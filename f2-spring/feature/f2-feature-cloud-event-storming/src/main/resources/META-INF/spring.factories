@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+city.smartb.f2.feature.cloudEvent.storming.F2StormingCloudEventConfig,\
+city.smartb.f2.feature.cloudEvent.storming.StormingCloudEventFunction

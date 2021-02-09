@@ -1,0 +1,46 @@
+pluginManagement {
+	repositories {
+		gradlePluginPortal()
+		jcenter()
+	}
+}
+
+rootProject.name = "f2"
+
+enableFeaturePreview("GRADLE_METADATA")
+
+
+include(
+	"f2-client",
+	"f2-client:f2-client-ktor",
+	"f2-client:f2-client-ktor:f2-client-ktor-http",
+	"f2-client:f2-client-ktor:f2-client-ktor-rsocket"
+)
+include(
+	"f2-dsl:f2-dsl-function",
+	"f2-dsl:f2-dsl-cqrs",
+	"f2-dsl:f2-dsl-event"
+)
+
+include(
+	"f2-spring:data:f2-spring-data",
+	"f2-spring:data:f2-spring-data-mongodb",
+	"f2-spring:data:f2-spring-data-mongodb-test"
+)
+
+//include(
+//	"f2-spring"
+//)
+
+include(
+	"f2-spring:function:f2-spring-boot-starter-function",
+	"f2-spring:function:f2-spring-boot-starter-function-http",
+	"f2-spring:function:f2-spring-boot-starter-function-rsocket"
+)
+
+include(
+	"f2-spring:feature:f2-feature-catalog",
+	"f2-spring:feature:f2-feature-cloud-event-storming",
+	"f2-spring:feature:f2-feature-version"
+)
+
