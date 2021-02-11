@@ -18,7 +18,7 @@ plugins {
 }
 
 allprojects {
-	group = "city.smartb.s2"
+	group = "city.smartb.f2"
 	version = System.getenv("VERSION") ?: "latest"
 	repositories {
 		jcenter()

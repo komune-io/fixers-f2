@@ -7,7 +7,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import kotlin.reflect.KClass
 
-
 class S2AggregateKtorClient<ID>(
 	val f2Client: S2CQRSClient
 ) :F2Client<ID> {
