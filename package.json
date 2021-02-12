@@ -11,8 +11,8 @@
     "typescript": "^4.0.3"
   },
   "scripts": {
-    "storybook": "start-storybook -p 6007 -s public",
-    "build-storybook": "build-storybook -s public"
+    "storybook": "start-storybook -p 6007 -s docs/public",
+    "build-storybook": "build-storybook -s docs/public"
   },
   "eslintConfig": {
     "extends": [
@@ -36,8 +36,10 @@
     "@storybook/addon-actions": "^6.1.17",
     "@storybook/addon-essentials": "^6.1.17",
     "@storybook/addon-links": "^6.1.17",
+    "@storybook/addons": "^6.1.17",
     "@storybook/node-logger": "^6.1.17",
     "@storybook/preset-create-react-app": "^3.1.5",
-    "@storybook/react": "^6.1.17"
+    "@storybook/react": "^6.1.17",
+    "@storybook/theming": "^6.1.17"
   }
 }
