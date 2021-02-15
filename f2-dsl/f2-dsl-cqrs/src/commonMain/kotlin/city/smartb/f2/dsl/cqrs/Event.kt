@@ -5,7 +5,7 @@ import kotlin.js.JsName
 
 @JsExport
 @JsName("Event")
-interface Event<out TYPE> {
-        @JsName("type")
-        val type: TYPE
+interface Event {
+//        @JsName("type")
+//        val type: TYPE
 }

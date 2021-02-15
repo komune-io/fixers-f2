@@ -19,7 +19,13 @@ object Versions {
 	const val rsocket = "0.12.0"
 	const val testcontainers = "1.15.1"
 	const val reactor = "3.4.2"
+
+	const val assertj = "3.15.0"
+
 	const val ssm = "0.1.0-SNAPSHOT"
+	const val vc = "0.1.0-SNAPSHOT"
+	const val iris = "0.1.0-SNAPSHOT"
+	const val f2 = "0.1.0-SNAPSHOT"
 }
 
 

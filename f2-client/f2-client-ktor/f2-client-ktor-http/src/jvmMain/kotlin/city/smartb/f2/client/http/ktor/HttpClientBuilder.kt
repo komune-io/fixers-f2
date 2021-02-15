@@ -1,10 +1,10 @@
 package city.smartb.f2.client.http.ktor
 
-import city.smartb.f2.dsl.cqrs.S2CQRSClient
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import f2.client.F2Client
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
@@ -23,14 +23,14 @@ actual class HttpClientBuilder {
 		}
 	}
 
-	actual fun cqrsClient(
+	actual fun build(
 		scheme: String,
 		host: String,
 		port: Int,
 		path: String?
-	): S2CQRSClient {
+	): F2Client {
 		val httpCLient = httpClient()
-		return HttpCQRSClient(
+		return HttpF2Client(
 			scheme = scheme,
 			host = host,
 			port = port,

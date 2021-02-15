@@ -3,6 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
 	kotlin("multiplatform") version PluginVersions.kotlin apply false
 	kotlin("jvm") version PluginVersions.kotlin apply false
+
+	id("org.jetbrains.kotlin.kapt") version PluginVersions.kotlin apply(false)
 	kotlin("plugin.spring") version PluginVersions.kotlin apply false
 	kotlin("plugin.serialization") version PluginVersions.kotlin apply false
 	id("org.jetbrains.dokka") version PluginVersions.dokka
@@ -26,6 +28,9 @@ allprojects {
 		maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 		maven("https://repo.spring.io/snapshot")
 		maven("https://repo.spring.io/milestone")
+
+		//For iris-sign
+		maven { url = uri("https://jitpack.io") }
 	}
 }
 
@@ -121,10 +126,16 @@ subprojects {
 
 		dependencies {
 			val implementation by configurations
+			val testImplementation by configurations
 
 			implementation(kotlin("reflect"))
 			Dependencies.jvm.coroutines.forEach{implementation(it)}
+
+			testImplementation("org.junit.jupiter:junit-jupiter")
+			testImplementation("org.junit.jupiter:junit-jupiter-api")
+			testImplementation("org.assertj:assertj-core:${Versions.assertj}")
 		}
+
 		the<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension>().apply {
 			imports {
 				mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES) {

@@ -1,15 +1,15 @@
 package city.smartb.f2.client.http.ktor
 
-import city.smartb.f2.dsl.cqrs.S2CQRSClient
+import f2.client.F2Client
 
 
 expect fun httpClientBuilder(): HttpClientBuilder
 
 expect class HttpClientBuilder {
-	fun cqrsClient(
+	fun build(
 		scheme: String,
 		host: String ,
 		port: Int,
 		path: String? = null
-	): S2CQRSClient
+	): F2Client
 }

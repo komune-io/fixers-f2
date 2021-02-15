@@ -1,6 +1,6 @@
 package city.smartb.f2.client.http.ktor
 
-import city.smartb.f2.dsl.cqrs.S2CQRSClient
+import f2.client.F2Client
 import io.ktor.client.*
 import io.ktor.client.engine.js.*
 import io.ktor.client.features.json.*
@@ -9,8 +9,8 @@ import io.ktor.client.features.json.*
 @JsName("HttpClientBuilder")
 actual class HttpClientBuilder(
 ) {
-	actual fun cqrsClient(scheme: String, host: String, port: Int, path: String?): S2CQRSClient {
-		return HttpCQRSClient(
+	actual fun build(scheme: String, host: String, port: Int, path: String?): F2Client {
+		return HttpF2Client(
 			scheme = scheme,
 			host = host,
 			port = port,
@@ -19,7 +19,7 @@ actual class HttpClientBuilder(
 		)
 	}
 
-	private fun httpClient(): HttpClient {
+	private fun httpClient(): io.ktor.client.HttpClient {
 		return HttpClient(Js) {
 			install(JsonFeature)
 		}

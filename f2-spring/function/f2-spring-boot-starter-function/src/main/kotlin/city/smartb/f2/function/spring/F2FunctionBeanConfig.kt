@@ -24,26 +24,29 @@ open class F2FunctionBeanConfig(
 	@ExperimentalStdlibApi
 	open fun registerS2Function(): String? {
 		val bean = context.getBeansWithAnnotation(F2::class.java)
-		val aggregateBean = bean.values.first()
-		aggregateBean::class.members.forEach { kfunction ->
-			val annotated = kfunction.findAnnotation<F2>()
-			if (annotated != null) {
-				val name = kfunction.name
-				val javaMethod = aggregateBean::class.java.methods.find { it.name == kfunction.name }!!
+		if(bean.values.size > 0) {
+			val aggregateBean = bean.values.first()
 
-				val from = ResolvableType.forClassWithGenerics(Flux::class.java, javaMethod.parameterTypes.first())
-				val to = ResolvableType.forClassWithGenerics(Flux::class.java, javaMethod.returnType)
-				val execution = execute<Any, Any> {
-					kfunction.callSuspend(aggregateBean, it)!!
-				}
-				val fnc = FunctionType(
-					ResolvableType.forClassWithGenerics(Function::class.java, from, to).getType()
-				)
-				context.registerBean(name, FunctionRegistration::class.java,
-					Supplier {
-						FunctionRegistration(execution).type(fnc)
+			aggregateBean::class.members.forEach { kfunction ->
+				val annotated = kfunction.findAnnotation<F2>()
+				if (annotated != null) {
+					val name = kfunction.name
+					val javaMethod = aggregateBean::class.java.methods.find { it.name == kfunction.name }!!
+
+					val from = ResolvableType.forClassWithGenerics(Flux::class.java, javaMethod.parameterTypes.first())
+					val to = ResolvableType.forClassWithGenerics(Flux::class.java, javaMethod.returnType)
+					val execution = execute<Any, Any> {
+						kfunction.callSuspend(aggregateBean, it)!!
 					}
-				)
+					val fnc = FunctionType(
+						ResolvableType.forClassWithGenerics(Function::class.java, from, to).getType()
+					)
+					context.registerBean(name, FunctionRegistration::class.java,
+						Supplier {
+							FunctionRegistration(execution).type(fnc)
+						}
+					)
+				}
 			}
 		}
 		return null

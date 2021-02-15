@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+f2.feature.vc.fnc.config.VCConfig,\
+f2.feature.vc.fnc.SignVcFunction

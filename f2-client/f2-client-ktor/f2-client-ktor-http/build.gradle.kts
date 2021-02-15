@@ -7,6 +7,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
+                api(project(":f2-client"))
                 api(project(":f2-dsl:f2-dsl-cqrs"))
 
                 api("io.ktor:ktor-client-core:${Versions.ktor}")
