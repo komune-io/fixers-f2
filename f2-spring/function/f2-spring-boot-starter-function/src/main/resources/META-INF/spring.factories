@@ -1,5 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-city.smartb.f2.spring.MyKotlinLambdaToFunctionAutoConfiguration,\
-city.smartb.f2.function.spring.F2FunctionBeanConfig
+city.smartb.f2.spring.KotlinLambdaToFunctionAutoConfiguration
 
 org.springframework.boot.autoconfigure.AutoConfigurationImportFilter=city.smartb.f2.spring.MyExclusionFilter

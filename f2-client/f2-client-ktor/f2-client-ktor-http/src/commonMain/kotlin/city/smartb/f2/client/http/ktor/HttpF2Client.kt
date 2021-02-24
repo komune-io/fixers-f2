@@ -5,6 +5,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.*
 import io.ktor.content.*
 import io.ktor.http.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 open class HttpF2Client(
 	private val httpClient: HttpClient,
@@ -19,5 +22,4 @@ open class HttpF2Client(
 			body =  TextContent(command, contentType = ContentType.Application.Json)
 		}
 	}
-
 }

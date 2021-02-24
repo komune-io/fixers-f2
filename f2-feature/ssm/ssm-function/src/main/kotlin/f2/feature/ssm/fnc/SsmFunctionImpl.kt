@@ -1,17 +1,19 @@
 package f2.feature.ssm.fnc
 
-import city.smartb.f2.function.spring.annotation.F2
+import city.smartb.f2.function.spring.adapter.flow
+import f2.dsl.F2Flow
 import f2.feature.ssm.fnc.extentions.asAgent
 import f2.ssm.*
+import f2.ssm.functions.*
 import kotlinx.coroutines.future.await
 import org.civis.blockchain.ssm.client.SsmClient
 import org.civis.blockchain.ssm.client.domain.Context
 import org.civis.blockchain.ssm.client.domain.Session
 import org.civis.blockchain.ssm.client.domain.Signer
+import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Service
 
 
-@F2
 @Service
 class SsmFunctionImpl(
 	private val ssmClient: SsmClient,
@@ -19,9 +21,10 @@ class SsmFunctionImpl(
 	private val signer: Signer,
 ) : SSMFunction {
 
-	override suspend fun perform(cmd: SsmPerformCommand): SsmPerformedEvent {
+	@Bean
+	override fun perform(): F2Flow<SsmPerformCommand, SsmPerformedEvent> = flow { cmd ->
 		val invokeReturn = ssmClient.perform(signer, cmd.action, cmd.context.toSsmContext()).await()
-		return SsmPerformedEvent(
+		SsmPerformedEvent(
 			InvokeReturn(
 				status = invokeReturn.status,
 				info = invokeReturn.info,
@@ -30,10 +33,10 @@ class SsmFunctionImpl(
 		)
 	}
 
-	@F2
-	override suspend fun start(cmd: SsmStartCommand): SsmStartedEvent {
+	@Bean
+	override fun start(): F2Flow<SsmStartCommand, SsmStartedEvent> = flow { cmd ->
 		val invokeReturn = ssmClient.start(signer, cmd.session.toSession()).await()
-		return SsmStartedEvent(
+		SsmStartedEvent(
 			InvokeReturn(
 				status = invokeReturn.status,
 				info = invokeReturn.info,
@@ -42,10 +45,11 @@ class SsmFunctionImpl(
 		)
 	}
 
-	@F2
-	override suspend fun init(cmd: SsmInitCommand): SsmInitedEvent {
+
+	@Bean
+	override fun init(): F2Flow<SsmInitCommand, SsmInitedEvent> = flow { cmd ->
 		val invokeReturns = initializer.init(signer.asAgent(), cmd.ssm.toSsm())
-		return SsmInitedEvent(
+		SsmInitedEvent(
 			invokeReturns = invokeReturns.toInvokeReturns()
 		)
 	}

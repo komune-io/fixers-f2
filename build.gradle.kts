@@ -59,6 +59,7 @@ subprojects {
 				val commonMain by getting {
 					dependencies {
 						Dependencies.common.kserialization.forEach { api(it) }
+						Dependencies.common.coroutines.forEach { implementation(it) }
 					}
 				}
 				val commonTest by getting {

@@ -1,7 +1,15 @@
 package f2.ssm
 
+import f2.ssm.functions.*
+
 interface SSMFunction {
-	suspend fun perform(cmd: SsmPerformCommand): SsmPerformedEvent
-	suspend fun start(cmd: SsmStartCommand): SsmStartedEvent
-	suspend fun init(cmd: SsmInitCommand): SsmInitedEvent
+	fun perform(): SsmPerformFunction
+	fun start(): SsmStartFunction
+	fun init(): SsmInitFunction
+}
+
+interface SSMRemoteFunction {
+	fun perform(): SsmPerformRemoteFunction
+	fun start(): SsmStartRemoteFunction
+	fun init(): SsmInitRemoteFunction
 }

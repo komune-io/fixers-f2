@@ -1,6 +1,5 @@
 package f2.feature.ssm.fnc
 
-import city.smartb.f2.function.spring.annotation.F2
 import kotlinx.coroutines.future.await
 import org.civis.blockchain.ssm.client.SsmClient
 import org.civis.blockchain.ssm.client.domain.Agent
@@ -8,8 +7,6 @@ import org.civis.blockchain.ssm.client.domain.SignerAdmin
 import org.civis.blockchain.ssm.client.domain.Ssm
 import org.civis.blockchain.ssm.client.repository.InvokeReturn
 import org.springframework.stereotype.Service
-import java.util.*
-import java.util.concurrent.CompletableFuture
 
 
 @Service

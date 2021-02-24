@@ -1,6 +1,6 @@
 package f2.feature.vc.fnc
 
-import city.smartb.f2.function.spring.annotation.F2
+import city.smartb.f2.function.spring.adapter.flow
 import city.smartb.iris.crypto.rsa.signer.Signer
 import city.smartb.iris.crypto.rsa.verifier.Verifier
 import city.smartb.iris.ldproof.LdProofBuilder
@@ -11,34 +11,37 @@ import city.smartb.iris.vc.signer.VCVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import f2.feature.vc.fnc.config.CredentialsKey
+import f2.vc.VC
+import f2.vc.VCBase
 import f2.vc.VCFunction
-import f2.vc.VCSignCommand
-import f2.vc.VCVerifyCommand
+import f2.vc.functions.*
+import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.*
 
-@F2
 @Service
 class SignVcFunction(
 	private val objectMapper: ObjectMapper,
 	private val credentialsKey: CredentialsKey,
-): VCFunction<Map<String, out Any>> {
+): VCFunction<Map<String, Any>> {
 	private val vcSign = VCSign()
 	private val vcVerifier = VCVerifier()
 
-	@F2
-	override suspend fun sign(cmd: VCSignCommand<Map<String, Any>>): VCJson<Map<String, Any>>  {
+	@Bean
+	override fun sign(): VCSignFunction<Map<String, Any>> = flow { cmd ->
 		val credentials = signVc(cmd.identifier, cmd.claims)
-		return objectMapper.convertValue(credentials.asJson())
+		val vc: VCJson<Map<String, Any>> = objectMapper.convertValue(credentials.asJson())
+		VCSignResult(vc)
 	}
 
-	@F2
-	override suspend fun verify(cmd: VCVerifyCommand<Map<String, Any>>): Boolean {
+	@Bean
+	override fun verify(): VCVerifyFunction<Map<String, Any>> = flow { cmd ->
 		val verifier = Verifier.rs256Verifier(credentialsKey.getRSAPublicKey())
 		val map: MutableMap<String, Any> = objectMapper.convertValue(cmd.claims)
 		val credentials = VerifiableCredential(map)
-		return vcVerifier.verify(credentials, verifier) ?: false
+		val isValid = vcVerifier.verify(credentials, verifier) ?: false
+		VCVerifyResult(isValid)
 	}
 
 	private suspend fun <T> signVc(identifier: String, claim: T): VerifiableCredential {
@@ -64,5 +67,6 @@ class SignVcFunction(
 
 		return vcSign.sign(vcBuild, proofBuilder, signer)
 	}
+
 
 }

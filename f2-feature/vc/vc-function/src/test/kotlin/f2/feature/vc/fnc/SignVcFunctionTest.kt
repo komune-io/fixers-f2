@@ -1,7 +1,10 @@
 package f2.feature.vc.fnc
 
-import f2.vc.VCSignCommand
-import f2.vc.VCVerifyCommand
+import f2.vc.functions.VCSignCommand
+import f2.vc.functions.VCSignFunction
+import f2.vc.functions.VCSignResult
+import f2.vc.functions.VCVerifyCommand
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -28,6 +31,8 @@ class SignVcFunctionTest {
 	fun checkFuntionIsRegistred() = runBlocking<Unit> {
 		val signF2: Any = catalog.lookup("sign")
 		Assertions.assertThat(signF2).isNotNull
+		val verifyF2: Any = catalog.lookup("verify")
+		Assertions.assertThat(verifyF2).isNotNull
 	}
 
 	@Test
@@ -37,11 +42,11 @@ class SignVcFunctionTest {
 		val claims = mapOf("value" to claimsValue as Any)
 		val cmd = VCSignCommand(identifier, claims)
 
-		val vc = signVcFunction.sign(cmd)
+		val result = signVcFunction.sign().invoke(listOf(cmd).asFlow()).first()
 
-		val verify = signVcFunction.verify(VCVerifyCommand(vc))
+		val verify = signVcFunction.verify().invoke(listOf(VCVerifyCommand(result.vc)).asFlow()).first()
 
-		Assertions.assertThat(vc.credentialSubject.get("value")).isEqualTo(claimsValue)
-		Assertions.assertThat(verify).isTrue()
+		Assertions.assertThat(result.vc.credentialSubject.get("value")).isEqualTo(claimsValue)
+		Assertions.assertThat(verify.isValid).isTrue()
 	}
 }
