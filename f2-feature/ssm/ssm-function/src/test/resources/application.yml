@@ -1,0 +1,10 @@
+f2:
+  ssm:
+    baseUrl: http://localhost:9090
+    signer:
+      user:
+        name: adam
+        key: user/adam
+      admin:
+        name: adam
+        key: user/adam

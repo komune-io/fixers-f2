@@ -1,5 +1,4 @@
 plugins {
-    id("io.spring.dependency-management")
     kotlin("jvm")
     kotlin("plugin.spring")
 }
@@ -8,13 +7,13 @@ dependencies {
 
     api(project(":f2-dsl:f2-dsl-cqrs"))
 
-    implementation("org.springframework.boot:spring-boot-autoconfigure")
+    implementation("org.springframework.boot:spring-boot-autoconfigure:${Versions.springBoot}")
 
-    implementation("javax.persistence:javax.persistence-api")
-    implementation("org.springframework:spring-context")
-    implementation("org.springframework.data:spring-data-commons")
+    implementation("javax.persistence:javax.persistence-api:${Versions.javaxPersistence}")
+    implementation("org.springframework:spring-context:${Versions.springFramework}")
+    implementation("org.springframework.data:spring-data-commons:${Versions.springData}")
 
-    implementation( "com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation( "com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.jacksonKotlin}")
 }
 
 apply(from = rootProject.file("gradle/publishing.gradle"))

@@ -1,5 +1,4 @@
 plugins {
-    id("io.spring.dependency-management")
     kotlin("jvm")
     kotlin("plugin.spring")
     id("org.jetbrains.kotlin.kapt")
@@ -11,7 +10,7 @@ dependencies {
 
     api("city.smartb.iris:iris-vc:${Versions.vc}")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
 

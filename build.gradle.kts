@@ -9,7 +9,6 @@ plugins {
 	kotlin("plugin.serialization") version PluginVersions.kotlin apply false
 	id("org.jetbrains.dokka") version PluginVersions.dokka
 
-	id("io.spring.dependency-management") version PluginVersions.springPom apply false
 	id("org.springframework.boot") version PluginVersions.springBoot apply false
 
 	id("org.sonarqube") version PluginVersions.sonarQube
@@ -26,8 +25,6 @@ allprojects {
 		jcenter()
 		mavenCentral()
 		maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
-		maven("https://repo.spring.io/snapshot")
-		maven("https://repo.spring.io/milestone")
 
 		//For iris-sign
 		maven { url = uri("https://jitpack.io") }
@@ -132,19 +129,9 @@ subprojects {
 			implementation(kotlin("reflect"))
 			Dependencies.jvm.coroutines.forEach{implementation(it)}
 
-			testImplementation("org.junit.jupiter:junit-jupiter")
-			testImplementation("org.junit.jupiter:junit-jupiter-api")
-			testImplementation("org.assertj:assertj-core:${Versions.assertj}")
+			Dependencies.jvm.junit.forEach{testImplementation(it)}
 		}
 
-		the<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension>().apply {
-			imports {
-				mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES) {
-					bomProperty("kotlin.version", PluginVersions.kotlin)
-				}
-				mavenBom("org.springframework.cloud:spring-cloud-dependencies:${PluginVersions.springCloudPom}")
-			}
-		}
 	}
 	plugins.apply("org.jetbrains.dokka")
 }

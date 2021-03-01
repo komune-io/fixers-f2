@@ -1,7 +1,7 @@
 package f2.feature.ssm.fnc
 
 import city.smartb.f2.function.spring.adapter.flow
-import f2.dsl.F2Flow
+import f2.dsl.F2Function
 import f2.feature.ssm.fnc.extentions.asAgent
 import f2.ssm.*
 import f2.ssm.functions.*
@@ -22,7 +22,7 @@ class SsmFunctionImpl(
 ) : SSMFunction {
 
 	@Bean
-	override fun perform(): F2Flow<SsmPerformCommand, SsmPerformedEvent> = flow { cmd ->
+	override fun perform(): F2Function<SsmPerformCommand, SsmPerformedEvent> = flow { cmd ->
 		val invokeReturn = ssmClient.perform(signer, cmd.action, cmd.context.toSsmContext()).await()
 		SsmPerformedEvent(
 			InvokeReturn(
@@ -34,7 +34,7 @@ class SsmFunctionImpl(
 	}
 
 	@Bean
-	override fun start(): F2Flow<SsmStartCommand, SsmStartedEvent> = flow { cmd ->
+	override fun start(): F2Function<SsmStartCommand, SsmStartedEvent> = flow { cmd ->
 		val invokeReturn = ssmClient.start(signer, cmd.session.toSession()).await()
 		SsmStartedEvent(
 			InvokeReturn(
@@ -47,7 +47,7 @@ class SsmFunctionImpl(
 
 
 	@Bean
-	override fun init(): F2Flow<SsmInitCommand, SsmInitedEvent> = flow { cmd ->
+	override fun init(): F2Function<SsmInitCommand, SsmInitedEvent> = flow { cmd ->
 		val invokeReturns = initializer.init(signer.asAgent(), cmd.ssm.toSsm())
 		SsmInitedEvent(
 			invokeReturns = invokeReturns.toInvokeReturns()

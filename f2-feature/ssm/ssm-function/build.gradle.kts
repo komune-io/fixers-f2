@@ -1,5 +1,4 @@
 plugins {
-    id("io.spring.dependency-management")
     kotlin("jvm")
     kotlin("plugin.spring")
     id("org.jetbrains.kotlin.kapt")
@@ -12,7 +11,7 @@ dependencies {
     api ("city.smartb.ssm:ssm-sdk-client:${Versions.ssm}")
     api ("city.smartb.ssm:ssm-sdk-client-spring:${Versions.ssm}")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
 
