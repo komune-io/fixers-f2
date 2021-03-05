@@ -20,7 +20,6 @@ object Versions {
 	const val jacksonKotlin  = "2.12.1"
 	const val javaxPersistence = "2.2"
 
-
 	const val embedMongo = "2.2.0"
 
 	const val coroutines = "1.4.2"

@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-city.smartb.f2.feature.catalog.CatalogFunctionConfig
+f2.feature.catalog.CatalogFunctionConfig

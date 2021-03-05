@@ -1,9 +1,7 @@
 package f2.feature.vc.fnc
 
-import f2.vc.functions.VCSignCommand
-import f2.vc.functions.VCSignFunction
-import f2.vc.functions.VCSignResult
-import f2.vc.functions.VCVerifyCommand
+import f2.vc.model.command.VCSignCommand
+import f2.vc.model.command.VCVerifyCommand
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions

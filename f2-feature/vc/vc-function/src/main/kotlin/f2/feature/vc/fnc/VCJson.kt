@@ -1,8 +1,8 @@
 package f2.feature.vc.fnc
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import f2.vc.LdProofBase
-import f2.vc.VC
+import f2.vc.model.LdProofBase
+import f2.vc.model.VC
 
 class VCJson<T>(
 	@JsonProperty("@context")

@@ -1,6 +1,6 @@
 package f2.feature.vc.fnc
 
-import city.smartb.f2.function.spring.adapter.flow
+import f2.function.spring.adapter.flow
 import city.smartb.iris.crypto.rsa.signer.Signer
 import city.smartb.iris.crypto.rsa.verifier.Verifier
 import city.smartb.iris.ldproof.LdProofBuilder
@@ -11,10 +11,11 @@ import city.smartb.iris.vc.signer.VCVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import f2.feature.vc.fnc.config.CredentialsKey
-import f2.vc.VC
-import f2.vc.VCBase
-import f2.vc.VCFunction
-import f2.vc.functions.*
+import f2.vc.model.VCFunction
+import f2.vc.model.command.VCSignFunction
+import f2.vc.model.command.VCSignResult
+import f2.vc.model.command.VCVerifyFunction
+import f2.vc.model.command.VCVerifyResult
 import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime

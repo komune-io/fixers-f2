@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-city.smartb.s2.spring.data.mongodb.MongodbConfig
+f2.spring.data.mongodb.MongodbConfig
