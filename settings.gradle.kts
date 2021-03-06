@@ -35,12 +35,6 @@ include(
 )
 
 include(
-	"f2-feature:ssm:ssm-client",
-	"f2-feature:ssm:ssm-function",
-	"f2-feature:ssm:ssm-model"
-)
-
-include(
 	"f2-spring:function:f2-spring-boot-starter-function",
 	"f2-spring:function:f2-spring-boot-starter-function-http",
 	"f2-spring:function:f2-spring-boot-starter-function-rsocket"

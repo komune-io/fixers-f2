@@ -1,6 +1,5 @@
 package f2.feature.vc.fnc
 
-import f2.function.spring.adapter.flow
 import city.smartb.iris.crypto.rsa.signer.Signer
 import city.smartb.iris.crypto.rsa.verifier.Verifier
 import city.smartb.iris.ldproof.LdProofBuilder
@@ -11,6 +10,7 @@ import city.smartb.iris.vc.signer.VCVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import f2.feature.vc.fnc.config.CredentialsKey
+import f2.function.spring.adapter.f2Function
 import f2.vc.model.VCFunction
 import f2.vc.model.command.VCSignFunction
 import f2.vc.model.command.VCSignResult
@@ -30,14 +30,14 @@ class SignVcFunction(
 	private val vcVerifier = VCVerifier()
 
 	@Bean
-	override fun sign(): VCSignFunction<Map<String, Any>> = flow { cmd ->
+	override fun sign(): VCSignFunction<Map<String, Any>> = f2Function { cmd ->
 		val credentials = signVc(cmd.identifier, cmd.claims)
 		val vc: VCJson<Map<String, Any>> = objectMapper.convertValue(credentials.asJson())
 		VCSignResult(vc)
 	}
 
 	@Bean
-	override fun verify(): VCVerifyFunction<Map<String, Any>> = flow { cmd ->
+	override fun verify(): VCVerifyFunction<Map<String, Any>> = f2Function { cmd ->
 		val verifier = Verifier.rs256Verifier(credentialsKey.getRSAPublicKey())
 		val map: MutableMap<String, Any> = objectMapper.convertValue(cmd.claims)
 		val credentials = VerifiableCredential(map)
