@@ -20,6 +20,6 @@ FROM nginx:1.17.0-alpine
 COPY --from=build /app/storybook-static /var/www
 COPY infra/docker/storybook/nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 82
+EXPOSE 80
 
 ENTRYPOINT ["nginx","-g","daemon off;"]
