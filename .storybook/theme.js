@@ -1,5 +1,5 @@
 import { create } from '@storybook/theming';
-import logo from '../docs/public/smartb.png';
+import logo from '../docs/public/logo.png';
 
 export default create({
     base: 'light',
