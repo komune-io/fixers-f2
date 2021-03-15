@@ -1,7 +1,7 @@
 STORYBOOK_DOCKERFILE	:= infra/docker/storybook/Dockerfile
-STORYBOOK_NAME	   	 	:= smartbcity/storybook-f2
+STORYBOOK_NAME	   	 	:= smartbcity/f2-storybook
 STORYBOOK_IMG	    	:= ${STORYBOOK_NAME}:${VERSION}
-STORYBOOK_LATEST		:= ${REST_MOBI_NAME}:latest
+STORYBOOK_LATEST		:= ${STORYBOOK_NAME}:latest
 
 
 clean: clean-kotlin
