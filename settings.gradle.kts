@@ -41,8 +41,7 @@ include(
 )
 
 include(
-	"f2-spring:feature:f2-feature-catalog",
-	"f2-spring:feature:f2-feature-cloud-event-storming",
-	"f2-spring:feature:f2-feature-version"
+	"f2-feature:catalog:f2-feature-catalog",
+	"f2-feature:cloud-event-storming:f2-feature-cloud-event-storming",
+	"f2-feature:version:f2-feature-version"
 )
-

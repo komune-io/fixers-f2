@@ -1,0 +1,10 @@
+spring:
+  rsocket:
+    server:
+      port: 7000
+      transport: websocket
+#debug: true
+logging:
+  level:
+    io.rsocket.FrameLogger: DEBUG
+    org.springframework.boot.rsocket: DEBUG

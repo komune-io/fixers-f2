@@ -38,17 +38,17 @@ open class RSocketClient(
 		return rSocket.requestChannel(payload, payloads)
 	}
 
-	suspend fun requestResponse(route: String, jsonBody: String? = null): ByteArray {
+	suspend fun requestResponse(route: String, jsonBody: String? = null): String {
 		val payload = buildPayload {
 			metadata(RoutingMetadata(route))
 			if(jsonBody != null) {
 				data(jsonBody)
 			}
 		}
-		return rSocket.requestResponse(payload).data.readBytes()
+		return rSocket.requestResponse(payload).data.readText()
 	}
 
-	fun requestStream(route: String, jsonBody: String? = null): Flow<ByteArray> {
+	fun requestStream(route: String, jsonBody: String? = null): Flow<String> {
 		val payload = buildPayload {
 			metadata(RoutingMetadata(route))
 			if(jsonBody != null) {
@@ -56,7 +56,7 @@ open class RSocketClient(
 			}
 
 		}
-		return rSocket.requestStream(payload).map { it.data.readBytes() }
+		return rSocket.requestStream(payload).map { it.data.readText() }
 	}
 
 

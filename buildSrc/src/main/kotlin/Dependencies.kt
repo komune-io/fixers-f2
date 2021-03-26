@@ -14,7 +14,7 @@ object PluginVersions {
 object Versions {
 	const val springBoot = PluginVersions.springBoot
 	const val springFramework = "5.3.4"
-	const val springCloudFunction = "3.1.1"
+	const val springCloudFunction = "3.1.2"
 	const val springData = "2.4.5"
 
 	const val jacksonKotlin  = "2.12.1"
@@ -24,7 +24,7 @@ object Versions {
 
 	const val coroutines = "1.4.2"
 	const val kserialization = "1.1.0"
-	const val ktor = "1.5.1"
+	const val ktor = "1.5.2"
 	const val rsocket = "0.12.0"
 	const val reactor = "3.4.2"
 

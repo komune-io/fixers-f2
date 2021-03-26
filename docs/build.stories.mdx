@@ -1,0 +1,52 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Build" parameters={{ previewTabs: { canvas: { hidden: true } } }} />
+
+## Kotlin Source
+
+### Build
+```
+./gradlew clean build
+```
+
+### Publish Source
+
+ * Declare sonatype credentials
+```
+export sonatypeUsername=
+export sonatypePassword=
+export signingPassword=
+export signingKey=
+```
+ * Publish
+```
+VERSION=0.1.0-SNAPSHOT ./gradlew build publish
+```
+
+## Documentation
+
+### Init
+```
+yarn install
+```
+
+### Start
+```
+yarn storybook
+```
+
+### Build
+```
+yarn build-storybook
+```
+
+### Docker
+ * Build
+```
+make package-storybook
+```
+
+### Publish
+```
+make publish-storybook
+```
