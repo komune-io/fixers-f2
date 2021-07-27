@@ -18,9 +18,10 @@ interface  Error<PAYLOAD> {
         val payload: PAYLOAD
 }
 
+
 @JsExport
 @JsName("ErrorSeverity")
-sealed class ErrorSeverity(val severity: String)
+open class ErrorSeverity(val severity: String)
 
 @JsExport
 @JsName("ErrorSeverityWarning")
@@ -28,4 +29,4 @@ class ErrorSeverityWarning: ErrorSeverity("warning")
 
 @JsExport
 @JsName("AlertSeverityError")
-class ErrorSeverityError: ErrorSeverity("error")
+class  ErrorSeverityError: ErrorSeverity("error")

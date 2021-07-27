@@ -12,18 +12,3 @@ expect fun rsocketClientBuilder(): RSocketClientBuilder
 expect class RSocketClientBuilder {
 	fun build(): HttpClient
 }
-
-@OptIn(ExperimentalTime::class)
-fun HttpClientConfig<*>.withRSocket() {
-	install(WebSockets)
-	install(RSocketSupport) {
-		connector = RSocketConnector {
-			connectionConfig {
-				payloadMimeType = PayloadMimeType(
-					data = "application/json",
-					metadata = "message/x.rsocket.routing.v0"
-				)
-			}
-		}
-	}
-}

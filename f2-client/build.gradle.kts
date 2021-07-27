@@ -3,19 +3,8 @@ plugins {
 }
 
 kotlin {
-    sourceSets {
-        commonMain {
-            dependencies {
-            }
-        }
-        jsMain {
-            dependencies {
-            }
-        }
-        jvmMain {
-            dependencies {
-            }
-        }
+    dependencies {
+        commonMainApi(project(":f2-dsl:f2-dsl-function"))
     }
 }
 

@@ -1,18 +1,21 @@
 package f2.vc.model.command
 
 import f2.dsl.cqrs.Command
-import f2.dsl.function.F2Function
-import f2.dsl.function.F2FunctionRemote
-import f2.vc.model.VC
+import f2.dsl.fnc.F2FunctionDeclaration
+import f2.vc.model.VCBase
+import f2.vc.model.VCBaseGen
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
-typealias VCSignFunction<T> = F2Function<VCSignCommand<T>, VCSignResult<T>>
-typealias VCSignRemoteFunction<T> = F2FunctionRemote<VCSignCommand<T>, VCSignResult<T>>
+typealias VCSignFunction = F2FunctionDeclaration<VCSignCommand, VCSignResult>
 
-class VCSignCommand<T>(
+@Serializable
+class VCSignCommand(
 	val identifier: String,
-	val claims: T
+	val claims: Map<String, @Serializable(with = AnySerializer::class) Any>
 ): Command
 
-open class VCSignResult<T>(
-	val vc: VC<T>,
+@Serializable
+open class VCSignResult(
+	val vc: VCBaseGen,
 ): Command

@@ -9,9 +9,9 @@ Function client is based on ktor
 
 ### Function
 F2 builds on top of the 3 core functional:
- * `f2.dsl.function.F2Function<I, O>` apply change on data
- * `f2.dsl.function.F2Supplier<O>` supply a stream of data
- * `f2.dsl.function.F2Consumer<I>` consume data
+ * `f2.dsl.fnc.F2Function<I, O>` apply change on data
+ * `f2.dsl.fnc.F2Supplier<O>` supply a stream of data
+ * `f2.dsl.fnc.F2Consumer<I>` consume data
 
 
 

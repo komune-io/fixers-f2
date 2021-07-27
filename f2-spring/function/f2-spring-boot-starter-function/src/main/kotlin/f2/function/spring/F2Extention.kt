@@ -1,6 +1,6 @@
 package f2.function.spring
 
-import f2.dsl.function.F2Function
+import f2.dsl.fnc.F2Function
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.first
 

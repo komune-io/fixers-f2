@@ -30,7 +30,7 @@ class VCConfig {
 			.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
 			.registerModule(KotlinModule())
 			.registerModule(JavaTimeModule())
-			.setPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE)
+			.setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
 	}
 
 }

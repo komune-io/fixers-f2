@@ -23,7 +23,7 @@ actual class HttpClientBuilder {
 		}
 	}
 
-	actual fun build(
+	fun build(
 		scheme: String,
 		host: String,
 		port: Int,
