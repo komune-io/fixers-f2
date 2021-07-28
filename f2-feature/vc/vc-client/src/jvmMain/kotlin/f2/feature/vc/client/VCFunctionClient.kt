@@ -15,6 +15,6 @@ suspend fun vcClient(protocol: Protocol, host: String, port: Int, path: String? 
 }
 
 actual open class VCFunctionClient actual constructor(private val client: F2Client) : VCFunction {
-	override fun sign(): VCSignFunction = client.declaration("signFunction")
-	override fun verify(): VCVerifyFunction = client.declaration("verifyFunction")
+	override fun sign(): VCSignFunction = client.declaration(VCFunctionClient::sign.name)
+	override fun verify(): VCVerifyFunction = client.declaration(VCFunctionClient::verify.name)
 }

@@ -27,7 +27,7 @@ actual class HttpClientBuilder {
 		scheme: String,
 		host: String,
 		port: Int,
-		path: String?
+		path: String?,
 	): F2Client {
 		val httpCLient = httpClient()
 		return HttpF2Client(

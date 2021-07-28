@@ -9,52 +9,31 @@ import city.smartb.iris.vc.signer.VCSign
 import city.smartb.iris.vc.signer.VCVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
-import f2.dsl.fnc.*
+import f2.dsl.fnc.f2Function
 import f2.feature.vc.fnc.config.CredentialsKey
-import f2.vc.model.VCBase
 import f2.vc.model.VCBaseGen
 import f2.vc.model.VCFunction
-import f2.vc.model.command.*
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializable
+import f2.vc.model.command.VCSignFunction
+import f2.vc.model.command.VCSignResult
+import f2.vc.model.command.VCVerifyFunction
+import f2.vc.model.command.VCVerifyResult
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.buildClassSerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.reflect.full.memberProperties
 
 @Configuration
 class SignVcFunction(
 	private val objectMapper: ObjectMapper,
 	private val credentialsKey: CredentialsKey,
-): VCFunction {
+) : VCFunction {
 	private val vcSign = VCSign()
 	private val vcVerifier = VCVerifier()
 
 	@Bean
-	fun signFunction(): F2Function<VCSignCommand, VCSignResult> = sign().expose()
-	@Bean
-	fun verifyFunction(): F2Function<VCVerifyCommand, VCVerifyResult> = verify().expose()
-
-	@Bean
-	fun testFnc(): F2Function<String, String> = {
-		test().invoke(it)
-	}
-
-	@Bean
-	fun testFnc2(): F2Function<String, String> = test().expose()
-
-	fun test(): F2FunctionDeclaration<String, String> = declaration { cmd ->
-		cmd.toUpperCase()
-	}
-
-	override fun sign(): VCSignFunction = declaration { cmd ->
+	override fun sign(): VCSignFunction = f2Function { cmd ->
 		val credentials = signVc(cmd.identifier, cmd.claims)
 		val vc: String = objectMapper.writeValueAsString(credentials.asJson())
 		val vcbase = Json {
@@ -63,7 +42,8 @@ class SignVcFunction(
 		VCSignResult(vcbase)
 	}
 
-	override fun verify(): VCVerifyFunction = declaration { cmd ->
+	@Bean
+	override fun verify(): VCVerifyFunction = f2Function { cmd ->
 		val verifier = Verifier.rs256Verifier(credentialsKey.getRSAPublicKey())
 		val map: MutableMap<String, Any> = objectMapper.convertValue(cmd.claims)
 		map[VerifiableCredential.JSON_LD_CONTEXT] = listOf("https://www.w3.org/2018/credentials/v1")

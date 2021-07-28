@@ -11,5 +11,5 @@ import javax.persistence.Entity
 class CloudEventEntity(
 	@Id
 	val id: UUID,
-	val event: CloudEvent<*>
+	val event: CloudEvent<*>,
 )

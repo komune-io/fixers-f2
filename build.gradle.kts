@@ -4,7 +4,7 @@ plugins {
 	kotlin("multiplatform") version PluginVersions.kotlin apply false
 	kotlin("jvm") version PluginVersions.kotlin apply false
 
-	id("org.jetbrains.kotlin.kapt") version PluginVersions.kotlin apply(false)
+	id("org.jetbrains.kotlin.kapt") version PluginVersions.kotlin apply (false)
 	kotlin("plugin.spring") version PluginVersions.kotlin apply false
 	kotlin("plugin.serialization") version PluginVersions.kotlin
 	id("org.jetbrains.dokka") version PluginVersions.dokka
@@ -14,7 +14,7 @@ plugins {
 	id("org.sonarqube") version PluginVersions.sonarQube
 
 	id("lt.petuska.npm.publish") version PluginVersions.npmPublish apply false
-	id("com.moowork.node" ) version "1.2.0"
+	id("com.moowork.node") version "1.2.0"
 
 }
 
@@ -127,9 +127,9 @@ subprojects {
 			val testImplementation by configurations
 
 			implementation(kotlin("reflect"))
-			Dependencies.jvm.coroutines.forEach{implementation(it)}
+			Dependencies.jvm.coroutines.forEach { implementation(it) }
 
-			Dependencies.jvm.junit.forEach{testImplementation(it)}
+			Dependencies.jvm.junit.forEach { testImplementation(it) }
 		}
 
 	}

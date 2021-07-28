@@ -23,7 +23,7 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, )
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class SignVcFunctionTest {
 
 	@LocalServerPort
@@ -37,9 +37,9 @@ class SignVcFunctionTest {
 
 	@Test
 	fun checkFuntionIsRegistred() = runBlocking<Unit> {
-		val signF2: Any = catalog.lookup("signFunction")
+		val signF2: Any = catalog.lookup("sign")
 		Assertions.assertThat(signF2).isNotNull
-		val verifyF2: Any = catalog.lookup("verifyFunction")
+		val verifyF2: Any = catalog.lookup("verify")
 		Assertions.assertThat(verifyF2).isNotNull
 	}
 
@@ -69,7 +69,7 @@ class SignVcFunctionTest {
 		val cmd = VCSignCommand(identifier, claims)
 		val signed = client.sign()
 		val cmdFlow = listOf(cmd).asFlow()
-		val	result = signed.invoke(cmdFlow)
+		val result = signed.invoke(cmdFlow)
 		result.collect()
 
 //		val verify = signVcFunction.verify().invoke(listOf(VCVerifyCommand(result.vc)).asFlow()).first()

@@ -10,16 +10,16 @@ import javax.persistence.TemporalType
 @MappedSuperclass
 @EntityListeners
 abstract class EntityBase(
-		@CreatedBy
-		var createdBy: String? = null,
-		@CreatedDate
-		@Temporal(TemporalType.TIMESTAMP)
-		var creationDate: Date? = null,
-		@LastModifiedBy
-		var lastModifiedBy: String? = null,
-		@LastModifiedDate
-		@Temporal(TemporalType.TIMESTAMP)
-		var lastModifiedDate: Date? = null,
-		@Version
-		var version: Integer? = null
+	@CreatedBy
+	var createdBy: String? = null,
+	@CreatedDate
+	@Temporal(TemporalType.TIMESTAMP)
+	var creationDate: Date? = null,
+	@LastModifiedBy
+	var lastModifiedBy: String? = null,
+	@LastModifiedDate
+	@Temporal(TemporalType.TIMESTAMP)
+	var lastModifiedDate: Date? = null,
+	@Version
+	var version: Integer? = null,
 )

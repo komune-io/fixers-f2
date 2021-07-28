@@ -7,6 +7,6 @@ import kotlin.js.JsName
 @JsExport
 @JsName("PageRequestBase")
 class PageRequestBase(
-        override val page: Int?,
-        override val size: Int?,
+	override val page: Int?,
+	override val size: Int?,
 ) : PageRequest

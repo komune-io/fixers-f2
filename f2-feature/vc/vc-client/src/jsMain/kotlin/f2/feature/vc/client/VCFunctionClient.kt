@@ -13,9 +13,9 @@ import kotlin.js.Promise
 
 @JsName("vcClient")
 @JsExport
-fun <T> vcClient(protocol: Protocol, host: String, port: Int, path: String? = null):  Promise<VCFunctionClient> {
-	return F2ClientBuilder.get(protocol, host, port, path).then {
-			s2Client ->  VCFunctionClient(s2Client)
+fun <T> vcClient(protocol: Protocol, host: String, port: Int, path: String? = null): Promise<VCFunctionClient> {
+	return F2ClientBuilder.get(protocol, host, port, path).then { s2Client ->
+		VCFunctionClient(s2Client)
 	}
 
 }

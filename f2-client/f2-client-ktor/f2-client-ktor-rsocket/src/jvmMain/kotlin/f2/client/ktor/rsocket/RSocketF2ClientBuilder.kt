@@ -14,7 +14,8 @@ actual class RSocketF2ClientBuilder {
 		path: String?,
 		secure: Boolean,
 	): F2Client {
-		val rSocket: RSocket = rsocketClientBuilder().build().rSocket(host = host, port = port, path = path ?: "", secure = secure)
+		val rSocket: RSocket =
+			rsocketClientBuilder().build().rSocket(host = host, port = port, path = path ?: "", secure = secure)
 		val client = RSocketClient(rSocket)
 		return RSocketF2Client(client)
 	}

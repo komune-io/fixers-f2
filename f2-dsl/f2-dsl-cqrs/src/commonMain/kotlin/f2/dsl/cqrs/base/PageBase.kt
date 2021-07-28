@@ -9,8 +9,8 @@ import kotlin.js.JsName
 @JsExport
 @JsName("PageBase")
 class PageBase<OBJECT>(
-        override val page: Int,
-        override val size: Int,
-        override val total: Long,
-        override val list: List<OBJECT>
+	override val page: Int,
+	override val size: Int,
+	override val total: Long,
+	override val list: List<OBJECT>,
 ) : Page<OBJECT>

@@ -3,19 +3,12 @@ package f2.dsl.cqrs
 import kotlin.js.JsExport
 import kotlin.js.JsName
 
-@JsExport
-@JsName("Error")
-interface  Error<PAYLOAD> {
-        @JsName("severity")
-        val severity: ErrorSeverity
-        @JsName("type")
-        val type: String
-        @JsName("description")
-        val description: String
-        @JsName("date")
-        val date: String
-        @JsName("payload")
-        val payload: PAYLOAD
+expect interface Error<PAYLOAD> {
+	val severity: ErrorSeverity
+	val type: String
+	val description: String
+	val date: String
+	val payload: PAYLOAD
 }
 
 
@@ -25,8 +18,8 @@ open class ErrorSeverity(val severity: String)
 
 @JsExport
 @JsName("ErrorSeverityWarning")
-class ErrorSeverityWarning: ErrorSeverity("warning")
+class ErrorSeverityWarning : ErrorSeverity("warning")
 
 @JsExport
 @JsName("AlertSeverityError")
-class  ErrorSeverityError: ErrorSeverity("error")
+class ErrorSeverityError : ErrorSeverity("error")

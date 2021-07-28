@@ -8,20 +8,20 @@ import java.security.interfaces.RSAPublicKey
 
 class CredentialsKey(val name: String, val pair: KeyPair) {
 
-    companion object {
-        @Throws(Exception::class)
-        fun loadFromFile(name: String, filename: String): CredentialsKey {
-            val keypair = RSAKeyPairReader.loadKeyPair(filename)
-            return CredentialsKey(name, keypair)
-        }
-    }
+	companion object {
+		@Throws(Exception::class)
+		fun loadFromFile(name: String, filename: String): CredentialsKey {
+			val keypair = RSAKeyPairReader.loadKeyPair(filename)
+			return CredentialsKey(name, keypair)
+		}
+	}
 
-    fun getRSAPrivateKey(): RSAPrivateKey {
-        return pair.private as RSAPrivateKey;
-    }
+	fun getRSAPrivateKey(): RSAPrivateKey {
+		return pair.private as RSAPrivateKey;
+	}
 
-    fun getRSAPublicKey(): RSAPublicKey {
-        return pair.public as RSAPublicKey;
-    }
+	fun getRSAPublicKey(): RSAPublicKey {
+		return pair.public as RSAPublicKey;
+	}
 
 }

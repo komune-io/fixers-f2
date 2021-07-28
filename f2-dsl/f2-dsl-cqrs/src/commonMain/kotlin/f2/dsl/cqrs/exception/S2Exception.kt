@@ -7,6 +7,6 @@ import kotlin.js.JsName
 @JsExport
 @JsName("R2Exception")
 open class S2Exception(
-        val id: String,
-        val error: Error<*>
-): Exception(error.description)
+	val id: String,
+	val error: Error<*>,
+) : Exception(error.description)

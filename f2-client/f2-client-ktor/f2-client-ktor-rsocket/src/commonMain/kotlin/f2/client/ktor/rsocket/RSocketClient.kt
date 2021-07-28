@@ -1,6 +1,5 @@
 package f2.client.ktor.rsocket
 
-import io.ktor.utils.io.core.*
 import io.rsocket.kotlin.RSocket
 import io.rsocket.kotlin.metadata.RoutingMetadata
 import io.rsocket.kotlin.metadata.metadata
@@ -41,7 +40,7 @@ open class RSocketClient(
 	suspend fun requestResponse(route: String, jsonBody: String? = null): String {
 		val payload = buildPayload {
 			metadata(RoutingMetadata(route))
-			if(jsonBody != null) {
+			if (jsonBody != null) {
 				data(jsonBody)
 			}
 		}
@@ -51,14 +50,13 @@ open class RSocketClient(
 	fun requestStream(route: String, jsonBody: String? = null): Flow<String> {
 		val payload = buildPayload {
 			metadata(RoutingMetadata(route))
-			if(jsonBody != null) {
+			if (jsonBody != null) {
 				data(jsonBody)
 			}
 
 		}
 		return rSocket.requestStream(payload).map { it.data.readText() }
 	}
-
 
 
 }

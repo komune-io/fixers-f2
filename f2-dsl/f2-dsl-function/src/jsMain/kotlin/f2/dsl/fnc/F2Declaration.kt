@@ -4,18 +4,18 @@ import kotlin.js.Promise
 
 @JsExport
 @JsName("F2FunctionDeclaration")
-actual interface F2FunctionDeclaration<T, R> {
+actual external interface F2Function<T, R> {
 	fun invoke(cmd: T): Promise<R>
 }
 
 @JsExport
 @JsName("F2SupplierDeclaration")
-actual interface F2SupplierDeclaration<R>{
+actual external interface F2Supplier<R> {
 	fun invoke(): Promise<List<R>>
 }
 
 @JsExport
 @JsName("F2ConsumerDeclaration")
-actual interface F2ConsumerDeclaration<T> {
+actual external interface F2Consumer<T> {
 	fun invoke(value: T)
 }

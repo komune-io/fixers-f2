@@ -15,5 +15,5 @@ open class CloudEvent<T>(
 	open val schemaURL: String? = null,  // RFC 3986
 	open val contentType: String? = null, // RFC 2046
 	open val extensions: Map<String, Any>? = null,
-	open val data: T
+	open val data: T,
 )

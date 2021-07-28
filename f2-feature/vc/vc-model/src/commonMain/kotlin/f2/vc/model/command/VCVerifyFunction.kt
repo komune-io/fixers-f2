@@ -1,35 +1,33 @@
 package f2.vc.model.command
 
 import f2.dsl.cqrs.Command
-import f2.dsl.fnc.F2FunctionDeclaration
-import f2.vc.model.VCBase
+import f2.dsl.fnc.F2Function
 import f2.vc.model.VCBaseGen
 import kotlinx.serialization.KSerializer
-import kotlin.js.JsExport
-import kotlin.js.JsName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.*
+import kotlin.js.JsExport
+import kotlin.js.JsName
 
-typealias VCVerifyFunction = F2FunctionDeclaration<VCVerifyCommand, VCVerifyResult>
+typealias VCVerifyFunction = F2Function<VCVerifyCommand, VCVerifyResult>
 
 @Serializable
 @JsExport
 @JsName("VCVerifyCommand")
 class VCVerifyCommand(
-	val claims: VCBaseGen
-): Command
+	val claims: VCBaseGen,
+) : Command
 
 @Serializable
 @JsExport
 @JsName("VCVerifyResult")
 class VCVerifyResult(
-	val isValid: Boolean
-): Command
-
+	val isValid: Boolean,
+) : Command
 
 
 object AnySerializer : KSerializer<Any> {

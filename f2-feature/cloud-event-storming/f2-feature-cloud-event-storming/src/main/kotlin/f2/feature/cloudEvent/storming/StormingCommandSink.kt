@@ -1,11 +1,11 @@
 package f2.feature.cloudEvent.storming
 
+//import f2.dsl.cqrs.CloudEvent
+import com.fasterxml.jackson.databind.ObjectMapper
+import f2.dsl.cqrs.Command
+import f2.dsl.event.CloudEvent
 import f2.feature.cloudEvent.storming.entity.CloudEventEntity
 import f2.feature.cloudEvent.storming.entity.CloudEventEntityRepository
-//import f2.dsl.cqrs.CloudEvent
-import f2.dsl.cqrs.Command
-import com.fasterxml.jackson.databind.ObjectMapper
-import f2.dsl.event.CloudEvent
 import kotlinx.coroutines.runBlocking
 import org.springframework.context.event.EventListener
 import java.time.Instant
@@ -13,7 +13,7 @@ import java.util.*
 
 class StormingCommandSink(
 	private val repo: CloudEventEntityRepository,
-	private val objectMapper: ObjectMapper
+	private val objectMapper: ObjectMapper,
 ) {
 
 	@EventListener
@@ -24,11 +24,11 @@ class StormingCommandSink(
 			cloudEventsVersion = "1",
 			source = "S2",
 			eventID = UUID.randomUUID().toString(),
-			eventTime= Instant.now().toString(), // RFC 3339
+			eventTime = Instant.now().toString(), // RFC 3339
 			schemaURL = null,  // RFC 3986
 			contentType = "application/json", // RFC 2046
 			extensions = null,
-			data= objectMapper.writeValueAsString(command)
+			data = objectMapper.writeValueAsString(command)
 		)
 		val entity = CloudEventEntity(
 			id = UUID.randomUUID(),

@@ -1,43 +1,36 @@
 package f2.dsl.fnc
 
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
-@Deprecated("Better use declaration")
-fun <T, R> f2Function(fnc: suspend (t: T) -> R): F2Function<T, R> = { flow ->
+fun <T, R> f2LambdaFunction(fnc: suspend (t: T) -> R): F2LambdaFunction<T, R> = { flow ->
 	flow.map { value -> fnc(value) }
 }
 
-@Deprecated("Better use declaration")
-fun <T> f2Consumer(fnc: suspend (t: T) -> Unit): F2Consumer<T> =  { flow ->
+fun <T> f2LambdaConsumer(fnc: suspend (t: T) -> Unit): F2LambdaConsumer<T> = { flow ->
 	flow.map { value -> fnc(value) }
 }
 
-inline fun <reified T,reified R> declaration(crossinline fnc: suspend (t: T) -> R): F2FunctionDeclaration<T, R> = object : F2FunctionDeclaration<T, R> {
-	override suspend fun invoke(msg: Flow<T>): Flow<R> {
-		return msg.map { value ->
-			fnc(value)
-		}
+suspend operator fun <T, R> F2LambdaFunction<T, R>.invoke(t: T): R {
+	return invoke(listOf(t).asFlow()).first()
+}
+
+
+suspend operator fun <T, R> F2Function<T, R>.invoke(t: T): R {
+	return invoke(listOf(t).asFlow()).first()
+}
+
+
+fun <T, R> f2Function(fnc: suspend (t: T) -> R): F2Function<T, R> = F2Function { msg ->
+	msg.map { value ->
+		fnc(value)
 	}
 }
 
-fun <T, R> F2FunctionDeclaration<T, R>.expose(): F2Function<T, R> = { flow ->
-	val ff = flow.map { value ->
-		println("+++++++++++++++++++++")
-		println(value)
-		value
+fun <R> f2Supplier(fnc: suspend () -> R): F2Supplier<R> = F2Supplier<R> {
+	flow {
+		emit(fnc())
 	}
-	this.invoke(ff)
-}
-
-fun <T, R> declaration(fnc: suspend () -> R): F2ConsumerDeclaration<R> = object : F2ConsumerDeclaration<R> {
-	override suspend fun invoke(flow: Flow<R>) {
-		flow.map {
-				value -> fnc()
-		}
-	}
-}
-
-fun <T, R> F2ConsumerDeclaration<R>.expose(): F2Consumer<R> = { flow ->
-	this.invoke(flow)
 }

@@ -1,33 +1,31 @@
 package f2.client
 
-import f2.dsl.fnc.F2FunctionDeclaration
-import f2.dsl.fnc.declaration
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import f2.dsl.fnc.F2Function
+import f2.dsl.fnc.F2Supplier
+import f2.dsl.fnc.f2Function
+import f2.dsl.fnc.invoke
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-actual inline fun <reified T, reified R> F2Client.declaration(route: String): F2FunctionDeclaration<T, R> = declaration { cmd ->
-	println("//////////////////////////////////F2Client.declaration ${T::class.simpleName}")
-	val body = Json.encodeToString(cmd)
-	println("//////////////////////////////////AfterF2Client.declaration $body")
-	val ret = invoke(route).invoke(flow { emit(body) })
-	println("//////////////////////////////////AfterF2Client.declaration $ret")
-	println("//////////////////////////////////AfterF2Client.declaration ${R::class.simpleName}")
-	ret.map { json ->
-		jsonToValue<R>(json)
-	}.first()
+val jsonSerializer = Json {
+	ignoreUnknownKeys = true
+}
+
+actual inline fun <reified T, reified R> F2Client.declaration(route: String): F2Function<T, R> = f2Function { cmd ->
+	val body = jsonSerializer.encodeToString(cmd)
+	val ret = invoke(route).invoke(body)
+	jsonToValue(ret)
 }
 
 suspend inline fun <reified T, reified R> F2Client.executeInvoke(route: String, cmd: T): R {
-	val body = Json.encodeToString(cmd)
-	println("//////////////////////////////////F2Client.executeInvoke ${body}")
-	val ret = invoke(route).invoke(flow { emit(body) })
-	return ret.map { json ->
-		Json {
-			ignoreUnknownKeys = true
-		}.decodeFromString<List<R>>(json).first()
-	}.first()
+	val body = jsonSerializer.encodeToString(cmd)
+	val json = invoke(route).invoke(body)
+	return jsonSerializer.decodeFromString<List<R>>(json).first()
+}
+
+actual interface F2Client {
+	actual fun get(route: String): F2Supplier<String>
+	actual fun invoke(route: String): F2Function<String, String>
+
 }

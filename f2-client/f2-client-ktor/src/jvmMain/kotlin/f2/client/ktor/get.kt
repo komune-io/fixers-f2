@@ -10,7 +10,7 @@ suspend fun F2ClientBuilder.Companion.get(
 	port: Int,
 	path: String?,
 ): F2Client {
-	return when(protocol) {
+	return when (protocol) {
 		is HTTP -> HttpClientBuilder().build("http", host, port, path)
 		is HTTPS -> HttpClientBuilder().build("https", host, port, path)
 		is TCP -> RSocketF2ClientBuilder().build("tcp", host, 7000, path, secure = false)
