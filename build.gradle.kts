@@ -14,7 +14,7 @@ plugins {
 	id("org.sonarqube") version PluginVersions.sonarQube
 
 	id("lt.petuska.npm.publish") version PluginVersions.npmPublish apply false
-	id("com.moowork.node") version "1.2.0"
+	id("com.moowork.node") version "1.3.1"
 
 }
 
@@ -137,15 +137,16 @@ subprojects {
 }
 
 tasks {
-
+	val storybookDir = "${project.rootDir}/storybook"
 	create<com.moowork.gradle.node.yarn.YarnTask>("installYarn") {
-		dependsOn("build")
-		args = listOf("install")
+//		dependsOn("build")
+		args = listOf("--cwd", storybookDir,"install")
 	}
 
 	create<com.moowork.gradle.node.yarn.YarnTask>("storybook") {
 		dependsOn("yarn_install")
-		args = listOf("storybook")
+		args = listOf("--cwd", storybookDir, "storybook")
+
 	}
 
 }
