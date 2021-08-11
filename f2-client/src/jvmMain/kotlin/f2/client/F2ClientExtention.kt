@@ -21,7 +21,11 @@ actual inline fun <reified T, reified R> F2Client.declaration(route: String): F2
 suspend inline fun <reified T, reified R> F2Client.executeInvoke(route: String, cmd: T): R {
 	val body = jsonSerializer.encodeToString(cmd)
 	val json = invoke(route).invoke(body)
-	return jsonSerializer.decodeFromString<List<R>>(json).first()
+	return try {
+		jsonSerializer.decodeFromString<R>(json)
+	} catch (e: Exception) {
+		json as R
+	}
 }
 
 actual interface F2Client {

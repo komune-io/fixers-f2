@@ -12,26 +12,24 @@ actual class RSocketF2Client(
 	private val rSocketClient: RSocketClient,
 ) : F2Client {
 
-	actual override fun get(route: String) = object : F2Supplier<String> {
-		override suspend fun invoke(): Flow<String> {
-			return rSocketClient.requestStream(route).map {
-				handlePayloadResponse(it)
-			}
+	actual override fun get(route: String) = F2Supplier {
+		rSocketClient.requestStream(route).map {
+			handlePayloadResponse(it)
 		}
 	}
 
-	actual override fun invoke(route: String) = object : F2Function<String, String> {
-		override suspend fun invoke(msg: Flow<String>): Flow<String> {
-			return msg.map { cmd ->
-				val payload = rSocketClient.requestResponse(route, cmd)
-				handlePayloadResponse(payload)
-			}
+	actual override fun invoke(route: String) = F2Function<String, String> { msg ->
+		msg.map { cmd ->
+			val payload = rSocketClient.requestResponse(route, cmd)
+			handlePayloadResponse(payload)
 		}
 	}
 
-	private fun handlePayloadResponse(payload: String) =
-		Json {
-			ignoreUnknownKeys = true
-		}.decodeFromString<Map<String, String>>(payload).get("payload") ?: ""
+	private val json: Json = Json {
+		ignoreUnknownKeys = true
+	}
 
+	private fun handlePayloadResponse(payload: String): String {
+		return json.decodeFromString<Map<String, String>>(payload)["payload"] ?: ""
+	}
 }

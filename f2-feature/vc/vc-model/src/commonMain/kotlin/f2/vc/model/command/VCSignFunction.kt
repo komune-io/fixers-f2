@@ -2,7 +2,7 @@ package f2.vc.model.command
 
 import f2.dsl.cqrs.Command
 import f2.dsl.fnc.F2Function
-import f2.vc.model.VCBaseGen
+import f2.vc.model.VCGen
 import kotlinx.serialization.Serializable
 
 typealias VCSignFunction = F2Function<VCSignCommand, VCSignResult>
@@ -15,5 +15,5 @@ class VCSignCommand(
 
 @Serializable
 open class VCSignResult(
-	val vc: VCBaseGen,
+	val vc: VCGen,
 ) : Command

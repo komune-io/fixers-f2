@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import f2.dsl.fnc.f2Function
 import f2.feature.vc.fnc.config.CredentialsKey
-import f2.vc.model.VCBaseGen
+import f2.vc.model.VCGen
 import f2.vc.model.VCFunction
 import f2.vc.model.command.VCSignFunction
 import f2.vc.model.command.VCSignResult
@@ -38,7 +38,7 @@ class SignVcFunction(
 		val vc: String = objectMapper.writeValueAsString(credentials.asJson())
 		val vcbase = Json {
 			ignoreUnknownKeys = true
-		}.decodeFromString<VCBaseGen>(vc)
+		}.decodeFromString<VCGen>(vc)
 		VCSignResult(vcbase)
 	}
 
@@ -46,7 +46,6 @@ class SignVcFunction(
 	override fun verify(): VCVerifyFunction = f2Function { cmd ->
 		val verifier = Verifier.rs256Verifier(credentialsKey.getRSAPublicKey())
 		val map: MutableMap<String, Any> = objectMapper.convertValue(cmd.claims)
-		map[VerifiableCredential.JSON_LD_CONTEXT] = listOf("https://www.w3.org/2018/credentials/v1")
 		val credentials = VerifiableCredential(map)
 		val isValid = vcVerifier.verify(credentials, verifier) ?: false
 		VCVerifyResult(isValid)

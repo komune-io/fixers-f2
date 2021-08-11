@@ -18,7 +18,7 @@ actual open class HttpF2Client(
 ) : F2Client {
 
 	actual override fun get(route: String): F2Supplier<String> = object : F2Supplier<String> {
-		override fun invoke(): Promise<List<String>> = GlobalScope.promise {
+		override fun invoke(): Promise<String> = GlobalScope.promise {
 			httpClient.get(scheme = scheme, host = host, port = port, "${path ?: ""}/${route}")
 		}
 	}

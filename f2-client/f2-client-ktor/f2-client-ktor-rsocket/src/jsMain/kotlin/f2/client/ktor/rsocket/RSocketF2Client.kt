@@ -20,7 +20,7 @@ actual class RSocketF2Client(
 		override fun invoke() = GlobalScope.promise {
 			rSocketClient.requestStream(route).map {
 				handlePayloadResponse(it)
-			}.toList()
+			}.toList().get(0)!!
 		}
 	}
 
@@ -31,9 +31,11 @@ actual class RSocketF2Client(
 		}
 	}
 
-	private fun handlePayloadResponse(payload: String) =
-		Json {
-			ignoreUnknownKeys = true
-		}.decodeFromString<Map<String, String>>(payload).get("payload") ?: ""
+	private val json = Json {
+		ignoreUnknownKeys = true
+	}
 
+	private fun handlePayloadResponse(payload: String): String {
+		return json.decodeFromString<Map<String, String>>(payload).get("payload") ?: ""
+	}
 }

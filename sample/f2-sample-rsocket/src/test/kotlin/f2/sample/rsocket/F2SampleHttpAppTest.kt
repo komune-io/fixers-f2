@@ -1,5 +1,6 @@
 package f2.sample.rsocket
 
+import f2.client.executeInvoke
 import f2.client.ktor.F2ClientBuilder
 import f2.client.ktor.WS
 import f2.client.ktor.get
@@ -24,10 +25,10 @@ class F2SampleHttpAppTest {
 	lateinit var catalog: FunctionCatalog
 
 	@Test
-	fun springRSocketClient() = runBlocking<Unit> {
-		val client = F2ClientBuilder.get(WS, "localhost", 7000)
-		val response = client.invoke("sha256", "[\"HELLO\"]")
-		Assertions.assertEquals(response, "htUmpf3n54tq2H9Ekyz9T5/gaJwVDLhfrGCwV4wmuhs=")
+	fun springRSocketClient() = runBlocking {
+		val client = F2ClientBuilder.get(WS, "localhost", 7000, null)
+		val response = client.executeInvoke<String, String>("sha256", "HELLO")
+		Assertions.assertEquals(response, "NzPNl3/46xi5hzV+Is7Zn0YJfzHssjnoeK5jdg6D5NU=")
 	}
 
 

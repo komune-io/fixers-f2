@@ -11,7 +11,7 @@ actual external interface F2Function<T, R> {
 @JsExport
 @JsName("F2SupplierDeclaration")
 actual external interface F2Supplier<R> {
-	fun invoke(): Promise<List<R>>
+	fun invoke(): Promise<String>
 }
 
 @JsExport

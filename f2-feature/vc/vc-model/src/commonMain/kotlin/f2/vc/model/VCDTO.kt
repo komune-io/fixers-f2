@@ -1,23 +1,23 @@
 package f2.vc.model
 
 import f2.vc.model.command.AnySerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.js.JsExport
 import kotlin.js.JsName
 
-expect interface VC<T> {
-	//	val context: List<String>?
-//		get() = listOf("https://www.w3.org/2018/credentials/v1")
+expect interface VCDTO<T> {
+	@SerialName("@context")
+	val context: List<String>?
 	val type: String?
 	val id: String
 	val issuer: String
 	val issuanceDate: String
 	val credentialSubject: T
-	val proof: LdProof
+	val proof: LdProofDTO
 }
 
-@JsName("LdProof")
-expect interface LdProof {
+expect interface LdProofDTO {
 	val created: String
 	val domain: String
 	val challenge: String
@@ -29,36 +29,36 @@ expect interface LdProof {
 
 @Serializable
 @JsExport
-@JsName("VCBase")
-class VCBase<T>(
-//	@SerialName("@context")
-//	override val context: List<String>?,
+@JsName("VC")
+class VC<T>(
+	@SerialName("@context")
+	override val context: List<String>? = listOf("https://www.w3.org/2018/credentials/v1"),
 	override val type: String?,
 	override val id: String,
 	override val issuer: String,
 	override val issuanceDate: String,
 	override val credentialSubject: T,
-	override val proof: LdProofBase,
-) : VC<T>
+	override val proof: LdProof,
+) : VCDTO<T>
 
 @Serializable
 @JsExport
-@JsName("VCBaseGen")
-class VCBaseGen(
-//	@SerialName("@context")
-//	override val context: List<String>?,
+@JsName("VCGen")
+class VCGen(
+	@SerialName("@context")
+	override val context: List<String>?,
 	override val type: String?,
 	override val id: String,
 	override val issuer: String,
 	override val issuanceDate: String,
 	override val credentialSubject: Map<String, @Serializable(with = AnySerializer::class) Any>,
-	override val proof: LdProofBase,
-) : VC<Map<String, Any>>
+	override val proof: LdProof,
+) : VCDTO<Map<String, Any>>
 
 @Serializable
 @JsExport
-@JsName("LdProofBase")
-class LdProofBase(
+@JsName("LdProof")
+class LdProof(
 	override val created: String,
 	override val domain: String,
 	override val challenge: String,
@@ -66,4 +66,4 @@ class LdProofBase(
 	override val verificationMethod: String,
 	override val type: String,
 	override val jws: String,
-) : LdProof
+) : LdProofDTO

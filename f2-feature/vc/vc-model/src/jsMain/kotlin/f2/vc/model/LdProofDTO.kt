@@ -1,6 +1,11 @@
 package f2.vc.model
 
-actual interface LdProof {
+import f2.vc.model.command.AnySerializer
+import kotlinx.serialization.SerialName
+
+@JsExport
+@JsName("LdProofDTO")
+actual external interface LdProofDTO {
 	actual val created: String
 	actual val domain: String
 	actual val challenge: String
@@ -10,11 +15,15 @@ actual interface LdProof {
 	actual val jws: String
 }
 
-actual interface VC<T> {
+@JsExport
+@JsName("VCDTO")
+actual external interface VCDTO<T> {
+	@SerialName("@context")
+	actual val context: List<String>?
 	actual val type: String?
 	actual val id: String
 	actual val issuer: String
 	actual val issuanceDate: String
 	actual val credentialSubject: T
-	actual val proof: LdProof
+	actual val proof: LdProofDTO
 }

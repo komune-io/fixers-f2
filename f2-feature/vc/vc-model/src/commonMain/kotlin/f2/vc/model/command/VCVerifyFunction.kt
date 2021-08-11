@@ -2,7 +2,7 @@ package f2.vc.model.command
 
 import f2.dsl.cqrs.Command
 import f2.dsl.fnc.F2Function
-import f2.vc.model.VCBaseGen
+import f2.vc.model.VCGen
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -19,7 +19,7 @@ typealias VCVerifyFunction = F2Function<VCVerifyCommand, VCVerifyResult>
 @JsExport
 @JsName("VCVerifyCommand")
 class VCVerifyCommand(
-	val claims: VCBaseGen,
+	val claims: VCGen,
 ) : Command
 
 @Serializable
