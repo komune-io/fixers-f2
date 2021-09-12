@@ -1,6 +1,5 @@
 package f2.feature.cloudEvent.storming
 
-//import f2.dsl.cqrs.CloudEvent
 import com.fasterxml.jackson.databind.ObjectMapper
 import f2.dsl.cqrs.Command
 import f2.dsl.event.CloudEvent
@@ -25,7 +24,7 @@ class StormingCommandSink(
 			source = "S2",
 			eventID = UUID.randomUUID().toString(),
 			eventTime = Instant.now().toString(), // RFC 3339
-			schemaURL = null,  // RFC 3986
+			schemaURL = null, // RFC 3986
 			contentType = "application/json", // RFC 2046
 			extensions = null,
 			data = objectMapper.writeValueAsString(command)

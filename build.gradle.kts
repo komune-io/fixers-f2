@@ -26,6 +26,15 @@ allprojects {
 	}
 }
 
+fixers {
+	bundle {
+		id = "f2"
+		name = "F2 "
+		description = "Wrapper around Spring Cloud Function"
+		url = "https://gitlab.smartb.city/fixers/F2"
+	}
+}
+
 subprojects {
 	plugins.withType(lt.petuska.npm.publish.NpmPublishPlugin::class.java).whenPluginAdded {
 		the<lt.petuska.npm.publish.dsl.NpmPublishExtension>().apply {
@@ -53,7 +62,6 @@ subprojects {
 tasks {
 	val storybookDir = "${project.rootDir}/storybook"
 	create<com.moowork.gradle.node.yarn.YarnTask>("installYarn") {
-//		dependsOn("build")
 		args = listOf("--cwd", storybookDir,"install")
 	}
 

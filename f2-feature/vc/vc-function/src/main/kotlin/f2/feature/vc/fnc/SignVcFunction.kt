@@ -25,8 +25,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Configuration
-class SignVcFunction(
-	private val objectMapper: ObjectMapper,
+class SignVcFunction(private val objectMapper: ObjectMapper,
 	private val credentialsKey: CredentialsKey,
 ) : VCFunction {
 	private val vcSign = VCSign()
@@ -59,7 +58,7 @@ class SignVcFunction(
 		val vcBuild = VerifiableCredentialBuilder
 			.create<T>()
 			.withContextDefault()
-			.withId("https://credentials.mobilite.eco/travelaction/${identifier}")
+			.withId("https://credentials.mobilite.eco/travelaction/$identifier")
 			.withType("VerifiableCredential")
 			.withIssuanceDate(created.toString())
 			.withIssuer("https://mobilite.eco")

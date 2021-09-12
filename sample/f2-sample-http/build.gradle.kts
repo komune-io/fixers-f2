@@ -10,7 +10,6 @@ repositories {
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 }
 
-
 dependencies {
 
     implementation(project(":f2-spring:function:f2-spring-boot-starter-function-http"))
@@ -19,7 +18,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
 }
-
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {

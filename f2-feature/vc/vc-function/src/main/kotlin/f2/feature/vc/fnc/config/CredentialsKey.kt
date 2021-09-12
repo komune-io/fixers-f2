@@ -5,7 +5,6 @@ import java.security.KeyPair
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
-
 class CredentialsKey(val name: String, val pair: KeyPair) {
 
 	companion object {
@@ -17,11 +16,10 @@ class CredentialsKey(val name: String, val pair: KeyPair) {
 	}
 
 	fun getRSAPrivateKey(): RSAPrivateKey {
-		return pair.private as RSAPrivateKey;
+		return pair.private as RSAPrivateKey
 	}
 
 	fun getRSAPublicKey(): RSAPublicKey {
-		return pair.public as RSAPublicKey;
+		return pair.public as RSAPublicKey
 	}
-
 }

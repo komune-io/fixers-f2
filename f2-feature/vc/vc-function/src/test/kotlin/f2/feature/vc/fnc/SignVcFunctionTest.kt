@@ -4,6 +4,7 @@ import f2.client.ktor.HTTP
 import f2.feature.vc.client.vcClient
 import f2.vc.model.command.VCSignCommand
 import f2.vc.model.command.VCVerifyCommand
+import java.util.UUID
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
@@ -19,7 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.cloud.function.context.FunctionCatalog
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension::class)
@@ -78,4 +78,3 @@ class SignVcFunctionTest {
 //		Assertions.assertThat(verify.isValid).isTrue()
 	}
 }
-

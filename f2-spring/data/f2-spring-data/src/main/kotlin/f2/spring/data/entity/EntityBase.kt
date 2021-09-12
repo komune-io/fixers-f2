@@ -14,16 +14,11 @@ import org.springframework.data.annotation.Version
 @MappedSuperclass
 @EntityListeners
 open class EntityBase(
-	@CreatedBy
-	var createdBy: String? = null,
+	@CreatedBy var createdBy: String? = null,
 	@CreatedDate
-	@Temporal(TemporalType.TIMESTAMP)
-	var creationDate: Date? = null,
-	@LastModifiedBy
-	var lastModifiedBy: String? = null,
+	@Temporal(TemporalType.TIMESTAMP) var creationDate: Date? = null,
+	@LastModifiedBy var lastModifiedBy: String? = null,
 	@LastModifiedDate
-	@Temporal(TemporalType.TIMESTAMP)
-	var lastModifiedDate: Date? = null,
-	@Version
-	var version: Integer? = null,
+	@Temporal(TemporalType.TIMESTAMP) var lastModifiedDate: Date? = null,
+	@Version var version: Integer? = null,
 )

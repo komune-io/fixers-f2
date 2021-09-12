@@ -20,7 +20,6 @@ class VCConfig {
 	@Value("\${f2.vc.signer.key}")
 	private lateinit var signerKey: String
 
-
 	@Bean
 	fun signer(): CredentialsKey {
 		return CredentialsKey.loadFromFile(signerName, signerKey)

@@ -1,9 +1,7 @@
 package f2.sample.http
 
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -12,10 +10,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.function.Function
 import java.util.function.Supplier
 
-//@TestInstance(PER_CLASS)
+// @TestInstance(PER_CLASS)
 @ExtendWith(SpringExtension::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-//@ContextConfiguration(initializers = [MongoContainerInitializer::class] )
+// @ContextConfiguration(initializers = [MongoContainerInitializer::class] )
 internal class F2SampleHttpAppTest {
 
 

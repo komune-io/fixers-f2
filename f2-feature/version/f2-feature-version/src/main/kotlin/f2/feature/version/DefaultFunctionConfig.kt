@@ -5,13 +5,11 @@ import org.springframework.boot.info.BuildProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
-
 @Configuration
 class DefaultFunctionConfig {
 
 	@Autowired
 	lateinit var buildProperties: BuildProperties
-
 
 	@Bean
 	fun version(): () -> String {
