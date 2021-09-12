@@ -30,7 +30,7 @@ class MongoDBExtension : BeforeAllCallback, AfterAllCallback {
 			return mongodExecutable
 		} catch (e: Exception) {
 			// log exception here
-			mongodExecutable?.let { it.stop() }
+			mongodExecutable?.stop()
 			throw e
 		}
 	}
@@ -42,7 +42,7 @@ class MongoDBExtension : BeforeAllCallback, AfterAllCallback {
 	}
 
 	override fun afterAll(context: ExtensionContext?) {
-		mongodExecutable?.let { it.stop() }
+		mongodExecutable?.stop()
 		mongodExecutable = null
 	}
 }

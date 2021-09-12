@@ -23,6 +23,6 @@ fun <T> vcClient(protocol: Protocol, host: String, port: Int, path: String? = nu
 actual open class VCFunctionClient actual constructor(private val client: F2Client) : VCFunction {
 
 	override fun sign(): VCSignFunction = client.declaration("sign")
-	override fun verify(): VCVerifyFunction = client.declaration("verify")
 
+	override fun verify(): VCVerifyFunction = client.declaration("verify")
 }

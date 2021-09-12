@@ -14,5 +14,4 @@ actual external interface Page<OBJECT> {
 
 	@JsName("list")
 	actual val list: List<OBJECT>
-
 }

@@ -8,5 +8,4 @@ actual external interface PageRequest {
 
 	@JsName("size")
 	actual val size: Int?
-
 }

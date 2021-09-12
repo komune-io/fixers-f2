@@ -1,9 +1,9 @@
 package f2.client.ktor.http
 
 import f2.client.F2Client
-import io.ktor.client.*
-import io.ktor.client.engine.js.*
-import io.ktor.client.features.json.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.js.Js
+import io.ktor.client.features.json.JsonFeature
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
 import kotlin.js.Promise

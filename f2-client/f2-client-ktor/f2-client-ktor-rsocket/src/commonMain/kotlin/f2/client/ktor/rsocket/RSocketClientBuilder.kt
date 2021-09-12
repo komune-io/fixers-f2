@@ -1,6 +1,6 @@
 package f2.client.ktor.rsocket
 
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 
 expect fun rsocketClientBuilder(): RSocketClientBuilder
 

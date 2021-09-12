@@ -1,5 +1,7 @@
 plugins {
-    kotlin("jvm")
+    id("city.smartb.fixers.gradle.kotlin.jvm")
+    id("city.smartb.fixers.gradle.publish")
+
 }
 
 dependencies {
@@ -11,5 +13,3 @@ dependencies {
 
     api("de.flapdoodle.embed:de.flapdoodle.embed.mongo:${Versions.embedMongo}")
 }
-
-apply(from = rootProject.file("gradle/publishing.gradle"))

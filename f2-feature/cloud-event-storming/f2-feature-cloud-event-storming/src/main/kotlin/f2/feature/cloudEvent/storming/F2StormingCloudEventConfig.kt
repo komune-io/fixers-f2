@@ -30,5 +30,4 @@ class F2StormingCloudEventConfig {
 	): StormingCloudEventSink {
 		return StormingCloudEventSink(repo = cloudEventRepository)
 	}
-
 }

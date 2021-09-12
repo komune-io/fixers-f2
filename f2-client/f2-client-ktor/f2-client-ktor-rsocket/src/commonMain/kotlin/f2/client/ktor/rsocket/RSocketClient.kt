@@ -57,6 +57,4 @@ open class RSocketClient(
 		}
 		return rSocket.requestStream(payload).map { it.data.readText() }
 	}
-
-
 }

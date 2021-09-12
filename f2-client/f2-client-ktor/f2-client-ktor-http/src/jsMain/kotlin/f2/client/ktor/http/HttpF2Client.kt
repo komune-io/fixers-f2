@@ -3,8 +3,8 @@ package f2.client.ktor.http
 import f2.client.F2Client
 import f2.dsl.fnc.F2Function
 import f2.dsl.fnc.F2Supplier
-import io.ktor.client.*
-import io.ktor.client.request.*
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
 import kotlin.js.Promise

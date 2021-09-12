@@ -1,6 +1,6 @@
 plugins {
     id("org.springframework.boot")
-    kotlin("jvm")
+    id("city.smartb.fixers.gradle.kotlin.jvm")
     kotlin("plugin.spring")
     id("io.spring.dependency-management")
 }

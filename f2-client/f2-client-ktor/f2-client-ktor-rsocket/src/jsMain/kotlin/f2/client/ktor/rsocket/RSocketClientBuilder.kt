@@ -1,7 +1,7 @@
 package f2.client.ktor.rsocket
 
-import io.ktor.client.*
-import io.ktor.client.engine.js.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.js.Js
 
 actual fun rsocketClientBuilder(): RSocketClientBuilder {
 	return RSocketClientBuilder()

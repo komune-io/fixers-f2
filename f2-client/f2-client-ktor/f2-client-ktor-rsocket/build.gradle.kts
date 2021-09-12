@@ -1,5 +1,5 @@
 plugins {
-	kotlin("multiplatform")
+	id("city.smartb.fixers.gradle.kotlin.mpp")
 	id("lt.petuska.npm.publish")
 }
 
@@ -30,5 +30,3 @@ kotlin {
 		}
 	}
 }
-
-apply(from = rootProject.file("gradle/publishing-mpp.gradle"))

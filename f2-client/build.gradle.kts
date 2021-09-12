@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform")
+    id("city.smartb.fixers.gradle.kotlin.mpp")
 }
 
 kotlin {
@@ -7,5 +7,3 @@ kotlin {
         commonMainApi(project(":f2-dsl:f2-dsl-function"))
     }
 }
-
-apply(from = rootProject.file("gradle/publishing-mpp.gradle"))

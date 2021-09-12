@@ -2,7 +2,6 @@ package f2.dsl.cqrs
 
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 expect interface Page<OBJECT> {
 	val page: Int

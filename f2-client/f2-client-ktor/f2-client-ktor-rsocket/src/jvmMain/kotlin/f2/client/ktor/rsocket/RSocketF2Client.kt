@@ -3,7 +3,6 @@ package f2.client.ktor.rsocket
 import f2.client.F2Client
 import f2.dsl.fnc.F2Function
 import f2.dsl.fnc.F2Supplier
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json

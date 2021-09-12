@@ -9,7 +9,7 @@ import f2.feature.cloudEvent.storming.entity.CloudEventEntityRepository
 import kotlinx.coroutines.runBlocking
 import org.springframework.context.event.EventListener
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 class StormingCommandSink(
 	private val repo: CloudEventEntityRepository,

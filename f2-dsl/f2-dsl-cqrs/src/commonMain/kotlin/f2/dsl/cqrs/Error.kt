@@ -11,7 +11,6 @@ expect interface Error<PAYLOAD> {
 	val payload: PAYLOAD
 }
 
-
 @JsExport
 @JsName("ErrorSeverity")
 open class ErrorSeverity(val severity: String)

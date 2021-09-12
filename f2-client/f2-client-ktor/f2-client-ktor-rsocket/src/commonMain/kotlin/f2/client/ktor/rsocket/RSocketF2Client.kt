@@ -8,5 +8,4 @@ expect class RSocketF2Client : F2Client {
 
 	override fun get(route: String): F2Supplier<String>
 	override fun invoke(route: String): F2Function<String, String>
-
 }

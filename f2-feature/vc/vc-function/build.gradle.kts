@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm")
+    id("city.smartb.fixers.gradle.kotlin.jvm")
     kotlin("plugin.spring")
     id("org.jetbrains.kotlin.kapt")
 }
@@ -18,5 +18,3 @@ dependencies {
     testImplementation(project(":f2-feature:vc:vc-client"))
 
 }
-
-apply(from = rootProject.file("gradle/publishing.gradle"))

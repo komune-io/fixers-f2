@@ -36,5 +36,4 @@ class CatalogFunctionConfig {
 			namesFunction.filter { !it.startsWith("&") }.toTypedArray()
 		}
 	}
-
 }
