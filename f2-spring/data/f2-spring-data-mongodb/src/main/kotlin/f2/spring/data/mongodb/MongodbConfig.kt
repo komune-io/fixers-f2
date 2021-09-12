@@ -14,5 +14,4 @@ open class MongodbConfig {
 	open fun reactiveRepositoryFactorySupport(mongoOperations: ReactiveMongoOperations): ReactiveRepositoryFactorySupport {
 		return ReactiveMongoRepositoryFactory(mongoOperations)
 	}
-
 }

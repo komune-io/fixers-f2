@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm")
+    id("city.smartb.fixers.gradle.kotlin.jvm")
     kotlin("plugin.spring")
 }
 
@@ -8,5 +8,3 @@ dependencies {
 
     api("org.springframework.boot:spring-boot-autoconfigure:${Versions.springBoot}")
 }
-
-apply(from = rootProject.file("gradle/publishing.gradle"))

@@ -1,9 +1,7 @@
 plugins {
-    kotlin("multiplatform")
+    id("city.smartb.fixers.gradle.kotlin.mpp")
     id("lt.petuska.npm.publish")
 }
 
 dependencies {
 }
-
-apply(from = rootProject.file("gradle/publishing-mpp.gradle"))

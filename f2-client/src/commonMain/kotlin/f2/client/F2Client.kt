@@ -1,37 +1,28 @@
 package f2.client
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import f2.dsl.fnc.F2Function
+import f2.dsl.fnc.F2Supplier
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-interface F2Client {
-	suspend fun get(route: String): Flow<String>
-	suspend fun accept(route: String, command: String)
-	suspend fun invoke(route: String, command: String): String
+expect interface F2Client {
+	fun get(route: String): F2Supplier<String>
+
+	//     suspend fun accept(route: String, command: String)
+	fun invoke(route: String): F2Function<String, String>
+
 }
 
-suspend inline fun <reified T, reified R> F2Client.executeInvoke(route: String, cmd: T): R {
-	val body = Json.encodeToString(cmd)
-	val ret = invoke(route, body)
-	return jsonToValue(ret)
-}
+expect inline fun <reified T, reified R> F2Client.declaration(route: String): F2Function<T, R>
 
-suspend inline fun <reified R> F2Client.executeGet(route: String): Flow<R> {
-	val ret = get(route)
-	return ret.map { jsonToValue(it) }
-}
-
-suspend inline fun <reified T> F2Client.executeAccept(route: String, cmd: T) {
-	val body = Json.encodeToString(cmd)
-	accept(route, body)
+val json = Json {
+	ignoreUnknownKeys = true
 }
 
 inline fun <reified T> jsonToValue(ret: String): T {
 	return try {
-		Json.decodeFromString(ret)
+		json.decodeFromString<T>(ret)
 	} catch (e: Exception) {
-		Json.decodeFromString<List<T>>(ret).first()
+		json.decodeFromString<List<T>>(ret).first()
 	}
 }

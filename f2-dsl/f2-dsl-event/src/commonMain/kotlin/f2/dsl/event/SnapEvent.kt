@@ -15,7 +15,7 @@ open class SnapEvent<T>(
 	override val schemaURL: String? = null,  // RFC 3986
 	override val contentType: String? = null, // RFC 2046
 	override val extensions: Map<String, Any>? = null,
-	override val data: T
+	override val data: T,
 ) : CloudEvent<T>(
 	eventType = eventType,
 	eventTypeVersion = eventTypeVersion,

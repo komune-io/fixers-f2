@@ -5,9 +5,10 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import f2.client.F2Client
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.json.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.features.json.JacksonSerializer
+import io.ktor.client.features.json.JsonFeature
 
 actual class HttpClientBuilder {
 	private fun httpClient(): HttpClient {
@@ -23,11 +24,11 @@ actual class HttpClientBuilder {
 		}
 	}
 
-	actual fun build(
+	fun build(
 		scheme: String,
 		host: String,
 		port: Int,
-		path: String?
+		path: String?,
 	): F2Client {
 		val httpCLient = httpClient()
 		return HttpF2Client(
@@ -38,7 +39,6 @@ actual class HttpClientBuilder {
 			httpClient = httpCLient
 		)
 	}
-
 }
 
 actual fun httpClientBuilder() = HttpClientBuilder()

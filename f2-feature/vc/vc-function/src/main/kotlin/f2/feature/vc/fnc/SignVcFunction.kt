@@ -9,35 +9,41 @@ import city.smartb.iris.vc.signer.VCSign
 import city.smartb.iris.vc.signer.VCVerifier
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
+import f2.dsl.fnc.f2Function
 import f2.feature.vc.fnc.config.CredentialsKey
-import f2.function.spring.adapter.f2Function
+import f2.vc.model.VCGen
 import f2.vc.model.VCFunction
 import f2.vc.model.command.VCSignFunction
 import f2.vc.model.command.VCSignResult
 import f2.vc.model.command.VCVerifyFunction
 import f2.vc.model.command.VCVerifyResult
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.springframework.context.annotation.Bean
-import org.springframework.stereotype.Service
+import org.springframework.context.annotation.Configuration
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
-@Service
+@Configuration
 class SignVcFunction(
 	private val objectMapper: ObjectMapper,
 	private val credentialsKey: CredentialsKey,
-): VCFunction<Map<String, Any>> {
+) : VCFunction {
 	private val vcSign = VCSign()
 	private val vcVerifier = VCVerifier()
 
 	@Bean
-	override fun sign(): VCSignFunction<Map<String, Any>> = f2Function { cmd ->
+	override fun sign(): VCSignFunction = f2Function { cmd ->
 		val credentials = signVc(cmd.identifier, cmd.claims)
-		val vc: VCJson<Map<String, Any>> = objectMapper.convertValue(credentials.asJson())
-		VCSignResult(vc)
+		val vc: String = objectMapper.writeValueAsString(credentials.asJson())
+		val vcbase = Json {
+			ignoreUnknownKeys = true
+		}.decodeFromString<VCGen>(vc)
+		VCSignResult(vcbase)
 	}
 
 	@Bean
-	override fun verify(): VCVerifyFunction<Map<String, Any>> = f2Function { cmd ->
+	override fun verify(): VCVerifyFunction = f2Function { cmd ->
 		val verifier = Verifier.rs256Verifier(credentialsKey.getRSAPublicKey())
 		val map: MutableMap<String, Any> = objectMapper.convertValue(cmd.claims)
 		val credentials = VerifiableCredential(map)
@@ -45,7 +51,7 @@ class SignVcFunction(
 		VCVerifyResult(isValid)
 	}
 
-	private suspend fun <T> signVc(identifier: String, claim: T): VerifiableCredential {
+	private fun <T> signVc(identifier: String, claim: T): VerifiableCredential {
 		val created = LocalDateTime.now()
 		val nonce: String = UUID.randomUUID().toString()
 
@@ -68,6 +74,5 @@ class SignVcFunction(
 
 		return vcSign.sign(vcBuild, proofBuilder, signer)
 	}
-
 
 }

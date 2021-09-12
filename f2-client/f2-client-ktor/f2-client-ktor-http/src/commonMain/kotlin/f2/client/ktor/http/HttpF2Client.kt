@@ -1,32 +1,10 @@
 package f2.client.ktor.http
 
 import f2.client.F2Client
-import io.ktor.client.HttpClient
-import io.ktor.client.request.*
-import io.ktor.content.*
-import io.ktor.http.*
-import kotlinx.coroutines.flow.Flow
+import f2.dsl.fnc.F2Function
+import f2.dsl.fnc.F2Supplier
 
-open class HttpF2Client(
-	private val httpClient: HttpClient,
-	private val scheme: String,
-	private val host: String,
-	private val port: Int,
-	private val path: String?
-): F2Client {
-	override suspend fun get(route: String): Flow<String> {
-		return httpClient.get(scheme = scheme, host = host, port = port, "${path ?: ""}/${route}")
-	}
-
-	override suspend fun accept(route: String, command: String) {
-		return httpClient.post(scheme = scheme, host = host, port = port, "${path ?: ""}/${route}") {
-			body =  TextContent(command, contentType = ContentType.Application.Json)
-		}
-	}
-
-	override suspend fun invoke(route: String, command: String): String {
-		return httpClient.post(scheme = scheme, host = host, port = port, "${path ?: ""}/${route}") {
-			body =  TextContent(command, contentType = ContentType.Application.Json)
-		}
-	}
+expect open class HttpF2Client : F2Client {
+	override fun get(route: String): F2Supplier<String>
+	override fun invoke(route: String): F2Function<String, String>
 }

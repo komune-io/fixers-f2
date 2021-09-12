@@ -3,9 +3,9 @@ package f2.feature.cloudEvent.storming
 import f2.dsl.event.CloudEvent
 import f2.feature.cloudEvent.storming.entity.CloudEventEntity
 import f2.feature.cloudEvent.storming.entity.CloudEventEntityRepository
+import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import org.springframework.context.event.EventListener
-import java.util.*
 
 class StormingCloudEventSink(
 	private val repo: CloudEventEntityRepository,

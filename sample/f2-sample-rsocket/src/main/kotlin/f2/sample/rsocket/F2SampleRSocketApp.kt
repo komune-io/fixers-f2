@@ -1,7 +1,7 @@
 package f2.sample.rsocket
 
-import f2.dsl.function.F2Function
-import f2.function.spring.adapter.f2Function
+import f2.dsl.fnc.F2Function
+import f2.dsl.fnc.f2Function
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
@@ -20,7 +20,7 @@ class F2SampleRSocketApp {
 	 * and return suspend (Flow<T>) -> Flow<R>
 	 */
 	@Bean
-	fun sha256(): F2Function<String, String> = f2Function<String, String> { bytes ->
+	fun sha256(): F2Function<String, String> = f2Function { bytes ->
 		val md = MessageDigest.getInstance("SHA-256")
 		val hash = md.digest(bytes.toByteArray())
 		Base64.getEncoder().encodeToString(hash)

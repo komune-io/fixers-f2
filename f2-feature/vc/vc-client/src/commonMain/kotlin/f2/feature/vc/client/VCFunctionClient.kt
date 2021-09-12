@@ -1,6 +1,6 @@
 package f2.feature.vc.client
 
 import f2.client.F2Client
-import f2.vc.model.VCRemoteFunction
+import f2.vc.model.VCFunction
 
-expect open class VCFunctionClient<T>(client: F2Client) : VCRemoteFunction<T>
+expect open class VCFunctionClient(client: F2Client) : VCFunction

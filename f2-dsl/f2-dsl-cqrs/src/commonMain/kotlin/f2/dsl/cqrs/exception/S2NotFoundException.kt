@@ -6,5 +6,5 @@ import kotlin.js.JsName
 @JsExport
 @JsName("R2NotFoundException")
 class S2NotFoundException(
-        message : String
+	message: String,
 ) : Exception(message)

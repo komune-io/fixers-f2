@@ -4,4 +4,4 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface CloudEventEntityRepository: ReactiveCrudRepository<CloudEventEntity, String>
+interface CloudEventEntityRepository : ReactiveCrudRepository<CloudEventEntity, String>

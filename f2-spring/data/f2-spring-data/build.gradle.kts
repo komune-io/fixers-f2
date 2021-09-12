@@ -1,5 +1,7 @@
 plugins {
-    kotlin("jvm")
+    id("city.smartb.fixers.gradle.kotlin.jvm")
+    id("city.smartb.fixers.gradle.publish")
+
 }
 
 dependencies {
@@ -12,5 +14,3 @@ dependencies {
 
     implementation( "com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.jacksonKotlin}")
 }
-
-apply(from = rootProject.file("gradle/publishing.gradle"))

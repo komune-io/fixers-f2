@@ -4,14 +4,19 @@ import kotlin.js.JsExport
 
 @JsExport
 sealed class Protocol
+
 @JsExport
-object HTTP: Protocol()
+object HTTP : Protocol()
+
 @JsExport
-object HTTPS: Protocol()
+object HTTPS : Protocol()
+
 @JsExport
-object WS: Protocol()
+object WS : Protocol()
+
 @JsExport
-object WSS: Protocol()
+object WSS : Protocol()
+
 @JsExport
-object TCP: Protocol()
+object TCP : Protocol()
 

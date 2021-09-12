@@ -1,10 +1,7 @@
 plugins {
-    kotlin("multiplatform")
+    id("city.smartb.fixers.gradle.kotlin.mpp")
     id("lt.petuska.npm.publish")
 }
 
 dependencies {
-    jvmApi("io.projectreactor:reactor-core:${Versions.reactor}")
 }
-
-apply(from = rootProject.file("gradle/publishing-mpp.gradle"))

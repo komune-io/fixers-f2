@@ -1,7 +1,7 @@
 pluginManagement {
 	repositories {
 		gradlePluginPortal()
-		jcenter()
+		maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 	}
 }
 
@@ -44,4 +44,9 @@ include(
 	"f2-feature:catalog:f2-feature-catalog",
 	"f2-feature:cloud-event-storming:f2-feature-cloud-event-storming",
 	"f2-feature:version:f2-feature-version"
+)
+
+include(
+	"sample:f2-sample-http",
+	"sample:f2-sample-rsocket"
 )
