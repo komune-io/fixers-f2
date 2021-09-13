@@ -35,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cloud.function.context.config.CoroutinesUtils;
 import org.springframework.cloud.function.context.config.FunctionContextUtils;
+import org.springframework.core.type.MethodMetadata;
 import reactor.core.publisher.Flux;
 
 import org.springframework.beans.BeansException;
@@ -91,15 +92,18 @@ public class MyKotlinLambdaToFunctionAutoConfiguration {
                 for (String beanDefinitionName : beanDefinitionNames) {
                     BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanDefinitionName);
 
-                    if (beanDefinition instanceof AnnotatedBeanDefinition && ((AnnotatedBeanDefinition) beanDefinition).getFactoryMethodMetadata() != null) {
-                        String typeName = ((AnnotatedBeanDefinition) beanDefinition).getFactoryMethodMetadata().getReturnTypeName();
+                    if (beanDefinition instanceof AnnotatedBeanDefinition) {
+                        MethodMetadata methodMetadata = ((AnnotatedBeanDefinition) beanDefinition).getFactoryMethodMetadata();
+                        if(methodMetadata != null) {
+                            String typeName = methodMetadata.getReturnTypeName();
 
-                        if (typeName.startsWith(F2Function.class.getName())) {
-                            RootBeanDefinition cbd = new RootBeanDefinition(KotlinFunctionWrapper.class);
-                            ConstructorArgumentValues ca = new ConstructorArgumentValues();
-                            ca.addGenericArgumentValue(beanDefinition);
-                            cbd.setConstructorArgumentValues(ca);
-                            ((BeanDefinitionRegistry) beanFactory).registerBeanDefinition(beanDefinitionName + FunctionRegistration.REGISTRATION_NAME_SUFFIX, cbd);
+                            if (typeName.startsWith(F2Function.class.getName())) {
+                                RootBeanDefinition cbd = new RootBeanDefinition(KotlinFunctionWrapper.class);
+                                ConstructorArgumentValues ca = new ConstructorArgumentValues();
+                                ca.addGenericArgumentValue(beanDefinition);
+                                cbd.setConstructorArgumentValues(ca);
+                                ((BeanDefinitionRegistry) beanFactory).registerBeanDefinition(beanDefinitionName + FunctionRegistration.REGISTRATION_NAME_SUFFIX, cbd);
+                            }
                         }
                     }
 
