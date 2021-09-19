@@ -1,15 +1,25 @@
-package f2.dsl.cqrs
+package f2.dsl.cqrs.error
 
 import kotlin.js.JsExport
 import kotlin.js.JsName
 
-expect interface Error<PAYLOAD> {
+expect interface ErrorDTO<PAYLOAD> {
 	val severity: ErrorSeverity
 	val type: String
 	val description: String
 	val date: String
 	val payload: PAYLOAD
 }
+
+@JsExport
+@JsName("Error")
+open class Error<PAYLOAD>(
+	override val type: String,
+	override val description: String,
+	override val date: String,
+	override val payload: PAYLOAD,
+	override val severity: ErrorSeverity,
+) : ErrorDTO<PAYLOAD>
 
 @JsExport
 @JsName("ErrorSeverity")

@@ -16,7 +16,6 @@ import java.util.function.Supplier
 // @ContextConfiguration(initializers = [MongoContainerInitializer::class] )
 internal class F2SampleHttpAppTest {
 
-
 	@Autowired
 	lateinit var catalog: FunctionCatalog
 

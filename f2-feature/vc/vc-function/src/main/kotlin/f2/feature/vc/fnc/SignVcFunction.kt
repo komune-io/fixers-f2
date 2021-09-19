@@ -73,5 +73,4 @@ class SignVcFunction(private val objectMapper: ObjectMapper,
 
 		return vcSign.sign(vcBuild, proofBuilder, signer)
 	}
-
 }

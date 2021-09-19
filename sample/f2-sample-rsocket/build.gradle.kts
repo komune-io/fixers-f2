@@ -22,9 +22,7 @@ dependencies {
 
     implementation(project(":f2-client:f2-client-ktor"))
     implementation(project(":f2-client:f2-client-ktor:f2-client-ktor-rsocket"))
-
 }
-
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {

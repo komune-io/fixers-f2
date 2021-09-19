@@ -16,5 +16,4 @@ dependencies {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation(project(":f2-feature:vc:vc-client"))
-
 }

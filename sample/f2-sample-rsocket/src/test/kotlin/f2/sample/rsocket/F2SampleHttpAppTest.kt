@@ -15,11 +15,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.function.Function
 import java.util.function.Supplier
 
-
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
 class F2SampleHttpAppTest {
-
 
 	@Autowired
 	lateinit var catalog: FunctionCatalog
@@ -30,7 +28,6 @@ class F2SampleHttpAppTest {
 		val response = client.executeInvoke<String, String>("sha256", "HELLO")
 		Assertions.assertEquals(response, "NzPNl3/46xi5hzV+Is7Zn0YJfzHssjnoeK5jdg6D5NU=")
 	}
-
 
 	@Test
 	fun testCatalogue() = runBlocking {

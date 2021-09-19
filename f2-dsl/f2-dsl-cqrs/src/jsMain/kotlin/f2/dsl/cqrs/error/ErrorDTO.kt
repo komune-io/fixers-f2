@@ -1,8 +1,8 @@
-package f2.dsl.cqrs
+package f2.dsl.cqrs.error
 
 @JsExport
-@JsName("Error")
-actual external interface Error<PAYLOAD> {
+@JsName("ErrorDTO")
+actual external interface ErrorDTO<PAYLOAD> {
 	@JsName("severity")
 	actual val severity: ErrorSeverity
 

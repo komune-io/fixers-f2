@@ -1,6 +1,6 @@
-package f2.dsl.cqrs
+package f2.dsl.cqrs.error
 
-actual interface Error<PAYLOAD> {
+actual interface ErrorDTO<PAYLOAD> {
 	actual val severity: ErrorSeverity
 	actual val type: String
 	actual val description: String

@@ -36,7 +36,7 @@ class SignVcFunctionTest {
 	lateinit var catalog: FunctionCatalog
 
 	@Test
-	fun checkFuntionIsRegistred() = runBlocking<Unit> {
+	fun checkFunctionIsRegistred() = runBlocking<Unit> {
 		val signF2: Any = catalog.lookup("sign")
 		Assertions.assertThat(signF2).isNotNull
 		val verifyF2: Any = catalog.lookup("verify")
@@ -56,7 +56,7 @@ class SignVcFunctionTest {
 
 		val verify = signVcFunction.verify().invoke(listOf(VCVerifyCommand(result.vc)).asFlow()).first()
 
-//		Assertions.assertThat(result.vc.credentialSubject.get("value")).isEqualTo(claimsValue)
+		// Assertions.assertThat(result.vc.credentialSubject.get("value")).isEqualTo(claimsValue)
 		Assertions.assertThat(verify.isValid).isTrue()
 	}
 
@@ -72,9 +72,8 @@ class SignVcFunctionTest {
 		val result = signed.invoke(cmdFlow)
 		result.collect()
 
-//		val verify = signVcFunction.verify().invoke(listOf(VCVerifyCommand(result.vc)).asFlow()).first()
-//
-//		Assertions.assertThat(result.vc.credentialSubject.get("value")).isEqualTo(claimsValue)
-//		Assertions.assertThat(verify.isValid).isTrue()
+		// val verify = signVcFunction.verify().invoke(listOf(VCVerifyCommand(result.vc)).asFlow()).first()
+		// Assertions.assertThat(result.vc.credentialSubject.get("value")).isEqualTo(claimsValue)
+		// Assertions.assertThat(verify.isValid).isTrue()
 	}
 }

@@ -7,9 +7,6 @@ pluginManagement {
 
 rootProject.name = "f2"
 
-enableFeaturePreview("GRADLE_METADATA")
-
-
 include(
 	"f2-client",
 	"f2-client:f2-client-ktor",
