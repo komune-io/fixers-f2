@@ -5,17 +5,15 @@ import kotlin.js.JsName
 import kotlinx.serialization.Serializable
 
 @Serializable
-expect interface PageDTO<OBJECT> {
-	val pagination: OffsetPaginationDTO?
+expect interface PageDTO<out OBJECT> {
 	val total: Int
-	val list: List<OBJECT>
+	val list: List<out OBJECT>
 }
 
 @Serializable
 @JsExport
 @JsName("Page")
-class Page<OBJECT>(
-	override val pagination: OffsetPaginationDTO?,
+class Page<out OBJECT>(
 	override val total: Int,
-	override val list: List<OBJECT>,
+	override val list: List<out OBJECT>,
 ) : PageDTO<OBJECT>

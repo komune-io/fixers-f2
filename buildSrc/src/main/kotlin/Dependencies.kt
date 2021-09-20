@@ -28,7 +28,6 @@ object Versions {
 
 	const val vc = "0.1.0-SNAPSHOT"
 	const val iris = "0.1.0-SNAPSHOT"
-	const val f2 = "0.1.0-SNAPSHOT"
 }
 
 

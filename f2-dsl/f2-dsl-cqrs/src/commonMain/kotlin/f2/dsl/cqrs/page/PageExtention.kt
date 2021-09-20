@@ -1,12 +1,14 @@
 package f2.dsl.cqrs.page
 
-fun <OBJECT>  OffsetPaginationDTO.result(list: List<OBJECT>, total: Int): Page<OBJECT> {
-	return Page(
+fun <OBJECT> OffsetPaginationDTO.result(list: List<OBJECT>, total: Int): PageQueryResultDTO<OBJECT> {
+	return PageQueryResult(
 		pagination = OffsetPagination(
 			offset = this.offset,
 			limit = this.limit
 		),
-		list = list,
-		total = total
+		page = Page(
+			list = list,
+			total = total
+		)
 	)
 }
