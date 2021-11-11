@@ -29,7 +29,11 @@ fun <T, R> f2Function(fnc: suspend (t: T) -> R): F2Function<T, R> = F2Function {
 	}
 }
 
-fun <R> f2Supplier(fnc: suspend () -> R): F2Supplier<R> = F2Supplier<R> {
+suspend fun <T, R> T.invokeWith(f2: F2Function<T, R>): R {
+	return f2.invoke(this)
+}
+
+fun <R> f2Supplier(fnc: suspend () -> R): F2Supplier<R> = F2Supplier {
 	flow {
 		emit(fnc())
 	}
