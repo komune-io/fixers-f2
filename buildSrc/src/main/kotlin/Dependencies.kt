@@ -18,7 +18,7 @@ object Versions {
 
 	const val embedMongo = "2.2.0"
 
-	const val coroutines = "1.5.1"
+	const val coroutines = "1.4.2"
 	const val kserialization = "1.2.2"
 	const val ktor = "1.6.1"
 	const val rsocket = "0.13.1"
