@@ -17,8 +17,6 @@ dependencies {
     implementation(project(":f2-spring:function:f2-spring-boot-starter-function-rsocket"))
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
 
     implementation(project(":f2-client:f2-client-ktor"))
     implementation(project(":f2-client:f2-client-ktor:f2-client-ktor-rsocket"))

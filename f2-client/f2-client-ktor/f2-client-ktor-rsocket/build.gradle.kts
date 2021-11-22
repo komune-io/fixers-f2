@@ -1,3 +1,5 @@
+import city.smartb.gradle.dependencies.FixersVersions
+
 plugins {
 	id("city.smartb.fixers.gradle.kotlin.mpp")
 	id("city.smartb.fixers.gradle.publish")
@@ -13,18 +15,18 @@ kotlin {
 				implementation("io.rsocket.kotlin:rsocket-core:${Versions.rsocket}")
 				implementation("io.rsocket.kotlin:rsocket-transport-ktor:${Versions.rsocket}")
 				implementation("io.rsocket.kotlin:rsocket-transport-ktor-client:${Versions.rsocket}")
-				api("io.ktor:ktor-client-core:${Versions.ktor}")
+				api("io.ktor:ktor-client-core:${FixersVersions.Kotlin.ktor}")
 			}
 		}
 		jsMain {
 			dependencies {
-				implementation("io.ktor:ktor-client-js:${Versions.ktor}")
+				implementation("io.ktor:ktor-client-js:${FixersVersions.Kotlin.ktor}")
 			}
 		}
 		jvmMain {
 			dependencies {
 //				implementation("io.ktor:ktor-client-okhttp:${Versions.ktor}")
-				implementation("io.ktor:ktor-client-cio:${Versions.ktor}") {
+				implementation("io.ktor:ktor-client-cio:${FixersVersions.Kotlin.ktor}") {
 					exclude("org.jetbrains.kotlin", "kotlin-reflect")
 				}
 			}

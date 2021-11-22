@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
 	id("org.jetbrains.kotlin.kapt") version PluginVersions.kotlin apply (false)
 	kotlin("plugin.spring") version PluginVersions.kotlin apply false
