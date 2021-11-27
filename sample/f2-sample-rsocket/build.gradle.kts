@@ -13,7 +13,6 @@ repositories {
 
 
 dependencies {
-//    implementation("city.smartb.f2:f2-spring-boot-starter-function-rsocket:latest")
     implementation(project(":f2-spring:function:f2-spring-boot-starter-function-rsocket"))
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")

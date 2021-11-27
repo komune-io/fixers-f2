@@ -12,8 +12,6 @@ dependencies {
 
     api("city.smartb.iris:iris-vc:${Versions.vc}")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}") {
-        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-    }
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")
     testImplementation(project(":f2-feature:vc:vc-client"))
 }

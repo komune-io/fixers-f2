@@ -8,9 +8,7 @@ plugins {
 dependencies {
     api("org.springframework.boot:spring-boot-starter-data-mongodb-reactive:${FixersVersions.Spring.boot}")
 
-    api("org.springframework.boot:spring-boot-starter-test:${FixersVersions.Spring.boot}") {
-        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-    }
+    api("org.springframework.boot:spring-boot-starter-test:${FixersVersions.Spring.boot}")
 
     api("de.flapdoodle.embed:de.flapdoodle.embed.mongo:${Versions.embedMongo}")
 }

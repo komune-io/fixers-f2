@@ -37,11 +37,11 @@ include(
 	"f2-spring:function:f2-spring-boot-starter-function-rsocket"
 )
 
-//include(
-//	"f2-feature:catalog:f2-feature-catalog",
-//	"f2-feature:cloud-event-storming:f2-feature-cloud-event-storming",
-//	"f2-feature:version:f2-feature-version"
-//)
+include(
+	"f2-feature:catalog:f2-feature-catalog",
+	"f2-feature:cloud-event-storming:f2-feature-cloud-event-storming",
+	"f2-feature:version:f2-feature-version"
+)
 
 //include(
 //	"sample:f2-sample-http",

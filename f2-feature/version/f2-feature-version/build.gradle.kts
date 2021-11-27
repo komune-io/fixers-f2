@@ -1,3 +1,5 @@
+import city.smartb.gradle.dependencies.FixersVersions
+
 plugins {
     id("city.smartb.fixers.gradle.kotlin.jvm")
     kotlin("plugin.spring")
@@ -6,5 +8,5 @@ plugins {
 dependencies {
     api(project(":f2-spring:function:f2-spring-boot-starter-function"))
 
-    api("org.springframework.boot:spring-boot-autoconfigure:${Versions.springBoot}")
+    api("org.springframework.boot:spring-boot-autoconfigure:${FixersVersions.Spring.boot}")
 }
