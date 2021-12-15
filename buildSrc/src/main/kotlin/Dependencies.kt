@@ -1,4 +1,5 @@
 import city.smartb.gradle.dependencies.FixersPluginVersions
+import city.smartb.gradle.dependencies.FixersVersions
 import org.gradle.api.artifacts.Dependency
 
 typealias Scope = (dependencyNotation: Any) -> Dependency?
@@ -26,10 +27,24 @@ object Versions {
 }
 
 object Dependencies {
-	object jvm {
+	object Jvm {
 		fun cucumber(scope: Scope) = scope.add(
 			"io.cucumber:cucumber-java8:${Versions.cucumber}",
 			"io.cucumber:cucumber-junit-platform-engine:${Versions.cucumber}",
 		)
+		object Spring{
+			fun cloudFunction(scope: Scope) = scope.add(
+				"org.springframework.cloud:spring-cloud-function-context:${FixersVersions.Spring.function}",
+				"org.springframework.cloud:spring-cloud-function-kotlin:${FixersVersions.Spring.function}",
+				"org.springframework.boot:spring-boot-autoconfigure:${FixersVersions.Spring.boot}",
+				"com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.jacksonKotlin}"
+			)
+			fun cloudFunctionWebflux(scope: Scope) = scope.add(
+				"org.springframework.cloud:spring-cloud-starter-function-webflux:${FixersVersions.Spring.function}"
+			)
+			fun cloudFunctionRSocket(scope: Scope) = scope.add(
+				"org.springframework.cloud:spring-cloud-function-rsocket:${FixersVersions.Spring.function}"
+			)
+		}
 	}
 }

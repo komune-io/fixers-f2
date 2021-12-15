@@ -5,5 +5,5 @@ plugins {
 }
 
 dependencies {
-	Dependencies.jvm.cucumber(::api)
+	Dependencies.Jvm.cucumber(::api)
 }
