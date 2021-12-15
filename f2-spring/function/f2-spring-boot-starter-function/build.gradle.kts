@@ -16,4 +16,8 @@ dependencies {
     api("org.springframework.cloud:spring-cloud-function-kotlin:${FixersVersions.Spring.function}")
     api("com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.jacksonKotlin}")
     api("org.springframework.boot:spring-boot-autoconfigure:${FixersVersions.Spring.boot}")
+
+
+
+    testImplementation(project(":f2-bdd:f2-bdd-spring-autoconfigure"))
 }

@@ -25,7 +25,6 @@ kotlin {
 		}
 		jvmMain {
 			dependencies {
-//				implementation("io.ktor:ktor-client-okhttp:${Versions.ktor}")
 				implementation("io.ktor:ktor-client-cio:${FixersVersions.Kotlin.ktor}") {
 					exclude("org.jetbrains.kotlin", "kotlin-reflect")
 				}

@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-f2.function.spring.MyKotlinLambdaToFunctionAutoConfiguration
+f2.spring.MyKotlinLambdaToFunctionAutoConfiguration

@@ -8,11 +8,17 @@ pluginManagement {
 rootProject.name = "f2"
 
 include(
+	"f2-bdd:f2-bdd-config",
+	"f2-bdd:f2-bdd-spring-autoconfigure",
+)
+
+include(
 	"f2-client",
 	"f2-client:f2-client-ktor",
 	"f2-client:f2-client-ktor:f2-client-ktor-http",
 	"f2-client:f2-client-ktor:f2-client-ktor-rsocket"
 )
+
 include(
 	"f2-dsl:f2-dsl-function",
 	"f2-dsl:f2-dsl-cqrs",
@@ -25,11 +31,11 @@ include(
 	"f2-spring:data:f2-spring-data-mongodb-test"
 )
 
-//include(
-//	"f2-feature:vc:vc-client",
-//	"f2-feature:vc:vc-function",
-//	"f2-feature:vc:vc-model"
-//)
+include(
+	"f2-feature:vc:vc-client",
+	"f2-feature:vc:vc-function",
+	"f2-feature:vc:vc-model"
+)
 
 include(
 	"f2-spring:function:f2-spring-boot-starter-function",
@@ -43,7 +49,7 @@ include(
 	"f2-feature:version:f2-feature-version"
 )
 
-//include(
-//	"sample:f2-sample-http",
-//	"sample:f2-sample-rsocket"
-//)
+include(
+	"sample:f2-sample-http",
+	"sample:f2-sample-rsocket"
+)
