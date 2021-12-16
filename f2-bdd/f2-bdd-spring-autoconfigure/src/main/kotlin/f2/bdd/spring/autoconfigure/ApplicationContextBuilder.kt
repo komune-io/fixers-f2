@@ -2,6 +2,7 @@ package f2.bdd.spring.autoconfigure
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
+import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.support.GenericApplicationContext
 
@@ -29,6 +30,7 @@ class ApplicationContextBuilder {
 
 	@EnableAutoConfiguration
 	@Configuration
+	@ComponentScan("f2")
 	class SimpleConfiguration
 
 
