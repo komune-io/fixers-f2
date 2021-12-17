@@ -28,4 +28,34 @@ class F2SpringContextBag {
 	lateinit var contextBuilder: ReactiveWebApplicationContextRunner
 	var applicationContext: GenericApplicationContext? = null
 
+
+	@Suppress("UNCHECKED_CAST")
+	fun <P, R> getBlockingFunctionBean(name: String): (P) -> R {
+		return applicationContext!!.getBean(name) as (P) -> R
+	}
+
+	@Suppress("UNCHECKED_CAST")
+	fun <R> getBlockingSupplierBean(name: String): () -> R {
+		return applicationContext!!.getBean(name) as () -> R
+	}
+
+	@Suppress("UNCHECKED_CAST")
+	fun <P> getBlockingConsumerBean(name: String): (P) -> Unit {
+		return applicationContext!!.getBean(name) as (P) -> Unit
+	}
+
+	@Suppress("UNCHECKED_CAST")
+	fun <P, R> getFunctionBean(name: String): suspend (P) -> R {
+		return applicationContext!!.getBean(name) as suspend (P) -> R
+	}
+
+	@Suppress("UNCHECKED_CAST")
+	fun <R> getSupplierBean(name: String): suspend () -> R {
+		return applicationContext!!.getBean(name) as suspend () -> R
+	}
+
+	@Suppress("UNCHECKED_CAST")
+	fun <P> getConsumerBean(name: String): suspend (P) -> Unit {
+		return applicationContext!!.getBean(name) as suspend (P) -> Unit
+	}
 }

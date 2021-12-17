@@ -1,40 +1,38 @@
 package f2.spring.list
 
-import f2.bdd.spring.autoconfigure.steps.F2SpringStep
-import f2.spring.single.LambdaPureKotlinReceiver
-import f2.spring.single.LambdaSimple
+import f2.spring.LambdaListStepsBase
 import io.cucumber.datatable.DataTable
+import io.cucumber.java8.En
 import org.assertj.core.api.Assertions
 
-class LambdaListSteps: F2SpringStep() {
+class LambdaListSteps : LambdaListStepsBase(), En {
 
 	init {
-		prepareSteps()
+		prepareLambdaSteps(
+			functionName = LambdaList::functionList.name,
+			supplierName = LambdaList::supplierList.name,
+			consumerName = LambdaList::consumerList.name
+		)
 
 		@Suppress("UNCHECKED_CAST")
-		When("Execute ${LambdaList::functionList.name} with") { dataTable: DataTable ->
-			val functionPureKotlin = bag.applicationContext!!.getBean(LambdaList::functionList.name) as (List<String>) -> List<String>
-			bag.result[LambdaList::functionList.name] = functionPureKotlin(dataTable.asList())
-		}
-
-		@Suppress("UNCHECKED_CAST")
-		When("Execute ${LambdaList::supplierList.name}") {
-			val functionPureKotlin = bag.applicationContext!!.getBean(LambdaList::supplierList.name) as () -> List<String>
-			bag.result[LambdaList::supplierList.name] = functionPureKotlin()
-		}
-
-		@Suppress("UNCHECKED_CAST")
-		When("Execute ${LambdaList::consumerList.name} with") { dataTable: DataTable ->
-			val functionPureKotlin = bag.applicationContext!!.getBean(LambdaList::consumerList.name) as (List<String>) -> Void
-			functionPureKotlin(dataTable.asList())
-			val receiver = bag.applicationContext!!.getBean(LambdaSimple::lambdaSingleReceiver.name) as LambdaPureKotlinReceiver
-			bag.result[LambdaSimple::consumerSingle.name] = receiver.items.first()
-		}
-
-		@Suppress("UNCHECKED_CAST")
-		Then("The list result for {string} is") { value: String, dataTable: DataTable ->
+		Then("The result for {string} is") { value: String, dataTable: DataTable ->
 			Assertions.assertThat(bag.result[value] as List<String>?).isEqualTo(dataTable.asList())
 		}
+	}
+
+	override fun function(values: List<String>): List<String> {
+		val lambda: (List<String>) -> List<String> = LambdaList::functionList.blockingFunctionBean()
+		return lambda(values)
+	}
+
+	override fun supplier(): List<String> {
+		val lambda:  () -> List<String> = LambdaList::supplierList.blockingSupplierBean()
+		return lambda()
+	}
+
+	override fun consumer(values: List<String>) {
+		val lambda: (List<String>) -> Unit = LambdaList::consumerList.blockingConsumerBean()
+		lambda(values)
 	}
 
 }

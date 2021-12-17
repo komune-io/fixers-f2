@@ -1,35 +1,33 @@
 package f2.spring.single
 
-import f2.bdd.spring.autoconfigure.steps.F2SpringStep
-import org.assertj.core.api.Assertions
+import f2.spring.LambdaListStepsBase
+import io.cucumber.java8.En
+import kotlin.reflect.KFunction
 
-class LambdaSimpleSteps: F2SpringStep() {
+class LambdaSimpleSteps: LambdaListStepsBase(), En {
 
 	init {
-		prepareSteps()
+		prepareLambdaSteps(
+			functionName = LambdaSimple::functionSingle.name,
+			supplierName = LambdaSimple::supplierSingle.name,
+			consumerName = LambdaSimple::consumerSingle.name,
+		)
+	}
 
-		@Suppress("UNCHECKED_CAST")
-		When("Execute ${LambdaSimple::functionSingle.name} with {string}") { value: String ->
-			val functionPureKotlin = bag.applicationContext!!.getBean(LambdaSimple::functionSingle.name) as (String) -> String
-			bag.result[LambdaSimple::functionSingle.name] = functionPureKotlin(value)
-		}
+	override fun function(values: List<String>): List<String> {
+		val lambda: (String) -> String = LambdaSimple::functionSingle.blockingFunctionBean()
+		return values.map(lambda)
+	}
 
-		@Suppress("UNCHECKED_CAST")
-		When("Execute ${LambdaSimple::supplierSingle.name}") {
-			val functionPureKotlin = bag.applicationContext!!.getBean(LambdaSimple::supplierSingle.name) as () -> String
-			bag.result[LambdaSimple::supplierSingle.name] = functionPureKotlin()
-		}
+	override fun supplier(): List<String> {
+		val lambda: () -> String = LambdaSimple::supplierSingle.blockingSupplierBean()
+		return listOf(
+			lambda()
+		)
+	}
 
-		@Suppress("UNCHECKED_CAST")
-		When("Execute ${LambdaSimple::consumerSingle.name} with {string}") { value: String ->
-			val functionPureKotlin = bag.applicationContext!!.getBean(LambdaSimple::consumerSingle.name) as (String) -> Void
-			functionPureKotlin.invoke(value)
-			val receiver = bag.applicationContext!!.getBean(LambdaSimple::lambdaSingleReceiver.name) as LambdaPureKotlinReceiver
-			bag.result[LambdaSimple::consumerSingle.name] = receiver.items.first()
-		}
-
-		Then("The result for {string} is {string}") {value: String,result: String ->
-			Assertions.assertThat(bag.result[value]).isEqualTo(result)
-		}
+	override fun consumer(values: List<String>) {
+		val lambda: (String) -> Unit = LambdaSimple::consumerSingle.blockingConsumerBean()
+		values.map(lambda)
 	}
 }

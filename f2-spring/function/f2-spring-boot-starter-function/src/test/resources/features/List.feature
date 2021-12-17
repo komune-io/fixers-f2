@@ -22,21 +22,22 @@ Feature:
 
   Scenario: Execute FunctionList function
     Given I start a valid spring application context
-    When Execute functionList with
+    When Execute function functionList with
       | reverse |
       | test    |
-    Then The list result for "functionList" is
+    Then The result for "functionList" is
       | esrever |
       | tset    |
 
   Scenario: Execute SupplierList supplier function
     Given I start a valid spring application context
-    When Execute supplierList
-    Then The list result for "supplierList" is
+    When Execute supplier supplierList
+    Then The result for "supplierList" is
       | supplierValuePureKotlinValue |
 
   Scenario: Execute Single consumer function
     Given I start a valid spring application context
-    When Execute consumerList with
+    When Execute consumer consumerList with
       | reverse |
-    Then The result for "consumerSingle" is "reverse"
+    Then The result for "consumerList" is
+      | reverse |

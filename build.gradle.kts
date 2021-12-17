@@ -1,5 +1,5 @@
 plugins {
-	id("org.jetbrains.kotlin.kapt") version PluginVersions.kotlin apply (false)
+	id("org.jetbrains.kotlin.kapt") version PluginVersions.kotlin apply false
 	kotlin("plugin.spring") version PluginVersions.kotlin apply false
 	kotlin("plugin.serialization") version PluginVersions.kotlin
 	id("org.springframework.boot") version PluginVersions.springBoot apply false

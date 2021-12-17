@@ -1,55 +1,35 @@
 package f2.spring.flow
 
-import f2.bdd.spring.autoconfigure.steps.F2SpringStep
-import f2.spring.single.LambdaPureKotlinReceiver
-import f2.spring.single.LambdaSimple
-import io.cucumber.datatable.DataTable
+import f2.spring.LambdaListStepsBase
+import io.cucumber.java8.En
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
 
-class LambdaFlowSteps : F2SpringStep() {
+class LambdaFlowSteps : LambdaListStepsBase(), En {
 
 	init {
-		prepareSteps()
+		prepareLambdaSteps(
+			functionName = LambdaFlow::functionFlow.name,
+			supplierName = LambdaFlow::supplierFlow.name,
+			consumerName = LambdaFlow::consumerFlow.name
+		)
+	}
 
-		@Suppress("UNCHECKED_CAST")
-		When("Execute ${LambdaFlow::functionFlow.name} with") { dataTable: DataTable ->
-			runBlocking {
-				val functionPureKotlin =
-					bag.applicationContext!!.getBean(LambdaFlow::functionFlow.name) as suspend (Flow<String>) -> Flow<String>
-				bag.result[LambdaFlow::functionFlow.name] =
-					functionPureKotlin(dataTable.asList().asFlow()).toList()
-			}
-		}
+	override fun function(values: List<String>): List<String> = runBlocking {
+		val lambda: suspend (Flow<String>) -> Flow<String> = LambdaFlow::functionFlow.functionBean()
+		lambda(values.asFlow()).toList()
+	}
 
-		@Suppress("UNCHECKED_CAST")
-		When("Execute ${LambdaFlow::supplierFlow.name}") {
-			runBlocking {
-				val functionPureKotlin =
-					bag.applicationContext!!.getBean(LambdaFlow::supplierFlow.name) as suspend () -> Flow<String>
-				bag.result[LambdaFlow::supplierFlow.name] = functionPureKotlin().toList()
-			}
-		}
+	override fun supplier(): List<String> = runBlocking {
+		val functionPureKotlin: suspend () -> Flow<String> = LambdaFlow::supplierFlow.supplierBean()
+		functionPureKotlin().toList()
+	}
 
-		@Suppress("UNCHECKED_CAST")
-		When("Execute ${LambdaFlow::consumerFlow.name} with") { dataTable: DataTable ->
-			runBlocking {
-				val functionPureKotlin =
-					bag.applicationContext!!.getBean(LambdaFlow::consumerFlow.name) as suspend (Flow<String>) -> Void
-				functionPureKotlin(dataTable.asList().asFlow())
-				val receiver =
-					bag.applicationContext!!.getBean(LambdaSimple::lambdaSingleReceiver.name) as LambdaPureKotlinReceiver
-				bag.result[LambdaSimple::consumerSingle.name] = receiver.items.first()
-			}
-		}
-
-		@Suppress("UNCHECKED_CAST")
-		Then("The flow result for {string} is") { value: String, dataTable: DataTable ->
-			Assertions.assertThat(bag.result[value] as List<String>?).isEqualTo(dataTable.asList())
-		}
+	override fun consumer(values: List<String>) = runBlocking {
+		val functionPureKotlin: suspend (Flow<String>) -> Unit = LambdaFlow::consumerFlow.consumerBean()
+		functionPureKotlin(values.asFlow())
 	}
 
 }
