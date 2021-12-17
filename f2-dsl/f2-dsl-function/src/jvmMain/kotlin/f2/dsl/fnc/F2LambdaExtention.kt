@@ -1,9 +1,10 @@
 package f2.dsl.fnc
 
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.collect
 
 fun <T, R> f2LambdaFunction(fnc: suspend (t: T) -> R): F2LambdaFunction<T, R> = { flow ->
 	flow.map { value -> fnc(value) }
@@ -37,4 +38,8 @@ fun <R> f2Supplier(fnc: suspend () -> R): F2Supplier<R> = F2Supplier {
 	flow {
 		emit(fnc())
 	}
+}
+
+fun <R> f2Consumer(fnc: suspend (R) -> Unit): F2Consumer<R> = F2Consumer { flow ->
+	flow.map(fnc).collect()
 }

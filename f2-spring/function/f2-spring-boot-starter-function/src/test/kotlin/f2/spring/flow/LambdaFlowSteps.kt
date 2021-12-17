@@ -1,7 +1,6 @@
 package f2.spring.flow
 
 import f2.bdd.spring.autoconfigure.steps.F2SpringStep
-import f2.spring.flow.LambdaFlow
 import f2.spring.single.LambdaPureKotlinReceiver
 import f2.spring.single.LambdaSimple
 import io.cucumber.datatable.DataTable
