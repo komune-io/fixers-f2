@@ -298,7 +298,7 @@ public class MyKotlinLambdaToFunctionAutoConfiguration {
             return (isTypeRepresentedByClass(functionType, Function1.class) &&
                     type.length == 2 &&
                     CoroutinesUtils.isContinuationFlowType(type[0]))
-                    || (isSuperTypeRepresentedByClass(functionType, F2Consumer.class) &&  type.length == 1);
+                    || (isSuperTypeRepresentedByClass(functionType, F2Supplier.class) &&  type.length == 1);
         }
 
         private boolean isValidKotlinSuspendConsumer(Type functionType, Type[] type) {
@@ -306,7 +306,7 @@ public class MyKotlinLambdaToFunctionAutoConfiguration {
                     type.length == 3 &&
                     CoroutinesUtils.isFlowType(type[0]) &&
                     CoroutinesUtils.isContinuationUnitType(type[1]))
-                    || (isSuperTypeRepresentedByClass(functionType, F2Supplier.class) &&  type.length == 1);
+                    || (isSuperTypeRepresentedByClass(functionType, F2Consumer.class) &&  type.length == 1);
         }
 
         private boolean isValidKotlinSuspendFunction(Type functionType, Type[] type) {
