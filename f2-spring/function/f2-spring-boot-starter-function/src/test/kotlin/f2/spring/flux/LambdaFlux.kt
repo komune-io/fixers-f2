@@ -20,9 +20,9 @@ open class LambdaFlux {
 
 	@Bean
 	open fun consumerFlux(receiver: LambdaPureKotlinReceiver): (Flux<String>) -> Unit = {
-		it.map {
-			receiver.items.add(it)
-		}
+		it.map { value ->
+			receiver.items.add(value)
+		}.collectList().block()
 	}
 
 }

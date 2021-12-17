@@ -16,6 +16,11 @@ open class F2SpringStep: En {
 		Before { scenario: Scenario ->
 			bag = F2SpringContextBag.init(scenario)
 		}
+
+		After { scenario: Scenario ->
+			bag.applicationContext?.stop()
+		}
+
 	}
 
 }

@@ -2,6 +2,7 @@ package f2.bdd.spring.autoconfigure.steps
 
 import io.cucumber.java8.Scenario
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner
+import org.springframework.context.support.GenericApplicationContext
 import java.util.UUID
 
 class F2SpringContextBag {
@@ -25,4 +26,6 @@ class F2SpringContextBag {
 	var applicationParameters: Map<String, String> = emptyMap()
 	var result: MutableMap<String, Any> = mutableMapOf()
 	lateinit var contextBuilder: ReactiveWebApplicationContextRunner
+	var applicationContext: GenericApplicationContext? = null
+
 }

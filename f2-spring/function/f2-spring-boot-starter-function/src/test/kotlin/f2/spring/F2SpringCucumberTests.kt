@@ -11,6 +11,4 @@ import org.junit.platform.suite.api.Suite
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "${F2SpringStep.GLUE}, f2")
-class
-
-F2SpringCucumberTests
+class F2SpringCucumberTests

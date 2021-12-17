@@ -9,17 +9,20 @@ class LambdaSimpleSteps: F2SpringStep() {
 		prepareSteps()
 
 		When("Execute ${LambdaSimple::functionSingle.name} with {string}") { value: String ->
-			bag.contextBuilder.run { context ->
-				val functionPureKotlin = context.getBean(LambdaSimple::functionSingle.name) as (String) -> String
-				bag.result[LambdaSimple::functionSingle.name] = functionPureKotlin(value)
-			}
+			val functionPureKotlin = bag.applicationContext!!.getBean(LambdaSimple::functionSingle.name) as (String) -> String
+			bag.result[LambdaSimple::functionSingle.name] = functionPureKotlin(value)
 		}
 
 		When("Execute ${LambdaSimple::supplierSingle.name}") {
-			bag.contextBuilder.run { context ->
-				val functionPureKotlin = context.getBean(LambdaSimple::supplierSingle.name) as () -> String
-				bag.result[LambdaSimple::supplierSingle.name] = functionPureKotlin()
-			}
+			val functionPureKotlin = bag.applicationContext!!.getBean(LambdaSimple::supplierSingle.name) as () -> String
+			bag.result[LambdaSimple::supplierSingle.name] = functionPureKotlin()
+		}
+
+		When("Execute ${LambdaSimple::consumerSingle.name} with {string}") { value: String ->
+			val functionPureKotlin = bag.applicationContext!!.getBean(LambdaSimple::consumerSingle.name) as (String) -> Void
+			functionPureKotlin.invoke(value)
+			val receiver = bag.applicationContext!!.getBean(LambdaSimple::lambdaSingleReceiver.name) as LambdaPureKotlinReceiver
+			bag.result[LambdaSimple::consumerSingle.name] = receiver.items.first()
 		}
 
 		Then("The result for {string} is {string}") {value: String,result: String ->

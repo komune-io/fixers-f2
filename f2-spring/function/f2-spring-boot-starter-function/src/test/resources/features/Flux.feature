@@ -1,5 +1,4 @@
 Feature:
-
   Scenario: Inject Flux function
     When I build a valid spring application context
     Then Instance is an injectable bean
@@ -13,16 +12,22 @@ Feature:
       | name    |
       | UNKNOWN |
 
-  Scenario: Execute FunctionFlux function
-    Given I build a valid spring application context
+  Scenario: Execute flux function function
+    Given I start a valid spring application context
     When Execute functionFlux with
       | reverse |
       | test    |
     Then The flux result for "functionFlux" is
       | esrever |
       | tset    |
-  Scenario: Execute SupplierFlux supplier function
-    Given I build a valid spring application context
+  Scenario: Execute flux supplier supplier function
+    Given I start a valid spring application context
     When Execute supplierFlux
     Then The flux result for "supplierFlux" is
       | supplierFlux |
+
+  Scenario: Execute flux consumer function
+    Given I start a valid spring application context
+    When Execute consumerFlux with
+      | reverse |
+    Then The result for "consumerSingle" is "reverse"

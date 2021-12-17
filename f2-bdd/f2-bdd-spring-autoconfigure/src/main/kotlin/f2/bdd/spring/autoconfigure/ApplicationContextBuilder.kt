@@ -9,7 +9,6 @@ import org.springframework.context.support.GenericApplicationContext
 
 class ApplicationContextBuilder {
 
-
 	fun create(
 		types: Array<Class<*>>, profile: Array<String> =
 			emptyArray(), config: Map<String, String> = emptyMap()

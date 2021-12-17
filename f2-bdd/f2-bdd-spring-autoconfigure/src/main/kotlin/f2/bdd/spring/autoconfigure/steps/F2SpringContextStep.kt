@@ -1,5 +1,6 @@
 package f2.bdd.spring.autoconfigure.steps
 
+import f2.bdd.spring.autoconfigure.ApplicationContextBuilder
 import f2.bdd.spring.autoconfigure.ApplicationContextRunnerBuilder
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
@@ -14,6 +15,10 @@ open class F2SpringContextStep: F2SpringStep(), En {
 
 		Given("The application parameters") { table: DataTable ->
 			bag.applicationParameters = table.asMap(String::class.java, String::class.java)
+		}
+
+		When("I start a valid spring application context") {
+			bag.applicationContext = ApplicationContextBuilder().create(arrayOf(ApplicationContextBuilder.SimpleConfiguration::class.java))
 		}
 
 		When("I build a valid spring application context") {

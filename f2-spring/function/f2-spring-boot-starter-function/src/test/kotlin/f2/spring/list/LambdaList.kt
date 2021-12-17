@@ -18,7 +18,7 @@ open class LambdaList {
 	}
 
 	@Bean
-	open fun consumerList(receiver: LambdaPureKotlinReceiver): (String) -> Unit = {
-		receiver.items.add(it)
+	open fun consumerList(receiver: LambdaPureKotlinReceiver): (List<String>) -> Unit = {
+		receiver.items.addAll(it)
 	}
 }
