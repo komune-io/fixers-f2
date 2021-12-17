@@ -12,6 +12,13 @@ Feature:
       | name    |
       | UNKNOWN |
 
+  Scenario: Catalog contains f2 function
+    When I start a valid spring application context
+    Then Function catalog contains
+      | functionF2    |
+      | supplierF2    |
+      | consumerF2    |
+
   Scenario: Execute f2 function function
     Given I start a valid spring application context
     When Execute functionF2 with

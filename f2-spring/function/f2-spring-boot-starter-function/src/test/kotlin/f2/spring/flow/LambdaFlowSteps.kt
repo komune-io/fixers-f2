@@ -15,6 +15,7 @@ class LambdaFlowSteps : F2SpringStep() {
 	init {
 		prepareSteps()
 
+		@Suppress("UNCHECKED_CAST")
 		When("Execute ${LambdaFlow::functionFlow.name} with") { dataTable: DataTable ->
 			runBlocking {
 				val functionPureKotlin =
@@ -24,6 +25,7 @@ class LambdaFlowSteps : F2SpringStep() {
 			}
 		}
 
+		@Suppress("UNCHECKED_CAST")
 		When("Execute ${LambdaFlow::supplierFlow.name}") {
 			runBlocking {
 				val functionPureKotlin =
@@ -32,7 +34,7 @@ class LambdaFlowSteps : F2SpringStep() {
 			}
 		}
 
-
+		@Suppress("UNCHECKED_CAST")
 		When("Execute ${LambdaFlow::consumerFlow.name} with") { dataTable: DataTable ->
 			runBlocking {
 				val functionPureKotlin =
@@ -44,7 +46,7 @@ class LambdaFlowSteps : F2SpringStep() {
 			}
 		}
 
-
+		@Suppress("UNCHECKED_CAST")
 		Then("The flow result for {string} is") { value: String, dataTable: DataTable ->
 			Assertions.assertThat(bag.result[value] as List<String>?).isEqualTo(dataTable.asList())
 		}

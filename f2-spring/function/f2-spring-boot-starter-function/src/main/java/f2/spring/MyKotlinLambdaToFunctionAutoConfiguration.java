@@ -97,7 +97,11 @@ public class MyKotlinLambdaToFunctionAutoConfiguration {
                         if(methodMetadata != null) {
                             String typeName = methodMetadata.getReturnTypeName();
 
-                            if (typeName.startsWith(F2Function.class.getName())) {
+                            if (
+                                    typeName.startsWith(F2Function.class.getName()) ||
+                                    typeName.startsWith(F2Consumer.class.getName()) ||
+                                            typeName.startsWith(F2Supplier.class.getName())
+                            ) {
                                 RootBeanDefinition cbd = new RootBeanDefinition(KotlinFunctionWrapper.class);
                                 ConstructorArgumentValues ca = new ConstructorArgumentValues();
                                 ca.addGenericArgumentValue(beanDefinition);
@@ -291,16 +295,18 @@ public class MyKotlinLambdaToFunctionAutoConfiguration {
         }
 
         private boolean isValidKotlinSuspendSupplier(Type functionType, Type[] type) {
-            return isTypeRepresentedByClass(functionType, Function1.class) &&
+            return (isTypeRepresentedByClass(functionType, Function1.class) &&
                     type.length == 2 &&
-                    CoroutinesUtils.isContinuationFlowType(type[0]);
+                    CoroutinesUtils.isContinuationFlowType(type[0]))
+                    || (isSuperTypeRepresentedByClass(functionType, F2Consumer.class) &&  type.length == 1);
         }
 
         private boolean isValidKotlinSuspendConsumer(Type functionType, Type[] type) {
-            return isTypeRepresentedByClass(functionType, Function2.class) &&
+            return (isTypeRepresentedByClass(functionType, Function2.class) &&
                     type.length == 3 &&
                     CoroutinesUtils.isFlowType(type[0]) &&
-                    CoroutinesUtils.isContinuationUnitType(type[1]);
+                    CoroutinesUtils.isContinuationUnitType(type[1]))
+                    || (isSuperTypeRepresentedByClass(functionType, F2Supplier.class) &&  type.length == 1);
         }
 
         private boolean isValidKotlinSuspendFunction(Type functionType, Type[] type) {

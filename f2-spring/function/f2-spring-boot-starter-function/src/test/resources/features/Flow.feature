@@ -12,6 +12,13 @@ Feature:
       | name    |
       | UNKNOWN |
 
+  Scenario: Catalog contains function
+    When I start a valid spring application context
+    Then Function catalog contains
+      | functionFlow    |
+      | supplierFlow    |
+      | consumerFlow    |
+
   Scenario: Execute flow function function
     Given I start a valid spring application context
     When Execute functionFlow with

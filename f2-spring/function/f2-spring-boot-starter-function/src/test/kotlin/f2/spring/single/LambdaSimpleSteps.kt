@@ -8,16 +8,19 @@ class LambdaSimpleSteps: F2SpringStep() {
 	init {
 		prepareSteps()
 
+		@Suppress("UNCHECKED_CAST")
 		When("Execute ${LambdaSimple::functionSingle.name} with {string}") { value: String ->
 			val functionPureKotlin = bag.applicationContext!!.getBean(LambdaSimple::functionSingle.name) as (String) -> String
 			bag.result[LambdaSimple::functionSingle.name] = functionPureKotlin(value)
 		}
 
+		@Suppress("UNCHECKED_CAST")
 		When("Execute ${LambdaSimple::supplierSingle.name}") {
 			val functionPureKotlin = bag.applicationContext!!.getBean(LambdaSimple::supplierSingle.name) as () -> String
 			bag.result[LambdaSimple::supplierSingle.name] = functionPureKotlin()
 		}
 
+		@Suppress("UNCHECKED_CAST")
 		When("Execute ${LambdaSimple::consumerSingle.name} with {string}") { value: String ->
 			val functionPureKotlin = bag.applicationContext!!.getBean(LambdaSimple::consumerSingle.name) as (String) -> Void
 			functionPureKotlin.invoke(value)

@@ -17,6 +17,7 @@ class LambdaF2Steps : F2SpringStep() {
 	init {
 		prepareSteps()
 
+		@Suppress("UNCHECKED_CAST")
 		When("Execute ${LambdaF2::functionF2.name} with") { dataTable: DataTable ->
 			runBlocking {
 				val functionPureKotlin =
@@ -25,6 +26,7 @@ class LambdaF2Steps : F2SpringStep() {
 			}
 		}
 
+		@Suppress("UNCHECKED_CAST")
 		When("Execute ${LambdaF2::supplierF2.name}") {
 			runBlocking {
 				val functionPureKotlin =
@@ -33,7 +35,7 @@ class LambdaF2Steps : F2SpringStep() {
 			}
 		}
 
-
+		@Suppress("UNCHECKED_CAST")
 		When("Execute ${LambdaF2::consumerF2.name} with") { dataTable: DataTable ->
 			runBlocking {
 				val functionPureKotlin =
@@ -46,7 +48,7 @@ class LambdaF2Steps : F2SpringStep() {
 			}
 		}
 
-
+		@Suppress("UNCHECKED_CAST")
 		Then("The f2 result for {string} is") { value: String, dataTable: DataTable ->
 			Assertions.assertThat(bag.result[value] as List<String>?).isEqualTo(dataTable.asList())
 		}

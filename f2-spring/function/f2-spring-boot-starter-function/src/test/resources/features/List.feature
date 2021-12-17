@@ -13,6 +13,13 @@ Feature:
       | name    |
       | UNKNOWN |
 
+  Scenario: Catalog contains function
+    When I start a valid spring application context
+    Then Function catalog contains
+      | functionList |
+      | supplierList |
+      | consumerList |
+
   Scenario: Execute FunctionList function
     Given I start a valid spring application context
     When Execute functionList with
