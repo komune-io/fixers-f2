@@ -3,13 +3,14 @@ package f2.spring.f2
 import f2.dsl.fnc.F2Consumer
 import f2.dsl.fnc.F2Function
 import f2.dsl.fnc.F2Supplier
-import f2.spring.LambdaListStepsBase
+import f2.spring.step.LambdaListStepsBase
+import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
-class LambdaF2Steps : LambdaListStepsBase(), En {
+class LambdaF2Steps : LambdaListStepsBase<String, String>(), En {
 
 	init {
 		prepareLambdaSteps(
@@ -35,4 +36,7 @@ class LambdaF2Steps : LambdaListStepsBase(), En {
 		lambda(flow)
 	}
 
+	override fun transform(dataTable: DataTable): List<String> {
+		return dataTable.asList()
+	}
 }

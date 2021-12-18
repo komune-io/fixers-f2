@@ -24,5 +24,4 @@ open class LambdaFlux {
 			receiver.items.add(value)
 		}.collectList().block()
 	}
-
 }

@@ -1,10 +1,11 @@
 package f2.spring.flux
 
-import f2.spring.LambdaListStepsBase
+import f2.spring.step.LambdaListStepsBase
+import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import reactor.core.publisher.Flux
 
-class LambdaFluxSteps: LambdaListStepsBase(), En {
+class LambdaFluxSteps: LambdaListStepsBase<String, String>(), En {
 
 	init {
 		prepareLambdaSteps(
@@ -30,4 +31,7 @@ class LambdaFluxSteps: LambdaListStepsBase(), En {
 		lambda(flux)
 	}
 
+	override fun transform(dataTable: DataTable): List<String> {
+		return dataTable.asList()
+	}
 }

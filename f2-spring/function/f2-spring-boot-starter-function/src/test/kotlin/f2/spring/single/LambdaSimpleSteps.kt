@@ -1,10 +1,10 @@
 package f2.spring.single
 
-import f2.spring.LambdaListStepsBase
+import f2.spring.step.LambdaListStepsBase
+import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
-import kotlin.reflect.KFunction
 
-class LambdaSimpleSteps: LambdaListStepsBase(), En {
+class LambdaSimpleSteps: LambdaListStepsBase<String, String>(), En {
 
 	init {
 		prepareLambdaSteps(
@@ -29,5 +29,9 @@ class LambdaSimpleSteps: LambdaListStepsBase(), En {
 	override fun consumer(values: List<String>) {
 		val lambda: (String) -> Unit = LambdaSimple::consumerSingle.blockingConsumerBean()
 		values.map(lambda)
+	}
+
+	override fun transform(dataTable: DataTable): List<String> {
+		return dataTable.asList()
 	}
 }

@@ -1,11 +1,11 @@
 package f2.spring.list
 
-import f2.spring.LambdaListStepsBase
+import f2.spring.step.LambdaListStepsBase
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions
 
-class LambdaListSteps : LambdaListStepsBase(), En {
+class LambdaListSteps : LambdaListStepsBase<String, String>(), En {
 
 	init {
 		prepareLambdaSteps(
@@ -33,6 +33,10 @@ class LambdaListSteps : LambdaListStepsBase(), En {
 	override fun consumer(values: List<String>) {
 		val lambda: (List<String>) -> Unit = LambdaList::consumerList.blockingConsumerBean()
 		lambda(values)
+	}
+
+	override fun transform(dataTable: DataTable): List<String> {
+		return dataTable.asList()
 	}
 
 }
