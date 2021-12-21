@@ -1,7 +1,5 @@
-package f2.spring.step
+package f2.bdd.spring.autoconfigure.steps
 
-import f2.bdd.spring.autoconfigure.steps.F2SpringStep
-import f2.spring.single.LambdaPureKotlinReceiver
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions
@@ -55,7 +53,6 @@ abstract class FunctionCatalogStepsBase<P, R>(
 			bag.result[functionName] = consumerReceiver()
 		}
 	}
-
 
 	abstract fun transform(dataTable: DataTable): List<P>
 	abstract fun consumerReceiver(): List<R>

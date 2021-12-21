@@ -1,5 +1,4 @@
 Feature:
-
   Background:
     Given I start a valid spring application context
 

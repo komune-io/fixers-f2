@@ -1,16 +1,14 @@
-package f2.spring.step
+package f2.bdd.spring.autoconfigure.steps
 
-import f2.bdd.spring.autoconfigure.steps.F2SpringStep
+import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
 import f2.dsl.fnc.F2Consumer
 import f2.dsl.fnc.F2Function
 import f2.dsl.fnc.F2Supplier
-import f2.spring.single.LambdaPureKotlinReceiver
-import f2.spring.single.LambdaSimple
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlin.reflect.KFunction
 
-abstract class LambdaListStepsBase<P, R>() : F2SpringStep() {
+abstract class LambdaListStepsBase<P, R> : F2SpringStep() {
 
 	@Suppress("LongMethod")
 	fun En.prepareLambdaSteps(
@@ -30,11 +28,12 @@ abstract class LambdaListStepsBase<P, R>() : F2SpringStep() {
 
 		When("Execute consumer $consumerName with") { dataTable: DataTable ->
 			consumer(transform(dataTable))
-			val receiver = bag.applicationContext!!.getBean(LambdaSimple::lambdaSingleReceiver.name) as LambdaPureKotlinReceiver
+			val receiver = receiver()
 			bag.result[consumerName] = receiver.items
 		}
 	}
 
+	abstract fun receiver(): ConsumerReceiver<P>
 	abstract fun transform(dataTable: DataTable): List<P>
 	abstract fun function(values: List<P>): List<R>
 	abstract fun supplier(): List<R>

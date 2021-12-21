@@ -1,11 +1,10 @@
-package f2.spring.f2
+package f2.spring.http
 
+import f2.bdd.spring.autoconfigure.steps.LambdaListStepsBase
+import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
 import f2.dsl.fnc.F2Consumer
 import f2.dsl.fnc.F2Function
 import f2.dsl.fnc.F2Supplier
-import f2.bdd.spring.autoconfigure.steps.LambdaListStepsBase
-import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
-import f2.spring.single.LambdaSimple
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.flow.asFlow
@@ -43,6 +42,6 @@ class LambdaF2Steps : LambdaListStepsBase<String, String>(), En {
 	}
 
 	override fun receiver(): ConsumerReceiver<String> {
-		return bag.applicationContext!!.getBean(LambdaSimple::lambdaSingleReceiver.name) as ConsumerReceiver<String>
+		return  bag.applicationContext!!.getBean(LambdaF2::receiverF2.name) as ConsumerReceiver<String>
 	}
 }

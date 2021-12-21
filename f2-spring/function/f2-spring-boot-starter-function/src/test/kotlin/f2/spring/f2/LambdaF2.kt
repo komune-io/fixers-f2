@@ -1,7 +1,7 @@
 package f2.spring.f2
 
+import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
 import f2.dsl.fnc.*
-import f2.spring.single.LambdaPureKotlinReceiver
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -19,7 +19,7 @@ open class LambdaF2 {
 	}
 
 	@Bean
-	open fun consumerF2(receiver: LambdaPureKotlinReceiver): F2Consumer<String> = f2Consumer { value ->
+	open fun consumerF2(receiver: ConsumerReceiver<String>): F2Consumer<String> = f2Consumer { value ->
 		receiver.items.add(value)
 	}
 

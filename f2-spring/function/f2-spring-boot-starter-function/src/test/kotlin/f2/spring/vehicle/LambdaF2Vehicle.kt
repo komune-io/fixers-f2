@@ -1,7 +1,7 @@
 package f2.spring.vehicle
 
+import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
 import f2.dsl.fnc.*
-import f2.spring.single.LambdaPureKotlinReceiver
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -35,6 +35,6 @@ data class Vehicle(
 	val broken: Boolean
 )
 
-data class VehicleReceiver(
-	val items: MutableList<Vehicle> = mutableListOf()
-)
+class VehicleReceiver(
+	override val items: MutableList<Vehicle> = mutableListOf()
+): ConsumerReceiver<Vehicle>

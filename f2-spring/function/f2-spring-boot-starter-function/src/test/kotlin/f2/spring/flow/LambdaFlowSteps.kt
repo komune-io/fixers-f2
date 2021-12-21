@@ -1,6 +1,8 @@
 package f2.spring.flow
 
-import f2.spring.step.LambdaListStepsBase
+import f2.bdd.spring.autoconfigure.steps.LambdaListStepsBase
+import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
+import f2.spring.single.LambdaSimple
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.flow.Flow
@@ -35,5 +37,9 @@ class LambdaFlowSteps : LambdaListStepsBase<String, String>(), En {
 
 	override fun transform(dataTable: DataTable): List<String> {
 		return dataTable.asList()
+	}
+
+	override fun receiver(): ConsumerReceiver<String> {
+		return bag.applicationContext!!.getBean(LambdaSimple::lambdaSingleReceiver.name) as ConsumerReceiver<String>
 	}
 }

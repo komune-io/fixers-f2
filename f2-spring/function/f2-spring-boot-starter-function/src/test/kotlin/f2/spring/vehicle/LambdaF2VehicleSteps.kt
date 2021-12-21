@@ -1,6 +1,6 @@
 package f2.spring.vehicle
 
-import f2.spring.step.FunctionCatalogStepsBase
+import f2.bdd.spring.autoconfigure.steps.FunctionCatalogStepsBase
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 

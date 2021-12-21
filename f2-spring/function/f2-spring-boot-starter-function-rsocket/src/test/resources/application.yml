@@ -1,7 +1,7 @@
 spring:
   rsocket:
     server:
-      port: 7000
+      port: 7001
       transport: websocket
 #debug: true
 logging:

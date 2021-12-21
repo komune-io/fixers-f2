@@ -1,5 +1,6 @@
 package f2.spring.single
 
+import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -7,7 +8,7 @@ import org.springframework.context.annotation.Configuration
 open class LambdaSimple {
 
 	@Bean
-	open fun lambdaSingleReceiver(): LambdaPureKotlinReceiver = LambdaPureKotlinReceiver()
+	open fun lambdaSingleReceiver(): StringConsumerReceiver = StringConsumerReceiver()
 
 	@Bean
 	open fun functionSingle(): (String) -> String = { value ->
@@ -20,12 +21,11 @@ open class LambdaSimple {
 	}
 
 	@Bean
-	open fun consumerSingle(receiver: LambdaPureKotlinReceiver): (String) -> Unit = {
+	open fun consumerSingle(receiver: ConsumerReceiver<String>): (String) -> Unit = {
 		receiver.items.add(it)
 	}
-
 }
 
-data class LambdaPureKotlinReceiver(
-	val items: MutableList<String> = mutableListOf()
-)
+class StringConsumerReceiver(
+	override val items: MutableList<String> = mutableListOf()
+	) : ConsumerReceiver<String>

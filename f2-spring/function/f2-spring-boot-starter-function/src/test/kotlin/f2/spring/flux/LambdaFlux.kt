@@ -1,6 +1,6 @@
 package f2.spring.flux
 
-import f2.spring.single.LambdaPureKotlinReceiver
+import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import reactor.core.publisher.Flux
@@ -19,7 +19,7 @@ open class LambdaFlux {
 	}
 
 	@Bean
-	open fun consumerFlux(receiver: LambdaPureKotlinReceiver): (Flux<String>) -> Unit = {
+	open fun consumerFlux(receiver: ConsumerReceiver<String>): (Flux<String>) -> Unit = {
 		it.map { value ->
 			receiver.items.add(value)
 		}.collectList().block()

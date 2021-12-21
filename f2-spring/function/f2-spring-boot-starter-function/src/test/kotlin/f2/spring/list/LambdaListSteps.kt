@@ -1,6 +1,9 @@
 package f2.spring.list
 
-import f2.spring.step.LambdaListStepsBase
+import f2.bdd.spring.autoconfigure.steps.LambdaListStepsBase
+import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
+import f2.spring.single.LambdaSimple
+import f2.spring.single.StringConsumerReceiver
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions
@@ -39,4 +42,7 @@ class LambdaListSteps : LambdaListStepsBase<String, String>(), En {
 		return dataTable.asList()
 	}
 
+	override fun receiver(): ConsumerReceiver<String> {
+		return bag.applicationContext!!.getBean(StringConsumerReceiver::class.java)
+	}
 }

@@ -1,6 +1,6 @@
 package f2.spring.list
 
-import f2.spring.single.LambdaPureKotlinReceiver
+import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -18,7 +18,7 @@ open class LambdaList {
 	}
 
 	@Bean
-	open fun consumerList(receiver: LambdaPureKotlinReceiver): (List<String>) -> Unit = {
+	open fun consumerList(receiver: ConsumerReceiver<String>): (List<String>) -> Unit = {
 		receiver.items.addAll(it)
 	}
 }
