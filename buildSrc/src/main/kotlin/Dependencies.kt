@@ -1,16 +1,11 @@
 import city.smartb.gradle.dependencies.FixersPluginVersions
+import city.smartb.gradle.dependencies.FixersDependencies
 import city.smartb.gradle.dependencies.FixersVersions
-import org.gradle.api.artifacts.Dependency
-
-typealias Scope = (dependencyNotation: Any) -> Dependency?
-
-fun Scope.add(vararg deps: String): Scope {
-	deps.forEach { this(it) }
-	return this
-}
+import city.smartb.gradle.dependencies.Scope
+import city.smartb.gradle.dependencies.add
 
 object PluginVersions {
-	const val fixers = FixersPluginVersions.fixers
+	const val fixers = "experimental-SNAPSHOT"
 	const val kotlin = FixersPluginVersions.kotlin
 	const val springBoot = FixersPluginVersions.springBoot
 	const val npmPublish = FixersPluginVersions.npmPublish
@@ -18,6 +13,16 @@ object PluginVersions {
 
 
 object Versions {
+	object Kotlin {
+		const val ktor = FixersVersions.Kotlin.ktor
+	}
+	object Spring {
+		const val function = FixersVersions.Spring.function
+		const val boot = FixersVersions.Spring.boot
+		const val data = FixersVersions.Spring.data
+	}
+
+
 	const val springFramework = "5.3.13"
 	const val jacksonKotlin = "2.12.1"
 	const val javaxPersistence = "2.2"
@@ -25,9 +30,11 @@ object Versions {
 	const val embedMongo = "2.2.0"
 	const val cucumber = "7.1.0"
 }
-
 object Dependencies {
 	object Jvm {
+		object Kotlin {
+			fun coroutines(scope: Scope) = FixersDependencies.Jvm.Kotlin.coroutines(scope)
+		}
 		fun cucumber(scope: Scope) = scope.add(
 			"io.cucumber:cucumber-java8:${Versions.cucumber}",
 			"io.cucumber:cucumber-junit-platform-engine:${Versions.cucumber}",
