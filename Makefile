@@ -3,7 +3,8 @@ STORYBOOK_NAME	   	 	:= smartbcity/f2-storybook
 STORYBOOK_IMG	    	:= ${STORYBOOK_NAME}:${VERSION}
 STORYBOOK_LATEST		:= ${STORYBOOK_NAME}:latest
 
-package: package-kotlin package-storybook
+libs: package-kotlin package-storybook
+docs: package-storybook
 
 package-kotlin:
 	@gradle clean build publish
