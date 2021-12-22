@@ -6,7 +6,7 @@ STORYBOOK_LATEST		:= ${STORYBOOK_NAME}:latest
 package: package-kotlin package-storybook
 
 package-kotlin:
-	VERSION=${VERSION} @gradle clean build publish
+	@gradle clean build publish
 
 package-storybook:
 	@docker build -f ${STORYBOOK_DOCKERFILE} -t ${STORYBOOK_IMG} .
