@@ -2,9 +2,6 @@ import { Meta } from '@storybook/addon-docs/blocks';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-import F2SampleHttpApp from '../../sample/f2-sample-http/src/main/kotlin/f2/sample/http/F2SampleHttpApp.kt';
-import BuildGradleKts from '../../sample/f2-sample-http/build.gradle.kts';
-
 <Meta title="Sample/F2 Sample Http" parameters={{ previewTabs: { canvas: { hidden: true } } }} />
 
 # F2 Sample Http
@@ -18,15 +15,7 @@ This exemple show how to implement function executable throw http
 city.smartb.f2:f2-spring-boot-starter-function-http:${F2_VERISON}
 ```
 
-<SyntaxHighlighter  language="kotlin" style={materialLight}>
-    {BuildGradleKts}
-</SyntaxHighlighter>
 
- * Implement function
-
-<SyntaxHighlighter  language="kotlin" style={materialLight}>
-    {F2SampleHttpApp}
-</SyntaxHighlighter>
 
 ## Build Standalone Application for Docker
 
