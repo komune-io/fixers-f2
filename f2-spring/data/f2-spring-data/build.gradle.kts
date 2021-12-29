@@ -4,7 +4,6 @@ plugins {
 }
 
 dependencies {
-
     implementation("org.springframework.boot:spring-boot-autoconfigure:${Versions.Spring.boot}")
 
     implementation("javax.persistence:javax.persistence-api:${Versions.javaxPersistence}")
