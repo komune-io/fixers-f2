@@ -54,3 +54,17 @@ F2 provide basic configuration for spring cloud function
   <version>0.1.0-SNAPSHOT</version>
 </dependency>
 ```
+
+## RSOCKET 
+
+
+* Request-Respond (1 to 1)
+* Fire And Forget (1 to 0)
+* Request Stream (1 to many)
+* Request Channel (many to many)
+
+* Supplier (0 - 1) 
+* Consumer (1 - 0) => Fire And Forget
+* Function (1 - 1) => (many to many) or (1 to 1) 
+
+Manque Request Stream
