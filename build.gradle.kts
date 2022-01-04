@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
 	id("org.jetbrains.kotlin.kapt") version PluginVersions.kotlin apply (false)
@@ -11,8 +10,7 @@ plugins {
 
 	id("city.smartb.fixers.gradle.config") version PluginVersions.fixers
 	id("city.smartb.fixers.gradle.sonar") version PluginVersions.fixers
-	id("city.smartb.fixers.gradle.d2") version PluginVersions.fixers
-
+//	id("city.smartb.fixers.gradle.d2") version PluginVersions.fixers
 }
 
 allprojects {

@@ -1,17 +1,16 @@
 object PluginVersions {
-	const val kotlin = "1.5.30"
-	const val fixers = "experimental-SNAPSHOT"
-	const val springBoot = "2.5.3"
+	const val kotlin = "1.5.32"
+	const val fixers = "0.1.0-SNAPSHOT"
+	const val springBoot = "2.3.4.RELEASE"
 
 	const val npmPublish = "1.0.4"
-
 }
 
 object Versions {
 	const val springBoot = PluginVersions.springBoot
-	const val springFramework = "5.3.4"
+	const val springFramework = "5.2.9.RELEASE"
 	const val springCloudFunction = "3.1.3"
-	const val springData = "2.4.5"
+	const val springData = PluginVersions.springBoot
 
 	const val jacksonKotlin = "2.12.1"
 	const val javaxPersistence = "2.2"
@@ -19,8 +18,8 @@ object Versions {
 	const val embedMongo = "2.2.0"
 
 	const val coroutines = "1.4.2"
-	const val kserialization = "1.2.2"
-	const val ktor = "1.6.1"
+	const val kserialization = "1.0.0"
+	const val ktor = "1.4.1"
 	const val rsocket = "0.13.1"
 
 	const val junit = "5.7.0"
@@ -38,7 +37,7 @@ object Dependencies {
 			"org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}",
 			"org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${Versions.coroutines}",
 			"org.jetbrains.kotlinx:kotlinx-coroutines-reactive:${Versions.coroutines}",
-			"org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:${Versions.coroutines}"
+			"org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:${Versions.coroutines}",
 		)
 		val junit = arrayOf(
 			"org.junit.jupiter:junit-jupiter:${Versions.junit}",
@@ -49,7 +48,7 @@ object Dependencies {
 
 	object common {
 		val coroutines = arrayOf(
-			"org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}"
+			"org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}",
 		)
 		val kserialization = arrayOf(
 			"org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.kserialization}",
