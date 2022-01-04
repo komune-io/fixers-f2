@@ -1,6 +1,6 @@
 object PluginVersions {
 	const val kotlin = "1.5.32"
-	const val fixers = "0.1.0"
+	const val fixers = "0.1.1"
 	const val springBoot = "2.3.4.RELEASE"
 
 	const val npmPublish = "1.0.4"

@@ -18,6 +18,7 @@ allprojects {
 	version = System.getenv("VERSION") ?: "latest"
 	repositories {
 		mavenCentral()
+		maven { url = uri("https://oss.sonatype.org/service/local/repositories/releases/content") }
 		maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 		//For iris-sign
 		maven { url = uri("https://jitpack.io") }
