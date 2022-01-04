@@ -1,6 +1,6 @@
 object PluginVersions {
 	const val kotlin = "1.5.32"
-	const val fixers = "0.1.0-SNAPSHOT"
+	const val fixers = "0.1.0"
 	const val springBoot = "2.3.4.RELEASE"
 
 	const val npmPublish = "1.0.4"
@@ -25,9 +25,6 @@ object Versions {
 	const val junit = "5.7.0"
 	const val assertj = "3.15.0"
 
-	const val vc = "0.1.0-SNAPSHOT"
-	const val iris = "0.1.0-SNAPSHOT"
-	const val f2 = "0.1.0-SNAPSHOT"
 }
 
 
@@ -37,7 +34,7 @@ object Dependencies {
 			"org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}",
 			"org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${Versions.coroutines}",
 			"org.jetbrains.kotlinx:kotlinx-coroutines-reactive:${Versions.coroutines}",
-			"org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:${Versions.coroutines}",
+			"org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:${Versions.coroutines}"
 		)
 		val junit = arrayOf(
 			"org.junit.jupiter:junit-jupiter:${Versions.junit}",
@@ -48,7 +45,7 @@ object Dependencies {
 
 	object common {
 		val coroutines = arrayOf(
-			"org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}",
+			"org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}"
 		)
 		val kserialization = arrayOf(
 			"org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.kserialization}",
