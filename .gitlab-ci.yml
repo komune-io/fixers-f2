@@ -5,10 +5,3 @@ include:
     file: 'libs/.gitlab-ci.yml'
   - project: 'fixers/cicd'
     file: 'docs/.gitlab-ci.yml'
-#include:
-#  - project: 'fixers/cicd'
-#    file: '.gitlab-ci-fixers-base.yml'
-#  - project: 'fixers/cicd'
-#    file: '.gitlab-ci-fixers-libs.yml'
-#  - project: 'fixers/cicd'
-#    file: '.gitlab-ci-fixers-docs.yml'
