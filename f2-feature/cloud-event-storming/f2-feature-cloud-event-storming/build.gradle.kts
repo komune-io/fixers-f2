@@ -13,7 +13,7 @@ dependencies {
 
     implementation("javax.persistence:javax.persistence-api:${Versions.javaxPersistence}")
     implementation("org.springframework:spring-context:${Versions.springFramework}")
-    implementation("org.springframework.data:spring-data-commons:${Versions.Spring.data}")
+    implementation("org.springframework.data:spring-data-commons:${Versions.springDataCommons}")
 
     implementation( "com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.jacksonKotlin}")
 }

@@ -22,6 +22,7 @@ object Versions {
 	}
 
 	const val springFramework = "5.3.14"
+	const val springDataCommons = "2.6.0"
 	const val jacksonKotlin = "2.12.1"
 	const val javaxPersistence = "2.2"
 	const val rsocket = "0.13.1"
