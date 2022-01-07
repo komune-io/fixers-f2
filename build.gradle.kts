@@ -9,7 +9,7 @@ plugins {
 
 	id("city.smartb.fixers.gradle.config") version PluginVersions.fixers
 	id("city.smartb.fixers.gradle.sonar") version PluginVersions.fixers
-//	id("city.smartb.fixers.gradle.d2") version PluginVersions.fixers
+	id("city.smartb.fixers.gradle.d2") version PluginVersions.fixers
 
 }
 
@@ -33,9 +33,9 @@ subprojects {
 				description = "Wrapper around Spring Cloud Function"
 				url = "https://gitlab.smartb.city/fixers/F2"
 			}
-//	d2 {
-//		outputDirectory = file("docs/stories/d2")
-//	}
+			d2 {
+				outputDirectory = file("docs/stories/d2")
+			}
 		}
 	}
 	plugins.withType(lt.petuska.npm.publish.NpmPublishPlugin::class.java).whenPluginAdded {
