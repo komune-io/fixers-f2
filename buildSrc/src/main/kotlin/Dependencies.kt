@@ -5,7 +5,7 @@ import city.smartb.gradle.dependencies.Scope
 import city.smartb.gradle.dependencies.add
 
 object PluginVersions {
-	const val fixers = "0.2.4"
+	const val fixers = "0.3.1"
 	const val kotlin = FixersPluginVersions.kotlin
 	const val springBoot = FixersPluginVersions.springBoot
 	const val npmPublish = FixersPluginVersions.npmPublish
@@ -21,7 +21,7 @@ object Versions {
 		const val data = FixersVersions.Spring.data
 	}
 
-	const val springFramework = "5.3.13"
+	const val springFramework = "5.3.14"
 	const val jacksonKotlin = "2.12.1"
 	const val javaxPersistence = "2.2"
 	const val rsocket = "0.13.1"
