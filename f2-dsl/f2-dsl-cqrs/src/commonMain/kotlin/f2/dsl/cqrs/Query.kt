@@ -1,3 +1,3 @@
 package f2.dsl.cqrs
 
-expect interface Query
+expect interface Query: Message

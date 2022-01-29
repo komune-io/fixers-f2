@@ -1,3 +1,3 @@
 package f2.dsl.cqrs
 
-expect interface Event
+expect interface Event: Message

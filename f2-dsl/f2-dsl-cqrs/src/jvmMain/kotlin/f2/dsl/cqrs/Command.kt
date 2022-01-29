@@ -1,3 +1,3 @@
 package f2.dsl.cqrs
 
-actual interface Command
+actual interface Command: Message
