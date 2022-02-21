@@ -9,8 +9,8 @@ dependencies {
     Dependencies.Jvm.Spring.cloudFunctionRSocket(::api)
 
 
-    implementation(project(":f2-client:f2-client-ktor"))
-    implementation(project(":f2-client:f2-client-ktor:f2-client-ktor-rsocket"))
+    testImplementation(project(":f2-client:f2-client-ktor"))
+    testImplementation(project(":f2-client:f2-client-ktor:f2-client-ktor-rsocket"))
     
     testImplementation(project(":f2-bdd:f2-bdd-spring-autoconfigure"))
 

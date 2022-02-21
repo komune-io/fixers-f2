@@ -8,18 +8,31 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api(project(":f2-client"))
+                api(project(":f2-client:f2-client-core"))
                 api(project(":f2-dsl:f2-dsl-cqrs"))
 
                 api("io.ktor:ktor-client-core:${Versions.Kotlin.ktor}")
                 api("io.ktor:ktor-client-serialization:${Versions.Kotlin.ktor}")
+                implementation("org.jetbrains.kotlin:kotlin-test:1.6.20-M1")
+
 
             }
         }
+        commonTest {
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-test:1.6.20-M1")
+            }
+        }
+
         jsMain {
             dependencies {
                 implementation("io.ktor:ktor-client-core-js:${Versions.Kotlin.ktor}")
                 implementation("io.ktor:ktor-client-json-js:${Versions.Kotlin.ktor}")
+            }
+        }
+        jvmTest {
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-test:1.6.20-M1")
             }
         }
         jvmMain {

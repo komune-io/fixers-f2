@@ -6,7 +6,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.StructureKind
 
 @Serializable
-expect interface PageDTO<out OBJECT> {
+@JsExport
+@JsName("PageDTO")
+interface PageDTO<out OBJECT> {
 	val total: Int
 	val items: List<OBJECT>
 }

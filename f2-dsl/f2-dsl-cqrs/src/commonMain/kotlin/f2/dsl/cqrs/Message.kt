@@ -1,3 +1,10 @@
 package f2.dsl.cqrs
 
-expect interface Message
+import kotlinx.serialization.Serializable
+import kotlin.js.JsExport
+import kotlin.js.JsName
+
+@Serializable
+@JsExport
+@JsName("Message")
+interface Message

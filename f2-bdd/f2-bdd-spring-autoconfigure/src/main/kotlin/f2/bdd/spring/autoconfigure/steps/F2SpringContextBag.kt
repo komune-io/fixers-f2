@@ -9,7 +9,6 @@ class F2SpringContextBag {
 
 	companion object {
 		val cucumbers: MutableMap<String, F2SpringContextBag> = mutableMapOf()
-
 		fun init(scenario: Scenario): F2SpringContextBag {
 			if (!cucumbers.containsKey(scenario.id)) {
 				cucumbers[scenario.id] = F2SpringContextBag().apply {
@@ -18,9 +17,12 @@ class F2SpringContextBag {
 			}
 			return cucumbers[scenario.id]!!
 		}
-
 	}
 
+	@SuppressWarnings("MagicNumber")
+	var httpPort: Int = 6001
+	@SuppressWarnings("MagicNumber")
+	var rsoketPort: Int = 6002
 	lateinit var uuid: String
 
 	var applicationParameters: Map<String, String> = emptyMap()

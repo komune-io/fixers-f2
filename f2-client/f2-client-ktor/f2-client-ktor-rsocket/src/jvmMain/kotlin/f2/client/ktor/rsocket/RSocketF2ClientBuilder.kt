@@ -8,14 +8,11 @@ actual fun rSocketF2ClientBuilder() = RSocketF2ClientBuilder()
 
 actual class RSocketF2ClientBuilder {
 	suspend fun build(
-		scheme: String,
-		host: String,
-		port: Int,
-		path: String?,
+		urlBase: String,
 		secure: Boolean,
 	): F2Client {
 		val rSocket: RSocket =
-			rsocketClientBuilder().build().rSocket(host = host, port = port, path = path ?: "", secure = secure)
+			rsocketClientBuilder().build().rSocket(urlBase, secure = secure)
 		val client = RSocketClient(rSocket)
 		return RSocketF2Client(client)
 	}

@@ -8,7 +8,7 @@ kotlin {
 	sourceSets {
 		commonMain {
 			dependencies {
-				api(project(":f2-client"))
+				api(project(":f2-client:f2-client-core"))
 				api(project(":f2-dsl:f2-dsl-cqrs"))
 				implementation("io.rsocket.kotlin:rsocket-core:${Versions.rsocket}")
 				implementation("io.rsocket.kotlin:rsocket-transport-ktor:${Versions.rsocket}")

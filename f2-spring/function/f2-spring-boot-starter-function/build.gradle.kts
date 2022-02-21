@@ -10,5 +10,5 @@ dependencies {
     Dependencies.Jvm.Kotlin.coroutines(::api)
     Dependencies.Jvm.Spring.cloudFunction(::api)
 
-    testImplementation(project(":f2-bdd:f2-bdd-spring-autoconfigure"))
+    testImplementation(project(":f2-bdd:f2-bdd-spring-lambda"))
 }

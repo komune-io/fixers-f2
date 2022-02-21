@@ -11,10 +11,11 @@ rootProject.name = "f2"
 include(
 	"f2-bdd:f2-bdd-config",
 	"f2-bdd:f2-bdd-spring-autoconfigure",
+	"f2-bdd:f2-bdd-spring-lambda",
 )
 
 include(
-	"f2-client",
+	"f2-client:f2-client-core",
 	"f2-client:f2-client-ktor",
 	"f2-client:f2-client-ktor:f2-client-ktor-http",
 	"f2-client:f2-client-ktor:f2-client-ktor-rsocket"

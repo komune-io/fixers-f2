@@ -1,8 +1,12 @@
 package f2.spring.http
 
 import f2.client.ktor.F2ClientBuilder
-import io.netty.handler.codec.http.websocketx.WebSocketScheme.WS
+import f2.client.ktor.get
+import f2.dsl.fnc.invoke
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -34,9 +38,11 @@ class F2SampleRSocketAppTest {
 	@Autowired
 	lateinit var rsocketRequesterBuilder: RSocketRequester.Builder
 
+	val port = 7001
+
 	@Test
 	fun rSocketFunctionClient(): Unit = runBlocking {
-		val rSocketRequester = rsocketRequesterBuilder.websocket(URI.create("http://localhost:7001"))
+		val rSocketRequester = rsocketRequesterBuilder.websocket(URI.create("http://localhost:$port"))
 		val message = rSocketRequester
 			.route("functionF2")
 			.data("employee")
@@ -48,12 +54,24 @@ class F2SampleRSocketAppTest {
 
 	@Test
 	fun rSocketSuplierClient(): Unit = runBlocking {
-		val rSocketRequester = rsocketRequesterBuilder.websocket(URI.create("http://localhost:7001"))
+		val rSocketRequester = rsocketRequesterBuilder.websocket(URI.create("http://localhost:$port"))
 		val message = rSocketRequester
 			.route("supplierF2")
-			.retrieveMono(String::class.java)
-			.block()
-		Assertions.assertThat(message).isEqualTo("supplierF2Value")
+			.retrieveFlux(String::class.java)
+			.asFlow()
+			.toList()
+		Assertions.assertThat(message).containsExactly("supplierF2Value", "supplierF2Value1")
+	}
 
+	@Test
+	fun `should return the a single response`() = runTest {
+		val response = F2ClientBuilder.get("ws://localhost:$port").function("functionF2").invoke("employee")
+		Assertions.assertThat(response).isEqualTo("eeyolpme")
+	}
+
+	@Test
+	fun `should return supplierF2 array`(): Unit = runBlocking {
+		val response = F2ClientBuilder.get("ws://localhost:$port").supplier("supplierF2").invoke().toList()
+		Assertions.assertThat(response).containsExactly("supplierF2Value", "supplierF2Value1")
 	}
 }

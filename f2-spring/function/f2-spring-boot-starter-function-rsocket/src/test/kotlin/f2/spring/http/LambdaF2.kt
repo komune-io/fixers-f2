@@ -2,6 +2,7 @@ package f2.spring.http
 
 import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
 import f2.dsl.fnc.*
+import kotlinx.coroutines.flow.flowOf
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -18,7 +19,7 @@ open class LambdaF2 {
 
 	@Bean
 	open fun supplierF2(): F2Supplier<String> = f2Supplier {
-		"supplierF2Value"
+		flowOf("supplierF2Value", "supplierF2Value1")
 	}
 
 	@Bean

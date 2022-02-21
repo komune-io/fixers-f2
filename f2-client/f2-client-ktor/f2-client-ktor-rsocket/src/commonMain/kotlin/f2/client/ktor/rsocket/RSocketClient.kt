@@ -17,7 +17,6 @@ open class RSocketClient(
 		val payload = buildPayload {
 			metadata(RoutingMetadata(route))
 			data(jsonBody)
-
 		}
 		rSocket.fireAndForget(payload)
 	}
@@ -52,9 +51,11 @@ open class RSocketClient(
 			metadata(RoutingMetadata(route))
 			if (jsonBody != null) {
 				data(jsonBody)
-			}
+			} else data("")
 
 		}
-		return rSocket.requestStream(payload).map { it.data.readText() }
+		return rSocket.requestStream(payload).map {
+			it.data.readText()
+		}
 	}
 }
