@@ -43,7 +43,8 @@ open class RSocketClient(
 				data(jsonBody)
 			}
 		}
-		return rSocket.requestResponse(payload).data.readText()
+		val dd = rSocket.requestResponse(payload)
+		return dd.data.readText()
 	}
 
 	fun requestStream(route: String, jsonBody: String? = null): Flow<String> {

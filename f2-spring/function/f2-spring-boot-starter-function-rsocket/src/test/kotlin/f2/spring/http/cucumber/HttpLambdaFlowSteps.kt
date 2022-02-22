@@ -15,14 +15,14 @@ class HttpLambdaFlowSteps : LambdaFlowSteps(), En {
 	}
 
 	override fun function(values: List<String>): List<String> = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).function(LambdaFlow::functionFlow.name).invoke(values.asFlow()).toList()
+		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).function(LambdaFlow::functionFlow.name).invoke(values.asFlow()).toList()
 	}
 
 	override fun supplier(): List<String> = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).supplier(LambdaFlow::supplierFlow.name).invoke().toList()
+		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).supplier(LambdaFlow::supplierFlow.name).invoke().toList()
 	}
 
 	override fun consumer(values: List<String>) = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).consumer(LambdaFlow::consumerFlow.name).invoke(values.asFlow())
+		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).consumer(LambdaFlow::consumerFlow.name).invoke(values.asFlow())
 	}
 }

@@ -12,9 +12,8 @@ import org.junit.platform.suite.api.Suite
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "${F2SpringStep.GLUE}, f2")
-class F2SpringHttpCucumberTests
+class F2SpringRSocketCucumberTests
 
-
-object F2SpringHttpCucumberConfig {
-	fun urlBase(bag: F2SpringContextBag) = "http://localhost:${bag.httpPort}"
+object F2SpringRSocketCucumberConfig {
+	fun urlBase(bag: F2SpringContextBag) = "ws://localhost:${bag.rsoketPort}"
 }

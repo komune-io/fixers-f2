@@ -1,7 +1,6 @@
 package f2.spring.http.cucumber
 
 import f2.bdd.spring.lambda.list.LambdaList
-import f2.bdd.spring.lambda.single.LambdaSimple
 import f2.bdd.spring.lambda.single.LambdaSimpleSteps
 import f2.client.ktor.F2ClientBuilder
 import f2.client.ktor.get
@@ -17,14 +16,14 @@ class HttpLambdaSimpleSteps: LambdaSimpleSteps(), En {
 	}
 
 	override fun function(values: List<String>): List<String> = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).function(LambdaList::functionList.name).invoke(values.asFlow()).toList()
+		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).function(LambdaList::functionList.name).invoke(values.asFlow()).toList()
 	}
 
 	override fun supplier(): List<String> = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).supplier(LambdaList::supplierList.name).invoke().toList()
+		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).supplier(LambdaList::supplierList.name).invoke().toList()
 	}
 
 	override fun consumer(values: List<String>) = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).consumer(LambdaList::consumerList.name).invoke(values.asFlow())
+		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).consumer(LambdaList::consumerList.name).invoke(values.asFlow())
 	}
 }

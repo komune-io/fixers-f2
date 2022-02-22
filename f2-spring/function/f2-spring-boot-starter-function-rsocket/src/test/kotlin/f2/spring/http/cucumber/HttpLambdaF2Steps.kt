@@ -11,20 +11,22 @@ import kotlinx.coroutines.runBlocking
 
 class HttpLambdaF2Steps : LambdaF2Steps(), En {
 
+
 	init {
 		prepareLambdaSteps()
 	}
 
 	override fun function(values: List<String>): List<String> = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).function("functionF2").invoke(values.asFlow()).toList()
+		bag
+		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).function("functionF2").invoke(values.asFlow()).toList()
 	}
 
 	override fun supplier(): List<String> = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).supplier("supplierF2").invoke().toList()
+		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).supplier("supplierF2").invoke().toList()
 	}
 
 	override fun consumer(values: List<String>) = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).consumer(LambdaF2::consumerF2.name).invoke(values.asFlow())
+		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).consumer(LambdaF2::consumerF2.name).invoke(values.asFlow())
 	}
 
 }

@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-open class LambdaList {
+class LambdaList {
 
 	@Bean
 	open fun functionList(): (List<String>) -> List<String> = { values ->

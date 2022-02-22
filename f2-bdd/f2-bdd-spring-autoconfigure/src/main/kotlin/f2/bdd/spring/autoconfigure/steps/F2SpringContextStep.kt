@@ -21,12 +21,12 @@ open class F2SpringContextStep: F2SpringStep(), En {
 		When("I start a valid spring application context") {
 			bag.httpPort = Random.nextInt(from = 6000, until = 6999)
 			bag.rsoketPort = Random.nextInt(from = 6000, until = 6999)
-
 			bag.applicationContext = ApplicationContextBuilder().create(
 				types = arrayOf(ApplicationContextBuilder.SimpleConfiguration::class.java),
 				config = mapOf(
 					"server.port" to "${bag.httpPort}",
-					"spring.rsocket.server.port" to "${bag.rsoketPort}"
+					"spring.rsocket.server.port" to "${bag.rsoketPort}",
+					"spring.rsocket.server.transport" to "websocket"
 				)
 			)
 		}

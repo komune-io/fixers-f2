@@ -1,11 +1,11 @@
-spring:
-  rsocket:
-    server:
-      port: 7001
-      transport: websocket
-#debug: true
-logging:
-  level:
-    io.rsocket.FrameLogger: DEBUG
-    org.springframework.boot.rsocket: DEBUG
-
+#spring:
+#  rsocket:
+#    server:
+#      port: 7001
+#      transport: websocket
+#
+#logging:
+#  level:
+#    io.rsocket.FrameLogger: DEBUG
+#    org.springframework.boot.rsocket: DEBUG
+#
