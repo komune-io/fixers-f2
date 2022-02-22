@@ -6,10 +6,8 @@ fun <OBJECT> OffsetPaginationDTO.result(items: List<OBJECT>, total: Int): PageQu
 			offset = this.offset,
 			limit = this.limit
 		),
-		page = Page(
-			items = items,
-			total = total
-		)
+		items = items,
+		total = total
 	)
 }
 

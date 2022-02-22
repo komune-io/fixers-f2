@@ -20,7 +20,5 @@ open class F2SpringStep {
 		After { scenario: Scenario ->
 			bag.applicationContext?.stop()
 		}
-
 	}
-
 }

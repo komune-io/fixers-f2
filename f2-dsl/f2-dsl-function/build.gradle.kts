@@ -5,4 +5,6 @@ plugins {
 }
 
 dependencies {
+//    jsApi("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:${city.smartb.gradle.dependencies.FixersVersions.Kotlin.coroutines}")
+    commonMainApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:${city.smartb.gradle.dependencies.FixersVersions.Kotlin.coroutines}")
 }

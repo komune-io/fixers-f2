@@ -7,6 +7,7 @@ import io.cucumber.java8.En
 import io.cucumber.java8.Scenario
 import org.assertj.core.api.Assertions
 import org.mockito.BDDMockito
+import kotlin.random.Random
 
 open class F2SpringContextStep: F2SpringStep(), En {
 
@@ -18,7 +19,16 @@ open class F2SpringContextStep: F2SpringStep(), En {
 		}
 
 		When("I start a valid spring application context") {
-			bag.applicationContext = ApplicationContextBuilder().create(arrayOf(ApplicationContextBuilder.SimpleConfiguration::class.java))
+			bag.httpPort = Random.nextInt(from = 6000, until = 6999)
+			bag.rsoketPort = Random.nextInt(from = 6000, until = 6999)
+			bag.applicationContext = ApplicationContextBuilder().create(
+				types = arrayOf(ApplicationContextBuilder.SimpleConfiguration::class.java),
+				config = mapOf(
+					"server.port" to "${bag.httpPort}",
+					"spring.rsocket.server.port" to "${bag.rsoketPort}",
+					"spring.rsocket.server.transport" to "websocket"
+				)
+			)
 		}
 
 		When("I build a valid spring application context") {

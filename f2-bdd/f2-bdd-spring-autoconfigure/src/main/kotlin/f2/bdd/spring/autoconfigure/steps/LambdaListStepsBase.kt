@@ -6,6 +6,8 @@ import f2.dsl.fnc.F2Function
 import f2.dsl.fnc.F2Supplier
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KFunction
 
 abstract class LambdaListStepsBase<P, R> : F2SpringStep() {
@@ -27,9 +29,12 @@ abstract class LambdaListStepsBase<P, R> : F2SpringStep() {
 		}
 
 		When("Execute consumer $consumerName with") { dataTable: DataTable ->
-			consumer(transform(dataTable))
-			val receiver = receiver()
-			bag.result[consumerName] = receiver.items
+			runBlocking {
+				consumer(transform(dataTable))
+				delay(timeMillis = 1000)
+				val receiver = receiver()
+				bag.result[consumerName] = receiver.items
+			}
 		}
 	}
 
@@ -39,7 +44,7 @@ abstract class LambdaListStepsBase<P, R> : F2SpringStep() {
 	abstract fun supplier(): List<R>
 	abstract fun consumer(values: List<P>)
 
-	fun <P,R> KFunction<*>.blockingFunctionBean(): (P) -> R {
+	fun <P, R> KFunction<*>.blockingFunctionBean(): (P) -> R {
 		return bag.getBlockingFunctionBean(this.name)
 	}
 
@@ -51,7 +56,7 @@ abstract class LambdaListStepsBase<P, R> : F2SpringStep() {
 		return bag.getBlockingConsumerBean(this.name)
 	}
 
-	fun <P,R> KFunction<*>.functionBean(): suspend (P) -> R {
+	fun <P, R> KFunction<*>.functionBean(): suspend (P) -> R {
 		return bag.getFunctionBean(this.name)
 	}
 
@@ -64,7 +69,7 @@ abstract class LambdaListStepsBase<P, R> : F2SpringStep() {
 	}
 
 	@Suppress("UNCHECKED_CAST")
-	fun <P,R> KFunction<*>.functionF2Bean(): F2Function<P, R> {
+	fun <P, R> KFunction<*>.functionF2Bean(): F2Function<P, R> {
 		return bag.applicationContext!!.getBean(name) as F2Function<P, R>
 	}
 

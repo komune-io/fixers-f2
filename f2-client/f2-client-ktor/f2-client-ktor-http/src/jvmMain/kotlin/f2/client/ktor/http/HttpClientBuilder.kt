@@ -1,6 +1,7 @@
 package f2.client.ktor.http
 
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -18,25 +19,19 @@ actual class HttpClientBuilder {
 					this.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 						.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 						.registerModule(KotlinModule())
-						.setPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE)
+						.setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
 				}
 			}
 		}
 	}
 
 	fun build(
-		scheme: String,
-		host: String,
-		port: Int,
-		path: String?,
+		urlBase: String
 	): F2Client {
 		val httpCLient = httpClient()
 		return HttpF2Client(
-			scheme = scheme,
-			host = host,
-			port = port,
-			path = path,
-			httpClient = httpCLient
+			httpClient = httpCLient,
+			urlBase
 		)
 	}
 }

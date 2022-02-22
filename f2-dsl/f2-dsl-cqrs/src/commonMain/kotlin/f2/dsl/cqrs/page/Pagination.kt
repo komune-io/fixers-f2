@@ -1,28 +1,40 @@
 package f2.dsl.cqrs.page
 
+import kotlinx.serialization.Serializable
 import kotlin.js.JsExport
 import kotlin.js.JsName
 
+@Serializable
+@JsExport
+@JsName("Pagination")
 sealed interface Pagination
 
-expect interface OffsetPaginationDTO {
+@Serializable
+@JsExport
+@JsName("OffsetPaginationDTO")
+interface OffsetPaginationDTO {
 	val offset: Int
 	val limit: Int
 }
 
+@Serializable
 @JsExport
-@JsName("OffsetRequest")
+@JsName("OffsetPagination")
 class OffsetPagination(
 	override val offset: Int,
 	override val limit: Int,
 ) : OffsetPaginationDTO, Pagination
 
 
-expect interface PagePaginationDTO {
+@Serializable
+@JsExport
+@JsName("PagePaginationDTO")
+interface PagePaginationDTO {
 	val page: Int?
 	val size: Int?
 }
 
+@Serializable
 @JsExport
 @JsName("PagePagination")
 class PagePagination(
