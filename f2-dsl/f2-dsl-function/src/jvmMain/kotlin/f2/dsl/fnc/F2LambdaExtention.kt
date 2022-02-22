@@ -28,6 +28,12 @@ fun <T, R> f2Function(fnc: suspend (t: T) -> R): F2Function<T, R> = F2Function {
 	}
 }
 
+fun <T, R> f2FunctionT(fnc: suspend (t: T) -> R): F2Function<T, R> = F2Function { msg ->
+	msg.map { value ->
+		fnc(value)
+	}
+}
+
 suspend fun <T, R> T.invokeWith(f2: F2Function<T, R>): R {
 	return f2.invoke(this)
 }

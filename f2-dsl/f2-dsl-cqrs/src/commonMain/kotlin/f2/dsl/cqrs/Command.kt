@@ -1,3 +1,3 @@
 package f2.dsl.cqrs
 
-expect interface Command
+expect interface Command: Message
