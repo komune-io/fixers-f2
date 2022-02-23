@@ -2,7 +2,6 @@ package f2.bdd.spring.lambda.list
 
 import f2.bdd.spring.autoconfigure.steps.LambdaListStepsBase
 import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
-import f2.bdd.spring.lambda.flux.LambdaFlux
 import f2.bdd.spring.lambda.single.StringConsumerReceiver
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En

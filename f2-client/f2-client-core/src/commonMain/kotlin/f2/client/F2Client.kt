@@ -12,8 +12,6 @@ expect interface F2Client {
 	fun consumer(route: String): F2Consumer<String>
 }
 
-expect inline fun <reified T, reified R> F2Client.declaration(route: String): F2Function<T, R>
-
 val json = Json {
 	ignoreUnknownKeys = true
 }

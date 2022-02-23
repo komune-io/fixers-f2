@@ -13,14 +13,14 @@ kotlin {
 
                 api("io.ktor:ktor-client-core:${Versions.Kotlin.ktor}")
                 api("io.ktor:ktor-client-serialization:${Versions.Kotlin.ktor}")
-                implementation("org.jetbrains.kotlin:kotlin-test:1.6.20-M1")
+                implementation("org.jetbrains.kotlin:kotlin-test:${PluginVersions.kotlin}")
 
 
             }
         }
         commonTest {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test:1.6.20-M1")
+                implementation("org.jetbrains.kotlin:kotlin-test:${PluginVersions.kotlin}")
             }
         }
 
@@ -32,7 +32,7 @@ kotlin {
         }
         jvmTest {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test:1.6.20-M1")
+                implementation("org.jetbrains.kotlin:kotlin-test:${PluginVersions.kotlin}")
             }
         }
         jvmMain {
