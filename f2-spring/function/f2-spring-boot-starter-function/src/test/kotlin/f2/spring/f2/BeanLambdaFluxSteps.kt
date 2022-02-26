@@ -17,7 +17,7 @@ class BeanLambdaFluxSteps: LambdaFluxSteps(), En {
 	}
 
 	override fun supplier(): List<String> {
-		val lambda: () -> Flux<String> = LambdaFlux::supplierFlux.blockingSupplierBean<Flux<String>>()
+		val lambda: () -> Flux<String> = LambdaFlux::supplierFlux.blockingSupplierBean()
 		return lambda().collectList().block()!!
 	}
 

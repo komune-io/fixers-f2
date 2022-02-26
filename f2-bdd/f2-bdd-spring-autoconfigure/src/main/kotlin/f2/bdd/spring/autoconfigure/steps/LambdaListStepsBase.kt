@@ -8,6 +8,7 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions
 import kotlin.reflect.KFunction
 
 abstract class LambdaListStepsBase<P, R> : F2SpringStep() {

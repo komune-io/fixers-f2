@@ -30,7 +30,9 @@ actual open class HttpF2Client(
 			httpClient.post<List<String>>("$urlBase/${route}") {
 				contentType(ContentType.Application.Json)
 				body = msg.toList()
-			}.forEach { emit(it) }
+			}.forEach {
+				emit(it)
+			}
 		}
 	}
 

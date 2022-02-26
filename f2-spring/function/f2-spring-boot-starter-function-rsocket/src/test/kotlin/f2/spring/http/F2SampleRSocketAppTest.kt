@@ -1,4 +1,11 @@
-//package f2.spring.http
+package f2.spring.http
+
+import f2.dsl.fnc.f2Consumer
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
+import org.springframework.context.annotation.Bean
+
+
 //
 //import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
 //import f2.client.ktor.F2ClientBuilder
@@ -101,4 +108,25 @@
 //		val response = F2ClientBuilder.get("ws://localhost:$port").supplier("supplierF2").invoke().toList()
 //		Assertions.assertThat(response).containsExactly("supplierF2Value", "supplierF2Value1")
 //	}
+//}
+//
+//@SpringBootApplication
+//open class TestingWebApplication {
+////	@Bean
+////	open fun functionF2SampleHttpAppLambda(): (String) -> String = { value ->
+////		value.reversed()
+////	}
+//
+//	//	@Bean
+////	open fun supplierF2SampleHttpAppLambda(): () -> List<String> = {
+////		listOf("supplierValuePure1", "supplierValuePure2")
+////	}
+//	@Bean
+//	open fun consumerF2() = f2Consumer<String> {
+//		println(it)
+//	}
+//}
+//
+//fun main(args: Array<String>) {
+//	runApplication<TestingWebApplication>(*args)
 //}

@@ -4,6 +4,7 @@ import f2.bdd.spring.lambda.list.LambdaList
 import f2.bdd.spring.lambda.list.LambdaListSteps
 import f2.client.ktor.F2ClientBuilder
 import f2.client.ktor.get
+import f2.spring.http.F2SpringRSocketCucumberConfig
 import io.cucumber.java8.En
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.toList

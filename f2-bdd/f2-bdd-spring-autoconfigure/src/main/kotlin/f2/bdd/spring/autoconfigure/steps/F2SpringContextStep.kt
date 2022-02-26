@@ -26,7 +26,9 @@ open class F2SpringContextStep: F2SpringStep(), En {
 				config = mapOf(
 					"server.port" to "${bag.httpPort}",
 					"spring.rsocket.server.port" to "${bag.rsoketPort}",
-					"spring.rsocket.server.transport" to "websocket"
+					"spring.rsocket.server.transport" to "websocket",
+					"logging.level.io.rsocket.FrameLogger" to "DEBUG",
+					"logging.level.org.springframework.boot.rsocket" to "DEBUG"
 				)
 			)
 		}

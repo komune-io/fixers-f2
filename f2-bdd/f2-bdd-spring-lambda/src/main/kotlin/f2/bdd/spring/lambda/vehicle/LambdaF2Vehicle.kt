@@ -7,6 +7,7 @@ import f2.dsl.fnc.F2Supplier
 import f2.dsl.fnc.f2Function
 import f2.dsl.fnc.asF2Supplier
 import f2.dsl.fnc.f2Consumer
+import kotlinx.serialization.Serializable
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -35,6 +36,7 @@ open class LambdaF2Vehicle {
 
 }
 
+@Serializable
 data class Vehicle(
 	val name: String,
 	val broken: Boolean

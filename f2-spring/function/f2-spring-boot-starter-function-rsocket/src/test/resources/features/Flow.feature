@@ -1,5 +1,4 @@
 Feature:
-
   Scenario: Catalog contains function
     When I start a valid spring application context
     Then Function catalog contains
