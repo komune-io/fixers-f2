@@ -28,13 +28,13 @@ Feature:
       | reverse |
       | test    |
 
-  Scenario: Execute f2 pipeline from the catalog
-    When Function catalog execute "supplierF2|functionF2|consumerF2"
-    Then The function catalog result for "supplierF2|functionF2|consumerF2" is
-      | eulaVniltoKeruPeulaVreilppus |
-
-  Scenario: Execute f2 pipeline from the catalog
-    When Function catalog execute "functionF2|consumerF2" with
-      | reverse |
-    Then The function catalog result for "functionF2|consumerF2" is
-      | esrever |
+#  Scenario: Execute f2 pipeline from the catalog
+#    When Function catalog execute "supplierF2|functionF2|consumerF2"
+#    Then The function catalog result for "supplierF2|functionF2|consumerF2" is
+#      | eulaVniltoKeruPeulaVreilppus |
+#
+#  Scenario: Execute f2 pipeline from the catalog
+#    When Function catalog execute "functionF2|consumerF2" with
+#      | reverse |
+#    Then The function catalog result for "functionF2|consumerF2" is
+#      | esrever |

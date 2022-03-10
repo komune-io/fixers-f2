@@ -37,22 +37,22 @@ Feature:
       | alpine | false  |
       | tesla  | true      |
 
-  Scenario: Execute f2 pipeline from the catalog
-    When Vehicle: Function catalog execute "supplierVehicle|fixVehicle|consumerVehicle"
-    Then Vehicle: The function catalog result for "supplierVehicle|fixVehicle|consumerVehicle" is
-      | name | broken |
-      | Car  | false  |
-      | Moto | false  |
-      | Bike | false  |
-
-
-  Scenario: Execute f2 pipeline from the catalog
-    When Vehicle: Function catalog execute "fixVehicle|consumerVehicle" with
-      | name   | broken |
-      | alpine | false  |
-      | tesla  | true   |
-
-    Then Vehicle: The function catalog result for "fixVehicle|consumerVehicle" is
-      | name   | broken |
-      | alpine | false  |
-      | tesla  | false  |
+#  Scenario: Execute f2 pipeline from the catalog
+#    When Vehicle: Function catalog execute "supplierVehicle|fixVehicle|consumerVehicle"
+#    Then Vehicle: The function catalog result for "supplierVehicle|fixVehicle|consumerVehicle" is
+#      | name | broken |
+#      | Car  | false  |
+#      | Moto | false  |
+#      | Bike | false  |
+#
+#
+#  Scenario: Execute f2 pipeline from the catalog
+#    When Vehicle: Function catalog execute "fixVehicle|consumerVehicle" with
+#      | name   | broken |
+#      | alpine | false  |
+#      | tesla  | true   |
+#
+#    Then Vehicle: The function catalog result for "fixVehicle|consumerVehicle" is
+#      | name   | broken |
+#      | alpine | false  |
+#      | tesla  | false  |
