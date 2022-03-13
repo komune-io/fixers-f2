@@ -5,7 +5,7 @@ import city.smartb.gradle.dependencies.Scope
 import city.smartb.gradle.dependencies.add
 
 object PluginVersions {
-	const val fixers = "0.4.1"
+	val fixers = FixersPluginVersions.fixers
 	const val d2 = "0.3.1"
 	const val kotlin = FixersPluginVersions.kotlin
 	const val springBoot = FixersPluginVersions.springBoot
@@ -16,19 +16,19 @@ object Versions {
 	object Kotlin {
 		const val ktor = FixersVersions.Kotlin.ktor
 	}
+	object Json {
+		const val jackson = FixersVersions.Json.jacksonKotlin
+	}
 	object Spring {
-		const val function = FixersVersions.Spring.function
+		const val function = "3.2.2"
 		const val boot = FixersVersions.Spring.boot
 		const val data = FixersVersions.Spring.data
-		const val dataCommons = "2.6.2"
 		const val framework = FixersVersions.Spring.framework
 	}
 
-	const val jacksonKotlin = "2.13.1"
-	const val javaxPersistence = "2.2"
+
 	const val rsocket = "0.14.3"
 	const val embedMongo = "2.2.0"
-	const val cucumber = "7.1.0"
 }
 
 object Dependencies {
@@ -36,22 +36,25 @@ object Dependencies {
 		object Kotlin {
 			fun coroutines(scope: Scope) = FixersDependencies.Jvm.Kotlin.coroutines(scope)
 		}
-		fun cucumber(scope: Scope) = scope.add(
-			"io.cucumber:cucumber-java8:${Versions.cucumber}",
-			"io.cucumber:cucumber-junit-platform-engine:${Versions.cucumber}",
-		)
+		object Json {
+			fun jackson(scope: Scope) = FixersDependencies.Jvm.Json.jackson(scope)
+		}
+
+		fun cucumber(scope: Scope) = FixersDependencies.Jvm.Test.cucumber(scope)
 		object Spring{
+			fun dataCommons(scope: Scope) = FixersDependencies.Jvm.Spring.dataCommons(scope)
+
 			fun cloudFunction(scope: Scope) = scope.add(
-				"org.springframework.cloud:spring-cloud-function-context:${FixersVersions.Spring.function}",
-				"org.springframework.cloud:spring-cloud-function-kotlin:${FixersVersions.Spring.function}",
-				"org.springframework.boot:spring-boot-autoconfigure:${FixersVersions.Spring.boot}",
-				"com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.jacksonKotlin}"
+				"org.springframework.cloud:spring-cloud-function-context:${Versions.Spring.function}",
+				"org.springframework.cloud:spring-cloud-function-kotlin:${Versions.Spring.function}",
+				"org.springframework.boot:spring-boot-autoconfigure:${Versions.Spring.boot}",
+				"com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.Json.jackson}"
 			)
 			fun cloudFunctionWebflux(scope: Scope) = scope.add(
-				"org.springframework.cloud:spring-cloud-starter-function-webflux:${FixersVersions.Spring.function}"
+				"org.springframework.cloud:spring-cloud-starter-function-webflux:${Versions.Spring.function}"
 			)
 			fun cloudFunctionRSocket(scope: Scope) = scope.add(
-				"org.springframework.cloud:spring-cloud-function-rsocket:${FixersVersions.Spring.function}"
+				"org.springframework.cloud:spring-cloud-function-rsocket:${Versions.Spring.function}"
 			)
 		}
 	}

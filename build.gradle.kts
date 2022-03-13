@@ -4,7 +4,7 @@ plugins {
 	kotlin("plugin.serialization") version PluginVersions.kotlin
 	id("org.springframework.boot") version PluginVersions.springBoot apply false
 
-	id("lt.petuska.npm.publish") version PluginVersions.npmPublish apply false
+	id("dev.petuska.npm.publish") version PluginVersions.npmPublish apply false
 	id("com.moowork.node") version "1.3.1"
 
 	id("city.smartb.fixers.gradle.config") version PluginVersions.fixers
@@ -38,8 +38,8 @@ subprojects {
 			}
 		}
 	}
-	plugins.withType(lt.petuska.npm.publish.NpmPublishPlugin::class.java).whenPluginAdded {
-		the<lt.petuska.npm.publish.dsl.NpmPublishExtension>().apply {
+	plugins.withType(dev.petuska.npm.publish.NpmPublishPlugin::class.java).whenPluginAdded {
+		the<dev.petuska.npm.publish.dsl.NpmPublishExtension>().apply {
 			organization = "smartb"
 			repositories {
 				repository("npmjs") {
