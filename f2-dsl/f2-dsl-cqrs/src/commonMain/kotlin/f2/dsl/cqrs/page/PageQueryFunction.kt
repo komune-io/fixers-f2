@@ -33,7 +33,7 @@ class PageQuery(
 @JsExport
 @JsName("PageQueryResult")
 class PageQueryResult<out OBJECT>(
-	override val pagination: OffsetPaginationDTO?,
+	override val pagination: OffsetPagination?,
 	override val total: Int,
 	override val items: List<OBJECT>,
 ) : PageQueryResultDTO<OBJECT>
