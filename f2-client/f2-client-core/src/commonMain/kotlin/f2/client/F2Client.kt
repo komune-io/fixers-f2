@@ -12,14 +12,14 @@ expect interface F2Client {
 	fun consumer(route: String): F2Consumer<String>
 }
 
-val json = Json {
+val jsonF2Config = Json {
 	ignoreUnknownKeys = true
 }
 
 inline fun <reified T> jsonToValue(ret: String): T {
 	return try {
-		json.decodeFromString<T>(ret)
+		jsonF2Config.decodeFromString<T>(ret)
 	} catch (e: Exception) {
-		json.decodeFromString<List<T>>(ret).first()
+		jsonF2Config.decodeFromString<List<T>>(ret).first()
 	}
 }

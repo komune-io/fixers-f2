@@ -1,13 +1,12 @@
-package f2.spring.http.cucunew
+package f2.spring.http.cucumber
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import f2.bdd.spring.lambda.HttpF2GenericsStepsBase
-import f2.bdd.spring.lambda.vehicle.Vehicle
-import f2.bdd.spring.lambda.vehicle.VehicleReceiver
+import f2.bdd.spring.lambda.single.StringConsumerReceiver
 import f2.client.ktor.F2ClientBuilder
 import f2.client.ktor.get
-import f2.spring.http.cucumber.F2SpringHttpCucumberConfig
+import f2.spring.http.F2SpringHttpCucumberConfig
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.flow.Flow
@@ -16,7 +15,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
-class HttpF2VehicleSteps : HttpF2GenericsStepsBase<Vehicle, Vehicle>("Vehicle: "), En {
+
+class HttpF2ListSteps : HttpF2GenericsStepsBase<String, String>("List: "), En {
 
 	init {
 		prepareFunctionCatalogSteps()
@@ -24,17 +24,14 @@ class HttpF2VehicleSteps : HttpF2GenericsStepsBase<Vehicle, Vehicle>("Vehicle: "
 
 	private val objectMapper = jacksonObjectMapper()
 
-	override fun transform(dataTable: DataTable): List<Vehicle> {
-		return dataTable.asMaps().map {
-			Vehicle(
-				name = it[Vehicle::name.name]!!,
-				broken = it[Vehicle::broken.name]!!.toBoolean()
-			)
-		}
+	override fun transform(dataTable: DataTable): List<String> {
+		return dataTable.asList().map {
+			it.split(",")
+		}.flatten()
 	}
 
-	override fun consumerReceiver(): List<Vehicle> {
-		val bean = bag.applicationContext!!.getBean(VehicleReceiver::class.java)
+	override fun consumerReceiver(): List<String> {
+		val bean = bag.applicationContext!!.getBean(StringConsumerReceiver::class.java)
 		return bean.items
 	}
 
@@ -59,11 +56,11 @@ class HttpF2VehicleSteps : HttpF2GenericsStepsBase<Vehicle, Vehicle>("Vehicle: "
 		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).supplier(supplierName).invoke().toList()
 	}
 
-	override fun fromJson(msg: String): Vehicle {
-		return objectMapper.readValue(msg)
+	override fun fromJson(msg: String): String {
+		return objectMapper.readValue<String>(msg)
 	}
 
-	override fun toJson(msg: Vehicle): String {
-		return objectMapper.writeValueAsString(msg)
+	override fun toJson(msg: String): String {
+		return msg
 	}
 }

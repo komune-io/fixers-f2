@@ -23,10 +23,9 @@ object Versions {
 		const val function = "3.2.3"
 		const val boot = FixersVersions.Spring.boot
 		const val data = FixersVersions.Spring.data
-		const val framework = FixersVersions.Spring.framework
 	}
 
-	const val rsocket = "0.14.3"
+	const val rsocket = "0.15.4"
 	const val embedMongo = "2.2.0"
 }
 

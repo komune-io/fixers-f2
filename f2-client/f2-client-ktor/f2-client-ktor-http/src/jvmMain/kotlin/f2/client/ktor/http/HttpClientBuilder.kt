@@ -1,28 +1,17 @@
 package f2.client.ktor.http
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import f2.client.F2Client
+import f2.client.jsonF2Config
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 
 actual class HttpClientBuilder {
 	private fun httpClient(): HttpClient {
 		return HttpClient(CIO) {
-			install(JsonFeature) {
-				serializer = KotlinxSerializer()
-//				serializer = JacksonSerializer {
-//					this.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-//						.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-//						.registerModule(KotlinModule())
-//						.setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
-//				}
+			install(ContentNegotiation) {
+				json(jsonF2Config)
 			}
 		}
 	}

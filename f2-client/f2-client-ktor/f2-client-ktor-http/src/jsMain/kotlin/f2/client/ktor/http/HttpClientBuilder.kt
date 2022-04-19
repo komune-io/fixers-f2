@@ -1,9 +1,11 @@
 package f2.client.ktor.http
 
 import f2.client.F2Client
+import f2.client.jsonF2Config
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.js.Js
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
 import kotlin.js.Promise
@@ -24,7 +26,9 @@ actual class HttpClientBuilder(
 
 	private fun httpClient(): HttpClient {
 		return HttpClient(Js) {
-			install(JsonFeature)
+			install(ContentNegotiation) {
+				json(jsonF2Config)
+			}
 		}
 	}
 

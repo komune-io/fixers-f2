@@ -4,47 +4,16 @@ plugins {
     id("dev.petuska.npm.publish")
 }
 
-kotlin {
-    sourceSets {
-        commonMain {
-            dependencies {
-                api(project(":f2-client:f2-client-core"))
-                api(project(":f2-dsl:f2-dsl-cqrs"))
+dependencies {
+    commonMainApi(project(":f2-client:f2-client-core"))
+    commonMainApi(project(":f2-dsl:f2-dsl-cqrs"))
+    commonMainApi("io.ktor:ktor-client-core:${Versions.Kotlin.ktor}")
+    commonMainApi("io.ktor:ktor-client-content-negotiation:${Versions.Kotlin.ktor}")
+    commonMainApi("io.ktor:ktor-serialization-kotlinx-json:${Versions.Kotlin.ktor}")
+    commonTestImplementation("org.jetbrains.kotlin:kotlin-test:${PluginVersions.kotlin}")
 
-                api("io.ktor:ktor-client-core:${Versions.Kotlin.ktor}")
-                api("io.ktor:ktor-client-serialization:${Versions.Kotlin.ktor}")
-                implementation("org.jetbrains.kotlin:kotlin-test:${PluginVersions.kotlin}")
+    jsApi("io.ktor:ktor-client-json-js:${Versions.Kotlin.ktor}")
 
-
-            }
-        }
-        commonTest {
-            dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test:${PluginVersions.kotlin}")
-            }
-        }
-
-        jsMain {
-            dependencies {
-                implementation("io.ktor:ktor-client-core-js:${Versions.Kotlin.ktor}")
-                implementation("io.ktor:ktor-client-json-js:${Versions.Kotlin.ktor}")
-            }
-        }
-        jvmTest {
-            dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test:${PluginVersions.kotlin}")
-            }
-        }
-        jvmMain {
-            dependencies {
-                implementation("io.ktor:ktor-client-core-jvm:${Versions.Kotlin.ktor}")
-                implementation("io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}"){
-                    exclude("org.jetbrains.kotlin", "kotlin-reflect")
-                }
-                implementation("io.ktor:ktor-client-jackson:${Versions.Kotlin.ktor}"){
-                    exclude("org.jetbrains.kotlin", "kotlin-reflect")
-                }
-            }
-        }
-    }
+    jvmMainImplementation("io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}")
+    jvmMainImplementation("io.ktor:ktor-client-jackson:${Versions.Kotlin.ktor}")
 }
