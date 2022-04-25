@@ -14,7 +14,7 @@ object PluginVersions {
 
 object Versions {
 	object Kotlin {
-		const val ktor = FixersVersions.Kotlin.ktor
+		const val ktor = "2.0.0"
 	}
 
 	object Json {
