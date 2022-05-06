@@ -16,4 +16,5 @@ dependencies {
 
     jvmMainImplementation("io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}")
     jvmMainImplementation("io.ktor:ktor-client-jackson:${Versions.Kotlin.ktor}")
+    jvmMainApi("io.ktor:ktor-client-auth:${Versions.Kotlin.ktor}")
 }

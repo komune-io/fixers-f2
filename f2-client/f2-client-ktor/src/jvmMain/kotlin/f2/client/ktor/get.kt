@@ -5,14 +5,15 @@ import f2.client.ktor.http.HttpClientBuilder
 import f2.client.ktor.http.httpClientBuilder
 import f2.client.ktor.rsocket.RSocketF2ClientBuilder
 import f2.client.ktor.rsocket.rSocketF2ClientBuilder
-import f2.client.ktor.rsocket.rsocketClientBuilder
+import io.ktor.client.plugins.auth.providers.BearerTokens
 
 suspend fun F2ClientBuilder.get(
 	urlBase: String,
+	generateBearerToken: suspend () -> BearerTokens? = { null }
 ): F2Client {
 	return when {
 		urlBase.startsWith("http:") -> httpClientBuilder().build(urlBase)
-		urlBase.startsWith("https:") -> httpClientBuilder().build(urlBase)
+		urlBase.startsWith("https:") -> httpClientBuilder().build(urlBase, generateBearerToken)
 		urlBase.startsWith("tcp:") -> rSocketF2ClientBuilder().build(urlBase, false)
 		urlBase.startsWith("ws:") -> rSocketF2ClientBuilder().build(urlBase, false)
 		urlBase.startsWith("wss:") -> rSocketF2ClientBuilder().build(urlBase, false)
