@@ -6,7 +6,7 @@ import city.smartb.gradle.dependencies.add
 
 object PluginVersions {
 	val fixers = FixersPluginVersions.fixers
-	const val d2 = "0.3.1"
+	const val d2 = "0.8.0"
 	const val kotlin = FixersPluginVersions.kotlin
 	const val springBoot = FixersPluginVersions.springBoot
 	const val npmPublish = FixersPluginVersions.npmPublish
@@ -14,7 +14,7 @@ object PluginVersions {
 
 object Versions {
 	object Kotlin {
-		const val ktor = "2.0.0"
+		const val ktor = "2.0.1"
 	}
 
 	object Json {
