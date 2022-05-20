@@ -36,21 +36,12 @@ subprojects {
 		}
 	}
 	plugins.withType(dev.petuska.npm.publish.NpmPublishPlugin::class.java).whenPluginAdded {
-		the<dev.petuska.npm.publish.dsl.NpmPublishExtension>().apply {
-			organization = "smartb"
-			repositories {
-				repository("npmjs") {
-					registry = uri("https://registry.npmjs.org")
-					authToken = System.getenv("NPM_TOKEN")
-				}
-			}
-			publications {
-				publication("js") {
-					packageJson {
-						bundledDependencies("kotlin") { // Always includes "kotlin" dependency and filters out the rest by the spec
-							-"ktor-ktor.*".toRegex() // Exclude "kotlin-test" dependency
-						}
-					}
+		the<dev.petuska.npm.publish.extension.NpmPublishExtension>().apply {
+			organization.set("smartb")
+			registries {
+				register("npmjs") {
+					uri.set(uri("https://registry.npmjs.org"))
+					authToken.set(System.getenv("NPM_TOKEN"))
 				}
 			}
 		}
