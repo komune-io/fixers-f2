@@ -2,7 +2,7 @@
 
 
 F2 is kotlin framework to implement and query function as a service.
-Functions implementation and deployement is based on (Spring Cloud Function)[https://github.com/spring-cloud/spring-cloud-function]. 
+Functions implementation and deployement is based on [Spring Cloud Function](https://github.com/spring-cloud/spring-cloud-function). 
 Function client is based on ktor
 
 ## Dsl
@@ -10,15 +10,21 @@ Function client is based on ktor
 ### Lambda
 
  * Supplier
-    F2Supplier.Signle<PAYLOAD> -> 0 to 1 -> suspend () -> T
-    F2Supplier.Flow<PAYLOAD>   -> 0 to * -> suspend () -> Flow<T>
+```
+F2Supplier.Signle<PAYLOAD> -> 0 to 1 -> suspend () -> T
+F2Supplier.Flow<PAYLOAD>   -> 0 to * -> suspend () -> Flow<T>
+```
  * Function
-   F2Function.Single<PAYLOAD, RESPONSE> -> 1 to 1 -> suspend (T) -> T
-   F2Function.Flow<PAYLOAD, RESPONSE> -> 1 to * -> suspend (T) -> Flow<T>
-   F2Function.Channel<PAYLOAD, RESPONSE> -> * to * -> suspend (Flow<T>) -> Flow<T>
+```
+F2Function.Single<PAYLOAD, RESPONSE> -> 1 to 1 -> suspend (T) -> T
+F2Function.Flow<PAYLOAD, RESPONSE> -> 1 to * -> suspend (T) -> Flow<T>
+F2Function.Channel<PAYLOAD, RESPONSE> -> * to * -> suspend (Flow<T>) -> Flow<T>
+```
  * Consumer
-   F2Supplier.Signle<PAYLOAD> -> 1 to 0 suspend (T) ->Unit
-   F2Supplier.Flow<PAYLOAD>   -> * to 0 suspend (Flow<T>) ->Unit
+ ```
+F2Supplier.Signle<PAYLOAD> -> 1 to 0 suspend (T) ->Unit
+F2Supplier.Flow<PAYLOAD>   -> * to 0 suspend (Flow<T>) ->Unit
+```
 
 ### Function
 F2 builds on top of the 3 core functional:
