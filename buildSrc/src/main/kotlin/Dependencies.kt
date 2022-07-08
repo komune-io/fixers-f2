@@ -6,7 +6,7 @@ import city.smartb.gradle.dependencies.add
 
 object PluginVersions {
 	val fixers = FixersPluginVersions.fixers
-	const val d2 = "0.8.2"
+	val d2 = FixersPluginVersions.fixers
 	const val kotlin = FixersPluginVersions.kotlin
 	const val springBoot = FixersPluginVersions.springBoot
 	const val npmPublish = FixersPluginVersions.npmPublish
@@ -14,7 +14,7 @@ object PluginVersions {
 
 object Versions {
 	object Kotlin {
-		const val ktor = "2.0.1"
+		const val ktor = FixersVersions.Kotlin.ktor
 	}
 
 	object Json {
@@ -22,7 +22,7 @@ object Versions {
 	}
 
 	object Spring {
-		const val function = "3.2.4"
+		const val function = "3.2.6"
 		const val boot = FixersVersions.Spring.boot
 		const val data = FixersVersions.Spring.data
 	}
@@ -32,6 +32,11 @@ object Versions {
 }
 
 object Dependencies {
+	object Mpp {
+		fun rsocketKtorClient(scope: Scope) = scope.add(
+			"io.rsocket.kotlin:rsocket-ktor-client:${Versions.rsocket}"
+		)
+	}
 	object Jvm {
 		object Kotlin {
 			fun coroutines(scope: Scope) = FixersDependencies.Jvm.Kotlin.coroutines(scope)
