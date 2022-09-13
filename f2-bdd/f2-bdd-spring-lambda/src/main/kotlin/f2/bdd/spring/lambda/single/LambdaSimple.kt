@@ -5,23 +5,23 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-open class LambdaSimple {
+class LambdaSimple {
 
 	@Bean
-	open fun lambdaSingleReceiver(): StringConsumerReceiver = StringConsumerReceiver()
+	fun lambdaSingleReceiver(): StringConsumerReceiver = StringConsumerReceiver()
 
 	@Bean
-	open fun functionSingle(): (String) -> String = { value ->
+	fun functionSingle(): (String) -> String = { value ->
 		value.reversed()
 	}
 
 	@Bean
-	open fun supplierSingle(): () -> String = {
+	fun supplierSingle(): () -> String = {
 		"supplierValuePureKotlinValue"
 	}
 
 	@Bean
-	open fun consumerSingle(receiver: ConsumerReceiver<String>): (String) -> Unit = {
+	fun consumerSingle(receiver: ConsumerReceiver<String>): (String) -> Unit = {
 		receiver.items.add(it)
 	}
 }
