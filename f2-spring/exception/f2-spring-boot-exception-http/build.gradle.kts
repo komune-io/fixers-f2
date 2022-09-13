@@ -7,6 +7,10 @@ plugins {
 
 dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor:${Versions.Spring.boot}")
+
     Dependencies.Jvm.Spring.cloudFunction(::implementation)
     Dependencies.Jvm.Spring.cloudFunctionWebflux(::api)
+
+    testImplementation(project(":f2-bdd:f2-bdd-spring-lambda"))
+    testImplementation(project(":f2-client:f2-client-ktor"))
 }

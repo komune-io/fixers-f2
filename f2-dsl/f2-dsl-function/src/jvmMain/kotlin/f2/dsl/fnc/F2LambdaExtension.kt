@@ -1,12 +1,12 @@
 package f2.dsl.fnc
 
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 fun <T, R> f2LambdaFunction(fnc: suspend (t: T) -> R): F2LambdaFunction<T, R> = { flow ->
 	flow.map { value -> fnc(value) }

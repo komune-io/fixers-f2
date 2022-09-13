@@ -15,7 +15,7 @@ abstract class HttpF2GenericsStepsBase<P, R>(
 	val prefix: String
 ) : F2SpringStep() {
 
-	fun En.prepareFunctionCatalogSteps() {
+	open fun En.prepareFunctionCatalogSteps() {
 		prepareSteps()
 
 		When("${prefix}Function catalog contains") { table: DataTable ->
