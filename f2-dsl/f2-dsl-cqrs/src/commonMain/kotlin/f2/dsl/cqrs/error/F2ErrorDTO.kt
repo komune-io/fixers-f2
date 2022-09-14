@@ -7,20 +7,24 @@ import kotlin.js.JsName
 @JsExport
 @JsName("F2ErrorDTO")
 interface F2ErrorDTO {
+	val id: String
 	val timestamp: String
-	val status: Int
 	val code: Int
-	val requestId: String
-	val error: String
+	val requestId: String?
+	val message: String
 }
 
 @Serializable
 @JsExport
 @JsName("F2Error")
 open class F2Error(
+	override val id: String,
 	override val timestamp: String,
-	override val status: Int,
 	override val code: Int,
-	override val requestId: String,
-	override val error: String
-) : F2ErrorDTO
+	override val message: String,
+	override val requestId: String? = null,
+) : F2ErrorDTO {
+	override fun toString(): String {
+		return "F2Error(timestamp='$timestamp', code=$code, requestId='$requestId', message='$message')"
+	}
+}

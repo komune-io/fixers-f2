@@ -1,7 +1,7 @@
 package f2.spring.http.cucumber.exception
 
 import f2.bdd.spring.lambda.HttpF2GenericsStepsBase
-import f2.spring.exception.F2Exception
+import f2.dsl.cqrs.exception.F2Exception
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.delay
@@ -50,14 +50,14 @@ abstract class ExceptionsHttpF2GenericsStepsBase<P, R>(prefix: String): HttpF2Ge
         Then("${prefix}An exception with code {int} has been thrown for {string}") { code: Int, name: String ->
             val exception = bag.exceptions[name]
             Assertions.assertThat(exception).isInstanceOf(F2Exception::class.java)
-            Assertions.assertThat((exception as F2Exception).code).isEqualTo(code)
+            Assertions.assertThat((exception as F2Exception).error.code).isEqualTo(code)
         }
     }
 
     private fun step(name: String, block: suspend () -> Unit) = runBlocking {
         try {
             block()
-        } catch (e: F2Exception) {
+        } catch (e: Throwable) {
             bag.exceptions[name] = e
         }
     }

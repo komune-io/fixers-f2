@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import org.springframework.http.HttpStatus
 
-class MessageConverterException(cause: JsonMappingException): F2Exception(
+class MessageConverterException(cause: JsonMappingException): F2HttpException(
     status = HttpStatus.BAD_REQUEST,
     message = computeMessage(cause),
     cause = cause

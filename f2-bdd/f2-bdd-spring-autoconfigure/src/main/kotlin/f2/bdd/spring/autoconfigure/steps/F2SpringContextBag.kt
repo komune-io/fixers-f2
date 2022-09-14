@@ -27,7 +27,7 @@ class F2SpringContextBag {
 
 	var applicationParameters: Map<String, String> = emptyMap()
 	var result: MutableMap<String, Any> = mutableMapOf()
-	var exceptions: MutableMap<String, Exception> = mutableMapOf()
+	var exceptions: MutableMap<String, Throwable> = mutableMapOf()
 	lateinit var contextBuilder: ReactiveWebApplicationContextRunner
 	var applicationContext: GenericApplicationContext? = null
 

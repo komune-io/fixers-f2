@@ -5,10 +5,11 @@ import kotlinx.serialization.Serializable
 import kotlin.js.JsExport
 import kotlin.js.JsName
 
-@Serializable
 @JsExport
 @JsName("F2Exception")
 open class F2Exception(
-	val id: String,
-	val error: F2Error
-) : Exception(error.error)
+	val error: F2Error,
+	cause: Throwable? = null
+) : RuntimeException(error.message, cause) {
+	companion object
+}

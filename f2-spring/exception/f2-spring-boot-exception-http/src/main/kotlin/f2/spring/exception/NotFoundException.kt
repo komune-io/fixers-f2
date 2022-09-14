@@ -4,8 +4,8 @@ import org.springframework.http.HttpStatus
 
 class NotFoundException(
     val name: String,
-    val id: String
-): F2Exception(
+    id: String
+): F2HttpException(
     status = HttpStatus.NOT_FOUND,
     message = "$name [$id] not found",
     cause = null
