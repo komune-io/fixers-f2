@@ -4,7 +4,6 @@ import kotlinx.serialization.Serializable
 import kotlin.js.JsExport
 import kotlin.js.JsName
 
-@Serializable
 @JsExport
 @JsName("Message")
 interface Message

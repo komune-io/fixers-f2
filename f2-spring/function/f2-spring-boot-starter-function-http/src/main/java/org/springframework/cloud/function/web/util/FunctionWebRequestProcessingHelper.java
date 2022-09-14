@@ -16,6 +16,11 @@
 
 package org.springframework.cloud.function.web.util;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -32,13 +37,9 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * !INTERNAL USE ONLY!
@@ -56,6 +57,8 @@ public final class FunctionWebRequestProcessingHelper {
 
     public static FunctionInvocationWrapper findFunction(FunctionProperties functionProperties, HttpMethod method, FunctionCatalog functionCatalog,
                                                          Map<String, Object> attributes, String path, String[] acceptContentTypes) {
+        // FIX SMARTB - For web browser we need to answer empty OPTIONS REQUEST -
+        // TODO Try to replace it with OptionFunctionController
         if(method.equals(HttpMethod.OPTIONS)) return null;
         if (method.equals(HttpMethod.GET) || method.equals(HttpMethod.POST)) {
             return doFindFunction(functionProperties.getDefinition(), method, functionCatalog, attributes, path, acceptContentTypes);
@@ -119,9 +122,11 @@ public final class FunctionWebRequestProcessingHelper {
             }
 
             if (pResult instanceof Flux) {
-                pResult = ((Flux) pResult).onErrorContinue((e, v) -> {
-                    logger.error("Failed to process value: " + v, (Throwable) e);
-                }).collectList();
+                pResult = ((Flux) pResult).collectList();
+                // FIX SMARTB force message conversion error propagation
+//                pResult = ((Flux) pResult).onErrorContinue((e, v) -> {
+//                    logger.error("Failed to process value: " + v, (Throwable) e);
+//                }).collectList();
             }
             pResult = Mono.from(pResult);
         }

@@ -10,8 +10,4 @@ dependencies {
 
     Dependencies.Jvm.Spring.cloudFunction(::implementation)
     Dependencies.Jvm.Spring.cloudFunctionWebflux(::api)
-
-    testImplementation(project(":f2-spring:function:f2-spring-boot-starter-function"))
-    testImplementation(project(":f2-bdd:f2-bdd-spring-lambda"))
-    testImplementation(project(":f2-client:f2-client-ktor"))
 }

@@ -1,4 +1,4 @@
-package f2.spring.exception.http.cucumber
+package f2.spring.http.cucumber.exception
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -6,7 +6,7 @@ import f2.bdd.spring.lambda.vehicle.Vehicle
 import f2.bdd.spring.lambda.vehicle.VehicleReceiver
 import f2.client.ktor.F2ClientBuilder
 import f2.client.ktor.get
-import f2.spring.exception.http.F2SpringExceptionsHttpCucumberConfig
+import f2.spring.http.F2SpringHttpCucumberConfig
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.flow.Flow
@@ -38,7 +38,7 @@ class ExceptionsHttpF2ExceptionSteps: ExceptionsHttpF2GenericsStepsBase<Any, Any
 			.map(::toJson)
 
 		F2ClientBuilder
-			.get(F2SpringExceptionsHttpCucumberConfig.urlBase(bag))
+			.get(F2SpringHttpCucumberConfig.urlBase(bag))
 			.function(functionName)
 			.invoke(json)
 			.toList()
@@ -46,18 +46,20 @@ class ExceptionsHttpF2ExceptionSteps: ExceptionsHttpF2GenericsStepsBase<Any, Any
 	}
 
 	override fun consumer(json: Flow<String>, consumerName: String): Unit = runBlocking {
-		F2ClientBuilder.get(F2SpringExceptionsHttpCucumberConfig.urlBase(bag)).consumer(consumerName).invoke(json)
+		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).consumer(consumerName).invoke(json)
 	}
 
 	override fun supplier(supplierName: String) = runBlocking {
-		F2ClientBuilder.get(F2SpringExceptionsHttpCucumberConfig.urlBase(bag)).supplier(supplierName).invoke().toList()
+		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).supplier(supplierName).invoke().toList()
 	}
 
 	override fun fromJson(msg: String): Vehicle {
+		println(msg)
 		return objectMapper.readValue(msg)
 	}
 
 	override fun toJson(msg: Any): String {
+		println(msg)
 		return objectMapper.writeValueAsString(msg)
 	}
 }

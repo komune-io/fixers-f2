@@ -5,7 +5,6 @@ import kotlin.js.JsName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.StructureKind
 
-@Serializable
 @JsExport
 @JsName("PageDTO")
 interface PageDTO<out OBJECT> {

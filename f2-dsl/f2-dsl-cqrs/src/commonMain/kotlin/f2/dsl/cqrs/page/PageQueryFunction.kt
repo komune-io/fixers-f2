@@ -6,14 +6,12 @@ import kotlinx.serialization.Serializable
 import kotlin.js.JsExport
 import kotlin.js.JsName
 
-@Serializable
 @JsExport
 @JsName("PageQueryDTO")
 interface PageQueryDTO : Query {
 	val pagination: OffsetPaginationDTO?
 }
 
-@Serializable
 @JsExport
 @JsName("PageQueryResultDTO")
 interface PageQueryResultDTO<out OBJECT> : Event, PageDTO<OBJECT> {

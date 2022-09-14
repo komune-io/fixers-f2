@@ -9,7 +9,6 @@ import kotlin.js.JsName
 @JsName("Pagination")
 sealed interface Pagination
 
-@Serializable
 @JsExport
 @JsName("OffsetPaginationDTO")
 interface OffsetPaginationDTO {
@@ -26,7 +25,6 @@ class OffsetPagination(
 ) : OffsetPaginationDTO, Pagination
 
 
-@Serializable
 @JsExport
 @JsName("PagePaginationDTO")
 interface PagePaginationDTO {

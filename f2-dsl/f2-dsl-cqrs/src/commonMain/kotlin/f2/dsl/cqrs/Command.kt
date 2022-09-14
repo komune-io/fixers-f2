@@ -5,7 +5,6 @@ import kotlin.js.JsExport
 import kotlin.js.JsName
 
 
-@Serializable
 @JsExport
 @JsName("Command")
 interface Command: Message

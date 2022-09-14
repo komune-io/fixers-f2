@@ -1,4 +1,4 @@
-package f2.spring.exception.http.cucumber
+package f2.spring.http.cucumber.exception
 
 import f2.bdd.spring.lambda.HttpF2GenericsStepsBase
 import f2.spring.exception.F2Exception
