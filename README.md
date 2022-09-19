@@ -46,7 +46,7 @@ It also interface for querying a page o result `f2.dsl.cqrs.PageRequest` and `Pa
 <dependency>
   <groupId>city.smartb.f2</groupId>
   <artifactId>f2-dsl-cqrs</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>${Versions.f2}</version>
 </dependency>
 ```
 
@@ -61,7 +61,7 @@ F2 provide basic configuration for spring cloud function
 <dependency>
   <groupId>city.smartb.f2</groupId>
   <artifactId>f2-spring-boot-starter-function-http</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>${Versions.f2}</version>
 </dependency>
 ```
 
@@ -70,9 +70,26 @@ F2 provide basic configuration for spring cloud function
 <dependency>
   <groupId>city.smartb.f2</groupId>
   <artifactId>f2-spring-boot-starter-function-rsocker</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>${Versions.f2}</version>
 </dependency>
 ```
+
+#### Openapi
+
+Integration with Springdoc to generate open api documentation.
+
+* Depencencies to deploy springdoc with swagger ui
+```
+<dependency>
+  <groupId>city.smartb.f2</groupId>
+  <artifactId>f2-spring-boot-openapi</artifactId>
+  <version>${Versions.f2}</version>
+</dependency>
+```
+
+* Configuration can be done as describe in springdoc documentation  
+  https://springdoc.org/#features
+
 
 ## RSOCKET 
 

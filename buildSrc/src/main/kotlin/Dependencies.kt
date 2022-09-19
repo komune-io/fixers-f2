@@ -27,6 +27,7 @@ object Versions {
 		const val data = FixersVersions.Spring.data
 	}
 
+	const val springdoc = "1.6.11"
 	const val rsocket = "0.15.4"
 	const val embedMongo = "2.2.0"
 }
