@@ -87,7 +87,7 @@ Integration with Springdoc to generate open api documentation.
 </dependency>
 ```
 
-* Configuration can be done as describe in springdoc documentation  
+* Configuration can be done as describe in springdoc documentation
   https://springdoc.org/#features
 
 
