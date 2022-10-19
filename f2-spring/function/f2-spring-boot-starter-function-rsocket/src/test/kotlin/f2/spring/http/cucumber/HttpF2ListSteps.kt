@@ -1,29 +1,25 @@
 package f2.spring.http.cucumber
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
-import f2.bdd.spring.lambda.HttpF2GenericsStepsBase
+import f2.bdd.spring.lambda.HttpF2GenericsStepsNext
 import f2.bdd.spring.lambda.single.StringConsumerReceiver
+import f2.client.consumerInl
+import f2.client.functionInl
 import f2.client.ktor.F2ClientBuilder
 import f2.client.ktor.get
+import f2.client.supplierInl
 import f2.spring.http.F2SpringRSocketCucumberConfig
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
 
-class HttpF2ListSteps : HttpF2GenericsStepsBase<List<String>, List<String>>("List: "), En {
+class HttpF2ListSteps : HttpF2GenericsStepsNext<List<String>, List<String>>("List: "), En {
 
 	init {
 		prepareFunctionCatalogSteps()
 	}
-
-	private val objectMapper = jacksonObjectMapper()
 
 	override fun transform(dataTable: DataTable): List<List<String>> {
 		return dataTable.asList().map {
@@ -36,32 +32,28 @@ class HttpF2ListSteps : HttpF2GenericsStepsBase<List<String>, List<String>>("Lis
 		return listOf(bean.items as List<String>)
 	}
 
-	override fun function(table: DataTable, functionName: String) = runBlocking {
-		val json = transform(table)
-			.asFlow()
-			.map(::toJson)
-
+	override fun function(functionName: String, msgs: Flow<List<String>>) = runBlocking {
 		F2ClientBuilder
 			.get(F2SpringRSocketCucumberConfig.urlBase(bag))
-			.function(functionName)
-			.invoke(json)
+			.functionInl<List<String>, List<String>>(functionName)
+			.invoke(msgs)
 			.toList()
 
 	}
 
-	override fun consumer(json: Flow<String>, consumerName: String): Unit = runBlocking {
-		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).consumer(consumerName).invoke(json)
+	override fun consumer(consumerName: String, msgs: Flow<List<String>>): Unit = runBlocking {
+		F2ClientBuilder
+			.get(F2SpringRSocketCucumberConfig.urlBase(bag))
+			.consumerInl<List<String>>(consumerName)
+			.invoke(msgs)
 	}
 
 	override fun supplier(supplierName: String) = runBlocking {
-		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).supplier(supplierName).invoke().toList()
+		F2ClientBuilder
+			.get(F2SpringRSocketCucumberConfig.urlBase(bag))
+			.supplierInl<List<String>>(supplierName)
+			.invoke()
+			.toList()
 	}
 
-	override fun fromJson(msg: String): List<String> {
-		return objectMapper.readValue(msg)
-	}
-
-	override fun toJson(msg: List<String>): String {
-		return objectMapper.writeValueAsString(msg)
-	}
 }

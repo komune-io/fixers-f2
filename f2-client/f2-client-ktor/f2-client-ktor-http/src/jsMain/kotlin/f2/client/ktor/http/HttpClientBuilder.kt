@@ -1,6 +1,7 @@
 package f2.client.ktor.http
 
 import f2.client.F2Client
+import f2.client.F2ClientType
 import f2.client.jsonF2Config
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.js.Js

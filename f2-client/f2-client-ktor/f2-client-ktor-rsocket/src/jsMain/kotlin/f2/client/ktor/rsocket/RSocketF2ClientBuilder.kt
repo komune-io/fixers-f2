@@ -1,6 +1,7 @@
 package f2.client.ktor.rsocket
 
 import f2.client.F2Client
+import f2.client.F2ClientType
 import io.rsocket.kotlin.RSocket
 import io.rsocket.kotlin.ktor.client.rSocket
 import kotlinx.coroutines.GlobalScope

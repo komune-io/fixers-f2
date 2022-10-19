@@ -1,21 +1,21 @@
 package f2.spring.http.cucumber
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import f2.bdd.spring.lambda.HttpF2GenericsStepsBase
+import f2.bdd.spring.lambda.HttpF2GenericsStepsNext
 import f2.bdd.spring.lambda.single.StringConsumerReceiver
+import f2.client.consumerInl
+import f2.client.functionInl
 import f2.client.ktor.F2ClientBuilder
 import f2.client.ktor.get
+import f2.client.supplierInl
 import f2.spring.http.F2SpringHttpCucumberConfig
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
-class HttpF2FlowSteps : HttpF2GenericsStepsBase<String, String>("Flow: "), En {
+class HttpF2FlowSteps : HttpF2GenericsStepsNext<String, String>("Flow: "), En {
 
 	init {
 		prepareFunctionCatalogSteps()
@@ -32,32 +32,27 @@ class HttpF2FlowSteps : HttpF2GenericsStepsBase<String, String>("Flow: "), En {
 		return bean.items
 	}
 
-	override fun function(table: DataTable, functionName: String) = runBlocking {
-		val json = transform(table)
-			.asFlow()
-			.map(::toJson)
-
+	override fun function(functionName: String, msgs: Flow<String>) = runBlocking {
 		F2ClientBuilder
 			.get(F2SpringHttpCucumberConfig.urlBase(bag))
-			.function(functionName)
-			.invoke(json)
+			.functionInl<String, String>(functionName)
+			.invoke(msgs)
 			.toList()
 
 	}
 
-	override fun consumer(json: Flow<String>, consumerName: String): Unit = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).consumer(consumerName).invoke(json)
+	override fun consumer(consumerName: String, msgs: Flow<String>): Unit = runBlocking {
+		F2ClientBuilder
+			.get(F2SpringHttpCucumberConfig.urlBase(bag))
+			.consumerInl<String>(consumerName)
+			.invoke(msgs)
 	}
 
 	override fun supplier(supplierName: String) = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).supplier(supplierName).invoke().toList()
-	}
-
-	override fun fromJson(msg: String): String {
-		return objectMapper.readValue(msg)
-	}
-
-	override fun toJson(msg: String): String {
-		return msg
+		F2ClientBuilder
+			.get(F2SpringHttpCucumberConfig.urlBase(bag))
+			.supplierInl<String>(supplierName)
+			.invoke()
+			.toList()
 	}
 }

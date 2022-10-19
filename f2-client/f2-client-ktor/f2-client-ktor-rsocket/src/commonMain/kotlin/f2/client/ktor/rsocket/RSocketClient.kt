@@ -6,7 +6,6 @@ import io.rsocket.kotlin.metadata.metadata
 import io.rsocket.kotlin.payload.Payload
 import io.rsocket.kotlin.payload.buildPayload
 import io.rsocket.kotlin.payload.data
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 

@@ -14,7 +14,6 @@ import org.junit.platform.suite.api.Suite
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "${F2SpringStep.GLUE}, f2")
 class F2SpringHttpCucumberTests
 
-
 object F2SpringHttpCucumberConfig {
 	fun urlBase(bag: F2SpringContextBag) = "http://localhost:${bag.httpPort}"
 }

@@ -10,3 +10,7 @@ expect class RSocketF2Client : F2Client {
 	override fun function(route: String): F2Function<String, String>
 	override fun consumer(route: String): F2Consumer<String>
 }
+
+data class Response<T>(
+	val paylaod: T
+)

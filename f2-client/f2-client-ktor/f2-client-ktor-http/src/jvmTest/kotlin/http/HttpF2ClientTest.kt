@@ -1,3 +1,4 @@
+import f2.client.F2ClientType
 import f2.client.jsonF2Config
 import f2.client.ktor.http.HttpF2Client
 import io.ktor.client.*

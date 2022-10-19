@@ -1,6 +1,6 @@
 package f2.spring.http.cucumber
 
-import f2.bdd.spring.lambda.HttpF2GenericsStepsBase
+import f2.bdd.spring.lambda.HttpF2GenericsStepsNext
 import f2.bdd.spring.lambda.single.StringConsumerReceiver
 import f2.client.ktor.F2ClientBuilder
 import f2.client.ktor.get
@@ -8,12 +8,10 @@ import f2.spring.http.F2SpringRSocketCucumberConfig
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
-class HttpF2SingleSteps : HttpF2GenericsStepsBase<String, String>("Single: "), En {
+class HttpF2SingleSteps : HttpF2GenericsStepsNext<String, String>("Single: "), En {
 
 	init {
 		prepareFunctionCatalogSteps()
@@ -28,32 +26,21 @@ class HttpF2SingleSteps : HttpF2GenericsStepsBase<String, String>("Single: "), E
 		return bean.items
 	}
 
-	override fun function(table: DataTable, functionName: String) = runBlocking {
-		val json = transform(table)
-			.asFlow()
-			.map(::toJson)
-
+	override fun function(functionName: String, msgs: Flow<String>) = runBlocking {
 		F2ClientBuilder
 			.get(F2SpringRSocketCucumberConfig.urlBase(bag))
 			.function(functionName)
-			.invoke(json)
+			.invoke(msgs)
 			.toList()
 
 	}
 
-	override fun consumer(json: Flow<String>, consumerName: String): Unit = runBlocking {
-		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).consumer(consumerName).invoke(json)
+	override fun consumer(consumerName: String, msgs: Flow<String>): Unit = runBlocking {
+		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).consumer(consumerName).invoke(msgs)
 	}
 
 	override fun supplier(supplierName: String) = runBlocking {
 		F2ClientBuilder.get(F2SpringRSocketCucumberConfig.urlBase(bag)).supplier(supplierName).invoke().toList()
 	}
 
-	override fun fromJson(msg: String): String {
-		return msg
-	}
-
-	override fun toJson(msg: String): String {
-		return msg
-	}
 }
