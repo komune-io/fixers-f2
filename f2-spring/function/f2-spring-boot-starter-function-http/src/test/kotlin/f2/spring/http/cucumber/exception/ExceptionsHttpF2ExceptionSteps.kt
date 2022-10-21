@@ -1,65 +1,50 @@
 package f2.spring.http.cucumber.exception
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import f2.bdd.spring.lambda.vehicle.Vehicle
-import f2.bdd.spring.lambda.vehicle.VehicleReceiver
+import f2.bdd.spring.lambda.single.StringConsumerReceiver
+import f2.client.consumerInl
+import f2.client.functionInl
 import f2.client.ktor.F2ClientBuilder
 import f2.client.ktor.get
+import f2.client.supplierInl
 import f2.spring.http.F2SpringHttpCucumberConfig
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
-class ExceptionsHttpF2ExceptionSteps: ExceptionsHttpF2GenericsStepsBase<Any, Any>("Exceptions: "), En {
+class ExceptionsHttpF2ExceptionSteps: ExceptionsHttpF2GenericsStepsBase<MutableMap<String, String>, String>("Exceptions: "), En {
 
 	init {
 		prepareFunctionCatalogSteps()
 	}
-
-	private val objectMapper = jacksonObjectMapper()
-
-	override fun transform(dataTable: DataTable): List<Any> {
+	override fun transform(dataTable: DataTable): List<MutableMap<String, String>> {
 		return dataTable.asMaps()
 	}
 
-	override fun consumerReceiver(): List<Vehicle> {
-		val bean = bag.applicationContext!!.getBean(VehicleReceiver::class.java)
+	override fun consumerReceiver(): List<String> {
+		val bean = bag.applicationContext!!.getBean(StringConsumerReceiver::class.java)
 		return bean.items
 	}
 
-	override fun function(table: DataTable, functionName: String) = runBlocking {
-		val json = transform(table)
-			.asFlow()
-			.map(::toJson)
-
+	override fun function(functionName: String, msgs: Flow<MutableMap<String, String>>) = runBlocking {
 		F2ClientBuilder
 			.get(F2SpringHttpCucumberConfig.urlBase(bag))
-			.function(functionName)
-			.invoke(json)
+			.functionInl<MutableMap<String, String>, String>(functionName)
+			.invoke(msgs)
 			.toList()
 
 	}
 
-	override fun consumer(json: Flow<String>, consumerName: String): Unit = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).consumer(consumerName).invoke(json)
+	override fun consumer(consumerName: String, msgs: Flow<MutableMap<String, String>>): Unit = runBlocking {
+		F2ClientBuilder
+			.get(F2SpringHttpCucumberConfig.urlBase(bag))
+			.consumerInl<MutableMap<String, String>>(consumerName)
+			.invoke(msgs)
 	}
 
 	override fun supplier(supplierName: String) = runBlocking {
-		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).supplier(supplierName).invoke().toList()
+		F2ClientBuilder.get(F2SpringHttpCucumberConfig.urlBase(bag)).supplierInl<String>(supplierName).invoke().toList()
 	}
 
-	override fun fromJson(msg: String): Vehicle {
-		println(msg)
-		return objectMapper.readValue(msg)
-	}
-
-	override fun toJson(msg: Any): String {
-		println(msg)
-		return objectMapper.writeValueAsString(msg)
-	}
 }

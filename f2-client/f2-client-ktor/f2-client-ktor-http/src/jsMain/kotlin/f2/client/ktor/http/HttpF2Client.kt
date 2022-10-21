@@ -31,33 +31,6 @@ actual open class HttpF2Client(
 		return url
 	}
 
-	actual override fun supplier(route: String): F2Supplier<String> = object : F2Supplier<String> {
-		override fun invoke(): Promise<Array<String>> = GlobalScope.promise {
-			val url = buildUrl(route)
-			httpClient.get(url).body()
-		}
-	}
-
-	actual override fun function(route: String): F2Function<String, String> =
-		object : F2Function<String, String> {
-			override fun invoke(cmd: String): Promise<String> = GlobalScope.promise {
-				val url = buildUrl(route)
-				httpClient.post(url) {
-					setBody(cmd)
-				}.body()
-			}
-		}
-
-	actual override fun consumer(route: String): F2Consumer<String> =
-		object : F2Consumer<String> {
-			override fun invoke(cmd: String): Promise<Unit> = GlobalScope.promise {
-				val url = buildUrl(route)
-				httpClient.get(url) {
-					setBody(cmd)
-				}
-			}
-		}
-
 	override fun <RESPONSE> supplierGen(route: String, typeInfo: TypeInfo): F2Supplier<RESPONSE> = object : F2Supplier<RESPONSE> {
 		override fun invoke(): Promise<Array<RESPONSE>> = GlobalScope.promise {
 			val url = buildUrl(route)

@@ -1,6 +1,6 @@
 package f2.spring.http.cucumber
 
-import f2.bdd.spring.lambda.HttpF2GenericsStepsNext
+import f2.bdd.spring.lambda.HttpF2GenericsSteps
 import f2.bdd.spring.lambda.single.StringConsumerReceiver
 import f2.client.consumerInl
 import f2.client.functionInl
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
 
-class HttpF2ListSteps : HttpF2GenericsStepsNext<List<String>, List<String>>("List: "), En {
+class HttpF2ListSteps : HttpF2GenericsSteps<List<String>, List<String>>("List: "), En {
 
 	init {
 		prepareFunctionCatalogSteps()

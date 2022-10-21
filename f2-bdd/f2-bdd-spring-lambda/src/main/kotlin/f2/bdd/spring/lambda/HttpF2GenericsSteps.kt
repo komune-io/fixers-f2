@@ -6,12 +6,11 @@ import io.cucumber.java8.En
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.springframework.cloud.function.context.FunctionCatalog
 
-abstract class HttpF2GenericsStepsBase<P, R>(
+abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 	val prefix: String
 ) : F2SpringStep() {
 
@@ -28,18 +27,19 @@ abstract class HttpF2GenericsStepsBase<P, R>(
 
 		When("${prefix}Execute supplier {string}") { supplierName: String ->
 			val result = supplier(supplierName)
-			bag.result[supplierName] = result.map(::fromJson)
+			bag.result[supplierName] = result
 		}
 
 		When("${prefix}Execute function {string} with") { functionName: String, table: DataTable ->
-			val result = function(table, functionName)
-			bag.result[functionName] = result.map(::fromJson)
+			val msgs = transform(table).asFlow()
+			val result = function(functionName, msgs)
+			bag.result[functionName] = result
 		}
 
 		When("${prefix}Execute consumer {string} with") { consumerName: String, table: DataTable ->
 			runBlocking {
-				val json = transform(table).asFlow().map(::toJson)
-				consumer(json, consumerName)
+				val msgs = transform(table).asFlow()
+				consumer(consumerName, msgs)
 				delay(timeMillis = 500L)
 				bag.result[consumerName] = consumerReceiver()
 			}
@@ -47,18 +47,17 @@ abstract class HttpF2GenericsStepsBase<P, R>(
 
 		@Suppress("UNCHECKED_CAST")
 		Then("${prefix}The result for {string} is") { value: String, dataTable: DataTable ->
-			val result = (bag.result[value] as List<P>?)
+			val result = (bag.result[value] as List<REQUEST>?)
 			val expected = transform(dataTable)
 			Assertions.assertThat(result).isEqualTo(expected)
 		}
 	}
 
-	abstract fun function(table: DataTable, functionName: String): List<String>
-	abstract fun consumer(table: Flow<String>, consumerName: String)
-	abstract fun supplier(supplierName: String): List<String>
+	abstract fun function(functionName: String, msgs: Flow<REQUEST>): List<RESPONSE>
+	abstract fun consumer(consumerName: String, msgs: Flow<REQUEST>)
+	abstract fun supplier(supplierName: String): List<RESPONSE>
 
-	abstract fun transform(dataTable: DataTable): List<P>
-	abstract fun toJson(msg: P): String
-	abstract fun fromJson(msg: String): P
-	abstract fun consumerReceiver(): List<R>
+	abstract fun transform(dataTable: DataTable): List<REQUEST>
+	abstract fun consumerReceiver(): List<RESPONSE>
+
 }

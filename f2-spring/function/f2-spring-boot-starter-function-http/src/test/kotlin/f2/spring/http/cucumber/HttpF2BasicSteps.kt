@@ -1,7 +1,6 @@
 package f2.spring.http.cucumber
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import f2.bdd.spring.lambda.HttpF2GenericsStepsNext
+import f2.bdd.spring.lambda.HttpF2GenericsSteps
 import f2.bdd.spring.lambda.single.StringConsumerReceiver
 import f2.client.consumerInl
 import f2.client.functionInl
@@ -12,12 +11,10 @@ import f2.spring.http.F2SpringHttpCucumberConfig
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
-class HttpF2BasicSteps : HttpF2GenericsStepsNext<String, String>("Basic: "), En {
+class HttpF2BasicSteps : HttpF2GenericsSteps<String, String>("Basic: "), En {
 
 	init {
 		prepareFunctionCatalogSteps()

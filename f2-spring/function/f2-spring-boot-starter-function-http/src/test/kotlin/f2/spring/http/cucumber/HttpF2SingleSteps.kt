@@ -1,7 +1,6 @@
 package f2.spring.http.cucumber
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import f2.bdd.spring.lambda.HttpF2GenericsStepsNext
+import f2.bdd.spring.lambda.HttpF2GenericsSteps
 import f2.bdd.spring.lambda.single.StringConsumerReceiver
 import f2.client.consumerInl
 import f2.client.functionInl
@@ -15,12 +14,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
-class HttpF2SingleSteps : HttpF2GenericsStepsNext<String, String>("Single: "), En {
+class HttpF2SingleSteps : HttpF2GenericsSteps<String, String>("Single: "), En {
 
 	init {
 		prepareFunctionCatalogSteps()
 	}
-	private val objectMapper = jacksonObjectMapper()
 	override fun transform(dataTable: DataTable): List<String> {
 		return dataTable.asList()
 	}

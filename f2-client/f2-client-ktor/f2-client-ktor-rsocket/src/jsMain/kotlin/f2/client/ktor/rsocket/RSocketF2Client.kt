@@ -27,27 +27,6 @@ actual class RSocketF2Client(
 
 	override val type: F2ClientType = F2ClientType.RSOCKET
 
-	actual override fun supplier(route: String) = object : F2Supplier<String> {
-		override fun invoke() = GlobalScope.promise {
-			rSocketClient.requestStream(route).map {
-				handlePayloadResponse(it)
-			}.toList().toTypedArray()
-		}
-	}
-
-	actual override fun function(route: String): F2Function<String, String> = object : F2Function<String, String> {
-		override fun invoke(cmd: String) = GlobalScope.promise {
-			val payload = rSocketClient.requestResponse(route, cmd)
-			handlePayloadResponse(payload)
-		}
-	}
-
-	actual override fun consumer(route: String): F2Consumer<String> = object : F2Consumer<String> {
-		override fun invoke(cmd: String): Promise<Unit> = GlobalScope.promise {
-			rSocketClient.fireAndForget(route, cmd)
-		}
-	}
-
 	override fun <RESPONSE> supplierGen(route: String, typeInfo: TypeInfo) = object : F2Supplier<RESPONSE> {
 		override fun invoke() = GlobalScope.promise {
 			rSocketClient.requestStream(route).map {

@@ -1,5 +1,3 @@
-import f2.client.F2ClientType
-import f2.client.jsonF2Config
 import f2.client.ktor.http.HttpF2Client
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -17,7 +15,7 @@ class HttpF2ClientTest {
 		val client = HttpF2Client(
 			httpClient =  HttpClient(CIO) {
 				install(ContentNegotiation) {
-					json(jsonF2Config)
+					json()
 				}
 			},
 			"https://www.google.fr",

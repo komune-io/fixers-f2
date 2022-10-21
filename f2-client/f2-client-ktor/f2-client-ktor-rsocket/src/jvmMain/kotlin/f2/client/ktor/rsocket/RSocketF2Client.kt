@@ -32,26 +32,6 @@ actual class RSocketF2Client(
 		ignoreUnknownKeys = true
 	}
 
-	actual override fun supplier(route: String) = F2Supplier {
-		rSocketClient.requestStream(route).flatMapMerge {
-			val resp = handlePayloadResponse(it)
-			flowOf(resp)
-		}
-	}
-
-	actual override fun function(route: String): F2Function<String, String> = F2Function { msgs ->
-		msgs.map { msg ->
-			val payload = rSocketClient.requestResponse(route, msg)
-			handlePayloadResponse(payload)
-		}
-	}
-
-	actual override fun consumer(route: String): F2Consumer<String> = F2Consumer { msgs ->
-		msgs.map { msg ->
-			rSocketClient.fireAndForget(route, msg)
-		}.collect()
-	}
-
 	override fun <RESPONSE> supplierGen(route: String, responseTypeInfo: TypeInfo) = F2Supplier<RESPONSE> {
 		rSocketClient.requestStream(route).flatMapMerge {payload ->
 			handlePayloadResponse<RESPONSE>(payload, responseTypeInfo)

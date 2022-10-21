@@ -11,9 +11,6 @@ import kotlin.js.Promise
 @JsExport
 @JsName("F2Client")
 actual external interface F2Client {
-	actual fun supplier(route: String): F2Supplier<String>
-	actual fun function(route: String): F2Function<String, String>
-	actual fun consumer(route: String): F2Consumer<String>
 	actual fun <RESPONSE> supplierGen(route: String, responseTypeInfo: TypeInfo): F2Supplier<RESPONSE>
 	actual fun <QUERY, RESPONSE> functionGen(route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo): F2Function<QUERY, RESPONSE>
 	actual fun <QUERY> consumerGen(route: String, queryTypeInfo: TypeInfo): F2Consumer<QUERY>

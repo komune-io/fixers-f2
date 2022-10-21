@@ -14,8 +14,4 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 
-expect open class HttpF2Client : F2Client {
-	override fun supplier(route: String): F2Supplier<String>
-	override fun function(route: String): F2Function<String, String>
-	override fun consumer(route: String): F2Consumer<String>
-}
+expect open class HttpF2Client : F2Client
