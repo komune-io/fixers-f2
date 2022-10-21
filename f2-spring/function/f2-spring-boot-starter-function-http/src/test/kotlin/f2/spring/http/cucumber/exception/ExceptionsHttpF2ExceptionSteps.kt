@@ -1,5 +1,6 @@
 package f2.spring.http.cucumber.exception
 
+import f2.bdd.spring.lambda.HttpF2GenericsSteps
 import f2.bdd.spring.lambda.single.StringConsumerReceiver
 import f2.client.consumerInl
 import f2.client.functionInl
@@ -13,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 
-class ExceptionsHttpF2ExceptionSteps: ExceptionsHttpF2GenericsStepsBase<MutableMap<String, String>, String>("Exceptions: "), En {
+class ExceptionsHttpF2ExceptionSteps: HttpF2GenericsSteps<MutableMap<String, String>, String>("Exceptions: "), En {
 
 	init {
 		prepareFunctionCatalogSteps()

@@ -1,6 +1,7 @@
 package f2.bdd.spring.lambda
 
 import f2.bdd.spring.autoconfigure.steps.F2SpringStep
+import f2.dsl.cqrs.exception.F2Exception
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.delay
@@ -26,20 +27,24 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 		}
 
 		When("${prefix}Execute supplier {string}") { supplierName: String ->
-			val result = supplier(supplierName)
-			bag.result[supplierName] = result
+			step(supplierName) {
+				val result = supplier(supplierName)
+				bag.result[supplierName] = result
+			}
 		}
 
 		When("${prefix}Execute function {string} with") { functionName: String, table: DataTable ->
-			val msgs = transform(table).asFlow()
-			val result = function(functionName, msgs)
-			bag.result[functionName] = result
+			step(functionName) {
+				val json = transform(table).asFlow()
+				val result = function(functionName, json)
+				bag.result[functionName] = result
+			}
 		}
 
 		When("${prefix}Execute consumer {string} with") { consumerName: String, table: DataTable ->
-			runBlocking {
-				val msgs = transform(table).asFlow()
-				consumer(consumerName, msgs)
+			step(consumerName) {
+				val json = transform(table).asFlow()
+				consumer(consumerName, json)
 				delay(timeMillis = 500L)
 				bag.result[consumerName] = consumerReceiver()
 			}
@@ -50,6 +55,20 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 			val result = (bag.result[value] as List<REQUEST>?)
 			val expected = transform(dataTable)
 			Assertions.assertThat(result).isEqualTo(expected)
+		}
+
+		Then("${prefix}An exception with code {int} has been thrown for {string}") { code: Int, name: String ->
+			val exception = bag.exceptions[name]
+			Assertions.assertThat(exception).isInstanceOf(F2Exception::class.java)
+			Assertions.assertThat((exception as F2Exception).error.code).isEqualTo(code)
+		}
+	}
+
+	private fun step(name: String, block: suspend () -> Unit) = runBlocking {
+		try {
+			block()
+		} catch (e: Throwable) {
+			bag.exceptions[name] = e
 		}
 	}
 
