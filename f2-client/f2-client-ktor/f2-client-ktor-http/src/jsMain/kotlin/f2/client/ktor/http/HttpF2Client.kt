@@ -31,13 +31,13 @@ actual open class HttpF2Client(
 		return url
 	}
 
-	override fun <RESPONSE> supplierGen(route: String, typeInfo: TypeInfo): F2Supplier<RESPONSE> = object : F2Supplier<RESPONSE> {
+	override fun <RESPONSE> supplier(route: String, typeInfo: TypeInfo): F2Supplier<RESPONSE> = object : F2Supplier<RESPONSE> {
 		override fun invoke(): Promise<Array<RESPONSE>> = GlobalScope.promise {
 			val url = buildUrl(route)
 			httpClient.get(url).body(typeInfo)
 		}
 	}
-	override fun <QUERY, RESPONSE> functionGen(
+	override fun <QUERY, RESPONSE> function(
 		route: String,
 		queryTypeInfo: TypeInfo,
 		responseTypeInfo: TypeInfo,
@@ -45,7 +45,7 @@ actual open class HttpF2Client(
 		TODO("Not yet implemented")
 	}
 
-	override fun <QUERY> consumerGen(route: String, queryTypeInfo: TypeInfo): F2Consumer<QUERY> =
+	override fun <QUERY> consumer(route: String, queryTypeInfo: TypeInfo): F2Consumer<QUERY> =
 		object : F2Consumer<QUERY> {
 			override fun invoke(cmd: QUERY): Promise<Unit> = GlobalScope.promise {
 				val url = buildUrl(route)

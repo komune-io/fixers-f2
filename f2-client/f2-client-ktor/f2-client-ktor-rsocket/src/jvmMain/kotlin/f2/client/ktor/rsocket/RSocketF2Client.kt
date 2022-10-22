@@ -32,13 +32,13 @@ actual class RSocketF2Client(
 		ignoreUnknownKeys = true
 	}
 
-	override fun <RESPONSE> supplierGen(route: String, responseTypeInfo: TypeInfo) = F2Supplier<RESPONSE> {
+	override fun <RESPONSE> supplier(route: String, responseTypeInfo: TypeInfo) = F2Supplier<RESPONSE> {
 		rSocketClient.requestStream(route).flatMapMerge {payload ->
 			handlePayloadResponse<RESPONSE>(payload, responseTypeInfo)
 		}
 	}
 
-	override fun <QUERY, RESPONSE> functionGen(
+	override fun <QUERY, RESPONSE> function(
 		route: String,
 		queryTypeInfo: TypeInfo,
 		responseTypeInfo: TypeInfo,
@@ -50,7 +50,7 @@ actual class RSocketF2Client(
 		}
 	}
 
-	override fun <QUERY> consumerGen(route: String, queryTypeInfo: TypeInfo): F2Consumer<QUERY> = F2Consumer { msgs ->
+	override fun <QUERY> consumer(route: String, queryTypeInfo: TypeInfo): F2Consumer<QUERY> = F2Consumer { msgs ->
 		msgs.map { msg ->
 			val toSend = encode(msg, queryTypeInfo)
 			rSocketClient.fireAndForget(route, toSend)

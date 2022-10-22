@@ -68,7 +68,7 @@ actual open class HttpF2Client(
 		return response.body(typeInfo)
 	}
 
-	override fun <RESPONSE> supplierGen(route: String, responseTypeInfo: TypeInfo): F2Supplier<RESPONSE> = F2Supplier<RESPONSE> {
+	override fun <RESPONSE> supplier(route: String, responseTypeInfo: TypeInfo): F2Supplier<RESPONSE> = F2Supplier<RESPONSE> {
 		flow {
 			httpClient.get("$urlBase/${route}").let { response ->
 				handlePayloadResponse<List<RESPONSE>>(response, responseTypeInfo)
@@ -77,7 +77,7 @@ actual open class HttpF2Client(
 			}
 		}
 	}
-	override fun <QUERY, RESPONSE> functionGen(
+	override fun <QUERY, RESPONSE> function(
 		route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo
 	) = F2Function<QUERY, RESPONSE> { msg ->
 		flow {
@@ -91,7 +91,7 @@ actual open class HttpF2Client(
 			}
 		}
 	}
-	override fun <QUERY> consumerGen(route: String, queryTypeInfo: TypeInfo): F2Consumer<QUERY>  = F2Consumer { msg ->
+	override fun <QUERY> consumer(route: String, queryTypeInfo: TypeInfo): F2Consumer<QUERY>  = F2Consumer { msg ->
 		httpClient.post("$urlBase/${route}") {
 			contentType(ContentType.Application.Json)
 			setBody(msg.toList(), queryTypeInfo)

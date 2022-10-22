@@ -1,12 +1,9 @@
 package f2.bdd.spring.lambda.flux
 
 import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
-import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.collect
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import reactor.core.publisher.Flux
-import java.util.function.Consumer
 
 @Configuration
 open class LambdaFlux {

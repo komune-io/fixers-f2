@@ -2,11 +2,11 @@ package f2.spring.http.cucumber
 
 import f2.bdd.spring.lambda.HttpF2GenericsSteps
 import f2.bdd.spring.lambda.single.StringConsumerReceiver
-import f2.client.consumerInl
-import f2.client.functionInl
+import f2.client.consumer
+import f2.client.function
 import f2.client.ktor.F2ClientBuilder
 import f2.client.ktor.get
-import f2.client.supplierInl
+import f2.client.supplier
 import f2.spring.http.F2SpringHttpCucumberConfig
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
@@ -35,7 +35,7 @@ class HttpF2ListSteps : HttpF2GenericsSteps<String, String>("List: "), En {
 	override fun function(functionName: String, msgs: Flow<String>) = runBlocking {
 		F2ClientBuilder
 			.get(F2SpringHttpCucumberConfig.urlBase(bag))
-			.functionInl<String, String>(functionName)
+			.function<String, String>(functionName)
 			.invoke(msgs)
 			.toList()
 	}
@@ -43,14 +43,14 @@ class HttpF2ListSteps : HttpF2GenericsSteps<String, String>("List: "), En {
 	override fun consumer(consumerName: String, msgs: Flow<String>): Unit = runBlocking {
 		F2ClientBuilder
 			.get(F2SpringHttpCucumberConfig.urlBase(bag))
-			.consumerInl<String>(consumerName)
+			.consumer<String>(consumerName)
 			.invoke(msgs)
 	}
 
 	override fun supplier(supplierName: String) = runBlocking {
 		F2ClientBuilder
 			.get(F2SpringHttpCucumberConfig.urlBase(bag))
-			.supplierInl<String>(supplierName)
+			.supplier<String>(supplierName)
 			.invoke()
 			.toList()
 	}

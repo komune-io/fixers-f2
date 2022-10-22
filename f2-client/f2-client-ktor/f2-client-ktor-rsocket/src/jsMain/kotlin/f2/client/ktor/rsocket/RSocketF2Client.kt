@@ -27,14 +27,14 @@ actual class RSocketF2Client(
 
 	override val type: F2ClientType = F2ClientType.RSOCKET
 
-	override fun <RESPONSE> supplierGen(route: String, typeInfo: TypeInfo) = object : F2Supplier<RESPONSE> {
+	override fun <RESPONSE> supplier(route: String, typeInfo: TypeInfo) = object : F2Supplier<RESPONSE> {
 		override fun invoke() = GlobalScope.promise {
 			rSocketClient.requestStream(route).map {
 				json.decodeFromString<Response<RESPONSE>>(it).paylaod
 			}.toList().toTypedArray()
 		}
 	}
-	override fun <QUERY, RESPONSE> functionGen(
+	override fun <QUERY, RESPONSE> function(
 		route: String,
 		queryTypeInfo: TypeInfo,
 		responseTypeInfo: TypeInfo,
@@ -47,7 +47,7 @@ actual class RSocketF2Client(
 	}
 
 
-	override fun <QUERY> consumerGen(route: String, queryTypeInfo: TypeInfo) = object : F2Consumer<QUERY> {
+	override fun <QUERY> consumer(route: String, queryTypeInfo: TypeInfo) = object : F2Consumer<QUERY> {
 		override fun invoke(cmd: QUERY): Promise<Unit> = GlobalScope.promise {
 			val toSend = handlePayload(cmd, queryTypeInfo)
 			rSocketClient.fireAndForget(route, toSend)

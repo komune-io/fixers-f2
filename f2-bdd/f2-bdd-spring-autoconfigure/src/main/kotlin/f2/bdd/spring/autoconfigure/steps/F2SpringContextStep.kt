@@ -4,10 +4,8 @@ import f2.bdd.spring.autoconfigure.ApplicationContextBuilder
 import f2.bdd.spring.autoconfigure.ApplicationContextRunnerBuilder
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
-import io.cucumber.java8.Scenario
-import org.assertj.core.api.Assertions
-import org.mockito.BDDMockito
 import kotlin.random.Random
+import org.assertj.core.api.Assertions
 
 open class F2SpringContextStep: F2SpringStep(), En {
 

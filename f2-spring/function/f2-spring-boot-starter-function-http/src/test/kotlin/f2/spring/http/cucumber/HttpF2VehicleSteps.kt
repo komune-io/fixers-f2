@@ -3,11 +3,11 @@ package f2.spring.http.cucumber
 import f2.bdd.spring.lambda.HttpF2GenericsSteps
 import f2.bdd.spring.lambda.vehicle.Vehicle
 import f2.bdd.spring.lambda.vehicle.VehicleReceiver
-import f2.client.consumerInl
-import f2.client.functionInl
+import f2.client.consumer
+import f2.client.function
 import f2.client.ktor.F2ClientBuilder
 import f2.client.ktor.get
-import f2.client.supplierInl
+import f2.client.supplier
 import f2.spring.http.F2SpringHttpCucumberConfig
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
@@ -39,7 +39,7 @@ class HttpF2VehicleSteps : HttpF2GenericsSteps<Vehicle, Vehicle>("Vehicle: "), E
 
 		F2ClientBuilder
 			.get(F2SpringHttpCucumberConfig.urlBase(bag))
-			.functionInl<Vehicle, Vehicle>(functionName)
+			.function<Vehicle, Vehicle>(functionName)
 			.invoke(msgs)
 			.toList()
 
@@ -48,14 +48,14 @@ class HttpF2VehicleSteps : HttpF2GenericsSteps<Vehicle, Vehicle>("Vehicle: "), E
 	override fun consumer(consumerName: String, msgs: Flow<Vehicle>): Unit = runBlocking {
 		F2ClientBuilder
 			.get(F2SpringHttpCucumberConfig.urlBase(bag))
-			.consumerInl<Vehicle>(consumerName)
+			.consumer<Vehicle>(consumerName)
 			.invoke(msgs)
 	}
 
 	override fun supplier(supplierName: String) = runBlocking {
 		F2ClientBuilder
 			.get(F2SpringHttpCucumberConfig.urlBase(bag))
-			.supplierInl<Vehicle>(supplierName)
+			.supplier<Vehicle>(supplierName)
 			.invoke()
 			.toList()
 	}
