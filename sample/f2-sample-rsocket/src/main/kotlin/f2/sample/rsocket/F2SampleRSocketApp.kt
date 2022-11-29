@@ -2,11 +2,11 @@ package f2.sample.rsocket
 
 import f2.dsl.fnc.F2Function
 import f2.dsl.fnc.f2Function
+import java.security.MessageDigest
+import java.util.Base64
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
-import java.security.MessageDigest
-import java.util.Base64
 
 /**
  * Declare Spring Boot Application

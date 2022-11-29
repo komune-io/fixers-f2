@@ -6,9 +6,9 @@ import io.ktor.client.engine.js.Js
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.DefaultJson
 import io.ktor.serialization.kotlinx.json.json
+import kotlin.js.Promise
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
-import kotlin.js.Promise
 import kotlinx.serialization.json.Json
 
 @JsExport

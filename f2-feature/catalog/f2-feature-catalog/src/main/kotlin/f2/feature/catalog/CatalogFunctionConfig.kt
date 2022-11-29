@@ -1,11 +1,11 @@
 package f2.feature.catalog
 
+import java.util.function.Consumer
+import java.util.function.Supplier
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.function.context.FunctionCatalog
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.util.function.Consumer
-import java.util.function.Supplier
 
 @Configuration
 class CatalogFunctionConfig {

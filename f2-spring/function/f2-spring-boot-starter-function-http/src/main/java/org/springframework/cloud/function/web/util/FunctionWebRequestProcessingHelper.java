@@ -16,11 +16,6 @@
 
 package org.springframework.cloud.function.web.util;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -37,9 +32,13 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * !INTERNAL USE ONLY!

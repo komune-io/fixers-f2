@@ -22,14 +22,6 @@
 
 package org.springdoc.core.providers;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Content;
@@ -46,7 +38,6 @@ import org.springdoc.core.SpringDocAnnotationsUtils;
 import org.springdoc.core.SpringDocConfigProperties;
 import org.springdoc.core.annotations.RouterOperations;
 import org.springdoc.core.fn.RouterOperation;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.function.context.FunctionCatalog;
@@ -59,6 +50,10 @@ import org.springframework.http.MediaType;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;

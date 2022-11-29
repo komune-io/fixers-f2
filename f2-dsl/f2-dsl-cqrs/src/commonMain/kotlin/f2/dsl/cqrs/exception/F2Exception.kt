@@ -1,7 +1,6 @@
 package f2.dsl.cqrs.exception
 
 import f2.dsl.cqrs.error.F2Error
-import kotlinx.serialization.Serializable
 import kotlin.js.JsExport
 import kotlin.js.JsName
 

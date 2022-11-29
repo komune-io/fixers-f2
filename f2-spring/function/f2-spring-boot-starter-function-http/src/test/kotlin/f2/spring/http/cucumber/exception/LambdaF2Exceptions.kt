@@ -4,7 +4,6 @@ import f2.dsl.fnc.F2Function
 import f2.dsl.fnc.F2Supplier
 import f2.dsl.fnc.f2Function
 import f2.dsl.fnc.f2Supplier
-import f2.spring.exception.ConflictException
 import f2.spring.exception.ForbiddenAccessException
 import f2.spring.exception.NotFoundException
 import kotlinx.serialization.Serializable

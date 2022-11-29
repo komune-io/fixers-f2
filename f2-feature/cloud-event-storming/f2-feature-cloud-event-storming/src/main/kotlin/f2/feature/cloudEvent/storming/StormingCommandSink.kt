@@ -5,10 +5,10 @@ import f2.dsl.cqrs.Command
 import f2.dsl.event.CloudEvent
 import f2.feature.cloudEvent.storming.entity.CloudEventEntity
 import f2.feature.cloudEvent.storming.entity.CloudEventEntityRepository
-import kotlinx.coroutines.runBlocking
-import org.springframework.context.event.EventListener
 import java.time.Instant
 import java.util.UUID
+import kotlinx.coroutines.runBlocking
+import org.springframework.context.event.EventListener
 
 class StormingCommandSink(
 	private val repo: CloudEventEntityRepository,

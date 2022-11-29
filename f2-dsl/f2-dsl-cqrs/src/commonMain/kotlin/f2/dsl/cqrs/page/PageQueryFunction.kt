@@ -2,9 +2,9 @@ package f2.dsl.cqrs.page
 
 import f2.dsl.cqrs.Event
 import f2.dsl.cqrs.Query
-import kotlinx.serialization.Serializable
 import kotlin.js.JsExport
 import kotlin.js.JsName
+import kotlinx.serialization.Serializable
 
 @JsExport
 @JsName("PageQueryDTO")

@@ -1,8 +1,8 @@
 package f2.dsl.cqrs.error
 
-import kotlinx.serialization.Serializable
 import kotlin.js.JsExport
 import kotlin.js.JsName
+import kotlinx.serialization.Serializable
 
 @JsExport
 @JsName("F2ErrorDTO")

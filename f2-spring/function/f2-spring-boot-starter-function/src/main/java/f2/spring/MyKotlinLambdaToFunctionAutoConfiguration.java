@@ -16,12 +16,6 @@
 
 package f2.spring;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import f2.dsl.fnc.F2Consumer;
 import f2.dsl.fnc.F2Function;
 import f2.dsl.fnc.F2Supplier;
@@ -33,11 +27,6 @@ import kotlin.jvm.functions.Function3;
 import kotlin.jvm.functions.Function4;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.cloud.function.context.config.CoroutinesUtils;
-import org.springframework.cloud.function.context.config.FunctionContextUtils;
-import org.springframework.core.type.MethodMetadata;
-import reactor.core.publisher.Flux;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -52,10 +41,20 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.function.context.FunctionRegistration;
+import org.springframework.cloud.function.context.config.CoroutinesUtils;
+import org.springframework.cloud.function.context.config.FunctionContextUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.ObjectUtils;
+import reactor.core.publisher.Flux;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 /**

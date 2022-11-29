@@ -5,7 +5,6 @@ import f2.client.ktor.http.HttpClientBuilder
 import f2.client.ktor.http.httpClientBuilder
 import f2.client.ktor.rsocket.RSocketF2ClientBuilder
 import f2.client.ktor.rsocket.rSocketF2ClientBuilder
-import f2.client.ktor.rsocket.rsocketClientBuilder
 
 suspend fun F2ClientBuilder.get(
 	urlBase: String,

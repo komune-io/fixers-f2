@@ -1,5 +1,7 @@
 package f2.sample.http
 
+import java.util.function.Function
+import java.util.function.Supplier
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -7,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.function.context.FunctionCatalog
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.util.function.Function
-import java.util.function.Supplier
 
 // @TestInstance(PER_CLASS)
 @ExtendWith(SpringExtension::class)

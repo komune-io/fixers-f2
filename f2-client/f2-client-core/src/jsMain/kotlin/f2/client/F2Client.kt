@@ -4,9 +4,6 @@ import f2.dsl.fnc.F2Consumer
 import f2.dsl.fnc.F2Function
 import f2.dsl.fnc.F2Supplier
 import io.ktor.util.reflect.TypeInfo
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlin.js.Promise
 
 @JsExport
 @JsName("F2Client")
