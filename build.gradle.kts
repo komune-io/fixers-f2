@@ -23,16 +23,6 @@ allprojects {
 }
 
 subprojects {
-	plugins.withType(city.smartb.fixers.gradle.config.ConfigPlugin::class.java).whenPluginAdded {
-		fixers {
-			bundle {
-				id = "f2"
-				name = "F2"
-				description = "Wrapper around Spring Cloud Function"
-				url = "https://gitlab.smartb.city/fixers/F2"
-			}
-		}
-	}
 	plugins.withType(dev.petuska.npm.publish.NpmPublishPlugin::class.java).whenPluginAdded {
 		the<dev.petuska.npm.publish.extension.NpmPublishExtension>().apply {
 			organization.set("smartb")
@@ -61,5 +51,11 @@ tasks {
 fixers {
 	d2 {
 		outputDirectory = file("storybook/d2/")
+	}
+	bundle {
+		id = "f2"
+		name = "F2"
+		description = "Wrapper around Spring Cloud Function"
+		url = "https://gitlab.smartb.city/fixers/F2"
 	}
 }
