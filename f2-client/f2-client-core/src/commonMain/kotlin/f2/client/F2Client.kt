@@ -18,33 +18,29 @@ expect interface F2Client {
 }
 
 inline fun <reified RESPONSE> F2Client.supplier(route: String): F2Supplier<RESPONSE> {
-	val typeInfo = if(type == F2ClientType.HTTP) {
-		typeInfo<List<RESPONSE>>()
-	} else {
-		typeInfo<RESPONSE>()
-	}
+	val typeInfo = getTypeInfo<RESPONSE>()
+	return supplier(route, typeInfo)
+}
+inline fun <reified RESPONSE> F2Client.supplierSingle(route: String): F2Supplier<RESPONSE> {
+	val typeInfo = typeInfo<RESPONSE>()
 	return supplier(route, typeInfo)
 }
 
 inline fun <reified QUERY, reified RESPONSE> F2Client.function(route: String): F2Function<QUERY, RESPONSE> {
-	val queryTypeInfo =  if(type == F2ClientType.HTTP) {
-		typeInfo<List<QUERY>>()
-	} else {
-		typeInfo<QUERY>()
-	}
-	val responseTypeInfo = if(type == F2ClientType.HTTP) {
-		typeInfo<List<RESPONSE>>()
-	} else {
-		typeInfo<RESPONSE>()
-	}
+	val queryTypeInfo = getTypeInfo<QUERY>()
+	val responseTypeInfo = getTypeInfo<RESPONSE>()
 	return function(route, queryTypeInfo, responseTypeInfo)
 }
 
 inline fun <reified QUERY> F2Client.consumer(route: String): F2Consumer<QUERY> {
-	val typeInfo = if(type == F2ClientType.HTTP) {
-		typeInfo<List<QUERY>>()
-	} else {
-		typeInfo<QUERY>()
-	}
+	val typeInfo = getTypeInfo<QUERY>()
 	return consumer(route, typeInfo)
+}
+
+inline fun <reified DATA> F2Client.getTypeInfo(): TypeInfo {
+	return if (type == F2ClientType.HTTP) {
+		typeInfo<List<DATA>>()
+	} else {
+		typeInfo<DATA>()
+	}
 }

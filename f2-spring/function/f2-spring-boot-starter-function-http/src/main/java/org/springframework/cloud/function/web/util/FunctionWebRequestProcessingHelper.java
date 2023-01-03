@@ -16,29 +16,31 @@
 
 package org.springframework.cloud.function.web.util;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionProperties;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
 import org.springframework.cloud.function.web.constants.WebRequestConstants;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+
 
 /**
  * !INTERNAL USE ONLY!
@@ -55,29 +57,16 @@ public final class FunctionWebRequestProcessingHelper {
     }
 
     public static FunctionInvocationWrapper findFunction(FunctionProperties functionProperties, HttpMethod method, FunctionCatalog functionCatalog,
-                                                         Map<String, Object> attributes, String path, String[] acceptContentTypes) {
+                                                         Map<String, Object> attributes, String path) {
         // FIX SMARTB - For web browser we need to answer empty OPTIONS REQUEST -
         // TODO Try to replace it with OptionFunctionController
         if(method.equals(HttpMethod.OPTIONS)) return null;
         if (method.equals(HttpMethod.GET) || method.equals(HttpMethod.POST)) {
-            return doFindFunction(functionProperties.getDefinition(), method, functionCatalog, attributes, path, acceptContentTypes);
+            return doFindFunction(functionProperties.getDefinition(), method, functionCatalog, attributes, path);
         }
         else {
             throw new IllegalStateException("HTTP method '" + method + "' is not supported;");
         }
-    }
-
-    public static String[] acceptContentTypes(List<MediaType> acceptHeaders) {
-        String[] acceptContentTypes = new String[] {};
-        if (!CollectionUtils.isEmpty(acceptHeaders)) {
-            acceptContentTypes = acceptHeaders.stream().map(mediaType -> mediaType.toString()).toArray(String[]::new);
-        }
-        else {
-            acceptContentTypes = new String[] {MediaType.APPLICATION_JSON.toString()};
-        }
-
-        acceptContentTypes = new String[] {StringUtils.arrayToCommaDelimitedString(acceptContentTypes)};
-        return new String[] {};
     }
 
     public static Object invokeFunction(FunctionInvocationWrapper function, Object input, boolean isMessage) {
@@ -87,6 +76,9 @@ public final class FunctionWebRequestProcessingHelper {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static Publisher<?> processRequest(FunctionWrapper wrapper, Object argument, boolean eventStream) {
+        if (argument == null) {
+            argument = "";
+        }
         FunctionInvocationWrapper function = wrapper.getFunction();
 
         if (function == null) {
@@ -95,15 +87,20 @@ public final class FunctionWebRequestProcessingHelper {
 
         HttpHeaders headers = wrapper.getHeaders();
 
-        Message<?> inputMessage = argument == null ? null : MessageBuilder.withPayload(argument).copyHeaders(headers.toSingleValueMap()).build();
+        Message<?> inputMessage = null;
+
+
+        MessageBuilder builder = MessageBuilder.withPayload(argument);
+        if (!CollectionUtils.isEmpty(wrapper.getParams())) {
+            builder = builder.setHeader(HeaderUtils.HTTP_REQUEST_PARAM, wrapper.getParams().toSingleValueMap());
+        }
+        inputMessage = builder.copyHeaders(headers.toSingleValueMap()).build();
 
         if (function.isRoutingFunction()) {
             function.setSkipOutputConversion(true);
         }
 
-        Object input = argument == null ? "" : (argument instanceof Publisher ? Flux.from((Publisher) argument) : inputMessage);
-
-        Object result = function.apply(input);
+        Object result = function.apply(inputMessage);
         if (function.isConsumer()) {
             if (result instanceof Publisher) {
                 Mono.from((Publisher) result).subscribe();
@@ -155,11 +152,11 @@ public final class FunctionWebRequestProcessingHelper {
     }
 
     private static FunctionInvocationWrapper doFindFunction(String functionDefinition, HttpMethod method, FunctionCatalog functionCatalog,
-                                                            Map<String, Object> attributes, String path, String[] acceptContentTypes) {
+                                                            Map<String, Object> attributes, String path) {
 
         path = path.startsWith("/") ? path.substring(1) : path;
         if (method.equals(HttpMethod.GET)) {
-            FunctionInvocationWrapper function = functionCatalog.lookup(path, acceptContentTypes);
+            FunctionInvocationWrapper function = functionCatalog.lookup(path);
             if (function != null && function.isSupplier()) {
                 attributes.put(WebRequestConstants.SUPPLIER, function);
                 return function;
@@ -177,14 +174,14 @@ public final class FunctionWebRequestProcessingHelper {
             name = builder.toString();
             value = path.length() > name.length() ? path.substring(name.length() + 1)
                     : null;
-            FunctionInvocationWrapper function = functionCatalog.lookup(name, acceptContentTypes);
+            FunctionInvocationWrapper function = functionCatalog.lookup(name);
             if (function != null) {
                 return postProcessFunction(function, value, attributes);
             }
         }
 
         if (StringUtils.hasText(functionDefinition)) {
-            FunctionInvocationWrapper function = functionCatalog.lookup(functionDefinition, acceptContentTypes);
+            FunctionInvocationWrapper function = functionCatalog.lookup(functionDefinition);
             if (function != null) {
                 return postProcessFunction(function, value, attributes);
             }

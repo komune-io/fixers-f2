@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package f2.spring;
+package org.springframework.cloud.function.context.config;
 
-import f2.dsl.fnc.F2Consumer;
-import f2.dsl.fnc.F2Function;
-import f2.dsl.fnc.F2Supplier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
@@ -27,35 +32,17 @@ import kotlin.jvm.functions.Function3;
 import kotlin.jvm.functions.Function4;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.cloud.function.context.FunctionRegistration;
-import org.springframework.cloud.function.context.config.CoroutinesUtils;
-import org.springframework.cloud.function.context.config.FunctionContextUtils;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.ResolvableType;
-import org.springframework.core.type.MethodMetadata;
-import org.springframework.util.ObjectUtils;
 import reactor.core.publisher.Flux;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.cloud.function.context.FunctionRegistration;
+import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.ResolvableType;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Configuration class which defines the required infrastructure to bootstrap Kotlin
@@ -68,62 +55,28 @@ import java.util.function.Supplier;
  */
 @Configuration
 @ConditionalOnClass(name = "kotlin.jvm.functions.Function0")
-public class MyKotlinLambdaToFunctionAutoConfiguration {
+public class KotlinLambdaToFunctionAutoConfiguration {
 
     protected final Log logger = LogFactory.getLog(getClass());
-
-    /**
-     * Will transform all discovered Kotlin's Function lambdas to java
-     * Supplier, Function and Consumer, retaining the original Kotlin type
-     * characteristics.
-     *
-     * @return the bean factory post processor
-     */
-    @Bean
-    public BeanFactoryPostProcessor kotlinToFunctionTransformerMyne() {
-        return new BeanFactoryPostProcessor() {
-
-            @Override
-            public void postProcessBeanFactory(
-                    ConfigurableListableBeanFactory beanFactory) throws BeansException {
-
-                String[] beanDefinitionNames = beanFactory.getBeanDefinitionNames();
-                for (String beanDefinitionName : beanDefinitionNames) {
-                    BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanDefinitionName);
-
-                    if (beanDefinition instanceof AnnotatedBeanDefinition) {
-                        MethodMetadata methodMetadata = ((AnnotatedBeanDefinition) beanDefinition).getFactoryMethodMetadata();
-                        if(methodMetadata != null) {
-                            String typeName = methodMetadata.getReturnTypeName();
-
-                            if (
-                                    typeName.startsWith(F2Function.class.getName()) ||
-                                    typeName.startsWith(F2Consumer.class.getName()) ||
-                                            typeName.startsWith(F2Supplier.class.getName())
-                            ) {
-                                RootBeanDefinition cbd = new RootBeanDefinition(KotlinFunctionWrapper.class);
-                                ConstructorArgumentValues ca = new ConstructorArgumentValues();
-                                ca.addGenericArgumentValue(beanDefinition);
-                                cbd.setConstructorArgumentValues(ca);
-                                ((BeanDefinitionRegistry) beanFactory).registerBeanDefinition(beanDefinitionName + FunctionRegistration.REGISTRATION_NAME_SUFFIX, cbd);
-                            }
-                        }
-                    }
-
-                }
-            }
-        };
-    }
+// THIS LOOKS TO BE MANDATORY WHEN USING spring web instead of webflux
+//    @Bean
+//    @ConditionalOnMissingBean
+//    @ConditionalOnClass(name = {"org.springframework.http.converter.json.Jackson2ObjectMapperBuilder",
+//            "com.fasterxml.jackson.module.kotlin.KotlinModule"})
+//    Jackson2ObjectMapperBuilderCustomizer customizer() {
+//        return new Jackson2ObjectMapperBuilderCustomizer() {
+//            @Override
+//            public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
+//                jacksonObjectMapperBuilder.modulesToInstall(KotlinModule.class);
+//            }
+//        };
+//    }
 
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final class KotlinFunctionWrapper implements Function<Object, Object>, Supplier<Object>, Consumer<Object>,
             Function0<Object>, Function1<Object, Object>, Function2<Object, Object, Object>,
-            Function3<Object, Object, Object, Object>, Function4<Object, Object, Object, Object, Object>,
-            FactoryBean<FunctionRegistration>,
-            BeanNameAware,
-            BeanFactoryAware {
-
+            Function3<Object, Object, Object, Object>, Function4<Object, Object, Object, Object, Object> {
         private final Object kotlinLambdaTarget;
 
         private String name;
@@ -138,9 +91,6 @@ public class MyKotlinLambdaToFunctionAutoConfiguration {
         public Object apply(Object input) {
             if (ObjectUtils.isEmpty(input)) {
                 return this.invoke();
-            }
-            else if (ObjectUtils.isArray(input)) {
-                return null;
             }
             else {
                 return this.invoke(input);
@@ -164,54 +114,28 @@ public class MyKotlinLambdaToFunctionAutoConfiguration {
 
         @Override
         public Object invoke(Object arg0) {
-            /**
-             * Support suspend function as super type is not available yet.
-             * https://youtrack.jetbrains.com/issue/KT-18707
-             * TODO Use : suspend (Flow<T>) -> Flow<R> when it will be possible
-             *
-             */
-            if(kotlinLambdaTarget instanceof F2Function) {
-                Object lambda = CoroutinesUtilsLocal.invokeFunction((F2Function)kotlinLambdaTarget);
-                return CoroutinesUtils.invokeSuspendingFunction(lambda, arg0);
-            }
             if (CoroutinesUtils.isValidSuspendingFunction(kotlinLambdaTarget, arg0)) {
                 return CoroutinesUtils.invokeSuspendingFunction(kotlinLambdaTarget, arg0);
             }
-
-            return ((Function1) this.kotlinLambdaTarget).invoke(arg0);
+            if (this.kotlinLambdaTarget instanceof Function1) {
+                return ((Function1) this.kotlinLambdaTarget).invoke(arg0);
+            }
+            return ((Function) this.kotlinLambdaTarget).apply(arg0);
         }
 
         @Override
         public Object invoke() {
-            /**
-             * Support suspend function as super type is not available yet.
-             * https://youtrack.jetbrains.com/issue/KT-18707
-             * TODO Use : suspend (Flow<T>) -> Flow<R> when it will be possible
-             *
-             */
-            if(kotlinLambdaTarget instanceof F2Supplier) {
-                Object lambda = CoroutinesUtilsLocal.invokeSupplier((F2Supplier)kotlinLambdaTarget);
-                return CoroutinesUtils.invokeSuspendingSupplier(lambda);
-            }
             if (CoroutinesUtils.isValidSuspendingSupplier(kotlinLambdaTarget)) {
                 return CoroutinesUtils.invokeSuspendingSupplier(kotlinLambdaTarget);
             }
-            return ((Function0) this.kotlinLambdaTarget).invoke();
+            if (this.kotlinLambdaTarget instanceof Function0) {
+                return ((Function0) this.kotlinLambdaTarget).invoke();
+            }
+            return ((Supplier) this.kotlinLambdaTarget).get();
         }
 
         @Override
         public void accept(Object input) {
-            /**
-             * Support suspend function as super type is not available yet.
-             * https://youtrack.jetbrains.com/issue/KT-18707
-             * TODO Use : suspend (Flow<T>) -> Flow<R> when it will be possible
-             *
-             */
-            if(kotlinLambdaTarget instanceof F2Consumer) {
-                Object lambda = CoroutinesUtilsLocal.invokeConsumer((F2Consumer)kotlinLambdaTarget);
-                CoroutinesUtils.invokeSuspendingConsumer(lambda, input);
-                return;
-            }
             if (CoroutinesUtils.isValidSuspendingFunction(kotlinLambdaTarget, input)) {
                 CoroutinesUtils.invokeSuspendingConsumer(kotlinLambdaTarget, input);
                 return;
@@ -224,8 +148,7 @@ public class MyKotlinLambdaToFunctionAutoConfiguration {
             return this.apply(null);
         }
 
-        @Override
-        public FunctionRegistration getObject() throws Exception {
+        public FunctionRegistration getFunctionRegistration() {
             String name = this.name.endsWith(FunctionRegistration.REGISTRATION_NAME_SUFFIX)
                     ? this.name.replace(FunctionRegistration.REGISTRATION_NAME_SUFFIX, "")
                     : this.name;
@@ -268,7 +191,9 @@ public class MyKotlinLambdaToFunctionAutoConfiguration {
                         ResolvableType.forClassWithGenerics(Flux.class, ResolvableType.forType(continuationArgType))
                 ).getType();
             }
-            else {
+            else if (!FunctionTypeUtils.isFunction(functionType)
+                    && !FunctionTypeUtils.isConsumer(functionType)
+                    && !FunctionTypeUtils.isSupplier(functionType)) {
                 throw new UnsupportedOperationException("Multi argument Kotlin functions are not currently supported");
             }
             registration = registration.type(functionType);
@@ -294,57 +219,51 @@ public class MyKotlinLambdaToFunctionAutoConfiguration {
         }
 
         private boolean isValidKotlinSuspendSupplier(Type functionType, Type[] type) {
-            return (isTypeRepresentedByClass(functionType, Function1.class) &&
-                    type.length == 2 &&
-                    CoroutinesUtils.isContinuationFlowType(type[0]))
-                    || (isSuperTypeRepresentedByClass(functionType, F2Supplier.class) &&  type.length == 1);
+            return isTypeRepresentedByClass(functionType, Function1.class) &&
+                    (type.length == 1 || (type.length == 2 && CoroutinesUtils.isContinuationFlowType(type[0])));
         }
 
         private boolean isValidKotlinSuspendConsumer(Type functionType, Type[] type) {
-            return (isTypeRepresentedByClass(functionType, Function2.class) &&
-                    type.length == 3 &&
-                    CoroutinesUtils.isFlowType(type[0]) &&
-                    CoroutinesUtils.isContinuationUnitType(type[1]))
-                    || (isSuperTypeRepresentedByClass(functionType, F2Consumer.class) &&  type.length == 1);
+            return isTypeRepresentedByClass(functionType, Function2.class) &&
+                    (
+                            type.length == 1 ||
+                                    (type.length == 3 && CoroutinesUtils.isContinuationUnitType(type[1]) && CoroutinesUtils.isFlowType(type[0]))
+                    ) ;
         }
 
         private boolean isValidKotlinSuspendFunction(Type functionType, Type[] type) {
-            return (isTypeRepresentedByClass(functionType, Function2.class) &&
-                    type.length == 3 &&
-                    CoroutinesUtils.isContinuationFlowType(type[1]))
-                    || (isSuperTypeRepresentedByClass(functionType, F2Function.class) &&  type.length == 2
-            );
+            return isTypeRepresentedByClass(functionType, Function2.class) &&
+                    ((type.length == 3 && CoroutinesUtils.isContinuationFlowType(type[1]))
+                            ||  type.length == 2);
+
         }
 
         private boolean isTypeRepresentedByClass(Type type, Class<?> clazz) {
-            return type.getTypeName().contains(clazz.getName());
+            return concatWithSuperTypes(type)
+                    .stream()
+                    .map(Type::getTypeName)
+                    .map(s ->
+                            s.contains(clazz.getName())
+                    )
+                    .reduce((a, b) -> a || b)
+                    .orElse(false);
         }
 
-        private boolean isSuperTypeRepresentedByClass(Type type, Class<?> clazz) {
-            if(type.getTypeName().contains(clazz.getName())){
-                return true;
+        private List<Type> concatWithSuperTypes(Type type) {
+            List<Type> all = new ArrayList<>();
+            all.add(type);
+            if(type instanceof ParameterizedType) {
+                Class<?>[] interfaces = ((Class<?>)((ParameterizedType) type).getRawType()).getInterfaces();
+                all.addAll(List.of(interfaces));
             }
-            if(type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() instanceof Class<?>) {
-                Class<?>[] superTypes = ((Class<?>)((ParameterizedType) type).getRawType()).getInterfaces();
-                for (Class<?> superType : superTypes) {
-                    if(isTypeRepresentedByClass(superType, clazz))
-                        return true;
-                }
-            }
-            return false;
+            return all;
         }
 
-        @Override
-        public Class<?> getObjectType() {
-            return FunctionRegistration.class;
-        }
-
-        @Override
-        public void setBeanName(String name) {
+        public void setName(String name) {
             this.name = name;
         }
 
-        @Override
+
         public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
             this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
         }

@@ -7,6 +7,7 @@ import f2.client.function
 import f2.client.ktor.F2ClientBuilder
 import f2.client.ktor.get
 import f2.client.supplier
+import f2.client.supplierSingle
 import f2.spring.http.F2SpringHttpCucumberConfig
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
@@ -34,7 +35,6 @@ class HttpF2SingleSteps : HttpF2GenericsSteps<String, String>("Single: "), En {
 			.function<String, String>(functionName)
 			.invoke(msgs)
 			.toList()
-
 	}
 
 	override fun consumer(consumerName: String, msgs: Flow<String>): Unit = runBlocking {
@@ -47,7 +47,7 @@ class HttpF2SingleSteps : HttpF2GenericsSteps<String, String>("Single: "), En {
 	override fun supplier(supplierName: String) = runBlocking {
 		F2ClientBuilder
 			.get(F2SpringHttpCucumberConfig.urlBase(bag))
-			.supplier<String>(supplierName)
+			.supplierSingle<String>(supplierName)
 			.invoke()
 			.toList()
 	}

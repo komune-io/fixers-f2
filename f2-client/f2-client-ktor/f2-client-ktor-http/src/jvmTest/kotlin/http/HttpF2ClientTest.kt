@@ -3,6 +3,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.util.reflect.typeInfo
 import kotlin.test.Test
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -20,7 +21,7 @@ class HttpF2ClientTest {
 			},
 			"https://www.google.fr",
 		)
-		val result = client.getT("search?q=smartb").invoke().first()
+		val result = client.supplier<String>("search?q=smartb", typeInfo<String>()).invoke().first()
 		Assertions.assertThat(result).isNotNull
 	}
 }

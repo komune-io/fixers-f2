@@ -12,7 +12,7 @@ Feature:
     When Exceptions: Execute function "basicFunction" with
       | name   | wrongParam |
       | blblbl | fake       |
-    Then Exceptions: An exception with code 400 has been thrown for "basicFunction"
+    Then Exceptions: An exception with code 400 has been thrown for "basicFunction" with message "Missing parameter `description`"
 
   Scenario: Trigger 404 Not Found Exception
     When Exceptions: Execute supplier "notFoundFunction"

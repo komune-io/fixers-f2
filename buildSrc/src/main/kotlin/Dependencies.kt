@@ -22,7 +22,7 @@ object Versions {
 	}
 
 	object Spring {
-		const val function = "3.2.6"
+		const val function = "4.0.0"
 		const val boot = FixersVersions.Spring.boot
 		const val data = FixersVersions.Spring.data
 	}

@@ -21,8 +21,8 @@ class LambdaSimple {
 	}
 
 	@Bean
-	fun consumerSingle(receiver: ConsumerReceiver<String>): (String) -> Unit = {
-		receiver.items.add(it)
+	fun consumerSingle(receiver: ConsumerReceiver<String>): (String) -> Unit = { value ->
+		receiver.items.add(value)
 	}
 }
 

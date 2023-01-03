@@ -12,7 +12,7 @@ import org.assertj.core.api.Assertions
 import org.springframework.cloud.function.context.FunctionCatalog
 
 abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
-	val prefix: String
+	private val prefix: String
 ) : F2SpringStep() {
 
 	open fun En.prepareFunctionCatalogSteps() {
@@ -61,6 +61,14 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 			val exception = bag.exceptions[name]
 			Assertions.assertThat(exception).isInstanceOf(F2Exception::class.java)
 			Assertions.assertThat((exception as F2Exception).error.code).isEqualTo(code)
+		}
+
+		Then("${prefix}An exception with code {int} has been thrown for {string} with message {string}")
+		{ code: Int, name: String, message: String ->
+			val exception = bag.exceptions[name]
+			Assertions.assertThat(exception).isInstanceOf(F2Exception::class.java)
+			Assertions.assertThat((exception as F2Exception).error.code).isEqualTo(code)
+			Assertions.assertThat((exception).message).isEqualTo(message)
 		}
 	}
 

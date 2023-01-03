@@ -4,12 +4,11 @@ import f2.client.F2Client
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.DefaultJson
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 actual class HttpClientBuilder(
-	private val json: Json = DefaultJson
+	private val json: Json = F2DefaultJson
 ) {
 	fun build(
 		urlBase: String
@@ -20,7 +19,7 @@ actual class HttpClientBuilder(
 			urlBase
 		)
 	}
-	private fun httpClient(json: Json = DefaultJson): HttpClient {
+	private fun httpClient(json: Json = F2DefaultJson): HttpClient {
 		return HttpClient(CIO) {
 			install(ContentNegotiation) {
 				json(json)

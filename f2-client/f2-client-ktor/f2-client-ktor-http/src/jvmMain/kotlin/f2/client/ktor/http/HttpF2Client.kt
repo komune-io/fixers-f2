@@ -20,11 +20,9 @@ import io.ktor.http.isSuccess
 import io.ktor.util.reflect.TypeInfo
 import java.util.Date
 import java.util.UUID
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonPrimitive
 
 actual open class HttpF2Client(
 	protected val httpClient: HttpClient,
@@ -33,18 +31,20 @@ actual open class HttpF2Client(
 
 	override val type: F2ClientType = F2ClientType.HTTP
 
-	private suspend fun handlePayloadResponseToStringList(response: HttpResponse): List<String> {
-		if(!response.status.isSuccess()) {
-			handleError(response)
-		}
-		return 	when (val element = response.body<JsonElement>()) {
-			is JsonPrimitive -> listOf(element.toString())
-			is JsonArray -> element.map { it.toString() }
-			else -> listOf(element.toString())
-		}
-	}
+//	private suspend fun handlePayloadResponseToStringList(response: HttpResponse): List<String> {
+//		if(!response.status.isSuccess()) {
+//			handleError(response)
+//		}
+//		Json.decodeFromJsonElement()
+//		return 	when (val element = response.body<JsonElement>()) {
+//			is JsonPrimitive -> listOf(element.toString())
+//			is JsonObject -> listOf(element.toString())
+//			is JsonArray -> element.map { it.toString() }
+//			else -> listOf(element.toString())
+//		}
+//	}
 
-	suspend fun handleError(response: HttpResponse) {
+	private suspend fun handleError(response: HttpResponse) {
 		val error: F2Error = try {
 			response.body()
 		} catch (e: Throwable) {
@@ -55,53 +55,49 @@ actual open class HttpF2Client(
 				message = response.bodyAsText()
 			)
 		}
-		println(response.status)
-		println(error)
-		println("/////////////////////////////")
 		throw F2Exception(error = error)
 	}
 
-	suspend inline fun <reified T> handlePayloadResponse(response: HttpResponse, typeInfo: TypeInfo): T {
-		if(!response.status.isSuccess()) {
-			handleError(response)
+	private suspend inline fun <T> handlePayloadResponse(response: HttpResponse, typeInfo: TypeInfo): Flow<T> {
+		return flow {
+			try {
+				if (!response.status.isSuccess()) {
+					handleError(response)
+				}
+				response.body<T>(typeInfo).let { result ->
+					if(result is Collection<*>) {
+						result.forEach {emit(it as T)}
+					} else {
+						emit(result)
+					}
+				}
+			} catch (e: Exception) {
+				throw e;
+			}
 		}
-		return response.body(typeInfo)
 	}
 
 	override fun <RESPONSE> supplier(route: String, responseTypeInfo: TypeInfo): F2Supplier<RESPONSE> = F2Supplier<RESPONSE> {
-		flow {
-			httpClient.get("$urlBase/${route}").let { response ->
-				handlePayloadResponse<List<RESPONSE>>(response, responseTypeInfo)
-			}.forEach {
-				emit(it)
-			}
+		httpClient.get("$urlBase/${route}").let { response ->
+			handlePayloadResponse(response, responseTypeInfo)
 		}
 	}
+
 	override fun <QUERY, RESPONSE> function(
 		route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo
 	) = F2Function<QUERY, RESPONSE> { msg ->
-		flow {
-			httpClient.post("$urlBase/${route}") {
-				contentType(ContentType.Application.Json)
-				setBody(msg.toList(), queryTypeInfo)
-			}.let { response ->
-				handlePayloadResponse<List<RESPONSE>>(response, responseTypeInfo)
-			}.forEach {
-				emit(it)
-			}
+		httpClient.post("$urlBase/${route}") {
+			contentType(ContentType.Application.Json)
+			setBody(msg.toList(), queryTypeInfo)
+		}.let { response ->
+			handlePayloadResponse<RESPONSE>(response, responseTypeInfo)
 		}
 	}
+
 	override fun <QUERY> consumer(route: String, queryTypeInfo: TypeInfo): F2Consumer<QUERY>  = F2Consumer { msg ->
 		httpClient.post("$urlBase/${route}") {
 			contentType(ContentType.Application.Json)
 			setBody(msg.toList(), queryTypeInfo)
-		}
-	}
-
-	fun getT(route: String) = F2Supplier {
-		flow {
-			val tt = httpClient.get("$urlBase/${route}")
-			emit(tt.bodyAsText())
 		}
 	}
 

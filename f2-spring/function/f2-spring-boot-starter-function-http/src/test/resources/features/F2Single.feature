@@ -14,10 +14,10 @@ Feature:
     Then Single: The result for "functionSingle" is
       | esrever |
 
-#  Scenario: Execute single supplier from the catalog
-#    When Single: Execute supplier "supplierSingle"
-#    Then Single: The result for "supplierSingle" is
-#      | supplierValuePureKotlinValue |
+  Scenario: Execute single supplier from the catalog
+    When Single: Execute supplier "supplierSingle"
+    Then Single: The result for "supplierSingle" is
+      | supplierValuePureKotlinValue |
 
   Scenario: Execute single consumer from the catalog
     When Single: Execute consumer "consumerSingle" with
@@ -26,12 +26,13 @@ Feature:
     Then Single: The result for "consumerSingle" is
       | alpine |
 
-#  Scenario: Execute single consumer from the catalog
-#    When Single: Execute consumer "consumerSingle" with
-#      | alpine |
-#
-#    When Single: Execute consumer "consumerSingle" with
-#      | renault  |
-#
-#    Then Single: The result for "consumerSingle" is
-#      | alpine, renault |
+  Scenario: Execute single consumer from the catalog
+    When Single: Execute consumer "consumerSingle" with
+      | alpine |
+
+    When Single: Execute consumer "consumerSingle" with
+      | renault  |
+
+    Then Single: The result for "consumerSingle" is
+      | alpine |
+      | renault |
