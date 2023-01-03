@@ -10,5 +10,5 @@ repositories {
 }
 
 dependencies {
-	implementation("city.smartb.fixers.gradle:dependencies:experimental-next-SNAPSHOT")
+	implementation("city.smartb.fixers.gradle:dependencies:experimental-SNAPSHOT")
 }
