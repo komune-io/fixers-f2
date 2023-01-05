@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 
+@Deprecated("This will be removed")
 class MongoDBExtension : BeforeAllCallback, AfterAllCallback {
 
 	companion object {

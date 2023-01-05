@@ -11,6 +11,7 @@ import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.annotation.Version
 
+@Deprecated("Use the one from s2 or import it in your project")
 @MappedSuperclass
 @EntityListeners
 open class EntityBase(
