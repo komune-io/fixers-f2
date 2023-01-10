@@ -1,5 +1,6 @@
 package f2.dsl.cqrs.error
 
+import f2.dsl.cqrs.exception.F2Exception
 import kotlin.js.JsExport
 import kotlin.js.JsName
 import kotlinx.serialization.Serializable
@@ -27,4 +28,13 @@ open class F2Error(
 	override fun toString(): String {
 		return "F2Error(timestamp='$timestamp', code=$code, requestId='$requestId', message='$message')"
 	}
+}
+
+fun F2ErrorDTO.asException(cause: Throwable? = null) = F2Exception(
+	error = this,
+	cause
+)
+
+fun F2ErrorDTO.throwException(cause: Throwable? = null) {
+	throw asException(cause)
 }

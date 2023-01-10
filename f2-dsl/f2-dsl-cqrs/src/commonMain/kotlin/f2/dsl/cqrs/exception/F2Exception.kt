@@ -1,13 +1,13 @@
 package f2.dsl.cqrs.exception
 
-import f2.dsl.cqrs.error.F2Error
+import f2.dsl.cqrs.error.F2ErrorDTO
 import kotlin.js.JsExport
 import kotlin.js.JsName
 
 @JsExport
 @JsName("F2Exception")
 open class F2Exception(
-	val error: F2Error,
+	val error: F2ErrorDTO,
 	cause: Throwable? = null
 ) : RuntimeException(error.message, cause) {
 	companion object
