@@ -91,8 +91,7 @@ Integration with Springdoc to generate open api documentation.
   https://springdoc.org/#features
 
 
-## RSOCKET 
-
+## RSOCKET
 
 * Request-Respond (1 to 1)
 * Fire And Forget (1 to 0)
@@ -104,3 +103,10 @@ Integration with Springdoc to generate open api documentation.
 * Function (1 - 1) => (many to many) or (1 to 1) 
 
 Manque Request Stream
+
+## Serializer
+
+Three serializer can be used via the spring parameter `spring.cloud.function.preferred-json-mapper`
+ * jackson
+ * gson
+ * kSerialization

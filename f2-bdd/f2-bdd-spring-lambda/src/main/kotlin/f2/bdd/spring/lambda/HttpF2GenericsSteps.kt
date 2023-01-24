@@ -83,7 +83,6 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 	abstract fun function(functionName: String, msgs: Flow<REQUEST>): List<RESPONSE>
 	abstract fun consumer(consumerName: String, msgs: Flow<REQUEST>)
 	abstract fun supplier(supplierName: String): List<RESPONSE>
-
 	abstract fun transform(dataTable: DataTable): List<REQUEST>
 	abstract fun consumerReceiver(): List<RESPONSE>
 

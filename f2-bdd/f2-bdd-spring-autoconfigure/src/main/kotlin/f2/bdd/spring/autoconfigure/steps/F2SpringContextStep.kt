@@ -19,6 +19,11 @@ open class F2SpringContextStep: F2SpringStep(), En {
 		When("I start a valid spring application context") {
 			bag.httpPort = Random.nextInt(from = 6000, until = 6999)
 			bag.rsoketPort = Random.nextInt(from = 6000, until = 6999)
+			println("////////////////////////////////////////////////////////")
+			println("////////////////////////////////////////////////////////")
+			println(System.getProperty("spring.cloud.function.preferred-json-mapper"))
+			println("////////////////////////////////////////////////////////")
+			println("////////////////////////////////////////////////////////")
 			bag.applicationContext = ApplicationContextBuilder().create(
 				types = arrayOf(ApplicationContextBuilder.SimpleConfiguration::class.java),
 				config = mapOf(
@@ -26,7 +31,8 @@ open class F2SpringContextStep: F2SpringStep(), En {
 					"spring.rsocket.server.port" to "${bag.rsoketPort}",
 					"spring.rsocket.server.transport" to "websocket",
 					"logging.level.io.rsocket.FrameLogger" to "DEBUG",
-					"logging.level.org.springframework.boot.rsocket" to "DEBUG"
+					"logging.level.org.springframework.boot.rsocket" to "DEBUG",
+					"spring.cloud.function.preferred-json-mapper" to System.getProperty("spring.cloud.function.preferred-json-mapper")
 				)
 			)
 		}

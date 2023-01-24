@@ -774,7 +774,15 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                 if (JsonMapper.isJsonStringRepresentsCollection(payload)
                         && !FunctionTypeUtils.isTypeCollection(this.inputType) && !FunctionTypeUtils.isTypeArray(this.inputType)) {
                     MessageHeaders headers = ((Message) input).getHeaders();
-                    Collection collectionPayload = jsonMapper.fromJson(payload, Collection.class);
+                    Type genType = FunctionTypeUtils.getGenericType(this.inputType);
+
+                    // Original version
+//                     Collection collectionPayload = jsonMapper.fromJson(payload, Collection.class);
+                    // Fix for F2
+                    // Collection Type is needed by kotlin serializer to deserialize object
+                    ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, ResolvableType.forType(genType));
+                    Collection collectionPayload = jsonMapper.fromJson(payload, listType.getType());
+
                     Class inputClass = FunctionTypeUtils.getRawType(this.inputType);
                     if (this.isInputTypeMessage()) {
                         inputClass = FunctionTypeUtils.getRawType(FunctionTypeUtils.getImmediateGenericType(this.inputType, 0));

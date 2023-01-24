@@ -6,7 +6,7 @@ import f2.bdd.spring.lambda.single.StringConsumerReceiver
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 
-class FunctionCatalogSteps<P, R> : FunctionCatalogStepsBase<String, String>(""), En {
+class FunctionCatalogSteps : FunctionCatalogStepsBase<String, String>(""), En {
 
 	init {
 		prepareFunctionCatalogSteps()
