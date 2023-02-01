@@ -10,7 +10,6 @@ class Jackson {
 
     @Before
     fun configureJacksonSerializer() {
-        println("")
         System.setProperty("spring.cloud.function.preferred-json-mapper", "jackson")
     }
 }

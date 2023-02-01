@@ -28,11 +28,12 @@ Feature:
       | alpine |
 
   Scenario: Execute vehicle consumer from the catalog
-    When Vehicle: Execute consumer "consumerVehicle" with
+    When Flow: Execute consumer "consumerFlow" with
       | alpine |
 
-    When Vehicle: Execute consumer "consumerVehicle" with
+    When Flow: Execute consumer "consumerFlow" with
       | renault  |
 
-    Then Vehicle: The result for "consumerVehicle" is
-      | alpine,renault |
+    Then Flow: The result for "consumerFlow" is
+      | alpine  |
+      | renault |
