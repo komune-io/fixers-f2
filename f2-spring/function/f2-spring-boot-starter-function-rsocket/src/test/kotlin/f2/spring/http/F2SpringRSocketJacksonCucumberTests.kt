@@ -1,6 +1,5 @@
 package f2.spring.http
 
-import f2.bdd.spring.autoconfigure.steps.F2SpringContextBag
 import f2.bdd.spring.autoconfigure.steps.F2SpringStep
 import io.cucumber.junit.platform.engine.Constants.GLUE_PROPERTY_NAME
 import jackson.Jackson

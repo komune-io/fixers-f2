@@ -11,10 +11,18 @@ sealed interface Pagination
 
 @JsExport
 @JsName("OffsetPaginationDTO")
-interface OffsetPaginationDTO {
+interface OffsetPaginationDTO: Pagination {
 	val offset: Int
 	val limit: Int
 }
+
+@JsExport
+@JsName("PagePaginationDTO")
+interface PagePaginationDTO: Pagination {
+	val page: Int?
+	val size: Int?
+}
+
 
 @Serializable
 @JsExport
@@ -22,15 +30,8 @@ interface OffsetPaginationDTO {
 class OffsetPagination(
 	override val offset: Int,
 	override val limit: Int,
-) : OffsetPaginationDTO, Pagination
+) : OffsetPaginationDTO
 
-
-@JsExport
-@JsName("PagePaginationDTO")
-interface PagePaginationDTO {
-	val page: Int?
-	val size: Int?
-}
 
 @Serializable
 @JsExport
@@ -38,4 +39,4 @@ interface PagePaginationDTO {
 class PagePagination(
 	override val page: Int?,
 	override val size: Int?
-): PagePaginationDTO, Pagination
+): PagePaginationDTO

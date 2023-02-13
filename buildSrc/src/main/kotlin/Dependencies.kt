@@ -27,6 +27,7 @@ object Versions {
 		const val data = FixersVersions.Spring.data
 	}
 
+	const val cucumber = FixersVersions.Test.cucumber
 	const val springdoc = "1.6.11"
 	const val rsocket = "0.15.4"
 	const val embedMongo = "2.2.0"
@@ -43,6 +44,11 @@ object Dependencies {
 			fun coroutines(scope: Scope) = FixersDependencies.Jvm.Kotlin.coroutines(scope)
 		}
 
+		object Test {
+			fun springTest(scope: Scope) =  scope.add(
+				"org.springframework.boot:spring-boot-starter-test:${Versions.Spring.boot}"
+			)
+		}
 		object Json {
 			fun jackson(scope: Scope) = FixersDependencies.Jvm.Json.jackson(scope)
 		}

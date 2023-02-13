@@ -1,8 +1,8 @@
 package f2.feature.cloudEvent.storming.entity
 
 import f2.dsl.event.CloudEvent
-import java.util.UUID
 import jakarta.persistence.Entity
+import java.util.UUID
 import org.springframework.data.annotation.Id
 
 @Entity

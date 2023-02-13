@@ -16,19 +16,10 @@
 
 package org.springframework.cloud.function.context.config;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import f2.spring.KSerializationMapper;
 import io.cloudevents.spring.messaging.CloudEventMessageConverter;
-
 import kotlinx.serialization.json.Json;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -37,12 +28,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.function.cloudevent.CloudEventsFunctionInvocationHelper;
-import org.springframework.cloud.function.context.DefaultMessageRoutingHandler;
-import org.springframework.cloud.function.context.FunctionCatalog;
-import org.springframework.cloud.function.context.FunctionProperties;
-import org.springframework.cloud.function.context.FunctionRegistration;
-import org.springframework.cloud.function.context.FunctionRegistry;
-import org.springframework.cloud.function.context.MessageRoutingCallback;
+import org.springframework.cloud.function.context.*;
 import org.springframework.cloud.function.context.catalog.BeanFactoryAwareFunctionRegistry;
 import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
 import org.springframework.cloud.function.core.FunctionInvocationHelper;
@@ -72,6 +58,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * @author Dave Syer

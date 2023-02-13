@@ -1,9 +1,6 @@
 package f2.bdd.spring.lambda.methodcall
 
 import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
-import f2.dsl.fnc.F2Consumer
-import f2.dsl.fnc.F2Function
-import f2.dsl.fnc.F2Supplier
 import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
 

@@ -16,24 +16,10 @@
 
 package org.springframework.cloud.function.context.config;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
-import kotlin.jvm.functions.Function1;
-import kotlin.jvm.functions.Function2;
-import kotlin.jvm.functions.Function3;
-import kotlin.jvm.functions.Function4;
+import kotlin.jvm.functions.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Flux;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -43,6 +29,15 @@ import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ObjectUtils;
+import reactor.core.publisher.Flux;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Configuration class which defines the required infrastructure to bootstrap Kotlin
