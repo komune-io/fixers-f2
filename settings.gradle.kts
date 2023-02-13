@@ -24,7 +24,6 @@ include(
 
 include(
 	"f2-dsl:f2-dsl-function",
-	"f2-dsl:f2-dsl-lambda",
 	"f2-dsl:f2-dsl-cqrs",
 	"f2-dsl:f2-dsl-event"
 )
