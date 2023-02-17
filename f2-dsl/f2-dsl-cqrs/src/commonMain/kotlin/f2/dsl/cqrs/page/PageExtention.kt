@@ -20,3 +20,8 @@ inline fun <T, reified R> Page<T>.map(transform: (T) -> R): Page<R> = Page(
 	items = items.map(transform),
 	total = total
 )
+
+inline fun <T, reified R: Any> PageDTO<T>.mapNotNull(transform: (T) -> R?): PageDTO<R> = Page(
+	items = items.mapNotNull(transform),
+	total = total
+)

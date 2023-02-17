@@ -6,4 +6,7 @@ plugins {
 }
 
 dependencies {
+
+    Dependencies.Jvm.Spring.dataCommons(::jvmMainImplementation)
+
 }

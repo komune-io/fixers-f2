@@ -58,6 +58,11 @@ object Dependencies {
 		object Spring {
 			fun dataCommons(scope: Scope) = FixersDependencies.Jvm.Spring.dataCommons(scope)
 
+			fun cloudFunctionDep(scope: Scope) = scope.add(
+				"com.google.code.gson:gson:2.10.1",
+				"io.cloudevents:cloudevents-spring:2.4.1",
+				"com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2"
+			)
 			fun cloudFunction(scope: Scope) = scope.add(
 				"org.springframework.cloud:spring-cloud-function-context:${Versions.Spring.function}",
 				"org.springframework.cloud:spring-cloud-function-kotlin:${Versions.Spring.function}",
