@@ -214,10 +214,17 @@ class PageQueryResult<out OBJECT>(
 ```
 
 ### Page Extension
+ * Multiplatform
 ```kotlin
 fun <OBJECT> OffsetPaginationDTO.result(items: List<OBJECT>, total: Int): PageQueryResultDTO<OBJECT>
 inline fun <T, reified R> PageDTO<T>.map(transform: (T) -> R): PageDTO<R>
 inline fun <T, reified R> Page<T>.map(transform: (T) -> R): Page<R>
+```
+
+ * Jvm
+```kotlin
+inline fun <T, reified R: Any> PageDTO<T>.mapNotNull(transform: (T) -> R?): PageDTO<R>
+inline fun OffsetPagination?.toPageRequest(): PageRequest
 ```
 
 ### Function Extension

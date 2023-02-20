@@ -1,9 +1,8 @@
-package f2.dsl.cqrs
+package f2.dsl.cqrs.page
 
-import f2.dsl.cqrs.page.OffsetPagination
 import org.springframework.data.domain.PageRequest
 
-inline fun OffsetPagination?.toPage(): PageRequest = this?.let {
+inline fun OffsetPagination?.toPageRequest(): PageRequest = this?.let {
     val size = limit - offset
     val page = (if(size > 0 ) limit / size else 1) - 1
 
