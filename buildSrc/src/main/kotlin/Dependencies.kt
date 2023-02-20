@@ -31,12 +31,16 @@ object Versions {
 	const val springdoc = "1.6.11"
 	const val rsocket = "0.15.4"
 	const val embedMongo = "2.2.0"
+	const val kotlinxDatetime = "0.4.0"
 }
 
 object Dependencies {
 	object Mpp {
 		fun rsocketKtorClient(scope: Scope) = scope.add(
 			"io.rsocket.kotlin:rsocket-ktor-client:${Versions.rsocket}"
+		)
+		fun kotlinxDatetime(scope: Scope) = scope.add(
+			"org.jetbrains.kotlinx:kotlinx-datetime:${Versions.kotlinxDatetime}"
 		)
 	}
 	object Jvm {
