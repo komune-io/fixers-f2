@@ -31,19 +31,6 @@ actual open class HttpF2Client(
 
 	override val type: F2ClientType = F2ClientType.HTTP
 
-//	private suspend fun handlePayloadResponseToStringList(response: HttpResponse): List<String> {
-//		if(!response.status.isSuccess()) {
-//			handleError(response)
-//		}
-//		Json.decodeFromJsonElement()
-//		return 	when (val element = response.body<JsonElement>()) {
-//			is JsonPrimitive -> listOf(element.toString())
-//			is JsonObject -> listOf(element.toString())
-//			is JsonArray -> element.map { it.toString() }
-//			else -> listOf(element.toString())
-//		}
-//	}
-
 	private suspend fun handleError(response: HttpResponse) {
 		val error: F2Error = try {
 			response.body()

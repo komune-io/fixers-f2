@@ -15,12 +15,9 @@ import kotlinx.serialization.json.Json
 actual class HttpClientBuilder(
 	private val json: Json = F2DefaultJson
 ) {
-	fun build(scheme: String, host: String, port: Int, path: String?): Promise<F2Client> = GlobalScope.promise {
+	fun build(urlBase: String): Promise<F2Client> = GlobalScope.promise {
 		HttpF2Client(
-			scheme = scheme,
-			host = host,
-			port = port,
-			path = path ?: "",
+			urlBase = urlBase,
 			httpClient = httpClient(json)
 		)
 	}
