@@ -19,3 +19,7 @@ actual interface F2Supplier<R> {
 actual interface F2Consumer<T> {
 	fun invoke(cmd: T): Promise<Unit>
 }
+
+actual interface F2SupplierSingle<R> {
+	fun invoke(): Promise<R>
+}
