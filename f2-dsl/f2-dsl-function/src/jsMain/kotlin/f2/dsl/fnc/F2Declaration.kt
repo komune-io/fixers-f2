@@ -5,7 +5,7 @@ import kotlin.js.Promise
 @JsExport
 @JsName("F2Function")
 actual interface F2Function<T, R> {
-	fun invoke(cmd: T): Promise<R>
+	fun invoke(cmd: Array<T>): Promise<Array<R>>
 }
 
 @JsExport
@@ -17,7 +17,7 @@ actual interface F2Supplier<R> {
 @JsExport
 @JsName("F2Consumer")
 actual interface F2Consumer<T> {
-	fun invoke(cmd: T): Promise<Unit>
+	fun invoke(cmd: Array<T>): Promise<Unit>
 }
 
 actual interface F2SupplierSingle<R> {

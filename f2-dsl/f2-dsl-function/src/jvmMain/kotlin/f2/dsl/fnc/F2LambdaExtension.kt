@@ -23,10 +23,8 @@ fun <T, R> f2Function(fnc: suspend (t: T) -> R): F2Function<T, R> = F2Function {
 	}
 }
 
-fun <R> f2SupplierSingle(fnc: suspend () -> R): F2Supplier<R> = F2Supplier {
-	flow {
-		emit(fnc())
-	}
+fun <R> f2SupplierSingle(fnc: suspend () -> R): F2SupplierSingle<R> = F2SupplierSingle {
+	fnc()
 }
 
 fun <R> f2Supplier(fnc: suspend () -> Flow<R>): F2Supplier<R> = F2Supplier {

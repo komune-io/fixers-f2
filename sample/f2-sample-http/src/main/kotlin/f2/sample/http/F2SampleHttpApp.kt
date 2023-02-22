@@ -3,6 +3,7 @@ package f2.sample.http
 import f2.dsl.fnc.F2Consumer
 import f2.dsl.fnc.F2Function
 import f2.dsl.fnc.F2Supplier
+import f2.dsl.fnc.F2SupplierSingle
 import f2.dsl.fnc.f2Consumer
 import f2.dsl.fnc.f2Function
 import f2.dsl.fnc.f2Supplier
@@ -31,7 +32,7 @@ class F2SampleHttpApp {
 	}
 
 	@Bean
-	fun uuid(): F2Supplier<String> = f2SupplierSingle {
+	fun uuid(): F2SupplierSingle<String> = f2SupplierSingle {
 		UUID.randomUUID().toString()
 	}
 	@Bean
