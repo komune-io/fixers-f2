@@ -37,7 +37,7 @@ actual open class HttpF2Client(
 
 	override fun <QUERY> consumer(route: String, queryTypeInfo: TypeInfo): F2Consumer<QUERY> =
 		object : F2Consumer<QUERY> {
-			override fun invoke(cmd: QUERY): Promise<Unit> = GlobalScope.promise {
+			override fun invoke(cmd: Array<QUERY>): Promise<Unit> = GlobalScope.promise {
 				httpClient.get(urlBase) {
 					setBody(cmd, queryTypeInfo)
 				}
