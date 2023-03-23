@@ -1,7 +1,8 @@
-package city.smartb.registry.program.api.commons.model
+package f2.dsl.cqrs.filter
 
 import kotlin.js.JsExport
 import kotlin.js.JsName
+import kotlinx.serialization.Serializable
 
 @JsExport
 @JsName("SortDTO")
@@ -11,12 +12,14 @@ interface SortDTO {
     val nullsFirst: Boolean?
 }
 
+@Serializable
 data class SortDTOBase(
     override val property: String,
     override val ascending: Boolean,
     override val nullsFirst: Boolean
 ): SortDTO
 
+@Serializable
 data class Sort<P: Enum<*>>(
     val property: P,
     val ascending: Boolean,

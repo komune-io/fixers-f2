@@ -1,5 +1,8 @@
 package f2.dsl.cqrs.filter
 
+import kotlin.js.JsExport
+
+@JsExport
 sealed interface Match<T> {
     val negative: Boolean
 
