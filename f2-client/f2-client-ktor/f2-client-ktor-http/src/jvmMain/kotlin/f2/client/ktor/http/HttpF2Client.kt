@@ -25,8 +25,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 
 actual open class HttpF2Client(
-	protected val httpClient: HttpClient,
-	protected val urlBase: String,
+	actual val httpClient: HttpClient,
+	val urlBase: String,
 ) : F2Client {
 
 	override val type: F2ClientType = F2ClientType.HTTP

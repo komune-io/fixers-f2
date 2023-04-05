@@ -16,7 +16,7 @@ import kotlinx.coroutines.promise
 
 actual open class HttpF2Client(
 	protected val urlBase: String,
-	private val httpClient: HttpClient,
+	actual val httpClient: HttpClient
 ) : F2Client {
 
 	override val type: F2ClientType = F2ClientType.HTTP
