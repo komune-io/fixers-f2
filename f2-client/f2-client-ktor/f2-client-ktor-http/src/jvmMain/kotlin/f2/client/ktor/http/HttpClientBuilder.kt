@@ -5,7 +5,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.CIOEngineConfig
-import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -32,10 +31,10 @@ actual class HttpClientBuilder(
 			install(ContentNegotiation) {
 				json(json)
 			}
-
 			config?.let { config(this) }
 		}
 	}
+
 }
 
 actual fun httpClientBuilder() = HttpClientBuilder()

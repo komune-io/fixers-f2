@@ -10,4 +10,5 @@ val F2DefaultJson: Json = Json {
     prettyPrint = false
     useArrayPolymorphism = false
     ignoreUnknownKeys = true
+    explicitNulls = false
 }

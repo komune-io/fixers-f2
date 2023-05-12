@@ -4,6 +4,6 @@ plugins {
 }
 
 dependencies {
-    commonMainApi("io.ktor:ktor-utils:2.1.2")
+    commonMainApi("io.ktor:ktor-utils:${Versions.Kotlin.ktor}")
     commonMainApi(project(":f2-dsl:f2-dsl-function"))
 }
