@@ -10,7 +10,5 @@ package-kotlin:
 	@gradle clean build publishToMavenLocal publish
 
 package-storybook:
-	@echo "//${CI_SERVER_HOST}/api/v4/projects/127/packages/npm/:_authToken=${CI_JOB_TOKEN}">.npmrc
-	@cat .npmrc
-	@docker build -f ${STORYBOOK_DOCKERFILE} -t ${STORYBOOK_IMG} .
+	@docker build --build-arg CI_NPM_AUTH_TOKEN=${CI_NPM_AUTH_TOKEN} -f ${STORYBOOK_DOCKERFILE} -t ${STORYBOOK_IMG} .
 	@docker push ${STORYBOOK_IMG}
