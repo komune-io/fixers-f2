@@ -9,3 +9,6 @@ include:
     ref: secret-detection-config
     file: fixers/.gitlab-ci-docs.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
+
+secret_detection:
+  rules:
