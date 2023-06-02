@@ -8,3 +8,6 @@ include:
   - project: framework/fixers/cicd
     ref: secret-detection-config
     file: fixers/.gitlab-ci-docs.yml
+  - project: framework/fixers/cicd
+    ref: secret-detection-config
+    file: fixers/.gitlab-ci-security.yml
