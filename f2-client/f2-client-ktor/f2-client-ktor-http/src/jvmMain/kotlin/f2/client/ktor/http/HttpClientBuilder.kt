@@ -19,7 +19,7 @@ actual class HttpClientBuilder(
 	fun build(
 		urlBase: String
 
-	): F2Client {
+	): HttpF2Client {
 		val httpCLient = httpClient(json ?: F2DefaultJson, config)
 		return HttpF2Client(
 			httpClient = httpCLient,
