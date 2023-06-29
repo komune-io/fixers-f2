@@ -1,7 +1,7 @@
 {
-  "name": "components",
+  "name": "@smartb/f2-documentation",
   "version": "1.0.0",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "description": "F2 documentation",
   "main": "src/index.ts",
   "source": "src/index.ts",
