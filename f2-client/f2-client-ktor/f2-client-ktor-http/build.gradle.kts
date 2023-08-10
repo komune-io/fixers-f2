@@ -10,7 +10,6 @@ dependencies {
     commonMainApi("io.ktor:ktor-client-core:${Versions.Kotlin.ktor}")
     commonMainApi("io.ktor:ktor-client-content-negotiation:${Versions.Kotlin.ktor}")
     commonMainApi("io.ktor:ktor-serialization-kotlinx-json:${Versions.Kotlin.ktor}")
-    commonTestImplementation("org.jetbrains.kotlin:kotlin-test:${PluginVersions.kotlin}")
 
     jsMainApi("io.ktor:ktor-client-json-js:${Versions.Kotlin.ktor}")
 
