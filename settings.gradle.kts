@@ -35,6 +35,11 @@ include(
 )
 
 include(
+	"f2-spring:auth:f2-spring-boot-starter-auth",
+	"f2-spring:auth:f2-spring-boot-starter-auth-keycloak",
+)
+
+include(
 	"f2-spring:data:f2-spring-data",
 	"f2-spring:data:f2-spring-data-mongodb",
 	"f2-spring:data:f2-spring-data-mongodb-test"
