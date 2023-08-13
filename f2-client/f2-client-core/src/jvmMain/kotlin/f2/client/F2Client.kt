@@ -7,7 +7,9 @@ import io.ktor.util.reflect.TypeInfo
 
 actual interface F2Client {
 	actual fun <RESPONSE> supplier(route: String, responseTypeInfo: TypeInfo): F2Supplier<RESPONSE>
-	actual fun <QUERY, RESPONSE> function(route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo): F2Function<QUERY, RESPONSE>
+	actual fun <QUERY, RESPONSE> function(
+		route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo
+	): F2Function<QUERY, RESPONSE>
 	actual fun <QUERY> consumer(route: String, queryTypeInfo: TypeInfo): F2Consumer<QUERY>
 
 	actual val type: F2ClientType

@@ -23,6 +23,7 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 
 @Configuration
+@Suppress("MagicNumber")
 @Order(-2)
 class F2ErrorWebExceptionHandler(
     applicationContext: ApplicationContext,
@@ -36,6 +37,9 @@ class F2ErrorWebExceptionHandler(
     serverProperties.error,
     applicationContext
 ) {
+    companion object {
+        private const val INTERNAL_ERROR = 500
+    }
     init {
         setViewResolvers(viewResolvers.toList())
         setMessageWriters(serverCodecConfigurer.writers)
@@ -46,24 +50,27 @@ class F2ErrorWebExceptionHandler(
         return super.getRoutingFunction(errorAttributes)
     }
 
-    override fun handle(exchange: ServerWebExchange, throwable: Throwable): Mono<Void> {
+    override fun handle(
+        exchange: ServerWebExchange, throwable: Throwable
+    ): Mono<Void> {
         val cause = throwable.cause
-        if (cause is F2Exception) {
-            return super.handle(exchange, cause)
+        return if (cause is F2Exception) {
+             super.handle(exchange, cause)
         } else if(cause is MissingKotlinParameterException) {
-            return super.handle(exchange,  F2Exception(error = F2Error(
+            super.handle(exchange,  F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
                 timestamp = System.currentTimeMillis().toString(),
                 message = "Missing parameter `${cause.parameter.name!!}`",
                 code = 400,
             )))
+        } else {
+            return super.handle(exchange, throwable)
         }
-        return super.handle(exchange, throwable)
     }
 
     override fun renderErrorResponse(request: ServerRequest?): Mono<ServerResponse?>? {
         val error = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL))
-        val status: Int =  error[F2Error::code.name] as Int? ?: 500;
+        val status: Int =  error[F2Error::code.name] as Int? ?: INTERNAL_ERROR;
         return ServerResponse.status(status).contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(error))
     }

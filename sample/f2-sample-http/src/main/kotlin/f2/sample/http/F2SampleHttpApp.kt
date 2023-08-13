@@ -37,7 +37,7 @@ class F2SampleHttpApp {
 	}
 	@Bean
 	fun uuids(): F2Supplier<String> = f2Supplier {
-		ticker(1000).consumeAsFlow().map { UUID.randomUUID().toString() }
+		ticker(delayMillis = 1000).consumeAsFlow().map { UUID.randomUUID().toString() }
 	}
 	@Bean
 	fun println(): F2Consumer<String> = f2Consumer(::println)

@@ -31,6 +31,7 @@ actual open class HttpF2Client(
 
 	override val type: F2ClientType = F2ClientType.HTTP
 
+	@Suppress("SwallowedException")
 	private suspend fun handleError(response: HttpResponse) {
 		val error: F2Error = try {
 			response.body()
@@ -47,24 +48,22 @@ actual open class HttpF2Client(
 
 	private suspend inline fun <T> handlePayloadResponse(response: HttpResponse, typeInfo: TypeInfo): Flow<T> {
 		return flow {
-			try {
-				if (!response.status.isSuccess()) {
-					handleError(response)
+			if (!response.status.isSuccess()) {
+				handleError(response)
+			}
+			response.body<T>(typeInfo).let { result ->
+				if(result is Collection<*>) {
+					result.forEach {emit(it as T)}
+				} else {
+					emit(result)
 				}
-				response.body<T>(typeInfo).let { result ->
-					if(result is Collection<*>) {
-						result.forEach {emit(it as T)}
-					} else {
-						emit(result)
-					}
-				}
-			} catch (e: Exception) {
-				throw e;
 			}
 		}
 	}
 
-	override fun <RESPONSE> supplier(route: String, responseTypeInfo: TypeInfo): F2Supplier<RESPONSE> = F2Supplier<RESPONSE> {
+	override fun <RESPONSE> supplier(
+		route: String, responseTypeInfo: TypeInfo
+	): F2Supplier<RESPONSE> = F2Supplier<RESPONSE> {
 		httpClient.get("$urlBase/${route}").let { response ->
 			handlePayloadResponse(response, responseTypeInfo)
 		}

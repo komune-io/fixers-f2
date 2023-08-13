@@ -26,6 +26,7 @@ object Versions {
 		const val oauth2 = "6.0.1"
 		const val boot = FixersVersions.Spring.boot
 		const val data = FixersVersions.Spring.data
+		const val slf4j = FixersVersions.Logging.slf4j
 	}
 
 	const val cucumber = FixersVersions.Test.cucumber
@@ -61,6 +62,8 @@ object Dependencies {
 		fun cucumber(scope: Scope) = FixersDependencies.Jvm.Test.cucumber(scope)
 
 		object Spring {
+
+			fun slf4J(scope: Scope) = FixersDependencies.Jvm.Logging.slf4j(scope)
 			fun dataCommons(scope: Scope) = FixersDependencies.Jvm.Spring.dataCommons(scope)
 
 			fun security(scope: Scope) = scope.add(

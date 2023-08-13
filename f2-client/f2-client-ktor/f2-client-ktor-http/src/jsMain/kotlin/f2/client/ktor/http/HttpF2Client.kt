@@ -22,7 +22,9 @@ actual open class HttpF2Client(
 	override val type: F2ClientType = F2ClientType.HTTP
 
 
-	override fun <RESPONSE> supplier(route: String, typeInfo: TypeInfo): F2Supplier<RESPONSE> = object : F2Supplier<RESPONSE> {
+	override fun <RESPONSE> supplier(
+		route: String, typeInfo: TypeInfo
+	): F2Supplier<RESPONSE> = object : F2Supplier<RESPONSE> {
 		override fun invoke(): Promise<Array<RESPONSE>> = GlobalScope.promise {
 			httpClient.get(urlBase).body(typeInfo)
 		}

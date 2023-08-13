@@ -13,7 +13,9 @@ open class F2Exception(
 	cause: Throwable? = null
 ) : RuntimeException(error.message, cause) {
 	companion object {
-		operator fun invoke(message: String, id: String = "", requestId: String = "", code: Int = 500, cause: Throwable? = null) = F2Exception(
+		operator fun invoke(
+			message: String, id: String = "", requestId: String = "", code: Int = 500, cause: Throwable? = null
+		) = F2Exception(
 			error = F2Error(
 				message = message,
 				requestId = requestId,

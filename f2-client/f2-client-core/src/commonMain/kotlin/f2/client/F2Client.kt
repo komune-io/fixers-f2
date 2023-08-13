@@ -12,7 +12,9 @@ enum class F2ClientType {
 expect interface F2Client {
 	val type: F2ClientType
 	fun <RESPONSE> supplier(route: String, responseTypeInfo: TypeInfo): F2Supplier<RESPONSE>
-	fun <QUERY, RESPONSE> function(route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo): F2Function<QUERY, RESPONSE>
+	fun <QUERY, RESPONSE> function(
+		route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo
+	): F2Function<QUERY, RESPONSE>
 	fun <QUERY> consumer(route: String, queryTypeInfo: TypeInfo): F2Consumer<QUERY>
 
 }

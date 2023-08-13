@@ -55,10 +55,6 @@ actual class RSocketF2Client(
 		ignoreUnknownKeys = true
 	}
 
-	private fun handlePayloadResponse(payload: String): String {
-		return json.decodeFromString<Map<String, String>>(payload).get("payload") ?: ""
-	}
-
 	private fun <T> handlePayload(obj: T, typeInfo: TypeInfo): String {
 		val serializer = serializer(typeInfo.kotlinType!!)
 		return json.encodeToString(serializer, obj)

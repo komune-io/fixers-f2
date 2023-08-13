@@ -81,7 +81,9 @@ abstract class WebSecurityConfig {
         addJwtParsingRules(http)
     }
 
-    private fun authenticate(authentication: Mono<Authentication>, context: AuthorizationContext): Mono<AuthorizationDecision> {
+    private fun authenticate(
+        authentication: Mono<Authentication>, context: AuthorizationContext
+    ): Mono<AuthorizationDecision> {
         return authentication.map { auth ->
             if (auth !is JwtAuthenticationToken || auth.token == null) {
                 return@map false

@@ -5,7 +5,7 @@ import kotlin.js.JsName
 
 @JsExport
 @JsName("SnapEvent")
-open class SnapEvent<T>(
+open class SnapEvent<T> (
 	override val eventType: String,
 	override val eventTypeVersion: String? = null,
 	override val cloudEventsVersion: String,
