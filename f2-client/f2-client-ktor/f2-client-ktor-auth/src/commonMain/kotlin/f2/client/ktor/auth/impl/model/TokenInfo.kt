@@ -1,6 +1,7 @@
 package f2.client.ktor.auth.impl.model
 
-import kotlinx.serialization.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class TokenInfo(
