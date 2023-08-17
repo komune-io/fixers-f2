@@ -1,8 +1,9 @@
 package f2.client.ktor.auth.impl
 
-class AuthPluginConfig{
+class AuthPluginConfig {
     lateinit var auth: AuthProperties
 }
+
 class AuthProperties(
     val serverUrl: String,
     val realm: String,
@@ -11,6 +12,7 @@ class AuthProperties(
     val username: String? = null,
     val password: String? = null,
 )
+
 fun AuthProperties.toAuthRealm(): AuthRealm {
     return if (clientSecret != null) {
             AuthRealmClientSecret(
