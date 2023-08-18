@@ -18,6 +18,11 @@ dependencies {
     jvmMainImplementation("io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}")
     jvmMainImplementation("io.ktor:ktor-client-jackson:${Versions.Kotlin.ktor}")
 
-    jvmTestImplementation("org.slf4j:slf4j-api:2.0.7")
-    jvmTestImplementation("org.slf4j:slf4j-simple:2.0.7")
+    jvmTestImplementation("org.junit.jupiter:junit-jupiter:5.6.0")
+    jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http"))
+
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
