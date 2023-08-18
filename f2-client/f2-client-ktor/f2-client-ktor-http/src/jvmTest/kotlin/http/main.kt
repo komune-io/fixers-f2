@@ -1,7 +1,7 @@
-package f2.client.ktor.auth
+package http
 
-import f2.client.ktor.auth.impl.AuthRealmPassword
-import f2.client.ktor.auth.impl.F2Auth
+import f2.client.ktor.http.plugin.F2Auth
+import f2.client.ktor.http.plugin.model.AuthRealmPassword
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.header
@@ -22,14 +22,16 @@ fun main(args: Array<String>): Unit = runBlocking {
         }
 
         install(F2Auth) {
-            auth = AuthRealmPassword(
-                serverUrl = "http://localhost:8080/auth",
-                realmId = "alveole",
-                redirectUrl = "",
-                clientId = "alveole-web",
-                username = "admin@alveoleplus.fr",
-                password = "alveoleplus"
-            )
+            getAuth = {
+                AuthRealmPassword(
+                    serverUrl = "http://localhost:8080/auth",
+                    realmId = "alveole",
+                    redirectUrl = "",
+                    clientId = "alveole-web",
+                    username = "admin@alveoleplus.fr",
+                    password = "alveoleplus"
+                )
+            }
         }
     }
     println(

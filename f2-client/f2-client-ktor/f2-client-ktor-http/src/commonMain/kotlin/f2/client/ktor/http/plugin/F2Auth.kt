@@ -1,10 +1,12 @@
-package f2.client.ktor.auth.impl
+package f2.client.ktor.http.plugin
 
-import f2.client.ktor.auth.impl.model.TokenInfo
+import f2.client.ktor.http.plugin.model.AuthRealm
+import f2.client.ktor.http.plugin.model.AuthRealmClientSecret
+import f2.client.ktor.http.plugin.model.AuthRealmPassword
+import f2.client.ktor.http.plugin.model.TokenInfo
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpClientPlugin
-import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BasicAuthCredentials
 import io.ktor.client.plugins.auth.providers.BearerTokens
@@ -20,10 +22,10 @@ import io.ktor.util.AttributeKey
 class F2Auth {
     private lateinit var authPlugin: Auth
 
-    lateinit var auth: AuthRealm
+    lateinit var getAuth: suspend () -> AuthRealm
 
     companion object Plugin: HttpClientPlugin<F2Auth, F2Auth> {
-        private val bearerTokenStorage = mutableListOf<BearerTokens>()
+        private var lastBearerTokens: BearerTokens? = null
 
         override val key: AttributeKey<F2Auth> = AttributeKey("F2Auth")
 
@@ -41,12 +43,12 @@ class F2Auth {
         private fun F2Auth.prepareAuth() = Auth.prepare {
             bearer {
                 loadTokens {
-                    bearerTokenStorage.lastOrNull()
+                    lastBearerTokens
                 }
                 refreshTokens {
                     val refreshTokenInfo: TokenInfo = client.post {
-                        val authRealm = auth
-                        url("${auth.serverUrl}/realms/${auth.realmId}/protocol/openid-connect/token")
+                        val authRealm = getAuth()
+                        url("${authRealm.serverUrl}/realms/${authRealm.realmId}/protocol/openid-connect/token")
                         val parameters = if (oldTokens == null) {
                             when (authRealm) {
                                 is AuthRealmClientSecret -> mapOf(
@@ -73,50 +75,12 @@ class F2Auth {
                         setBody(FormDataContent(parametersOf(*parameters)))
                         markAsRefreshTokenRequest()
                     }.body()
-                    bearerTokenStorage.add(BearerTokens(refreshTokenInfo.accessToken, refreshTokenInfo.refreshToken ?: ""))
-                    bearerTokenStorage.last()
+                    lastBearerTokens = BearerTokens(refreshTokenInfo.accessToken, refreshTokenInfo.refreshToken ?: "")
+                    lastBearerTokens
                 }
             }
         }
     }
-}
-
-val F2AuthPlugin = createClientPlugin("F2AuthPlugin") {
-//    val realm = pluginConfig.auth.toAuthRealm()
-
-    client.config {
-        install(Auth) {
-//            when(realm) {
-//                is AuthRealmClientSecret -> {
-//                    if(!realm.isPublic) {
-//                            basicAuth(realm)
-//                        } else {
-//
-//                        }
-//                    }
-//
-//                is AuthRealmPassword -> TODO()
-//            }
-
-            bearer {
-                loadTokens {
-                    BearerTokens("abc123", "xyz111")
-                }
-            }
-        }
-    }
-
-//    on(Send) { request ->
-//        val originalCall = proceed(request)
-//        originalCall.response.run { // this: HttpResponse
-//            if (status == HttpStatusCode.Unauthorized && headers["WWW-Authenticate"]!!.contains("Bearer")) {
-//                request.headers.append("Authorization", "Bearer $token")
-//                proceed(request)
-//            } else {
-//                originalCall
-//            }
-//        }
-//    }
 }
 
 private fun Auth.basicAuth(realm: AuthRealmClientSecret) {
@@ -126,31 +90,3 @@ private fun Auth.basicAuth(realm: AuthRealmClientSecret) {
         }
     }
 }
-
-//val ResponseTimePlugin = createClientPlugin("ResponseTimePlugin") {
-//    val onCallTimeKey = AttributeKey<Long>("onCallTimeKey")
-//    client.config {
-//        install(Auth) {
-//            basic {
-//                credentials {
-//                    BasicAuthCredentials(username = "jetbrains", password = "foobar")
-//                }
-//            }
-//            bearer {
-//                loadTokens {
-//                    BearerTokens("abc123", "xyz111")
-//                }
-//            }
-//        }
-//    }
-//    on(SendingRequest) { request, content ->
-//        val onCallTime = System.currentTimeMillis()
-//        request.attributes.put(onCallTimeKey, onCallTime)
-//    }
-//
-//    onResponse { response ->
-//        val onCallTime = response.call.attributes[onCallTimeKey]
-//        val onCallReceiveTime = System.currentTimeMillis()
-//        println("Read response delay (ms): ${onCallReceiveTime - onCallTime}")
-//    }
-//}

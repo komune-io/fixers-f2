@@ -1,4 +1,4 @@
-package f2.client.ktor.auth.impl
+package f2.client.ktor.http.plugin.model
 
 import kotlin.js.JsExport
 
