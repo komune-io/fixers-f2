@@ -1,3 +1,3 @@
 package f2.dsl.fnc
 
-expect interface F2Function<T, R>
+expect interface F2Function<in T, out R>

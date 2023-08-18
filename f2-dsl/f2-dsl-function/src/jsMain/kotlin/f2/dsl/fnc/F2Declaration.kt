@@ -4,8 +4,8 @@ import kotlin.js.Promise
 
 @JsExport
 @JsName("F2Function")
-actual interface F2Function<T, R> {
-	fun invoke(cmd: Array<T>): Promise<Array<R>>
+actual interface F2Function<in T, out R> {
+	fun invoke(cmd: Array<out T>): Promise<Array<out R>>
 }
 
 @JsExport
