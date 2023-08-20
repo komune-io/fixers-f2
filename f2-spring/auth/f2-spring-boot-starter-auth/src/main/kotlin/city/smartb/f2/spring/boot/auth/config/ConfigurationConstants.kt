@@ -1,8 +1,8 @@
 package city.smartb.f2.spring.boot.auth.config
 
 // properties
-const val I2_PREFIX = "i2"
-const val JWT_ISSUER_NAME = "$I2_PREFIX.issuers[0].name"
+const val F2_PREFIX = "f2"
+const val JWT_ISSUER_NAME = "$F2_PREFIX.issuers[0].name"
 
 // conditional expressions
 const val OPENID_REQUIRED_EXPRESSION = "!'\${$JWT_ISSUER_NAME:}'.isEmpty()"

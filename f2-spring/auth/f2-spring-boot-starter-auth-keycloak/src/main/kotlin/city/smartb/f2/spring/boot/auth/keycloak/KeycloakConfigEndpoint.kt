@@ -7,16 +7,16 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-@EnableConfigurationProperties(I2KeycloakConfig::class)
+@EnableConfigurationProperties(F2KeycloakConfig::class)
 class KeycloakConfigEndpoint(
-    private val i2KeycloakConfigResolver: I2KeycloakConfigResolver
+    private val keycloakConfigResolver: KeycloakConfigResolver
 ) {
 
     @PermitAll
     @Bean
     fun keycloak(): (name: String) -> KeycloakConfig = { name ->
         runBlocking {
-            val keycloakConfig = i2KeycloakConfigResolver.getKeycloakConfig(name)
+            val keycloakConfig = keycloakConfigResolver.getKeycloakConfig(name)
 
             KeycloakConfig(
                 realm = keycloakConfig.realm,

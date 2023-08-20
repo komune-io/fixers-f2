@@ -1,6 +1,6 @@
 package city.smartb.f2.spring.boot.auth.config
 
-open class I2TrustedIssuerProperties(
+open class TrustedIssuerProperties(
     open val name: String,
     open val authUrl: String,
     open val realm: String,

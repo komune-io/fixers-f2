@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.server.resource.authentication.Reacti
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 
-class I2TrustedIssuerJwtAuthenticationManagerResolver(
+class TrustedIssuerJwtAuthenticationManagerResolver(
     val isTrustedIssuer: (String) -> Boolean,
     val reactiveJwtAuthenticationConverter: ReactiveJwtAuthenticationConverter
 ): ReactiveAuthenticationManagerResolver<String> {
