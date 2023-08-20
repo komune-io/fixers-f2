@@ -2,9 +2,9 @@ package city.smartb.f2.spring.boot.auth.keycloak
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "i2")
-data class I2KeycloakConfig (
-    val issuers: List<I2KeycloakIssuers> = emptyList()
+@ConfigurationProperties(prefix = "f2")
+data class F2KeycloakConfig (
+    val issuers: List<KeycloakIssuers> = emptyList()
 ) {
     fun getConfig(): Map<String, KeycloakConfig> {
         return issuers.associate {

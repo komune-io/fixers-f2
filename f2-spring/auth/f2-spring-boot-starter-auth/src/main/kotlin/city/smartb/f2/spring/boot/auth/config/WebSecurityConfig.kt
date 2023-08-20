@@ -30,7 +30,7 @@ import jakarta.annotation.security.RolesAllowed
 @Suppress("UnnecessaryAbstractClass")
 @Configuration
 @ConditionalOnMissingBean(WebSecurityConfig::class)
-@EnableConfigurationProperties(I2TrustedIssuersConfig::class)
+@EnableConfigurationProperties(F2TrustedIssuersConfig::class)
 abstract class WebSecurityConfig {
 
     companion object {
@@ -45,15 +45,15 @@ abstract class WebSecurityConfig {
     lateinit var applicationContext: ApplicationContext
 
     @Autowired
-    lateinit var i2TrustedIssuersResolver: I2TrustedIssuersConfig
+    lateinit var f2TrustedIssuersResolver: F2TrustedIssuersConfig
 
     @Bean
-    @ConfigurationProperties(prefix = "i2.filter")
+    @ConfigurationProperties(prefix = "f2.filter")
     fun authFilter(): Map<String, String> = HashMap()
 
     @Bean
     fun trustedIssuers(): List<String> {
-        return i2TrustedIssuersResolver.getTrustedIssuers()
+        return f2TrustedIssuersResolver.getTrustedIssuers()
     }
 
     @Bean(SPRING_SECURITY_FILTER_CHAIN)
@@ -147,14 +147,14 @@ abstract class WebSecurityConfig {
     }
 
     fun addJwtParsingRules(http: ServerHttpSecurity) {
-        val i2TrustedIssuerJwtAuthenticationManagerResolver = I2TrustedIssuerJwtAuthenticationManagerResolver(
+        val trustedIssuerJwtAuthenticationManagerResolver = TrustedIssuerJwtAuthenticationManagerResolver(
             ::isTrustedIssuer,
             jwtAuthenticationConverter()
         )
 
         http.oauth2ResourceServer { oauth2 ->
             oauth2.authenticationManagerResolver(
-                JwtIssuerReactiveAuthenticationManagerResolver(i2TrustedIssuerJwtAuthenticationManagerResolver)
+                JwtIssuerReactiveAuthenticationManagerResolver(trustedIssuerJwtAuthenticationManagerResolver)
             )
         }
     }

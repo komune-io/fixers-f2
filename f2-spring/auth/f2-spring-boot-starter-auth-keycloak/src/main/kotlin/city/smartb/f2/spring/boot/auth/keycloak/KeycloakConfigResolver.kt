@@ -3,15 +3,15 @@ package city.smartb.f2.spring.boot.auth.keycloak
 import org.springframework.stereotype.Service
 
 @Service
-class I2KeycloakConfigResolver(
-    private val i2KeycloakConfig: I2KeycloakConfig
+class KeycloakConfigResolver(
+    private val f2KeycloakConfig: F2KeycloakConfig
 ) {
     suspend fun getKeycloakConfig(name: String?): KeycloakConfig {
         if (name.isNullOrBlank()) {
-            return i2KeycloakConfig.getConfig().values.first()
+            return f2KeycloakConfig.getConfig().values.first()
         }
 
-        return i2KeycloakConfig.getConfig()[name]
+        return f2KeycloakConfig.getConfig()[name]
             ?: throw NullPointerException("No config found for this name $name")
     }
 }

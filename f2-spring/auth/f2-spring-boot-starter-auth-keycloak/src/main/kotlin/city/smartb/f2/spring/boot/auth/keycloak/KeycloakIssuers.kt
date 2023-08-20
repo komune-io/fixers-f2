@@ -1,13 +1,13 @@
 package city.smartb.f2.spring.boot.auth.keycloak
 
-import city.smartb.f2.spring.boot.auth.config.I2TrustedIssuerProperties
+import city.smartb.f2.spring.boot.auth.config.TrustedIssuerProperties
 
-class I2KeycloakIssuers(
+class KeycloakIssuers(
     name: String,
     authUrl: String,
     realm: String,
     val web: I2KeycloakProperties?
-): I2TrustedIssuerProperties(
+): TrustedIssuerProperties(
     name = name,
     authUrl = authUrl,
     realm = realm
