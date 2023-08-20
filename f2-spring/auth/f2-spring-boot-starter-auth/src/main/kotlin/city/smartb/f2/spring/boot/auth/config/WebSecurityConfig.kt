@@ -59,8 +59,12 @@ abstract class WebSecurityConfig {
     @Bean(SPRING_SECURITY_FILTER_CHAIN)
     @ConditionalOnExpression(NO_AUTHENTICATION_REQUIRED_EXPRESSION)
     fun dummyAuthenticationProvider(http: ServerHttpSecurity): SecurityWebFilterChain {
-        http.authorizeExchange().anyExchange().permitAll()
-        http.csrf().disable()
+        http.authorizeExchange{ exchange ->
+            exchange.anyExchange().permitAll()
+        }
+        http.csrf { csrf ->
+            csrf.disable()
+        }
         http.corsConfig()
         return http.build()
     }
@@ -69,7 +73,9 @@ abstract class WebSecurityConfig {
     @ConditionalOnExpression(AUTHENTICATION_REQUIRED_EXPRESSION)
     fun oauthAuthenticationProvider(http: ServerHttpSecurity): SecurityWebFilterChain {
         addAuthenticationRules(http)
-        http.csrf().disable()
+        http.csrf { csrf ->
+            csrf.disable()
+        }
         http.corsConfig()
         return http.build()
     }
@@ -103,7 +109,9 @@ abstract class WebSecurityConfig {
 
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", config)
-        cors().configurationSource(source)
+        cors { spec ->
+            spec.configurationSource(source)
+        }
     }
 
     fun addRolesAllowedRules(http: ServerHttpSecurity) {
@@ -112,9 +120,10 @@ abstract class WebSecurityConfig {
                 applicationContext.findAnnotationOnBean(bean, RolesAllowed::class.java)!!.value
             }
             .forEach { (name, roles) ->
-                http.authorizeExchange()
-                    .pathMatchers("$contextPath/$name")
-                    .hasAnyRole(*roles)
+                http.authorizeExchange{ exchange ->
+                    exchange.pathMatchers("$contextPath/$name")
+                        .hasAnyRole(*roles)
+                }
             }
     }
 
@@ -124,16 +133,17 @@ abstract class WebSecurityConfig {
             .toTypedArray()
 
         if (permitAllBeans.isNotEmpty()) {
-            http.authorizeExchange()
-                .pathMatchers(*permitAllBeans)
-                .permitAll()
+            http.authorizeExchange { exchange ->
+                exchange.pathMatchers(*permitAllBeans).permitAll()
+            }
         }
     }
 
     fun addMandatoryAuthRules(http: ServerHttpSecurity) {
-        http.authorizeExchange()
-            .anyExchange()
-            .access(::authenticate)
+        http.authorizeExchange { exchange ->
+            exchange.anyExchange()
+                .access(::authenticate)
+        }
     }
 
     fun addJwtParsingRules(http: ServerHttpSecurity) {
