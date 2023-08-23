@@ -16,6 +16,26 @@
 
 package org.springframework.cloud.function.context.catalog;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -45,21 +65,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import f2.spring.exception.MessageConverterException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 
 /**
@@ -1407,6 +1417,10 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                 try {
                     return this.convertOutputIfNecessary(v, type, expectedOutputContentType);
                 }
+                // FIX force message conversion error propagation
+                catch (MessageConverterException e) {
+                    throw e;
+                }
                 catch (Exception e) {
                     throw new IllegalStateException("Failed to convert output", e);
                 }
@@ -1414,6 +1428,10 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                     : Flux.from(publisher).map(v -> {
                 try {
                     return this.convertOutputIfNecessary(v, type, expectedOutputContentType);
+                }
+                // FIX force message conversion error propagation
+                catch (MessageConverterException e) {
+                    throw e;
                 }
                 catch (Exception e) {
                     throw new IllegalStateException("Failed to convert output", e);
