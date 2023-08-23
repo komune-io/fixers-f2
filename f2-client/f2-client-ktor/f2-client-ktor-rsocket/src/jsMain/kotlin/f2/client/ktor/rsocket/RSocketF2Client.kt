@@ -35,7 +35,7 @@ actual class RSocketF2Client(
 		queryTypeInfo: TypeInfo,
 		responseTypeInfo: TypeInfo,
 	) = object : F2Function<QUERY, RESPONSE> {
-		override fun invoke(cmd: Array<QUERY>) = GlobalScope.promise {
+		override fun invoke(cmd: Array<out QUERY>) = GlobalScope.promise {
 			cmd.map {
 				val toSend = handlePayload(cmd, queryTypeInfo)
 				val payload = rSocketClient.requestResponse(route, toSend)

@@ -17,16 +17,15 @@ operator fun <T, R> F2Function<T, R>.invoke(t: T): Promise<R> {
 	return invoke(t)
 }
 
-suspend fun <T, R> T.invokeWith(f2: F2Function<T, R>): Promise<Array<R>> {
+suspend fun <T, R> T.invokeWith(f2: F2Function<T, R>): Promise<Array<out R>> {
 	return f2.invoke(arrayOf(this))
 }
 
 fun <T, R> f2Function(fnc: suspend (t: T) -> R): F2Function<T, R> = object : F2Function<T, R> {
-	override fun invoke(cmds: Array<T>): Promise<Array<R>> = GlobalScope.promise {
+	override fun invoke(cmds: Array<out T>): Promise<Array<out R>> = GlobalScope.promise {
 		cmds.map { cmd ->
 			fnc(cmd)
-		}
-		TODO("Not yet implemented")
+		}.toTypedArray()
 	}
 }
 
