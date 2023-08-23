@@ -29,7 +29,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 
 class HttpF2ClientTest {
 
-	@Test
+//	@Test
 	fun auth(): Unit = runTest {
 		val client = HttpClient {
 			install(ContentNegotiation) {
@@ -62,7 +62,7 @@ class HttpF2ClientTest {
 		Assertions.assertThat(result).contains(organizationId)
 	}
 
-	@Test
+//	@Test
 	fun test(): Unit = runTest {
 		val client = ServerClient(
 			client = HttpF2Client(

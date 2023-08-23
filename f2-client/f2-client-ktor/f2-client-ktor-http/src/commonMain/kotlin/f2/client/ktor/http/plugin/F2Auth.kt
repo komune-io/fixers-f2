@@ -83,10 +83,10 @@ class F2Auth {
     }
 }
 
-private fun Auth.basicAuth(realm: AuthRealmClientSecret) {
-    basic {
-        credentials {
-            BasicAuthCredentials(username = realm.clientId, password = realm.clientSecret)
-        }
-    }
-}
+//private fun Auth.basicAuth(realm: AuthRealmClientSecret) {
+//    basic {
+//        credentials {
+//            BasicAuthCredentials(username = realm.clientId, password = realm.clientSecret)
+//        }
+//    }
+//}
