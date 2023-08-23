@@ -10,20 +10,18 @@ class BeanLambdaSimpleSteps: LambdaSimpleSteps(), En {
 		prepareLambdaSteps()
 	}
 
-	override fun function(values: List<String>): List<String> {
+	override fun function(values: String): String {
 		val lambda: (String) -> String = LambdaSimple::functionSingle.blockingFunctionBean()
-		return values.map(lambda)
+		return lambda(values)
 	}
 
-	override fun supplier(): List<String> {
+	override fun supplier(): String {
 		val lambda: () -> String = LambdaSimple::supplierSingle.blockingSupplierBean()
-		return listOf(
-			lambda()
-		)
+		return lambda()
 	}
 
-	override fun consumer(values: List<String>) {
+	override fun consumer(values: String) {
 		val lambda: (String) -> Unit = LambdaSimple::consumerSingle.blockingConsumerBean()
-		values.map(lambda)
+		lambda(values)
 	}
 }

@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.transform
 import java.util.Date
 import java.util.UUID
 import kotlin.reflect.full.isSubclassOf
+import kotlinx.coroutines.flow.asFlow
 
 actual open class HttpF2Client(
 	actual val httpClient: HttpClient,
@@ -86,7 +87,7 @@ actual open class HttpF2Client(
 	override fun <MSG, RESPONSE> function(
 		route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo
 	) = F2Function<MSG, RESPONSE> { messageFlow ->
-		doPost(route, queryTypeInfo, messageFlow).transform { response ->
+		doPost(route, queryTypeInfo, messageFlow).asFlow().transform { response ->
 			if (!response.status.isSuccess()) {
 				handleError(response)
 			}
@@ -112,16 +113,27 @@ actual open class HttpF2Client(
 		doPost(route, queryTypeInfo, messages)
 	}
 
-	private suspend fun <MSG> doPost(route: String, queryTypeInfo: TypeInfo, messages: Flow<MSG>): Flow<HttpResponse> {
+	private suspend fun <MSG> doPost(route: String, queryTypeInfo: TypeInfo, messages: Flow<MSG>): List<HttpResponse> {
+		val isListType = queryTypeInfo.type == List::class
 		return if (queryTypeInfo.type.isSubclassOf(F2UploadCommand::class)) {
 			messages.map { msg ->
 				postFormData(route, msg as F2UploadCommand<*>)
-			}
+			}.toList()
+		} else if(isListType) {
+			listOf(postJson(route, queryTypeInfo, messages))
 		} else {
-			flowOf(postJson(route, queryTypeInfo, messages))
+			messages.map { msg ->
+				postJson(route, queryTypeInfo, msg)
+			}.toList()
 		}
 	}
 
+	private suspend fun <MSG> postJson(route: String, queryTypeInfo: TypeInfo, message: MSG): HttpResponse {
+		return httpClient.post(buildUrl(route)) {
+			contentType(ContentType.Application.Json)
+			setBody(message, queryTypeInfo)
+		}
+	}
 	private suspend fun <MSG> postJson(route: String, queryTypeInfo: TypeInfo, messages: Flow<MSG>): HttpResponse {
 		return httpClient.post(buildUrl(route)) {
 			contentType(ContentType.Application.Json)
