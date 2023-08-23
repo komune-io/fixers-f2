@@ -759,10 +759,9 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
          */
         @SuppressWarnings("unchecked")
         private Object fluxifyInputIfNecessary(Object input) {
-            // FIX SMARTB - Comment next three lines to fix: Execute single consumer from the catalog
-//            if (input instanceof Message && !((Message) input).getHeaders().containsKey("user-agent") && this.isConsumer() && !this.isInputTypePublisher()) {
-//                return input;
-//            }
+            if (input instanceof Message && !((Message) input).getHeaders().containsKey("user-agent") && this.isConsumer() && !this.isInputTypePublisher()) {
+                return input;
+            }
             if (FunctionTypeUtils.isMultipleArgumentType(this.inputType)) {
                 return input;
             }

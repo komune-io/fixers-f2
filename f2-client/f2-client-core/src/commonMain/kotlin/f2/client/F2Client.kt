@@ -38,6 +38,10 @@ inline fun <reified QUERY> F2Client.consumer(route: String): F2Consumer<QUERY> {
 	val typeInfo = getTypeInfo<QUERY>()
 	return consumer(route, typeInfo)
 }
+inline fun <reified QUERY> F2Client.consumerSingle(route: String): F2Consumer<QUERY> {
+	val typeInfo = typeInfo<QUERY>()
+	return consumer(route, typeInfo)
+}
 
 inline fun <reified DATA> F2Client.getTypeInfo(): TypeInfo {
 	return if (type == F2ClientType.HTTP) {
