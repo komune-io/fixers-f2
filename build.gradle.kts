@@ -16,9 +16,7 @@ allprojects {
 	group = "city.smartb.f2"
 	version = System.getenv("VERSION") ?: "experimental-SNAPSHOT"
 	repositories {
-		mavenCentral()
-		maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
-		mavenLocal()
+		defaultRepo()
 	}
 }
 

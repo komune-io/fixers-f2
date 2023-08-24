@@ -16,9 +16,15 @@
 
 package org.springframework.cloud.function.context.config;
 
-import f2.spring.exception.MessageConverterException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
@@ -31,15 +37,10 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
- * FIX SMARTB - https://github.com/spring-cloud/spring-cloud-function/issues/901
+ * FIX SMARTB - https://github.com/spring-cloud/spring-cloud-function/issues/901.
  * Try to return an error instead of log a warnin when an object can't be parsed
  * @author Oleg Zhurakousky
  * @author Salvatore Bernardo
@@ -66,13 +67,15 @@ public class SmartCompositeMessageConverter extends CompositeMessageConverter {
                     return result;
                 }
             }
-            // FIX SMARTB force message conversion error propagation
-            catch (MessageConverterException e) {
+            // SmartB Modification
+            // force message conversion error propagation
+            catch (ResponseStatusException e) {
                 throw e;
             }
+            // SmartB End Of Modification
             catch (Exception e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failure during type conversion by " + converter + ". Will try the next converter.", e);
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Failure during type conversion by " + converter + ". Will try the next converter.", e);
                 }
             }
         }
@@ -141,15 +144,17 @@ public class SmartCompositeMessageConverter extends CompositeMessageConverter {
             String[] contentTypes = StringUtils.delimitedListToStringArray((String) value, ",");
             for (String contentType : contentTypes) {
                 if (!MimeType.valueOf(contentType).isConcrete()) {
-                    List<MimeType> supportedMimeTypes = ((AbstractMessageConverter) converter).getSupportedMimeTypes();
-                    for (MimeType supportedMimeType : supportedMimeTypes) {
-                        if (supportedMimeType.isCompatibleWith(MimeType.valueOf(contentType))) {
-                            MessageHeaderAccessor h = new MessageHeaderAccessor();
-                            h.copyHeaders(headers);
-                            h.setHeader(MessageHeaders.CONTENT_TYPE, supportedMimeType);
-                            Message<?> result = converter.toMessage(payload, h.getMessageHeaders());
-                            if (result != null) {
-                                return result;
+                    if (converter instanceof AbstractMessageConverter) {
+                        List<MimeType> supportedMimeTypes = ((AbstractMessageConverter) converter).getSupportedMimeTypes();
+                        for (MimeType supportedMimeType : supportedMimeTypes) {
+                            if (supportedMimeType.isCompatibleWith(MimeType.valueOf(contentType))) {
+                                MessageHeaderAccessor h = new MessageHeaderAccessor();
+                                h.copyHeaders(headers);
+                                h.setHeader(MessageHeaders.CONTENT_TYPE, supportedMimeType);
+                                Message<?> result = converter.toMessage(payload, h.getMessageHeaders());
+                                if (result != null) {
+                                    return result;
+                                }
                             }
                         }
                     }

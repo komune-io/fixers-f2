@@ -3,6 +3,10 @@ import city.smartb.gradle.dependencies.FixersPluginVersions
 import city.smartb.gradle.dependencies.FixersVersions
 import city.smartb.gradle.dependencies.Scope
 import city.smartb.gradle.dependencies.add
+import java.net.URI
+import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.kotlin.dsl.repositories
 
 object PluginVersions {
 	val fixers = FixersPluginVersions.fixers
@@ -22,9 +26,10 @@ object Versions {
 	}
 
 	object Spring {
-		const val function = "4.0.0"
+		const val function = "4.1.0-M1"
 		const val oauth2 = "6.0.1"
 		const val boot = FixersVersions.Spring.boot
+		const val framework = FixersVersions.Spring.framework
 		const val data = FixersVersions.Spring.data
 		const val slf4j = FixersVersions.Logging.slf4j
 	}
@@ -85,6 +90,7 @@ object Dependencies {
 				"com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2"
 			)
 			fun cloudFunction(scope: Scope) = scope.add(
+				"org.springframework:spring-web:${Versions.Spring.framework}",
 				"org.springframework.cloud:spring-cloud-function-context:${Versions.Spring.function}",
 				"org.springframework.cloud:spring-cloud-function-kotlin:${Versions.Spring.function}",
 				"org.springframework.boot:spring-boot-autoconfigure:${Versions.Spring.boot}",
@@ -154,4 +160,11 @@ object Modules {
 		val f2SampleRSocket = ":sample:f2-sample-rsocket"
 	}
 
+}
+
+fun RepositoryHandler.defaultRepo() {
+	mavenCentral()
+	maven { url = URI("https://oss.sonatype.org/content/repositories/snapshots") }
+	maven { url = URI("https://repo.spring.io/milestone") }
+	mavenLocal()
 }

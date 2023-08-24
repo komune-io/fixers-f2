@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2020 the original author or authors.
+ * Copyright 2020-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,25 @@
 
 package org.springframework.cloud.function.context.config;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+
 import com.fasterxml.jackson.databind.JsonMappingException;
-import f2.spring.exception.MessageConverterException;
 import org.springframework.cloud.function.cloudevent.CloudEventMessageUtils;
 import org.springframework.cloud.function.json.JsonMapper;
+import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.MethodParameter;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.util.MimeType;
-
-import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
+import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Implementation of {@link MessageConverter} which uses Jackson or Gson libraries to do the
@@ -69,7 +75,15 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 
 	@Override
 	protected boolean canConvertFrom(Message<?> message, @Nullable Class<?> targetClass) {
-		if (targetClass == null || !supportsMimeType(message.getHeaders())) {
+		return supportsMimeType(message.getHeaders()) && this.canDiscoverConvertToType(message, targetClass);
+	}
+
+	private boolean canDiscoverConvertToType(Message<?> message, Class<?> targetClass) {
+		if (targetClass == null || targetClass == Object.class) {
+			MimeType mimeType = getMimeType(message.getHeaders());
+			if (StringUtils.hasText(mimeType.getParameter("type"))) {
+				return true;
+			}
 			return false;
 		}
 		return true;
@@ -77,7 +91,25 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 
 	@Override
 	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
-		Type convertToType = conversionHint == null ? targetClass : (Type) conversionHint;
+		if (conversionHint instanceof ParameterizedTypeReference<?>) {
+			conversionHint = ((ParameterizedTypeReference<?>) conversionHint).getType();
+		}
+		Type convertToType = this.getResolvedType(targetClass, conversionHint);
+		if (convertToType == null || convertToType == Object.class) {
+			MimeType mimeType = getMimeType(message.getHeaders());
+			String type = mimeType.getParameter("type");
+			if (StringUtils.hasText(type)) {
+				try {
+					convertToType = Thread.currentThread().getContextClassLoader().loadClass(type);
+				}
+				catch (ClassNotFoundException e) {
+					throw new IllegalArgumentException("Failed to load class `" + type + "` specified by the provided content-type: " + mimeType, e);
+				}
+			}
+			else {
+				return message.getPayload();
+			}
+		}
 		if (targetClass == byte[].class && message.getPayload() instanceof String) {
 			return ((String) message.getPayload()).getBytes(StandardCharsets.UTF_8);
 		}
@@ -85,14 +117,16 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 			try {
 				return this.jsonMapper.fromJson(message.getPayload(), convertToType);
 			}
+			// SmartB Modification
+			// force message conversion error propagation
 			catch (IllegalStateException e) {
-				// FIX SMARTB force message conversion error propagation
 				if ("application/json".equals(message.getHeaders().get("Content-Type")) && e.getCause() instanceof JsonMappingException) {
-					throw new MessageConverterException((JsonMappingException) e.getCause());
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error parsing json", e.getCause());
 				}
 			}
+			// SmartB End Of Modification
 			catch (Exception e) {
-				if (message.getPayload() instanceof byte[] && targetClass.isAssignableFrom(String.class)) {
+				if (message.getPayload() instanceof byte[] && String.class.isAssignableFrom(targetClass)) {
 					return new String((byte[]) message.getPayload(), StandardCharsets.UTF_8);
 				}
 				else if (logger.isDebugEnabled()) {
@@ -100,7 +134,13 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 					if (payload instanceof byte[]) {
 						payload = new String((byte[]) payload, StandardCharsets.UTF_8);
 					}
-					logger.warn("Failed to convert value: " + payload, e);
+
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to convert value: " + payload + " to: " + targetClass, e);
+					}
+					else {
+						logger.warn("Failed to convert value: " + payload + " to: " + targetClass);
+					}
 				}
 			}
 		}
@@ -110,8 +150,24 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 
 	@Override
 	protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers,
-			@Nullable Object conversionHint) {
+									   @Nullable Object conversionHint) {
 		return jsonMapper.toJson(payload);
+	}
+
+	private Type getResolvedType(Class<?> targetClass, @Nullable Object conversionHint) {
+		if (conversionHint instanceof MethodParameter param) {
+			param = param.nestedIfOptional();
+			if (Message.class.isAssignableFrom(param.getParameterType())) {
+				param = param.nested();
+			}
+			Type genericParameterType = param.getNestedGenericParameterType();
+			Class<?> contextClass = param.getContainingClass();
+			return GenericTypeResolver.resolveType(genericParameterType, contextClass);
+		}
+		else if (conversionHint instanceof ParameterizedType) {
+			return (Type) conversionHint;
+		}
+		return targetClass;
 	}
 
 }

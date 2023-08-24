@@ -16,10 +16,24 @@
 
 package org.springframework.cloud.function.context.config;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import kotlin.Unit;
-import kotlin.jvm.functions.*;
+import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function1;
+import kotlin.jvm.functions.Function2;
+import kotlin.jvm.functions.Function3;
+import kotlin.jvm.functions.Function4;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Flux;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -29,15 +43,6 @@ import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ObjectUtils;
-import reactor.core.publisher.Flux;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Configuration class which defines the required infrastructure to bootstrap Kotlin
@@ -53,6 +58,7 @@ import java.util.function.Supplier;
 public class KotlinLambdaToFunctionAutoConfiguration {
 
     protected final Log logger = LogFactory.getLog(getClass());
+    // SmartB Modification
 // THIS LOOKS TO BE MANDATORY WHEN USING spring web instead of webflux
 //    @Bean
 //    @ConditionalOnMissingBean
@@ -66,7 +72,7 @@ public class KotlinLambdaToFunctionAutoConfiguration {
 //            }
 //        };
 //    }
-
+    // SmartB End Of Modification
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final class KotlinFunctionWrapper implements Function<Object, Object>, Supplier<Object>, Consumer<Object>,
@@ -212,7 +218,7 @@ public class KotlinLambdaToFunctionAutoConfiguration {
                     !CoroutinesUtils.isContinuationType(type[0]) &&
                     !isTypeRepresentedByClass(type[1], Unit.class);
         }
-
+        // SmartB Modification
         private boolean isValidKotlinSuspendSupplier(Type functionType, Type[] type) {
             return isTypeRepresentedByClass(functionType, Function1.class) &&
                     (type.length == 1 || (type.length == 2 && CoroutinesUtils.isContinuationFlowType(type[0])));
@@ -223,7 +229,7 @@ public class KotlinLambdaToFunctionAutoConfiguration {
                     (
                             type.length == 1 ||
                                     (type.length == 3 && CoroutinesUtils.isContinuationUnitType(type[1]) && CoroutinesUtils.isFlowType(type[0]))
-                    ) ;
+                    );
         }
 
         private boolean isValidKotlinSuspendFunction(Type functionType, Type[] type) {
@@ -247,13 +253,13 @@ public class KotlinLambdaToFunctionAutoConfiguration {
         private List<Type> concatWithSuperTypes(Type type) {
             List<Type> all = new ArrayList<>();
             all.add(type);
-            if(type instanceof ParameterizedType) {
-                Class<?>[] interfaces = ((Class<?>)((ParameterizedType) type).getRawType()).getInterfaces();
+            if (type instanceof ParameterizedType) {
+                Class<?>[] interfaces = ((Class<?>) ((ParameterizedType) type).getRawType()).getInterfaces();
                 all.addAll(List.of(interfaces));
             }
             return all;
         }
-
+        // SmartB End Of Modification
         public void setName(String name) {
             this.name = name;
         }
