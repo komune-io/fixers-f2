@@ -23,11 +23,15 @@ object Versions {
 
 	object Json {
 		const val jackson = FixersVersions.Json.jacksonKotlin
+		const val gson = "2.10.1"
 	}
 
+	object CloudEvent {
+        const val spring = "2.5.0"
+    }
 	object Spring {
 		const val function = "4.1.0-M1"
-		const val oauth2 = "6.0.1"
+		const val security = FixersVersions.Spring.security
 		const val boot = FixersVersions.Spring.boot
 		const val framework = FixersVersions.Spring.framework
 		const val data = FixersVersions.Spring.data
@@ -76,8 +80,8 @@ object Dependencies {
 			)
 
 			fun oauth2(scope: Scope) = scope.add(
-				"org.springframework.security:spring-security-oauth2-resource-server:${Versions.Spring.oauth2}",
-				"org.springframework.security:spring-security-oauth2-jose:${Versions.Spring.oauth2}"
+				"org.springframework.security:spring-security-oauth2-resource-server:${Versions.Spring.security}",
+				"org.springframework.security:spring-security-oauth2-jose:${Versions.Spring.security}"
 			)
 
 			fun autoconfigure(scope: Scope) = scope.add(
@@ -85,16 +89,15 @@ object Dependencies {
 			)
 
 			fun cloudFunctionDep(scope: Scope) = scope.add(
-				"com.google.code.gson:gson:2.10.1",
-				"io.cloudevents:cloudevents-spring:2.4.1",
-				"com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2"
+				"com.google.code.gson:gson:${Versions.Json.gson}",
+				"io.cloudevents:cloudevents-spring:${Versions.CloudEvent.spring}",
 			)
 			fun cloudFunction(scope: Scope) = scope.add(
-				"org.springframework:spring-web:${Versions.Spring.framework}",
 				"org.springframework.cloud:spring-cloud-function-context:${Versions.Spring.function}",
 				"org.springframework.cloud:spring-cloud-function-kotlin:${Versions.Spring.function}",
 				"org.springframework.boot:spring-boot-autoconfigure:${Versions.Spring.boot}",
-				"com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.Json.jackson}"
+				"com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.Json.jackson}",
+				"org.springframework:spring-web:${Versions.Spring.framework}",
 			)
 
 			fun cloudFunctionWebflux(scope: Scope) = scope.add(
