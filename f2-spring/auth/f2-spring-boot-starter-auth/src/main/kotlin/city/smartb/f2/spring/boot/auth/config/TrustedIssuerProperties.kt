@@ -4,5 +4,5 @@ open class TrustedIssuerProperties(
     open val name: String,
     open val authUrl: String,
     open val realm: String,
-    open val uri: String = "${authUrl.removeSuffix("/")}/realms/${realm.removePrefix("/")}"
+    open val issuer: String = "${authUrl.removeSuffix("/")}/realms/${realm.removePrefix("/")}"
 )

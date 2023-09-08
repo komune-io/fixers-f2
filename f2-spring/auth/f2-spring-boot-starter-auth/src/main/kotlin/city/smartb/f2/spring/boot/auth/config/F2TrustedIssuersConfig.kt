@@ -8,6 +8,6 @@ data class F2TrustedIssuersConfig (
 ) {
 
     fun getTrustedIssuers(): List<String> {
-        return issuers.map { it.uri }
+        return issuers.map { it.issuer }
     }
 }
