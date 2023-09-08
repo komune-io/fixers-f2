@@ -3,8 +3,8 @@ plugins {
 	kotlin("plugin.spring") version PluginVersions.kotlin apply false
 	kotlin("plugin.serialization") version PluginVersions.kotlin
 	id("org.springframework.boot") version PluginVersions.springBoot apply false
+	id("city.smartb.fixers.gradle.npm") version PluginVersions.fixers  apply false
 
-	id("dev.petuska.npm.publish") version PluginVersions.npmPublish apply false
 	id("com.moowork.node") version "1.3.1"
 
 	id("city.smartb.fixers.gradle.config") version PluginVersions.fixers
@@ -17,20 +17,6 @@ allprojects {
 	version = System.getenv("VERSION") ?: "experimental-SNAPSHOT"
 	repositories {
 		defaultRepo()
-	}
-}
-
-subprojects {
-	plugins.withType(dev.petuska.npm.publish.NpmPublishPlugin::class.java).whenPluginAdded {
-		the<dev.petuska.npm.publish.extension.NpmPublishExtension>().apply {
-			organization.set("smartb")
-			registries {
-				register("npmjs") {
-					uri.set(uri("https://registry.npmjs.org"))
-					authToken.set(System.getenv("NPM_TOKEN"))
-				}
-			}
-		}
 	}
 }
 
@@ -47,6 +33,9 @@ tasks {
 }
 
 fixers {
+	npm {
+		version = "0.17.0-SNAPSHOT"
+	}
 	d2 {
 		outputDirectory = file("storybook/d2/")
 	}
