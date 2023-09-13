@@ -14,7 +14,7 @@ plugins {
 
 allprojects {
 	group = "city.smartb.f2"
-	version = System.getenv("VERSION") ?: "experimental-SNAPSHOT"
+	version = System.getenv("VERSION") ?: "local"
 	repositories {
 		defaultRepo()
 	}

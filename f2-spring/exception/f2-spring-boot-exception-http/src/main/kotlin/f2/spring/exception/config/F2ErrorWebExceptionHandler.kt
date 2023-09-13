@@ -1,9 +1,6 @@
 package f2.spring.exception.config
 
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
-import f2.dsl.cqrs.error.F2Error
-import f2.dsl.cqrs.exception.F2Exception
-import java.util.UUID
+import f2.spring.exception.F2HttpException
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.boot.autoconfigure.web.WebProperties
@@ -11,20 +8,19 @@ import org.springframework.boot.autoconfigure.web.reactive.error.DefaultErrorWeb
 import org.springframework.boot.web.reactive.error.ErrorAttributes
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
-import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerCodecConfigurer
-import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.server.RouterFunction
-import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.result.view.ViewResolver
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 
 @Configuration
 @Suppress("MagicNumber")
-@Order(-2)
+@Order(Ordered.HIGHEST_PRECEDENCE)
 class F2ErrorWebExceptionHandler(
     applicationContext: ApplicationContext,
     webProperties: WebProperties,
@@ -50,28 +46,12 @@ class F2ErrorWebExceptionHandler(
         return super.getRoutingFunction(errorAttributes)
     }
 
-    override fun handle(
-        exchange: ServerWebExchange, throwable: Throwable
-    ): Mono<Void> {
-        val cause = throwable.cause
-        return if (cause is F2Exception) {
-             super.handle(exchange, cause)
-        } else if(cause is MissingKotlinParameterException) {
-            super.handle(exchange,  F2Exception(error = F2Error(
-                id = UUID.randomUUID().toString(),
-                timestamp = System.currentTimeMillis().toString(),
-                message = "Missing parameter `${cause.parameter.name!!}`",
-                code = 400,
-            )))
-        } else {
-            return super.handle(exchange, throwable)
+    override fun handle(exchange: ServerWebExchange, throwable: Throwable): Mono<Void> {
+        val f2Cause = throwable.takeIf { throwable is F2HttpException }
+            ?: throwable.cause.takeIf { throwable.cause is F2HttpException }
+        if (f2Cause is F2HttpException) {
+            return super.handle(exchange, ResponseStatusException(f2Cause.status, f2Cause.message, f2Cause))
         }
-    }
-
-    override fun renderErrorResponse(request: ServerRequest?): Mono<ServerResponse?>? {
-        val error = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL))
-        val status: Int =  error[F2Error::code.name] as Int? ?: INTERNAL_ERROR;
-        return ServerResponse.status(status).contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(error))
+        return super.handle(exchange, throwable)
     }
 }
