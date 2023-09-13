@@ -23,7 +23,7 @@ open class LambdaF2Exceptions {
 
 	@Bean
 	open fun forbiddenFunction(): F2Supplier<BasicParams> = f2Supplier {
-		throw ForbiddenAccessException("call this function")
+		throw ForbiddenAccessException("You are not authorized to call this function")
 	}
 }
 

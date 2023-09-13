@@ -3,9 +3,9 @@ package f2.spring.exception
 import org.springframework.http.HttpStatus
 
 class ForbiddenAccessException(
-    action: String
+    message: String
 ): F2HttpException(
     status = HttpStatus.FORBIDDEN,
-    message = "You are not authorized to $action",
+    message = message,
     cause = null
 )
