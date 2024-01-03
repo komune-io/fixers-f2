@@ -109,7 +109,7 @@ public final class FunctionWebRequestProcessingHelper {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static Publisher<?> processRequest(FunctionWrapper wrapper, Object argument, boolean eventStream) {
+    public static Publisher<?> processRequest(FunctionWrapper wrapper, Object argument, boolean eventStream, List<String> ignoredHeaders, List<String> requestOnlyHeaders) {
         if (argument == null) {
             argument = "";
         }
@@ -140,10 +140,10 @@ public final class FunctionWebRequestProcessingHelper {
                 Mono.from((Publisher) result).subscribe();
             }
             return "DELETE".equals(wrapper.getMethod()) ?
-                    Mono.empty() : Mono.just(ResponseEntity.accepted().headers(HeaderUtils.sanitize(headers)).build());
+                    Mono.empty() : Mono.just(ResponseEntity.accepted().headers(HeaderUtils.sanitize(headers, ignoredHeaders, requestOnlyHeaders)).build());
         }
 
-        BodyBuilder responseOkBuilder = ResponseEntity.ok().headers(HeaderUtils.sanitize(headers));
+        BodyBuilder responseOkBuilder = ResponseEntity.ok().headers(HeaderUtils.sanitize(headers, ignoredHeaders, requestOnlyHeaders));
 
         Publisher pResult;
         if (result instanceof Publisher) {
@@ -168,12 +168,12 @@ public final class FunctionWebRequestProcessingHelper {
         return Mono.from(pResult).map(v -> {
             if (v instanceof Iterable i) {
                 List aggregatedResult = (List) StreamSupport.stream(i.spliterator(), false).map(m -> {
-                    return m instanceof Message ? processMessage(responseOkBuilder, (Message<?>) m) : m;
+                    return m instanceof Message ? processMessage(responseOkBuilder, (Message<?>) m, ignoredHeaders) : m;
                 }).collect(Collectors.toList());
                 return responseOkBuilder.header("content-type", "application/json").body(aggregatedResult);
             }
             else if (v instanceof Message) {
-                return responseOkBuilder.body(processMessage(responseOkBuilder, (Message<?>) v));
+                return responseOkBuilder.body(processMessage(responseOkBuilder, (Message<?>) v, ignoredHeaders));
             }
             else {
                 return responseOkBuilder.body(v);
@@ -181,8 +181,8 @@ public final class FunctionWebRequestProcessingHelper {
         });
     }
 
-    private static Object processMessage(BodyBuilder responseOkBuilder, Message<?> message) {
-        responseOkBuilder.headers(HeaderUtils.fromMessage(message.getHeaders()));
+    private static Object processMessage(BodyBuilder responseOkBuilder, Message<?> message, List<String> ignoredHeaders) {
+        responseOkBuilder.headers(HeaderUtils.fromMessage(message.getHeaders(), ignoredHeaders));
         return message.getPayload();
     }
 

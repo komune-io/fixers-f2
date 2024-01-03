@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.Gson;
 import f2.spring.KSerializationMapper;
 import io.cloudevents.spring.messaging.CloudEventMessageConverter;
@@ -237,6 +238,7 @@ public class ContextFunctionCatalogAutoConfiguration {
             }
             catch (Exception e) {
                 mapper = new ObjectMapper();
+                mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
             }
             return new JacksonMapper(mapper);
         }

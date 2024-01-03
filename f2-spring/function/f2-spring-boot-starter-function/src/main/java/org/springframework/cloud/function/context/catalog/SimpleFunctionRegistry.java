@@ -640,6 +640,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         @Override
         public <V> Function<Object, V> andThen(Function<? super Object, ? extends V> after) {
             Assert.isTrue(after instanceof FunctionInvocationWrapper, "Composed function must be an instanceof FunctionInvocationWrapper.");
+
             if (FunctionTypeUtils.isMultipleArgumentType(this.inputType)
                     || FunctionTypeUtils.isMultipleArgumentType(this.outputType)
                     || FunctionTypeUtils.isMultipleArgumentType(((FunctionInvocationWrapper) after).inputType)
@@ -647,6 +648,8 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                 throw new UnsupportedOperationException("Composition of functions with multiple arguments is not supported at the moment");
             }
 
+            this.setSkipOutputConversion(true);
+            ((FunctionInvocationWrapper) after).setSkipOutputConversion(true);
             Function rawComposedFunction = v -> ((FunctionInvocationWrapper) after).doApply(doApply(v));
 
             FunctionInvocationWrapper afterWrapper = (FunctionInvocationWrapper) after;
@@ -1046,13 +1049,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             }
             else {
                 Object extractedValue = this.extractValueFromOriginalValueHolderIfNecessary(convertedInput);
-                if (extractedValue instanceof Message &&
-                        ((Message) extractedValue).getPayload().getClass().getName().equals("org.springframework.kafka.support.KafkaNull")) {
-                    ((Consumer) this.target).accept(null);
-                }
-                else {
-                    ((Consumer) this.target).accept(extractedValue);
-                }
+                ((Consumer) this.target).accept(extractedValue);
             }
             return result;
         }
@@ -1344,16 +1341,6 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         /*
          *
          */
-        private boolean isConversionHintRequired(Type actualType, Class<?> rawType) {
-            if (Collection.class.isAssignableFrom(rawType) || Map.class.isAssignableFrom(rawType)) {
-                return true;
-            }
-            return rawType != actualType && !FunctionTypeUtils.isMessage(actualType);
-        }
-
-        /*
-         *
-         */
         private Object convertInputMessageIfNecessary(Message message, Type type) {
             if (type == null) {
                 return null;
@@ -1378,7 +1365,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             Class<?> rawType = FunctionTypeUtils.isMessage(type)
                     ? FunctionTypeUtils.getRawType(itemType)
                     : FunctionTypeUtils.getRawType(type);
-            convertedInput = this.isConversionHintRequired(type, rawType)
+            convertedInput = type instanceof ParameterizedType
                     ? SimpleFunctionRegistry.this.messageConverter.fromMessage(message, rawType, itemType)
                     : SimpleFunctionRegistry.this.messageConverter.fromMessage(message, rawType);
 

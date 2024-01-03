@@ -29,7 +29,7 @@ object Versions {
         const val spring = "2.5.0"
     }
 	object Spring {
-		const val function = "4.1.0-M1"
+		const val function = "4.1.0"
 		const val security = FixersVersions.Spring.security
 		const val boot = FixersVersions.Spring.boot
 		const val framework = FixersVersions.Spring.framework

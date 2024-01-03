@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
+
 import org.springframework.cloud.function.cloudevent.CloudEventMessageUtils;
 import org.springframework.cloud.function.json.JsonMapper;
 import org.springframework.core.GenericTypeResolver;
@@ -119,15 +120,18 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 			}
 			// SmartB Modification
 			// force message conversion error propagation
-			catch (IllegalStateException e) {
-				if ("application/json".equals(message.getHeaders().get("Content-Type")) && e.getCause() instanceof JsonMappingException) {
-					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error parsing json", e.getCause());
-				}
-			}
+//			catch (IllegalStateException e) {
+//				if ("application/json".equals(message.getHeaders().get("Content-Type")) && e.getCause() instanceof JsonMappingException) {
+//					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error parsing json", e.getCause());
+//				}
+//			}
 			// SmartB End Of Modification
 			catch (Exception e) {
 				if (message.getPayload() instanceof byte[] && String.class.isAssignableFrom(targetClass)) {
 					return new String((byte[]) message.getPayload(), StandardCharsets.UTF_8);
+				}
+				else if ("application/json".equals(message.getHeaders().get("Content-Type")) && e.getCause() instanceof JsonMappingException) {
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error parsing json", e.getCause());
 				}
 				else if (logger.isDebugEnabled()) {
 					Object payload = message.getPayload();
