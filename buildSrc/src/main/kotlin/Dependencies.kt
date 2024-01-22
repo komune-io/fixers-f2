@@ -59,6 +59,7 @@ object Dependencies {
 		}
 
 		object Test {
+			fun junit(scope: Scope) = FixersDependencies.Jvm.Test.junit(scope)
 			fun springTest(scope: Scope) =  scope.add(
 				"org.springframework.boot:spring-boot-starter-test:${Versions.Spring.boot}"
 			)

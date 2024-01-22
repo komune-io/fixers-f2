@@ -29,12 +29,6 @@ include(
 )
 
 include(
-	"f2-feature:vc:vc-client",
-	"f2-feature:vc:vc-function",
-	"f2-feature:vc:vc-model"
-)
-
-include(
 	"f2-spring:auth:f2-spring-boot-starter-auth",
 	"f2-spring:auth:f2-spring-boot-starter-auth-keycloak",
 )

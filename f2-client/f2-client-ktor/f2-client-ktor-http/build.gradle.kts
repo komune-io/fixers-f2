@@ -18,7 +18,7 @@ dependencies {
     jvmMainImplementation("io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}")
     jvmMainImplementation("io.ktor:ktor-client-jackson:${Versions.Kotlin.ktor}")
 
-    jvmTestImplementation("org.junit.jupiter:junit-jupiter:5.6.0")
+    Dependencies.Jvm.Test.junit(::jvmTestImplementation)
     jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http"))
 
 }
