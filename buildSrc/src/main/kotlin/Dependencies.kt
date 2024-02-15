@@ -4,9 +4,7 @@ import city.smartb.gradle.dependencies.FixersVersions
 import city.smartb.gradle.dependencies.Scope
 import city.smartb.gradle.dependencies.add
 import java.net.URI
-import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.kotlin.dsl.repositories
 
 object PluginVersions {
 	val fixers = FixersPluginVersions.fixers
@@ -18,6 +16,7 @@ object PluginVersions {
 object Versions {
 	object Kotlin {
 		const val ktor = FixersVersions.Kotlin.ktor
+		const val coroutines = FixersVersions.Kotlin.coroutines
 	}
 
 	object Json {

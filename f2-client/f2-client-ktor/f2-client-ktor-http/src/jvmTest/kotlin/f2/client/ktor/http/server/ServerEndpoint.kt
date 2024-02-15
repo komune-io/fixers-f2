@@ -26,7 +26,8 @@ import java.io.PipedOutputStream
 @Configuration
 open class ServerEndpoint {
 
-    @PostMapping("/uploadFile")//, consumes = [MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE])
+    @PostMapping("/uploadFile")
+    //, consumes = [MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun uploadFile(
         @RequestPart("command") command: ServerUploadCommandBody,
         @RequestPart("file") file: FilePart
