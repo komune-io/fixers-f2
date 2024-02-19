@@ -1,4 +1,4 @@
-package city.smartb.f2.spring.boot.auth.config
+package io.komune.f2.spring.boot.auth.config
 
 // properties
 const val F2_PREFIX = "f2"

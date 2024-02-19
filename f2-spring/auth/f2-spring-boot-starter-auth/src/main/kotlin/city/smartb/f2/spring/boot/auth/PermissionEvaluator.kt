@@ -1,6 +1,6 @@
-package city.smartb.f2.spring.boot.auth
+package io.komune.f2.spring.boot.auth
 
-import city.smartb.f2.spring.boot.auth.AuthenticationProvider.hasRole
+import io.komune.f2.spring.boot.auth.AuthenticationProvider.hasRole
 import org.springframework.stereotype.Service
 
 const val ROLE_PREFIX = "ROLE_"

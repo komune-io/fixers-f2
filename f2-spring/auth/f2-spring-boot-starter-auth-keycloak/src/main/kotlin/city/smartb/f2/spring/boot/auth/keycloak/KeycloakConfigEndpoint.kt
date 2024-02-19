@@ -1,4 +1,4 @@
-package city.smartb.f2.spring.boot.auth.keycloak
+package io.komune.f2.spring.boot.auth.keycloak
 
 import jakarta.annotation.security.PermitAll
 import kotlinx.coroutines.runBlocking

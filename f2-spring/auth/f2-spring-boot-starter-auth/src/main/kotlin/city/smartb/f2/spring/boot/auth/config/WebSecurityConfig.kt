@@ -1,4 +1,4 @@
-package city.smartb.f2.spring.boot.auth.config
+package io.komune.f2.spring.boot.auth.config
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value

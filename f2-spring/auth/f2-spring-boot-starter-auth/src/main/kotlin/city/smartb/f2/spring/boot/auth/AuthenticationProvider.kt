@@ -1,6 +1,6 @@
-package city.smartb.f2.spring.boot.auth
+package io.komune.f2.spring.boot.auth
 
-import city.smartb.f2.spring.boot.auth.config.WebSecurityConfig
+import io.komune.f2.spring.boot.auth.config.WebSecurityConfig
 import kotlinx.coroutines.reactor.ReactorContext
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.security.core.authority.SimpleGrantedAuthority

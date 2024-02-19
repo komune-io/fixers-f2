@@ -1,6 +1,6 @@
-package city.smartb.f2.spring.boot.auth.keycloak
+package io.komune.f2.spring.boot.auth.keycloak
 
-import city.smartb.f2.spring.boot.auth.config.TrustedIssuerProperties
+import io.komune.f2.spring.boot.auth.config.TrustedIssuerProperties
 
 class KeycloakIssuers(
     name: String,
