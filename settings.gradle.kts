@@ -1,11 +1,5 @@
 
-//pluginManagement {
-//	repositories {
-//		gradlePluginPortal()
-//	}
-//}
-
-rootProject.name = "f2"
+rootProject.name = "fixers-f2"
 
 include(
 	"f2-bdd:f2-bdd-config",

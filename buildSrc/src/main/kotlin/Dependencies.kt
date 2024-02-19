@@ -1,5 +1,4 @@
 import io.komune.gradle.dependencies.FixersDependencies
-import io.komune.gradle.dependencies.FixersRepository
 import io.komune.gradle.dependencies.FixersPluginVersions
 import io.komune.gradle.dependencies.FixersVersions
 import io.komune.gradle.dependencies.Scope
@@ -166,6 +165,5 @@ object Modules {
 }
 
 fun RepositoryHandler.defaultRepo() {
-//	FixersRepository.defaultRepo(this)
 	maven { url = URI("https://repo.spring.io/milestone") }
 }

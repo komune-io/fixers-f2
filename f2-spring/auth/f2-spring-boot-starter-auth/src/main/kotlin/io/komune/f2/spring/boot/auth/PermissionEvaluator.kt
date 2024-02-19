@@ -7,7 +7,7 @@ const val ROLE_PREFIX = "ROLE_"
 const val SUPER_ADMIN_ROLE = "super_admin"
 
 @Service
-class PermissionEvaluator{
+class PermissionEvaluator {
     suspend fun isSuperAdmin(): Boolean {
         return hasRole(ROLE_PREFIX + SUPER_ADMIN_ROLE)
     }
