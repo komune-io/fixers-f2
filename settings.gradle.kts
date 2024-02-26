@@ -1,13 +1,5 @@
-pluginManagement {
-	repositories {
-		gradlePluginPortal()
-		maven { url = uri("https://oss.sonatype.org/service/local/repositories/releases/content") }
-		maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
-		mavenLocal()
-	}
-}
 
-rootProject.name = "f2"
+rootProject.name = "fixers-f2"
 
 include(
 	"f2-bdd:f2-bdd-config",

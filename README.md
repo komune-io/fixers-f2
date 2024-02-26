@@ -51,12 +51,12 @@ These functional interfaces can be used to implement functional programming conc
 ### Dependency
 * gradle
 ```gradle
-implementation("city.smartb.f2:f2-dsl-function:${Versions.f2}")
+implementation("io.komune.f2:f2-dsl-function:${Versions.f2}")
 ```
 * maven
 ```
 <dependency>
-  <groupId>city.smartb.f2</groupId>
+  <groupId>io.komune.f2</groupId>
   <artifactId>f2-dsl-function</artifactId>
   <version>${Versions.f2}</version>
 </dependency>
@@ -130,12 +130,12 @@ It also interface for querying a page o result `f2.dsl.cqrs.PageRequest` and `Pa
 ### Dependency
 * gradle
 ```gradle
-implementation("city.smartb.f2:f2-dsl-cqrs:${Versions.f2}")
+implementation("io.komune.f2:f2-dsl-cqrs:${Versions.f2}")
 ```
 * maven
 ```
 <dependency>
-  <groupId>city.smartb.f2</groupId>
+  <groupId>io.komune.f2</groupId>
   <artifactId>f2-dsl-cqrs</artifactId>
   <version>${Versions.f2}</version>
 </dependency>
@@ -251,13 +251,13 @@ F2 provide basic configuration for spring cloud function
 ### Dependency to implement function
 * gradle
 ```gradle
-implementation("city.smartb.f2:f2-spring-boot-starter-function:${Versions.f2}")
+implementation("io.komune.f2:f2-spring-boot-starter-function:${Versions.f2}")
 ```
 
 * maven
 ```
 <dependency>
-  <groupId>city.smartb.f2</groupId>
+  <groupId>io.komune.f2</groupId>
   <artifactId>f2-spring-boot-starter-function</artifactId>
   <version>${Versions.f2}</version>
 </dependency>
@@ -266,13 +266,13 @@ implementation("city.smartb.f2:f2-spring-boot-starter-function:${Versions.f2}")
 ### Dependency to bind function to http protocol 
 * gradle
 ```gradle
-implementation("city.smartb.f2:f2-spring-boot-starter-function-http:${Versions.f2}")
+implementation("io.komune.f2:f2-spring-boot-starter-function-http:${Versions.f2}")
 ```
 
 * maven
 ```
 <dependency>
-  <groupId>city.smartb.f2</groupId>
+  <groupId>io.komune.f2</groupId>
   <artifactId>f2-spring-boot-starter-function-http</artifactId>
   <version>${Versions.f2}</version>
 </dependency>
@@ -282,13 +282,13 @@ implementation("city.smartb.f2:f2-spring-boot-starter-function-http:${Versions.f
 ### Dependency to bind function to rSocket protocol
 * gradle
 ```gradle
-implementation("city.smartb.f2:f2-spring-boot-starter-function-rsocket:${Versions.f2}")
+implementation("io.komune.f2:f2-spring-boot-starter-function-rsocket:${Versions.f2}")
 ```
 
 * maven
 ```
 <dependency>
-  <groupId>city.smartb.f2</groupId>
+  <groupId>io.komune.f2</groupId>
   <artifactId>f2-spring-boot-starter-function-rsocket</artifactId>
   <version>${Versions.f2}</version>
 </dependency>
@@ -366,14 +366,14 @@ Integration with Springdoc to generate open api documentation.
 * Maven 
 ```
 <dependency>
-  <groupId>city.smartb.f2</groupId>
+  <groupId>io.komune.f2</groupId>
   <artifactId>f2-spring-boot-openapi</artifactId>
   <version>${Versions.f2}</version>
 </dependency>
 ```
 
 ```gradle
-implementation("city.smartb.f2:f2-spring-boot-openapi:${Versions.f2}")
+implementation("io.komune.f2:f2-spring-boot-openapi:${Versions.f2}")
 ```
 
 

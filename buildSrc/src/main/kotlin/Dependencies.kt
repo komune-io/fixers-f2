@@ -1,8 +1,8 @@
-import city.smartb.gradle.dependencies.FixersDependencies
-import city.smartb.gradle.dependencies.FixersPluginVersions
-import city.smartb.gradle.dependencies.FixersVersions
-import city.smartb.gradle.dependencies.Scope
-import city.smartb.gradle.dependencies.add
+import io.komune.gradle.dependencies.FixersDependencies
+import io.komune.gradle.dependencies.FixersPluginVersions
+import io.komune.gradle.dependencies.FixersVersions
+import io.komune.gradle.dependencies.Scope
+import io.komune.gradle.dependencies.add
 import java.net.URI
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 
@@ -165,8 +165,5 @@ object Modules {
 }
 
 fun RepositoryHandler.defaultRepo() {
-	mavenCentral()
-	maven { url = URI("https://oss.sonatype.org/content/repositories/snapshots") }
 	maven { url = URI("https://repo.spring.io/milestone") }
-	mavenLocal()
 }
