@@ -1,5 +1,5 @@
 #### Stage 1: Build the react application
-FROM node:lts as build
+FROM node:21.7-alpine3.19 as build
 
 WORKDIR /app
 
@@ -10,16 +10,14 @@ WORKDIR /app/storybook
 
 ARG CI_NPM_AUTH_TOKEN
 RUN echo -e "\
-access=public \n\
- @komune-io:registry=https://npm.pkg.github.com/komune-io \n\
+@komune-io:registry=https://npm.pkg.github.com \n\
 //npm.pkg.github.com/:_authToken=${CI_NPM_AUTH_TOKEN} \n\
 " > .npmrc
 
-RUN yarn install
-ENV PATH /app/storybook/node_modules/.bin:$PATH
-RUN export SET NODE_OPTIONS=--openssl-legacy-provider && yarn build-storybook
+RUN yarn install --frozen-lockfile --ignore-scripts
+RUN yarn build-storybook
 
-FROM nginx:1.25.0-alpine
+FROM nginx:1.25.4-alpine
 
 COPY --from=build /app/storybook/storybook-static /var/www
 COPY infra/docker/storybook/nginx.conf /etc/nginx/nginx.conf

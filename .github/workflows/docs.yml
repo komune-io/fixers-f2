@@ -1,0 +1,18 @@
+name: Docs
+
+on: [push]
+#on:
+#  push:
+#    branches: [ main ]
+
+jobs:
+  docs:
+    uses: komune-io/fixers-gradle/.github/workflows/publish-storybook-workflow.yml@fcde8c789d282cb957eee03c6b2c5b1fccbe818c
+    permissions:
+      contents: read
+      packages: write
+      pages: write
+      id-token: write
+    with:
+      storybook-dir: storybook
+      artifact-name: storybook/storybook-static/
