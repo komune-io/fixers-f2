@@ -7,7 +7,7 @@ on: [push]
 
 jobs:
   docs:
-    uses: komune-io/fixers-gradle/.github/workflows/publish-storybook-workflow.yml@be0ad7c1ee04ad1b0833893920643c653afb13b0
+    uses: komune-io/fixers-gradle/.github/workflows/publish-storybook-workflow.yml@fe83627c7c0a29287cd68bf3375ea0da4f13e93a
     permissions:
       contents: read
       packages: write
@@ -18,3 +18,4 @@ jobs:
       artifact-name: storybook/storybook-static/
     secrets:
       NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
