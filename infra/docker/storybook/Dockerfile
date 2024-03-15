@@ -9,13 +9,19 @@ COPY storybook ./storybook
 WORKDIR /app/storybook
 
 ARG CI_NPM_AUTH_TOKEN
-RUN echo -e "\
-@komune-io:registry=https://npm.pkg.github.com \n\
-//npm.pkg.github.com/:_authToken=${CI_NPM_AUTH_TOKEN} \n\
-" > .npmrc
+RUN printf "\
+@komune-io:registry=https://npm.pkg.github.com\n\
+//npm.pkg.github.com/:_authToken=%s\n\
+" "${CI_NPM_AUTH_TOKEN}" > .npmrc
 
-RUN yarn install --frozen-lockfile --ignore-scripts
-RUN yarn build-storybook
+
+RUN if [ ! -d "./storybook-static" ]; then \
+      yarn install --frozen-lockfile --ignore-script && \
+      yarn build-storybook; \
+    fi
+
+RUN yarn install --frozen-lockfile --ignore-scripts && \
+    yarn build-storybook
 
 FROM nginx:1.25.4-alpine
 

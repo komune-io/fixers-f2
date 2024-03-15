@@ -13,7 +13,7 @@ build: build-storybook
 test:
 	echo 'No Test'
 
-package: package-storybook
+package: package-storybook push-storybook
 
 # Storybook
 build-storybook:
@@ -22,10 +22,6 @@ build-storybook:
 
 lint-docker-storybook:
 	@docker run --rm -i hadolint/hadolint hadolint - < ${STORYBOOK_DOCKERFILE}
-
-package-storybook:
-	@docker build --no-cache  --platform=linux/amd64 -f ${STORYBOOK_DOCKERFILE} -t ${STORYBOOK_IMG} ../
-	@docker push ${STORYBOOK_IMG}
 
 package-storybook:
 	@docker build --no-cache  --platform=linux/amd64 \
