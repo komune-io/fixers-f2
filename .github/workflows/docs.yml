@@ -15,8 +15,7 @@ jobs:
       id-token: write
     with:
       storybook-dir: storybook
-      artifact-name: storybook
-      artifact-path: storybook/storybook-static/
+      storybook-static-dir: storybook-static
     secrets:
       NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
