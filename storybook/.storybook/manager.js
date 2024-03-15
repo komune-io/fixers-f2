@@ -9,4 +9,5 @@ addons.setConfig({
         brandUrl: "https://komune-io.github.io/fixers-g2/",
         brandImage: logo,
     }),
+    showToolbar: false
 });
