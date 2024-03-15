@@ -25,7 +25,7 @@ lint-docker-storybook:
 
 package-storybook:
 	@docker build --no-cache  --platform=linux/amd64 \
-		--build-arg CI_NPM_AUTH_TOKEN=${CI_NPM_AUTH_TOKEN} \
+		--build-arg NPM_AUTH_TOKEN=${NPM_AUTH_TOKEN} \
 		-f ${STORYBOOK_DOCKERFILE} \
 		-t ${STORYBOOK_IMG} .
 

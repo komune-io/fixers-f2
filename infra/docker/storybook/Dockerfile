@@ -8,11 +8,11 @@ COPY storybook ./storybook
 
 WORKDIR /app/storybook
 
-ARG CI_NPM_AUTH_TOKEN
+ARG NPM_AUTH_TOKEN
 RUN printf "\
 @komune-io:registry=https://npm.pkg.github.com\n\
 //npm.pkg.github.com/:_authToken=%s\n\
-" "${CI_NPM_AUTH_TOKEN}" > .npmrc
+" "${NPM_AUTH_TOKEN}" > .npmrc
 
 
 RUN if [ ! -d "./storybook-static" ]; then \
