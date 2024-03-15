@@ -7,7 +7,7 @@ on: [push]
 
 jobs:
   docs:
-    uses: komune-io/fixers-gradle/.github/workflows/publish-storybook-workflow.yml@ff5f228269b8f983edc6d1be998007dcbf9499d2
+    uses: komune-io/fixers-gradle/.github/workflows/publish-storybook-workflow.yml@cdfd0b1295e264dd9c4f9669b0cc4dbc838ebdd0
     permissions:
       contents: read
       packages: write
