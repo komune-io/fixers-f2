@@ -1,7 +1,3 @@
-STORYBOOK_DOCKERFILE	:= infra/docker/storybook/Dockerfile
-STORYBOOK_NAME	   	 	:= komune/f2-storybook
-STORYBOOK_IMG	    	:= ${STORYBOOK_NAME}:${VERSION}
-STORYBOOK_LATEST		:= ${STORYBOOK_NAME}:latest
 
 .PHONY: version
 
@@ -12,7 +8,6 @@ package: package-libs
 
 # Old task
 libs: package-kotlin
-docs: package-storybook push-storybook
 package-kotlin: build-libs test-libs package-libs
 
 lint-libs:
@@ -26,12 +21,6 @@ test-libs:
 
 package-libs: build-libs
 	./gradlew publishToMavenLocal publish
-
-package-storybook:
-	@docker build --build-arg CI_NPM_AUTH_TOKEN=${CI_NPM_AUTH_TOKEN} -f ${STORYBOOK_DOCKERFILE} -t ${STORYBOOK_IMG} .
-
-push-storybook:
-	@docker push ${STORYBOOK_IMG}
 
 version:
 	@VERSION=$$(cat VERSION); \
