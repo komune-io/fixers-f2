@@ -16,17 +16,25 @@ RUN printf "\
 
 
 RUN if [ ! -d "./storybook-static" ]; then \
-      yarn install --frozen-lockfile --ignore-script && \
+      yarn install --frozen-lockfile --ignore-scripts && \
       yarn build-storybook; \
     fi
 
-RUN yarn install --frozen-lockfile --ignore-scripts && \
-    yarn build-storybook
-
 FROM nginx:1.25.4-alpine
+
+LABEL org.opencontainers.image.source="https://github.com/komune-io/fixers-f2"
 
 COPY --from=build /app/storybook/storybook-static /var/www
 COPY infra/docker/storybook/nginx.conf /etc/nginx/nginx.conf
+
+RUN chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d
+
+RUN touch /var/run/nginx.pid && \
+        chown -R nginx:nginx /var/run/nginx.pid
+USER nginx
+
 
 EXPOSE 80
 
