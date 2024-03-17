@@ -5,9 +5,21 @@ on: [push]
 #  push:
 #    branches: [ main ]
 
+#jobs:
+#  Dev:
+#    uses: komune-io/fixers-gradle/.github/workflows/dev-workflow.yml@999ef07db02ef8a3d678de4fd326bce73fb7204e
+#    permissions:
+#      contents: read
+#      packages: write
+#    secrets:
+#      GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+#      GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
+#      PKG_MAVEN_USERNAME: ${{ secrets.PKG_MAVEN_USERNAME }}
+#      PKG_MAVEN_TOKEN: ${{ secrets.PKG_MAVEN_TOKEN }}
+
 jobs:
   Dev:
-    uses: komune-io/fixers-gradle/.github/workflows/dev-workflow.yml@999ef07db02ef8a3d678de4fd326bce73fb7204e
+    uses: komune-io/fixers-gradle/.github/workflows/make-jvm-workflow.yml@ed38b26fe5fb32eaacb6da889fcfe4455f8daa23
     permissions:
       contents: read
       packages: write
