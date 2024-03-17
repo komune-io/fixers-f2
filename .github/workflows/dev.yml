@@ -19,7 +19,7 @@ on: [push]
 
 jobs:
   dev:
-    uses: komune-io/fixers-gradle/.github/workflows/make-jvm-workflow.yml@95e42b46a5478f10789f3e293c8ebc01d86e24b0
+    uses: komune-io/fixers-gradle/.github/workflows/make-jvm-workflow.yml@main
     permissions:
       contents: read
       packages: write
@@ -30,7 +30,7 @@ jobs:
       PKG_MAVEN_TOKEN: ${{ secrets.PKG_MAVEN_TOKEN }}
 
   docs:
-    uses: komune-io/fixers-gradle/.github/workflows/publish-storybook-workflow.yml@95e42b46a5478f10789f3e293c8ebc01d86e24b0
+    uses: komune-io/fixers-gradle/.github/workflows/publish-storybook-workflow.yml@main
     permissions:
       contents: read
       packages: write
