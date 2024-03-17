@@ -5,9 +5,21 @@ on: [push]
 #  push:
 #    branches: [ main ]
 
+#jobs:
+#  Dev:
+#    uses: komune-io/fixers-gradle/.github/workflows/dev-workflow.yml@999ef07db02ef8a3d678de4fd326bce73fb7204e
+#    permissions:
+#      contents: read
+#      packages: write
+#    secrets:
+#      GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+#      GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
+#      PKG_MAVEN_USERNAME: ${{ secrets.PKG_MAVEN_USERNAME }}
+#      PKG_MAVEN_TOKEN: ${{ secrets.PKG_MAVEN_TOKEN }}
+
 jobs:
-  Dev:
-    uses: komune-io/fixers-gradle/.github/workflows/dev-workflow.yml@b28fb9d73dae755be3dcfe5311070771904c9630
+  dev:
+    uses: komune-io/fixers-gradle/.github/workflows/make-jvm-workflow.yml@95e42b46a5478f10789f3e293c8ebc01d86e24b0
     permissions:
       contents: read
       packages: write
@@ -16,3 +28,18 @@ jobs:
       GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
       PKG_MAVEN_USERNAME: ${{ secrets.PKG_MAVEN_USERNAME }}
       PKG_MAVEN_TOKEN: ${{ secrets.PKG_MAVEN_TOKEN }}
+
+  docs:
+    uses: komune-io/fixers-gradle/.github/workflows/publish-storybook-workflow.yml@95e42b46a5478f10789f3e293c8ebc01d86e24b0
+    permissions:
+      contents: read
+      packages: write
+      pages: write
+      id-token: write
+    with:
+      with-chromatic: false
+      storybook-dir: storybook
+      storybook-static-dir: storybook-static
+    secrets:
+      NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}

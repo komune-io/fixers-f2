@@ -5,8 +5,9 @@ import logo from "../assets/logo.png";
 addons.setConfig({
     theme: create({
         base: 'light',
-        brandTitle: 'SmartB F2',
-        brandUrl: 'https://docs.smartb.city/f2',
+        brandTitle: 'Fixers F2',
+        brandUrl: "https://komune-io.github.io/fixers-g2/",
         brandImage: logo,
     }),
+    showToolbar: false
 });
