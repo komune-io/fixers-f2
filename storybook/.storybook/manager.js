@@ -6,7 +6,7 @@ addons.setConfig({
     theme: create({
         base: 'light',
         brandTitle: 'Fixers F2',
-        brandUrl: "https://komune-io.github.io/fixers-g2/",
+        brandUrl: "https://komune-io.github.io/fixers-f2/",
         brandImage: logo,
     }),
     showToolbar: false
