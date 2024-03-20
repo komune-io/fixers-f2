@@ -26,8 +26,8 @@ class OtelPropertiesListenerTest {
         val context = SpringApplicationBuilder(App::class.java)
             .sources(OtelPropertiesListener::class.java)
             .properties(
-                "${OtelPropertiesListener.F2_OTEL_METRICS_ENDPOINT}=http://test-tracing-endpoint:4318/v1/metrics",
-                "${OtelPropertiesListener.F2_OTEL_TRACES_ENDPOINT}=http://test-tracing-endpoint:4318/v1/traces",
+                "f2.observability.opentelemetry.metrics.endpoint=http://test-tracing-endpoint:4318/v1/metrics",
+                "f2.observability.opentelemetry.traces.endpoint=http://test-tracing-endpoint:4318/v1/traces",
                 SPRING_APPLICATION_NAME_PROPERTIES
             ).run()
 
@@ -40,7 +40,7 @@ class OtelPropertiesListenerTest {
         val context = SpringApplicationBuilder(App::class.java)
             .sources(OtelPropertiesListener::class.java)
             .properties(
-                "f2.otel.endpoint=http://test-tracing-endpoint:4318",
+                "f2.observability.opentelemetry.endpoint=http://test-tracing-endpoint:4318",
                 SPRING_APPLICATION_NAME_PROPERTIES
             )
             .run()

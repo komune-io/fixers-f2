@@ -94,7 +94,7 @@ object Dependencies {
 
 
 			fun configurationProcessor(scope: Scope) = scope.add(
-				"org.springframework.boot:spring-boot-configuration-processor"
+				"org.springframework.boot:spring-boot-configuration-processor:${Versions.Spring.boot}"
 			)
 
 			fun cloudFunctionDep(scope: Scope) = scope.add(
