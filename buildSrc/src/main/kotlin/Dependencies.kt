@@ -92,6 +92,11 @@ object Dependencies {
 				"org.springframework.boot:spring-boot-autoconfigure:${Versions.Spring.boot}"
 			)
 
+
+			fun configurationProcessor(scope: Scope) = scope.add(
+				"org.springframework.boot:spring-boot-configuration-processor"
+			)
+
 			fun cloudFunctionDep(scope: Scope) = scope.add(
 				"com.google.code.gson:gson:${Versions.Json.gson}",
 				"io.cloudevents:cloudevents-spring:${Versions.CloudEvent.spring}",
