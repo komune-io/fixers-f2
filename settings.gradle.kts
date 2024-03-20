@@ -40,7 +40,8 @@ include(
 include(
 	"f2-spring:function:f2-spring-boot-starter-function",
 	"f2-spring:function:f2-spring-boot-starter-function-http",
-	"f2-spring:function:f2-spring-boot-starter-function-rsocket"
+	"f2-spring:function:f2-spring-boot-starter-function-rsocket",
+	"f2-spring:function:f2-spring-boot-starter-observability-otel"
 )
 
 include(
