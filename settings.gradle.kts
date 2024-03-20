@@ -25,11 +25,12 @@ include(
 	"f2-spring:auth:f2-spring-boot-starter-auth-keycloak",
 )
 
-include(
-	"f2-spring:data:f2-spring-data",
-	"f2-spring:data:f2-spring-data-mongodb",
-	"f2-spring:data:f2-spring-data-mongodb-test"
-)
+// TODO: Disable data need before removing it
+//include(
+//	"f2-spring:data:f2-spring-data",
+//	"f2-spring:data:f2-spring-data-mongodb",
+//	"f2-spring:data:f2-spring-data-mongodb-test"
+//)
 
 include(
 	"f2-spring:exception:f2-spring-boot-exception-http",
@@ -39,7 +40,8 @@ include(
 include(
 	"f2-spring:function:f2-spring-boot-starter-function",
 	"f2-spring:function:f2-spring-boot-starter-function-http",
-	"f2-spring:function:f2-spring-boot-starter-function-rsocket"
+	"f2-spring:function:f2-spring-boot-starter-function-rsocket",
+	"f2-spring:function:f2-spring-boot-starter-observability-otel"
 )
 
 include(

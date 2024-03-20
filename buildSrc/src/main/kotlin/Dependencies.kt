@@ -36,6 +36,11 @@ object Versions {
 		const val slf4j = FixersVersions.Logging.slf4j
 	}
 
+	object Observability {
+		const val micrometer = "1.2.2"
+		const val micrometerOtlp = "1.12.3"
+		const val opentelemetry = "1.34.1"
+	}
 	const val cucumber = FixersVersions.Test.cucumber
 	const val springdoc = "1.6.11"
 	const val rsocket = "0.15.4"
@@ -59,7 +64,7 @@ object Dependencies {
 
 		object Test {
 			fun junit(scope: Scope) = FixersDependencies.Jvm.Test.junit(scope)
-			fun springTest(scope: Scope) =  scope.add(
+			fun springTest(scope: Scope) = junit(scope).add(
 				"org.springframework.boot:spring-boot-starter-test:${Versions.Spring.boot}"
 			)
 		}
