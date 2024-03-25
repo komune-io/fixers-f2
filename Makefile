@@ -5,6 +5,7 @@ lint: lint-libs
 build: build-libs
 test: test-libs
 package: package-libs
+promote: promote-libs
 
 # Old task
 libs: package-kotlin
@@ -20,7 +21,11 @@ test-libs:
 	./gradlew test
 
 package-libs: build-libs
-	./gradlew publish
+	PKG_MAVEN_REPO=github ./gradlew publish
+
+promote-libs: build-libs
+	PKG_MAVEN_REPO=sonatype_oss ./gradlew publish
+
 
 version:
 	@VERSION=$$(cat VERSION); \
