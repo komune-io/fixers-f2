@@ -13,17 +13,11 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.authorization.AuthorizationDecision
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.security.oauth2.server.resource.authentication.JwtIssuerReactiveAuthenticationManagerResolver
-import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter
 import org.springframework.security.web.server.SecurityWebFilterChain
-import org.springframework.security.web.server.authorization.AuthorizationContext
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import jakarta.annotation.security.PermitAll
 import jakarta.annotation.security.RolesAllowed
@@ -51,11 +45,6 @@ abstract class WebSecurityConfig {
     @Bean
     @ConfigurationProperties(prefix = "f2.filter")
     fun authFilter(): Map<String, String> = HashMap()
-
-//    @Bean
-//    fun trustedIssuers(): List<String> {
-//        return f2TrustedIssuersResolver.getTrustedIssuers()
-//    }
 
     @Bean(SPRING_SECURITY_FILTER_CHAIN)
     @ConditionalOnExpression(NO_AUTHENTICATION_REQUIRED_EXPRESSION)

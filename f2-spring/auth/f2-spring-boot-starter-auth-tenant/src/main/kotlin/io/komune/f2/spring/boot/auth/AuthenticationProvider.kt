@@ -40,7 +40,7 @@ object AuthenticationProvider {
         return getPrincipal()?.getClaim<String>(AZP_CLAIM_NAME)
     }
 
-    suspend fun getSpace(): String? {
+    suspend fun getTenant(): String? {
         return getIssuer()?.substringAfterLast("/", "")?.ifEmpty { null }
     }
 
