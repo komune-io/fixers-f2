@@ -15,6 +15,9 @@ plugins {
 allprojects {
 	group = "io.komune.f2"
 	version = System.getenv("VERSION") ?: "experimental-SNAPSHOT"
+	repositories {
+		defaultRepo()
+	}
 }
 
 tasks {
