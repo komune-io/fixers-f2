@@ -23,7 +23,7 @@ jobs:
       PKG_SONATYPE_OSS_TOKEN: ${{ secrets.PKG_SONATYPE_OSS_TOKEN }}
 
   docs:
-    uses: komune-io/fixers-gradle/.github/workflows/publish-storybook-workflow.yml@a35d5bff2d19fc4cbc1312d5ff0e15cf004e656c
+    uses: komune-io/fixers-gradle/.github/workflows/publish-storybook-workflow.yml@main
     permissions:
       contents: read
       packages: write
