@@ -1,6 +1,5 @@
 package f2.client.ktor.http
 
-import f2.client.F2Client
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.js.Js
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -15,8 +14,9 @@ import kotlinx.serialization.json.Json
 actual class HttpClientBuilder(
 	private val json: Json = F2DefaultJson
 ) {
-	fun build(urlBase: String): Promise<HttpF2Client> = GlobalScope.promise {
-		HttpF2Client(
+
+	actual fun build(urlBase: String): HttpF2Client {
+		return HttpF2Client(
 			urlBase = urlBase,
 			httpClient = httpClient(json)
 		)
@@ -29,7 +29,6 @@ actual class HttpClientBuilder(
 			}
 		}
 	}
-
 }
 
 actual fun httpClientBuilder() = HttpClientBuilder()
