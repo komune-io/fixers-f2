@@ -13,8 +13,6 @@ dependencies {
     commonMainApi("io.ktor:ktor-client-content-negotiation:${Versions.Kotlin.ktor}")
     commonMainApi("io.ktor:ktor-serialization-kotlinx-json:${Versions.Kotlin.ktor}")
 
-//    jsMainApi("io.ktor:ktor-client-json-js:${Versions.Kotlin.ktor}")
-
     jvmMainImplementation("io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}")
     jvmMainImplementation("io.ktor:ktor-client-jackson:${Versions.Kotlin.ktor}")
 

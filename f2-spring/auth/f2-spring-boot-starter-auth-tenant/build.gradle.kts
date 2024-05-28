@@ -1,5 +1,3 @@
-import io.komune.gradle.dependencies.Scope
-import io.komune.gradle.dependencies.add
 
 plugins {
     id("io.komune.fixers.gradle.kotlin.jvm")
