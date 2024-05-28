@@ -10,6 +10,6 @@ data class TokenInfo(
     @SerialName("refresh_expires_in") val refreshExpiresIn: Int? = null,
     @SerialName("token_type") val tokenType: String,
     @SerialName("scope") val scope: String?,
-    @SerialName("id_token") val idToken: String?,
+    @SerialName("id_token") val idToken: String? = null,
     @SerialName("refresh_token") val refreshToken: String? = null,
 )

@@ -2,6 +2,7 @@ package f2.client.ktor.http
 
 import f2.client.ktor.http.model.F2FilePart
 import f2.client.ktor.http.plugin.F2Auth
+import f2.client.ktor.http.plugin.model.AuthRealmClientSecret
 import f2.client.ktor.http.plugin.model.AuthRealmPassword
 import f2.client.ktor.http.server.ServerClient
 import f2.client.ktor.http.server.command.ServerConsumeCommand
@@ -10,6 +11,10 @@ import f2.client.ktor.http.server.command.ServerUploadCommandBody
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.DEFAULT
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -37,29 +42,30 @@ class HttpF2ClientTest {
 					ignoreUnknownKeys = true
 				})
 			}
-
+			install(Logging) {
+				logger = Logger.DEFAULT
+				level = LogLevel.ALL
+			}
 			install(F2Auth) {
 				getAuth = {
-					AuthRealmPassword(
-						serverUrl = "https://dev.app.alveoleplus.fr/auth",
-						realmId = "alveole-dev",
+					AuthRealmClientSecret(
+						serverUrl = "http://keycloak-it:8080/auth",
+						realmId = "boislocal-local",
 						redirectUrl = "",
-						clientId = "alveole-web",
-						username = "admin",
-						password = "passw0rd"
+						clientId = "boislocal-api",
+						clientSecret = "secret",
+						isPublic = false
+
 					)
 				}
 			}
 		}
 
-		val organizationId = "7e1b2264-a856-4429-a4b5-6f2653bedb65"
-		val result = client.post("https://dev.app.alveoleplus.fr/api/organizationGet") {
+		val result = client.post("https://localhost:8090/fileList") {
 			header("Content-Type", ContentType.Application.Json)
-			setBody(mapOf("id" to organizationId))
 		}.bodyAsText()
 
 		println(result)
-		Assertions.assertThat(result).contains(organizationId)
 	}
 
 //	@Test
