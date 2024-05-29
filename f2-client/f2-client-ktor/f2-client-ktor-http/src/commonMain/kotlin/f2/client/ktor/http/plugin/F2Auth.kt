@@ -1,5 +1,6 @@
 package f2.client.ktor.http.plugin
 
+import f2.client.ktor.http.F2DefaultJson
 import f2.client.ktor.http.plugin.model.AuthRealm
 import f2.client.ktor.http.plugin.model.AuthRealmClientSecret
 import f2.client.ktor.http.plugin.model.AuthRealmPassword
@@ -18,8 +19,12 @@ import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.http.parametersOf
 import io.ktor.util.AttributeKey
+import kotlinx.serialization.json.Json
 
-class F2Auth {
+class F2Auth(
+    protected var json: Json = F2DefaultJson
+) {
+
     private lateinit var authPlugin: Auth
 
     lateinit var getAuth: suspend () -> AuthRealm
@@ -46,7 +51,7 @@ class F2Auth {
                     lastBearerTokens
                 }
                 refreshTokens {
-                    val refreshTokenInfo: TokenInfo = client.post {
+                    val refreshTokenInfoRequest = client.post {
                         val authRealm = getAuth()
                         url("${authRealm.serverUrl}/realms/${authRealm.realmId}/protocol/openid-connect/token")
                         val parameters = if (oldTokens == null) {
@@ -74,7 +79,9 @@ class F2Auth {
                             .toTypedArray()
                         setBody(FormDataContent(parametersOf(*parameters)))
                         markAsRefreshTokenRequest()
-                    }.body()
+                    }
+                    val tokenInfo = refreshTokenInfoRequest.body<String>()
+                    val refreshTokenInfo = json.decodeFromString<TokenInfo>(tokenInfo)
                     lastBearerTokens = BearerTokens(refreshTokenInfo.accessToken, refreshTokenInfo.refreshToken ?: "")
                     lastBearerTokens
                 }
