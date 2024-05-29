@@ -25,10 +25,12 @@ actual class HttpClientBuilder(
 		)
 	}
 
-	private fun httpClient(json: Json = F2DefaultJson, config: F2ClientConfigLambda?): HttpClient {
+	private fun httpClient(json: Json? = F2DefaultJson, config: F2ClientConfigLambda?): HttpClient {
 		return HttpClient(CIO) {
-			install(ContentNegotiation) {
-				json(json)
+			json?.let {
+				install(ContentNegotiation) {
+					json(json)
+				}
 			}
 			config?.let { config(this) }
 		}
