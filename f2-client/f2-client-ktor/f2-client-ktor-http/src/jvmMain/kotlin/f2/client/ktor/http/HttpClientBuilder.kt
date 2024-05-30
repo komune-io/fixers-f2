@@ -18,14 +18,14 @@ actual class HttpClientBuilder(
 	actual fun build(
 		urlBase: String
 	): HttpF2Client {
-		val httpCLient = httpClient(json ?: F2DefaultJson, config)
+		val httpCLient = httpClient(json, config)
 		return HttpF2Client(
 			httpClient = httpCLient,
 			urlBase
 		)
 	}
 
-	private fun httpClient(json: Json? = F2DefaultJson, config: F2ClientConfigLambda?): HttpClient {
+	private fun httpClient(json: Json?, config: F2ClientConfigLambda?): HttpClient {
 		return HttpClient(CIO) {
 			json?.let {
 				install(ContentNegotiation) {
