@@ -7,8 +7,6 @@ import f2.client.ktor.http.plugin.model.AuthRealmPassword
 import f2.client.ktor.http.plugin.model.TokenInfo
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.error.asException
-import f2.dsl.cqrs.error.throwException
-import f2.dsl.cqrs.exception.F2Exception
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpClientPlugin
@@ -20,15 +18,13 @@ import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
-import io.ktor.http.Parameters
-import io.ktor.http.ParametersImpl
 import io.ktor.http.parametersOf
 import io.ktor.util.AttributeKey
 import kotlinx.serialization.json.Json
 
 class F2Auth(
     protected var json: Json = F2DefaultJson,
-    private val debug: Boolean = false
+    private val debug: Boolean = true
 ) {
 
     private lateinit var authPlugin: Auth
