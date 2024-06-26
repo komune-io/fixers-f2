@@ -56,6 +56,7 @@ class F2Auth(
                     val refreshTokenInfoRequest = client.post {
                         val authRealm = getAuth()
                         url("${authRealm.serverUrl}/realms/${authRealm.realmId}/protocol/openid-connect/token")
+                        println("Auth to $url")
                         val parameters: Map<String, List<String>> = if (oldTokens?.refreshToken == null) {
                             generateNewToken(authRealm)
                         } else {
@@ -88,27 +89,38 @@ class F2Auth(
             }
         }
 
-        private fun RefreshTokensParams.refreshToken(authRealm: AuthRealm) =
-            mapOf(
+        private fun RefreshTokensParams.refreshToken(authRealm: AuthRealm): Map<String, String> {
+            println("Refresh Token: grant_type[refresh_token] with client_id[${authRealm.clientId}] " +
+                    "and refresh_token=${oldTokens?.refreshToken?.take(n=5)}...}")
+            return mapOf(
                 "grant_type" to "refresh_token",
                 "client_id" to authRealm.clientId,
                 "refresh_token" to (oldTokens?.refreshToken ?: "")
             )
+        }
 
-        private fun generateNewToken(authRealm: AuthRealm) = when (authRealm) {
-            is AuthRealmClientSecret -> mapOf(
-                "grant_type" to "client_credentials",
-                "client_id" to authRealm.clientId,
-                "client_secret" to authRealm.clientSecret,
-            )
+        private fun generateNewToken(authRealm: AuthRealm): Map<String, String>  = when (authRealm) {
+            is AuthRealmClientSecret -> {
+                println("Generate token: grant_type[client_credentials] " +
+                        "with client_id[${authRealm.clientId}] and client_secret=***")
+                mapOf(
+                    "grant_type" to "client_credentials",
+                    "client_id" to authRealm.clientId,
+                    "client_secret" to authRealm.clientSecret,
+                )
+            }
 
-            is AuthRealmPassword -> mapOf(
-                "grant_type" to "password",
-                "client_id" to authRealm.clientId,
-                "scope" to "openid",
-                "username" to authRealm.username,
-                "password" to authRealm.password
-            )
+            is AuthRealmPassword -> {
+                println("Generate token: grant_type[password] " +
+                        "with client_id ${authRealm.clientId}, username[${authRealm.username}] and password=***")
+                mapOf(
+                    "grant_type" to "password",
+                    "client_id" to authRealm.clientId,
+                    "scope" to "openid",
+                    "username" to authRealm.username,
+                    "password" to authRealm.password
+                )
+            }
         }
     }
 }
