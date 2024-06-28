@@ -20,7 +20,9 @@ import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.http.parametersOf
 import io.ktor.util.AttributeKey
+import io.ktor.util.logging.KtorSimpleLogger
 import kotlinx.serialization.json.Json
+
 
 class F2Auth(
     protected var json: Json = F2DefaultJson,
@@ -32,6 +34,7 @@ class F2Auth(
     lateinit var getAuth: suspend () -> AuthRealm
 
     companion object Plugin: HttpClientPlugin<F2Auth, F2Auth> {
+        val LOGGER = KtorSimpleLogger("f2.client.ktor.http.plugin.F2Auth")
         private var lastBearerTokens: BearerTokens? = null
 
         override val key: AttributeKey<F2Auth> = AttributeKey("F2Auth")
@@ -52,6 +55,7 @@ class F2Auth(
                 loadTokens {
                     lastBearerTokens
                 }
+
                 refreshTokens {
                     val authRealm = getAuth()
                     val parameters: Map<String, String> = if (oldTokens?.refreshToken.isNullOrBlank()) {
@@ -88,8 +92,9 @@ class F2Auth(
             }
         }
 
+
         private fun RefreshTokensParams.refreshToken(authRealm: AuthRealm): Map<String, String> {
-            println("Refresh Token: grant_type[refresh_token] with client_id[${authRealm.clientId}] " +
+            LOGGER.debug("Refresh Token: grant_type[refresh_token] with client_id[${authRealm.clientId}] " +
                     "and refresh_token=${oldTokens?.refreshToken?.take(n=5)}...}")
             return mapOf(
                 "grant_type" to "refresh_token",
@@ -100,7 +105,7 @@ class F2Auth(
 
         private fun generateNewToken(authRealm: AuthRealm): Map<String, String>  = when (authRealm) {
             is AuthRealmClientSecret -> {
-                println("Generate token: grant_type[client_credentials] " +
+                LOGGER.debug("Generate token: grant_type[client_credentials] " +
                         "with client_id[${authRealm.clientId}] and client_secret=***")
                 mapOf(
                     "grant_type" to "client_credentials",
@@ -110,7 +115,7 @@ class F2Auth(
             }
 
             is AuthRealmPassword -> {
-                println("Generate token: grant_type[password] " +
+                LOGGER.debug("Generate token: grant_type[password] " +
                         "with client_id ${authRealm.clientId}, username[${authRealm.username}] and password=***")
                 mapOf(
                     "grant_type" to "password",
