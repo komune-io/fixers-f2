@@ -54,7 +54,7 @@ class F2Auth(
                 }
                 refreshTokens {
                     val authRealm = getAuth()
-                    val parameters: Map<String, String> = if (oldTokens?.refreshToken == null) {
+                    val parameters: Map<String, String> = if (oldTokens?.refreshToken.isNullOrBlank()) {
                         generateNewToken(authRealm)
                     } else {
                         refreshToken(authRealm)
@@ -89,6 +89,8 @@ class F2Auth(
         }
 
         private fun RefreshTokensParams.refreshToken(authRealm: AuthRealm): Map<String, String> {
+            println("Refresh Token: grant_type[refresh_token] with client_id[${authRealm.clientId}] " +
+                    "and refresh_token=${oldTokens?.refreshToken?.take(n=5)}...}")
             return mapOf(
                 "grant_type" to "refresh_token",
                 "client_id" to authRealm.clientId,
@@ -98,6 +100,8 @@ class F2Auth(
 
         private fun generateNewToken(authRealm: AuthRealm): Map<String, String>  = when (authRealm) {
             is AuthRealmClientSecret -> {
+                println("Generate token: grant_type[client_credentials] " +
+                        "with client_id[${authRealm.clientId}] and client_secret=***")
                 mapOf(
                     "grant_type" to "client_credentials",
                     "client_id" to authRealm.clientId,
@@ -106,6 +110,8 @@ class F2Auth(
             }
 
             is AuthRealmPassword -> {
+                println("Generate token: grant_type[password] " +
+                        "with client_id ${authRealm.clientId}, username[${authRealm.username}] and password=***")
                 mapOf(
                     "grant_type" to "password",
                     "client_id" to authRealm.clientId,
