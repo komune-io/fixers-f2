@@ -46,7 +46,7 @@ object Versions {
 	const val cucumber = FixersVersions.Test.cucumber
 //	const val springdoc = "1.8.0"
 	const val springdoc = "1.6.11"
-	const val rsocket = "0.15.4"
+	const val rsocket = "0.16.0"
 }
 
 object Dependencies {
