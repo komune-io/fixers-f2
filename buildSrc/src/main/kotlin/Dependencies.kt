@@ -17,18 +17,20 @@ object Versions {
 	object Kotlin {
 		const val ktor = FixersVersions.Kotlin.ktor
 		const val coroutines = FixersVersions.Kotlin.coroutines
+		const val datetime = FixersVersions.Kotlin.datetime
 	}
 
 	object Json {
 		const val jackson = FixersVersions.Json.jacksonKotlin
-		const val gson = "2.10.1"
+		const val gson = "2.11.0"
 	}
 
 	object CloudEvent {
-        const val spring = "2.5.0"
+        const val spring = "4.0.1"
     }
 	object Spring {
-		const val function = "4.1.0"
+//		const val function = "4.1.3"
+		const val function = "4.1.1"
 		const val security = FixersVersions.Spring.security
 		const val boot = FixersVersions.Spring.boot
 		const val framework = FixersVersions.Spring.framework
@@ -42,10 +44,9 @@ object Versions {
 		const val opentelemetry = "1.34.1"
 	}
 	const val cucumber = FixersVersions.Test.cucumber
+//	const val springdoc = "1.8.0"
 	const val springdoc = "1.6.11"
-	const val rsocket = "0.15.4"
-	const val embedMongo = "2.2.0"
-	const val kotlinxDatetime = "0.4.0"
+	const val rsocket = "0.16.0"
 }
 
 object Dependencies {
@@ -54,7 +55,7 @@ object Dependencies {
 			"io.rsocket.kotlin:rsocket-ktor-client:${Versions.rsocket}"
 		)
 		fun kotlinxDatetime(scope: Scope) = scope.add(
-			"org.jetbrains.kotlinx:kotlinx-datetime:${Versions.kotlinxDatetime}"
+			"org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlin.datetime}"
 		)
 	}
 	object Jvm {
