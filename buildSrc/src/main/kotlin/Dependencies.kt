@@ -46,6 +46,7 @@ object Versions {
 //	const val springdoc = "1.8.0"
 	const val springdoc = "1.6.11"
 	const val rsocket = "0.16.0"
+	const val uuid = "0.8.4"
 }
 
 object Dependencies {
@@ -56,7 +57,11 @@ object Dependencies {
 		fun kotlinxDatetime(scope: Scope) = scope.add(
 			"org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlin.datetime}"
 		)
+		fun uuid(scope: Scope) = scope.add(
+			"com.benasher44:uuid:${Versions.uuid}"
+		)
 	}
+
 	object Jvm {
 		object Kotlin {
 			fun coroutines(scope: Scope) = FixersDependencies.Jvm.Kotlin.coroutines(scope)

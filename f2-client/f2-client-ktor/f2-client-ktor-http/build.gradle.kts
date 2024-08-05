@@ -17,7 +17,9 @@ dependencies {
     commonMainApi("io.ktor:ktor-client-logging:${Versions.Kotlin.ktor}")
 
     jvmMainImplementation("io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}")
-    jvmMainImplementation("io.ktor:ktor-client-jackson:${Versions.Kotlin.ktor}")
+
+    Dependencies.Mpp.uuid(::jsMainApi)
+
 
     Dependencies.Jvm.Test.junit(::jvmTestImplementation)
     jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http"))

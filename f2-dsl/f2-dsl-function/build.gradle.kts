@@ -7,5 +7,6 @@ plugins {
 }
 
 dependencies {
+    commonMainApi(project(":f2-dsl:f2-dsl-cqrs"))
     commonMainApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.Kotlin.coroutines}")
 }
