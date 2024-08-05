@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.promise
 
-@JsName("invokePromise")
 fun <T, R> F2Function<T, R>.invokePromise(t: T): Promise<R> {
 	return GlobalScope.promise {
 		invoke(flowOf(t)).first()
