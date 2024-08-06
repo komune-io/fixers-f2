@@ -14,6 +14,9 @@ object PluginVersions {
 }
 
 object Versions {
+
+	const val assertj = FixersVersions.Test.assertj
+
 	object Kotlin {
 		const val ktor = FixersVersions.Kotlin.ktor
 		const val coroutines = FixersVersions.Kotlin.coroutines

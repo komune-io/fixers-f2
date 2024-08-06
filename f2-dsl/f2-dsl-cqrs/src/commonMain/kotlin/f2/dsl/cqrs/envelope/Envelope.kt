@@ -1,6 +1,5 @@
 package f2.dsl.cqrs.envelope
 
-import f2.dsl.cqrs.Message
 import kotlin.js.JsExport
 import kotlin.js.JsName
 import kotlinx.serialization.Serializable
@@ -25,8 +24,11 @@ class Envelope<T>(
     override val id: String,
     override val data: T,
     override val type: String,
-    override val datacontenttype: String?,
-    override val specversion: String?,
-    override val source: String?,
-    override val time: String?
-) : EnvelopeDTO<T>
+    override val datacontenttype: String? = null,
+    override val specversion: String? = null,
+    override val source: String? = null,
+    override val time: String? = null
+) : EnvelopeDTO<T> {
+    companion object
+}
+

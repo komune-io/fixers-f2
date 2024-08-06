@@ -1,14 +1,10 @@
 package f2.dsl.cqrs.envelope
 
-import f2.dsl.cqrs.Message
-import kotlin.js.JsExport
-import kotlin.js.JsName
-import kotlinx.serialization.Serializable
+import com.benasher44.uuid.uuid4
 
-inline fun <reified T : Message> T.asEnvelope(
-    source: String,
-    id: String,
-    data: T,
+inline fun <reified T> T.asEnvelope(
+    source: String? = null,
+    id: String = uuid4().toString(),
     type: String =  T::class.simpleName ?: "Unknown",
     time: String? = null,
     datacontenttype: String? = null
@@ -20,6 +16,6 @@ inline fun <reified T : Message> T.asEnvelope(
         id = id,
         time = time,
         datacontenttype = datacontenttype,
-        data = data
+        data = this
     )
 }
