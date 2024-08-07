@@ -23,4 +23,27 @@ class MapToEnvelopeTest {
         assertThat(result).hasSize(3)
         assertThat(result.map { it.id }).containsExactly("1", "2", "3")
     }
+
+
+    @Test
+    fun `test mapToEnvelope with default ID function`() = runTest {
+        val flow = flowOf(1, 2, 3)
+        val result = flow.mapToEnvelope().toList()
+        assertThat(result).hasSize(3)
+        result.forEach { envelope ->
+            assertThat(envelope.id).isNotNull()
+            assertThat(envelope.data).isIn(1, 2, 3)
+        }
+    }
+
+    @Test
+    fun `test mapToEnvelope with custom ID function`() = runTest {
+        val flow = flowOf("a", "b", "c")
+        val result = flow.mapToEnvelope { it.toUpperCase() }.toList()
+        assertThat(result).hasSize(3)
+        result.forEach { envelope ->
+            assertThat(envelope.id).isIn("A", "B", "C")
+            assertThat(envelope.data).isIn("a", "b", "c")
+        }
+    }
 }

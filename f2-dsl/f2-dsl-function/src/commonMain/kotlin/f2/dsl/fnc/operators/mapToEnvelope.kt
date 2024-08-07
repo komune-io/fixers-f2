@@ -47,3 +47,42 @@ inline fun <T, reified R> F2Function<T, R>.mapToEnvelope(
         }.first()
     }
 }
+
+/**
+ * Extension function to map a Flow of inputs to a Flow of Envelopes containing the inputs.
+ *
+ * @param id A function to generate an ID for each input. Defaults to a random UUID.
+ * @return A Flow emitting Envelopes containing the inputs.
+ */
+inline fun <reified T> Flow<T>.mapToEnvelope(
+    crossinline id: (T) -> String = { uuid4().toString() },
+): Flow<Envelope<T>> = map { input ->
+    input.asEnvelope(
+        id = id(input),
+    )
+}
+
+
+suspend inline fun <T, reified R> Envelope<T>.mapEnvelope(
+    crossinline transform: suspend (value: T) -> R,
+    source: String? = null,
+    id: String = this.id,
+    type: String =  R::class.simpleName ?: "Unknown",
+    time: String? = null,
+    datacontenttype: String? = null
+): Envelope<R> {
+    return transform(data).asEnvelope(this, source, id, type, time, datacontenttype)
+}
+
+
+/**
+ * Extension function to map a Flow of inputs to a Flow of Envelopes containing the inputs.
+ *
+ * @param id A function to generate an ID for each input. Defaults to a random UUID.
+ * @return A Flow emitting Envelopes containing the inputs.
+ */
+inline fun <T, reified R> Flow<Envelope<T>>.mapEnvelopes(
+    crossinline transform: suspend (value: T) -> R
+): Flow<Envelope<R>> = map { input ->
+    input.mapEnvelope(transform)
+}

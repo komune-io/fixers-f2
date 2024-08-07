@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.channelFlow
  */
 inline fun <reified T, R> Flow<Envelope<T>>.pairEnvelope(
     props: InvokeChunk = InvokeChunk(),
-    crossinline execute: (Flow<Envelope<T>>) -> Flow<Envelope<R>>
+    crossinline execute: suspend (Flow<Envelope<T>>) -> Flow<Envelope<R>>
 ): Flow<Pair<T, R>> = channelFlow {
     chunk(props).collect { chunked ->
         val commandMap: Map<String, Envelope<T>> = chunked.associateBy { it.id }
