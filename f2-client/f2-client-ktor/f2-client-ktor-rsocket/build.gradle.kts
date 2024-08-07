@@ -10,6 +10,5 @@ dependencies {
 
 	Dependencies.Mpp.rsocketKtorClient(::commonMainApi)
 
-	//jsMainApi("io.ktor:ktor-client-js:${Versions.Kotlin.ktor}")
 	jvmMainImplementation("io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}")
 }

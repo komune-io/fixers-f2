@@ -7,5 +7,12 @@ plugins {
 }
 
 dependencies {
-    commonMainApi("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.Kotlin.coroutines}")
+    commonMainApi(project(":f2-dsl:f2-dsl-cqrs"))
+
+    Dependencies.Jvm.Test.junit(::jvmTestImplementation)
+
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

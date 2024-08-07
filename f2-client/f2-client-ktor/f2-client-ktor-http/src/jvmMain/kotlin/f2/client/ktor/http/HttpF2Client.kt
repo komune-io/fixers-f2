@@ -1,6 +1,5 @@
 package f2.client.ktor.http
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import f2.client.F2Client
 import f2.client.F2ClientType
 import f2.client.ktor.http.model.F2UploadCommand
@@ -30,7 +29,6 @@ import io.ktor.util.reflect.typeInfo
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transform
@@ -38,10 +36,14 @@ import java.util.Date
 import java.util.UUID
 import kotlin.reflect.full.isSubclassOf
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 
 actual open class HttpF2Client(
 	actual val httpClient: HttpClient,
 	val urlBase: String,
+	val json: Json = F2DefaultJson
 ) : F2Client {
 
 	override val type: F2ClientType = F2ClientType.HTTP
@@ -117,7 +119,7 @@ actual open class HttpF2Client(
 		val isListType = queryTypeInfo.type == List::class
 		return if (queryTypeInfo.type.isSubclassOf(F2UploadCommand::class)) {
 			messages.map { msg ->
-				postFormData(route, msg as F2UploadCommand<*>)
+				postFormData(route,queryTypeInfo, msg as F2UploadCommand<*>)
 			}.toList()
 		} else if(isListType) {
 			listOf(postJson(route, queryTypeInfo, messages))
@@ -141,10 +143,12 @@ actual open class HttpF2Client(
 		}
 	}
 
-	private suspend fun <MSG> postFormData(route: String, message: F2UploadCommand<MSG>): HttpResponse {
+	private suspend fun <MSG> postFormData(
+		route: String, queryTypeInfo: TypeInfo, message: F2UploadCommand<MSG>
+	): HttpResponse {
 		return httpClient.submitFormWithBinaryData(
 			url = buildUrl(route),
-			formData = FormDataBodyBuilder().apply {
+			formData = FormDataBodyBuilder<MSG>(json, queryTypeInfo).apply {
 				param("command", message.command)
 				message.fileMap.forEach { (key, files) ->
 					files.forEach { file ->
@@ -158,7 +162,10 @@ actual open class HttpF2Client(
 	private fun buildUrl(route: String) = "$urlBase/${route}"
 }
 
-private class FormDataBodyBuilder {
+private class FormDataBodyBuilder<T>(
+	val json: Json = F2DefaultJson,
+	queryTypeInfo: TypeInfo
+) {
 	private val formParts = mutableListOf<FormPart<*>>()
 
 	fun toFormData() = formData { formParts.forEach { append(it) } }
@@ -175,7 +182,7 @@ private class FormDataBodyBuilder {
 		).let(formParts::add)
 	}
 
-	fun <T> param(key: String, value: T) {
+	fun param(key: String, value: T) {
 		param(key, value.toJson(), "application/json")
 	}
 
@@ -190,6 +197,8 @@ private class FormDataBodyBuilder {
 		).let(formParts::add)
 	}
 
-	private fun <T> T.toJson(): String = jacksonObjectMapper()
-		.writeValueAsString(this)
+	private val querySerializer: KSerializer<T> =
+		queryTypeInfo.kotlinType?.let { serializer(it) } as KSerializer<T>
+
+	private fun T.toJson(): String = json.encodeToString(querySerializer,this)
 }
