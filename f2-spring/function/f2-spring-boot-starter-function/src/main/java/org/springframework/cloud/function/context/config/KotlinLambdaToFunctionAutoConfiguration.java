@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
@@ -38,10 +39,14 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ResolvableType;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -58,21 +63,20 @@ import org.springframework.util.ObjectUtils;
 public class KotlinLambdaToFunctionAutoConfiguration {
 
     protected final Log logger = LogFactory.getLog(getClass());
-    // SmartB Modification
-// THIS LOOKS TO BE MANDATORY WHEN USING spring web instead of webflux
-//    @Bean
-//    @ConditionalOnMissingBean
-//    @ConditionalOnClass(name = {"org.springframework.http.converter.json.Jackson2ObjectMapperBuilder",
-//            "com.fasterxml.jackson.module.kotlin.KotlinModule"})
-//    Jackson2ObjectMapperBuilderCustomizer customizer() {
-//        return new Jackson2ObjectMapperBuilderCustomizer() {
-//            @Override
-//            public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
-//                jacksonObjectMapperBuilder.modulesToInstall(KotlinModule.class);
-//            }
-//        };
-//    }
-    // SmartB End Of Modification
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnClass(name = {"org.springframework.http.converter.json.Jackson2ObjectMapperBuilder",
+            "com.fasterxml.jackson.module.kotlin.KotlinModule"})
+    Jackson2ObjectMapperBuilderCustomizer customizer() {
+        return new Jackson2ObjectMapperBuilderCustomizer() {
+            @Override
+            public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
+                jacksonObjectMapperBuilder.modulesToInstall(KotlinModule.class);
+            }
+        };
+    }
+
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final class KotlinFunctionWrapper implements Function<Object, Object>, Supplier<Object>, Consumer<Object>,
@@ -121,7 +125,11 @@ public class KotlinLambdaToFunctionAutoConfiguration {
             if (this.kotlinLambdaTarget instanceof Function1) {
                 return ((Function1) this.kotlinLambdaTarget).invoke(arg0);
             }
-            return ((Function) this.kotlinLambdaTarget).apply(arg0);
+            else if (this.kotlinLambdaTarget instanceof Function) {
+                return ((Function) this.kotlinLambdaTarget).apply(arg0);
+            }
+            ((Consumer) this.kotlinLambdaTarget).accept(arg0);
+            return null;
         }
 
         @Override
@@ -218,7 +226,7 @@ public class KotlinLambdaToFunctionAutoConfiguration {
                     !CoroutinesUtils.isContinuationType(type[0]) &&
                     !isTypeRepresentedByClass(type[1], Unit.class);
         }
-        // SmartB Modification
+        // KOMUNE Modification
         private boolean isValidKotlinSuspendSupplier(Type functionType, Type[] type) {
             return isTypeRepresentedByClass(functionType, Function1.class) &&
                     (type.length == 1 || (type.length == 2 && CoroutinesUtils.isContinuationFlowType(type[0])));
@@ -259,7 +267,7 @@ public class KotlinLambdaToFunctionAutoConfiguration {
             }
             return all;
         }
-        // SmartB End Of Modification
+        // KOMUNE End Of Modification
         public void setName(String name) {
             this.name = name;
         }
