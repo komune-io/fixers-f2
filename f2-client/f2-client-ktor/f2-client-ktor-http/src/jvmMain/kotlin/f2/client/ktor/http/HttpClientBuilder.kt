@@ -18,9 +18,9 @@ actual class HttpClientBuilder(
 	actual fun build(
 		urlBase: String
 	): HttpF2Client {
-		val httpCLient = httpClient(json, config)
+		val httpClient = httpClient(json, config)
 		return HttpF2Client(
-			httpClient = httpCLient,
+			httpClient = httpClient,
 			urlBase
 		)
 	}

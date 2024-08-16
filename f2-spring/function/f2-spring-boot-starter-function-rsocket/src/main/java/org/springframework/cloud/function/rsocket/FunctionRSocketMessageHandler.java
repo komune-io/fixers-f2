@@ -76,7 +76,7 @@ import org.springframework.web.util.pattern.PathPatternRouteMatcher;
  *
  * @since 3.1
  */
-class FunctionRSocketMessageHandler extends RSocketMessageHandler {
+public class FunctionRSocketMessageHandler extends RSocketMessageHandler {
 
     public static final String RECONCILED_LOOKUP_DESTINATION_HEADER = "reconciledLookupDestination";
 

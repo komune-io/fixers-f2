@@ -19,12 +19,12 @@ fun F2ClientBuilder.getHttp(
 	}
 }
 
-fun F2ClientBuilder.get(
+suspend fun F2ClientBuilder.get(
 	url: String,
-): Promise<F2Client> {
+): F2Client {
 	return when {
-		url.startsWith("http:") -> GlobalScope.promise { httpClientBuilder().build(url) }
-		url.startsWith("https:") -> GlobalScope.promise { httpClientBuilder().build(url) }
+		url.startsWith("http:") -> httpClientBuilder().build(url)
+		url.startsWith("https:") -> httpClientBuilder().build(url)
 		url.startsWith("tcp:") -> rSocketF2ClientBuilder().build(url, false)
 		url.startsWith("ws:") -> rSocketF2ClientBuilder().build(url, false)
 		url.startsWith("wss:") -> rSocketF2ClientBuilder().build(url, false)
@@ -32,16 +32,16 @@ fun F2ClientBuilder.get(
 	}
 }
 
-fun F2ClientBuilder.get(
+suspend fun F2ClientBuilder.get(
 	protocol: Protocol,
 	host: String,
 	port: Int,
 	path: String?,
-): Promise<F2Client> {
+): F2Client {
 	val pathA = path?.let { "/$path" } ?: ""
 	return when (protocol) {
-		is HTTP -> GlobalScope.promise { HttpClientBuilder().build("http://$host:$port$pathA") }
-		is HTTPS -> GlobalScope.promise {  HttpClientBuilder().build("https://$host:$port$pathA") }
+		is HTTP -> HttpClientBuilder().build("http://$host:$port$pathA")
+		is HTTPS -> HttpClientBuilder().build("https://$host:$port$pathA")
 		is TCP -> RSocketF2ClientBuilder().build("tcp://$host:$port$pathA", false)
 		is WS -> RSocketF2ClientBuilder().build("ws://$host:$port$pathA", false)
 		is WSS -> RSocketF2ClientBuilder().build("wss://$host:$port$pathA", true)
