@@ -68,10 +68,7 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 
 	@Override
 	protected boolean canConvertTo(Object payload, @Nullable MessageHeaders headers) {
-		if (!supportsMimeType(headers)) {
-			return false;
-		}
-		return true;
+		return supportsMimeType(headers);
 	}
 
 	@Override
@@ -82,10 +79,7 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 	private boolean canDiscoverConvertToType(Message<?> message, Class<?> targetClass) {
 		if (targetClass == null || targetClass == Object.class) {
 			MimeType mimeType = getMimeType(message.getHeaders());
-			if (StringUtils.hasText(mimeType.getParameter("type"))) {
-				return true;
-			}
-			return false;
+			return mimeType != null && StringUtils.hasText(mimeType.getParameter("type"));
 		}
 		return true;
 	}
@@ -118,33 +112,22 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 			try {
 				return this.jsonMapper.fromJson(message.getPayload(), convertToType);
 			}
-			// SmartB Modification
-			// force message conversion error propagation
-//			catch (IllegalStateException e) {
-//				if ("application/json".equals(message.getHeaders().get("Content-Type")) && e.getCause() instanceof JsonMappingException) {
-//					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error parsing json", e.getCause());
-//				}
-//			}
-			// SmartB End Of Modification
 			catch (Exception e) {
 				if (message.getPayload() instanceof byte[] && String.class.isAssignableFrom(targetClass)) {
 					return new String((byte[]) message.getPayload(), StandardCharsets.UTF_8);
 				}
+				// KOMUNE Modification
+				// force message conversion error propagation
 				else if ("application/json".equals(message.getHeaders().get("Content-Type")) && e.getCause() instanceof JsonMappingException) {
 					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error parsing json", e.getCause());
 				}
+				// KOMUNE End Of Modification
 				else if (logger.isDebugEnabled()) {
 					Object payload = message.getPayload();
 					if (payload instanceof byte[]) {
 						payload = new String((byte[]) payload, StandardCharsets.UTF_8);
 					}
-
-					if (logger.isDebugEnabled()) {
-						logger.debug("Failed to convert value: " + payload + " to: " + targetClass, e);
-					}
-					else {
-						logger.warn("Failed to convert value: " + payload + " to: " + targetClass);
-					}
+					logger.debug("Failed to convert value: " + payload + " to: " + targetClass, e);
 				}
 			}
 		}

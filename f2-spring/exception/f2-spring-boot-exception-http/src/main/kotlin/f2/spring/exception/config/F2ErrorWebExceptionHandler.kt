@@ -1,5 +1,7 @@
 package f2.spring.exception.config
 
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.exception.F2Exception
@@ -60,7 +62,7 @@ class F2ErrorWebExceptionHandler(
             super.handle(exchange,  F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
                 timestamp = System.currentTimeMillis().toString(),
-                message = "Missing parameter `${cause.parameter.name!!}`",
+                message = "Missing parameter `${cause.parameter.name}`",
                 code = 400,
             )))
         } else {

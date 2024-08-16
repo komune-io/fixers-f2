@@ -24,8 +24,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 import f2.spring.KSerializationMapper;
 import io.cloudevents.spring.messaging.CloudEventMessageConverter;
@@ -84,7 +86,6 @@ import org.springframework.util.StringUtils;
  * @author Chris Bono
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnMissingBean(FunctionCatalog.class)
 @EnableConfigurationProperties(FunctionProperties.class)
 @AutoConfigureAfter(name = {"org.springframework.cloud.function.deployer.FunctionDeployerConfiguration"})
 public class ContextFunctionCatalogAutoConfiguration {
@@ -185,11 +186,11 @@ public class ContextFunctionCatalogAutoConfiguration {
         public JsonMapper jsonMapper(ApplicationContext context) {
             String preferredMapper = context.getEnvironment().getProperty(JSON_MAPPER_PROPERTY);
             if (StringUtils.hasText(preferredMapper)) {
-                // SmartB Modification
+                // KOMUNE Modification
 				if ("kSerialization".equals(preferredMapper) && ClassUtils.isPresent("kotlinx.serialization.json.Json", null)) {
 					return kSerialization(context);
 				} else
-                // SmartB End Of Modification
+                // KOMUNE End Of Modification
                 if ("gson".equals(preferredMapper) && ClassUtils.isPresent("com.google.gson.Gson", null)) {
                     return gson(context);
                 }
@@ -218,7 +219,7 @@ public class ContextFunctionCatalogAutoConfiguration {
             }
             return new GsonMapper(gson);
         }
-        // SmartB Modification
+        // KOMUNE Modification
 		private JsonMapper kSerialization(ApplicationContext context) {
 			Json json;
 			try {
@@ -229,18 +230,23 @@ public class ContextFunctionCatalogAutoConfiguration {
 			}
 			return new KSerializationMapper(json);
 		}
-        // SmartB End Of Modification
+        // KOMUNE End Of Modification
 
+        // KOMUNE Modification
+        // THIS WILL BE FIXED BE THE NEXT spring CLOUD VERSION be the commit 1cd93cb27000c2bfeca43882961edf22c3000655
         private JsonMapper jackson(ApplicationContext context) {
             ObjectMapper mapper;
             try {
-                mapper = context.getBean(ObjectMapper.class);
+                mapper = context.getBean(ObjectMapper.class).copy();
             }
             catch (Exception e) {
                 mapper = new ObjectMapper();
-                mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
             }
+            mapper.registerModule(new JavaTimeModule());
+            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            mapper.configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true);
             return new JacksonMapper(mapper);
         }
+        // KOMUNE End Of Modification
     }
 }

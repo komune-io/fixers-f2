@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -395,7 +395,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     @SuppressWarnings("rawtypes")
     public class FunctionInvocationWrapper implements Function<Object, Object>, Consumer<Object>, Supplier<Object>, Runnable {
 
-        private final Object target;
+        private Object target;
 
         private Type inputType;
 
@@ -422,6 +422,8 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         private final ThreadLocal<Message<Object>> unconvertedResult = new ThreadLocal<>();
 
         private PostProcessingFunction postProcessor;
+
+        private Consumer<Boolean> skipInputConversionCallback;
 
         /*
          * This is primarily to support Stream's ability to access
@@ -484,6 +486,9 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             return skipOutputConversion;
         }
 
+        public boolean isSkipInputConversion() {
+            return skipInputConversion;
+        }
 
         public boolean isPrototype() {
             return !this.isSingleton;
@@ -494,6 +499,13 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                 logger.debug("'skipInputConversion' was explicitely set to true. No input conversion will be attempted");
             }
             this.skipInputConversion = skipInputConversion;
+            if (this.skipInputConversionCallback != null) {
+                this.skipInputConversionCallback.accept(skipInputConversion);
+            }
+        }
+
+        void setSkipInputConversionCallback(Consumer<Boolean> skipInputConversionCallback) {
+            this.skipInputConversionCallback = skipInputConversionCallback;
         }
 
         public void setSkipOutputConversion(boolean skipOutputConversion) {
@@ -647,12 +659,20 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                     || FunctionTypeUtils.isMultipleArgumentType(((FunctionInvocationWrapper) after).outputType)) {
                 throw new UnsupportedOperationException("Composition of functions with multiple arguments is not supported at the moment");
             }
+            FunctionInvocationWrapper afterWrapper = (FunctionInvocationWrapper) after;
+
+            //see GH-1141 for this code snippet
+            if ((this.getTarget() instanceof Supplier || this.getTarget() instanceof Function) && FunctionTypeUtils.isPublisher(this.getOutputType())
+                    && afterWrapper.getTarget() instanceof Consumer && !FunctionTypeUtils.isPublisher(afterWrapper.getInputType())) {
+                Consumer wrapper = new ConsumerWrapper((Consumer) afterWrapper.getTarget());
+                afterWrapper.target = wrapper;
+                afterWrapper.inputType = this.outputType;
+            }
+            //
 
             this.setSkipOutputConversion(true);
             ((FunctionInvocationWrapper) after).setSkipOutputConversion(true);
             Function rawComposedFunction = v -> ((FunctionInvocationWrapper) after).doApply(doApply(v));
-
-            FunctionInvocationWrapper afterWrapper = (FunctionInvocationWrapper) after;
 
             Type composedFunctionType;
             if (afterWrapper.outputType == null) {
@@ -685,6 +705,10 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
 
             String composedName = this.functionDefinition + "|" + afterWrapper.functionDefinition;
             FunctionInvocationWrapper composedFunction = invocationWrapperInstance(composedName, rawComposedFunction, composedFunctionType);
+            composedFunction.setSkipInputConversionCallback((skipInputConversion) -> {
+                this.setSkipInputConversion(skipInputConversion);
+                afterWrapper.setSkipInputConversion(skipInputConversion);
+            });
             composedFunction.composed = true;
             if (((FunctionInvocationWrapper) after).target instanceof PostProcessingFunction) {
                 composedFunction.postProcessor = (PostProcessingFunction) ((FunctionInvocationWrapper) after).target;
@@ -726,7 +750,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
 
             input = this.fluxifyInputIfNecessary(input);
 
-            Object convertedInput = this.convertInputIfNecessary(input, this.inputType);
+            Object convertedInput = input == null ? null : this.convertInputIfNecessary(input, this.inputType);
 
             if (this.isRoutingFunction() || this.isComposed()) {
                 result = ((Function) this.target).apply(convertedInput);
@@ -834,13 +858,13 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                     treatPayloadAsPlainText = contentTypeHeaderValue(msg).equals(MimeTypeUtils.TEXT_PLAIN_VALUE);
                 }
 
-                if (input instanceof Message && (!treatPayloadAsPlainText && JsonMapper.isJsonStringRepresentsCollection(payload))
+                if ((!treatPayloadAsPlainText && JsonMapper.isJsonStringRepresentsCollection(payload))
                         && !FunctionTypeUtils.isTypeCollection(this.inputType)
                         && !FunctionTypeUtils.isTypeArray(this.inputType)) {
-                    MessageHeaders headers = ((Message) input).getHeaders();
+                    MessageHeaders headers = input instanceof Message ? ((Message) input).getHeaders() : new MessageHeaders(Collections.emptyMap());
                     // Original version
 //                     Collection collectionPayload = jsonMapper.fromJson(payload, Collection.class);
-                    // Fix for SmartB
+                    // Fix for KOMUNE
                     // Collection Type is needed by kotlin serializer to deserialize object
                     Type genType = FunctionTypeUtils.getGenericType(this.inputType);
                     ResolvableType resolvableType = ResolvableType.forType(genType);
@@ -849,7 +873,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                     }
                     ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, resolvableType);
                     Collection collectionPayload = jsonMapper.fromJson(payload, listType.getType());
-                    // SmartB End Of Modification
+                    // KOMUNE End Of Modification
 
                     Class inputClass = FunctionTypeUtils.getRawType(this.inputType);
                     if (this.isInputTypeMessage()) {
@@ -1116,6 +1140,9 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                 convertedInput = Tuples.fromArray(convertedInputs);
             }
             else if (this.skipInputConversion) {
+                if (!(input instanceof Message)) {
+                    input = MessageBuilder.withPayload(input).build();
+                }
                 convertedInput = this.isInputTypeMessage()
                         ? input
                         : new OriginalMessageHolder(((Message) input).getPayload(), (Message<?>) input);
@@ -1188,14 +1215,13 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             if (ObjectUtils.isArray(payload)) {
                 payload = CollectionUtils.arrayToList(payload);
             }
-            if (payload instanceof Collection && !CollectionUtils.isEmpty((Collection<?>) payload)
-                    && Message.class.isAssignableFrom(CollectionUtils.findCommonElementType((Collection<?>) payload))) {
-                return true;
+            if (payload instanceof Collection && !CollectionUtils.isEmpty((Collection<?>) payload)) {
+                Class<?> commonElementType = CollectionUtils.findCommonElementType((Collection<?>) payload);
+                if (commonElementType != null && Message.class.isAssignableFrom(commonElementType)) {
+                    return true;
+                }
             }
-            if (this.containsRetainMessageSignalInHeaders(message)) {
-                return false;
-            }
-            return true;
+            return !this.containsRetainMessageSignalInHeaders(message);
         }
 
         /**
@@ -1357,6 +1383,12 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                 if (collectionType == itemType) {
                     return message.getPayload();
                 }
+
+                if (collectionType != null
+                        && FunctionTypeUtils.getRawType(itemType).isAssignableFrom(collectionType.getClass())
+                        && FunctionTypeUtils.isMessage(type)) {
+                    return message;
+                }
             }
 
             Object convertedInput = message.getPayload();
@@ -1497,12 +1529,12 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                 try {
                     return this.convertOutputIfNecessary(v, type, expectedOutputContentType);
                 }
-                // SmartB Modification
+                // KOMUNE Modification
                 // FIX force message conversion error propagation
                 catch (ResponseStatusException e) {
                     throw e;
                 }
-                // SmartB End Of Modification
+                // KOMUNE End Of Modification
                 catch (Exception e) {
                     throw new IllegalStateException("Failed to convert output", e);
                 }
@@ -1511,12 +1543,12 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                 try {
                     return this.convertOutputIfNecessary(v, type, expectedOutputContentType);
                 }
-                // SmartB Modification
+                // KOMUNE Modification
                 // FIX force message conversion error propagation
                 catch (ResponseStatusException e) {
                     throw e;
                 }
-                // SmartB End Of Modification
+                // KOMUNE End Of Modification
                 catch (Exception e) {
                     throw new IllegalStateException("Failed to convert output", e);
                 }
@@ -1551,5 +1583,21 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         public Object apply(Object t) {
             return t;
         }
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static class ConsumerWrapper implements Consumer<Flux<Object>> {
+
+        private final Consumer targetConsumer;
+
+        ConsumerWrapper(Consumer targetConsumer) {
+            this.targetConsumer = targetConsumer;
+        }
+
+        @Override
+        public void accept(Flux messageFlux) {
+            messageFlux.doOnNext(this.targetConsumer).subscribe();
+        }
+
     }
 }
