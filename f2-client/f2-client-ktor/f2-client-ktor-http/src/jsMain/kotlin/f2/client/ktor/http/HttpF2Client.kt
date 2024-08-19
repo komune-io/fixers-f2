@@ -26,7 +26,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.util.reflect.TypeInfo
-import io.ktor.util.reflect.typeInfo
 import io.ktor.utils.io.ByteReadChannel
 import kotlin.js.Date
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +38,7 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
+@JsExport
 actual open class HttpF2Client(
 	actual val httpClient: HttpClient,
 	val urlBase: String,

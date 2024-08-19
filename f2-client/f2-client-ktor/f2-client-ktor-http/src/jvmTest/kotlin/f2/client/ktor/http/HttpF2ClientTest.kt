@@ -29,10 +29,15 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.Test
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 
 class HttpF2ClientTest {
+
+//	@Test
+	fun buildClient(): Unit = runTest {
+
+
+	}
 
 //	@Test
 	fun auth(): Unit = runTest {

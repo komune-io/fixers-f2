@@ -54,6 +54,14 @@ object Versions {
 
 object Dependencies {
 	object Mpp {
+		fun ktorClientImpl(jvmScope: Scope, jsScope: Scope) {
+			jvmScope.add(
+				"io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}"
+			)
+			jsScope.add(
+				"io.ktor:ktor-client-js:${Versions.Kotlin.ktor}"
+			)
+		}
 		fun rsocketKtorClient(scope: Scope) = scope.add(
 			"io.rsocket.kotlin:rsocket-ktor-client:${Versions.rsocket}"
 		)

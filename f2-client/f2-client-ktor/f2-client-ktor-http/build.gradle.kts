@@ -16,12 +16,12 @@ dependencies {
     commonMainApi("io.ktor:ktor-serialization-kotlinx-json:${Versions.Kotlin.ktor}")
     commonMainApi("io.ktor:ktor-client-logging:${Versions.Kotlin.ktor}")
 
-    jvmMainImplementation("io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}")
+    Dependencies.Mpp.ktorClientImpl(::jvmMainApi, ::jsMainApi)
 
-    Dependencies.Mpp.uuid(::jsMainApi)
-
+    Dependencies.Mpp.uuid(::commonMainApi)
 
     Dependencies.Jvm.Test.junit(::jvmTestImplementation)
+
     jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http"))
 
 }
