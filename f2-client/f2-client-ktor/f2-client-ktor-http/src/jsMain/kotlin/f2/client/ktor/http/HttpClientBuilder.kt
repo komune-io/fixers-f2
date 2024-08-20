@@ -9,6 +9,11 @@ import io.ktor.serialization.kotlinx.json.DefaultJson
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
+/**
+ * Builder class for creating instances of [HttpF2Client].
+ *
+ * @constructor Creates an instance of [HttpClientBuilder].
+ */
 @JsExport
 @JsName("HttpClientBuilder")
 actual class HttpClientBuilder(
@@ -16,6 +21,12 @@ actual class HttpClientBuilder(
 	private val config: HttpClientConfig<HttpClientEngineConfig>.() -> Unit = {}
 ) {
 
+	/**
+	 * Builds an [HttpF2Client] with the specified base URL.
+	 *
+	 * @param urlBase The base URL for the HTTP client.
+	 * @return An instance of [HttpF2Client].
+	 */
 	actual fun build(urlBase: String): HttpF2Client {
 		return HttpF2Client(
 			urlBase = urlBase,
@@ -34,4 +45,7 @@ actual class HttpClientBuilder(
 			config.let { it(this) }
 		}
 	}
+
+	actual companion object
+
 }
