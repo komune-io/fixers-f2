@@ -34,7 +34,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 class HttpF2ClientTest {
 
 	@Test
-	fun testBuilderExtentionFunctionApi(): Unit = runTest {
+	fun testBuilderExtensionFunctionApi(): Unit = runTest {
 		HttpClientBuilder(json = defaultJson){
 			install(Logging) {
 				logger = Logger.DEFAULT

@@ -1,6 +1,7 @@
 @file:JvmName("HttpClientBuilderUtils")
 package f2.client.ktor.http
 
+import f2.client.ktor.common.F2ClientConfigLambda
 import io.ktor.client.engine.cio.CIOEngineConfig
 import kotlinx.serialization.json.Json
 

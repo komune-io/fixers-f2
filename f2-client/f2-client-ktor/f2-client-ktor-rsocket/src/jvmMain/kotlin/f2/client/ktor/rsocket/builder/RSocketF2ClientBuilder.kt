@@ -1,9 +1,11 @@
-package f2.client.ktor.rsocket
+package f2.client.ktor.rsocket.builder
 
+import f2.client.ktor.rsocket.RSocketClient
+import f2.client.ktor.rsocket.RSocketF2Client
 import io.rsocket.kotlin.RSocket
 import io.rsocket.kotlin.ktor.client.rSocket
 
-actual fun rSocketF2ClientBuilderDefault(): RSocketF2ClientBuilder = RSocketF2ClientBuilder()
+actual fun rSocketF2ClientBuilderDefault() = RSocketF2ClientBuilder()
 
 actual class RSocketF2ClientBuilder {
 
@@ -12,7 +14,7 @@ actual class RSocketF2ClientBuilder {
 		secure: Boolean,
 	): RSocketF2Client {
 		val rSocket: RSocket =
-			rsocketClientBuilder().build().rSocket(url, secure = secure)
+			rsocketClientBuilderDefault().build().rSocket(url, secure = secure)
 		val client = RSocketClient(rSocket)
 		return RSocketF2Client(client)
 	}

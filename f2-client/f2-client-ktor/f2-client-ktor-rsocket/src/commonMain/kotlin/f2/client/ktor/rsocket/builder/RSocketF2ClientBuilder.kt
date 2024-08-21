@@ -1,4 +1,7 @@
-package f2.client.ktor.rsocket
+package f2.client.ktor.rsocket.builder
+
+import f2.client.ktor.rsocket.RSocketClient
+import f2.client.ktor.rsocket.RSocketF2Client
 
 
 expect fun rSocketF2ClientBuilderDefault(): RSocketF2ClientBuilder

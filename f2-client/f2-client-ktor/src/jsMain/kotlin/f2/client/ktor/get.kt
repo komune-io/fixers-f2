@@ -1,10 +1,10 @@
 package f2.client.ktor
 
 import f2.client.F2Client
-import f2.client.ktor.http.F2ClientConfigLambda
+import f2.client.ktor.common.F2ClientConfigLambda
 import f2.client.ktor.http.F2DefaultJson
 import f2.client.ktor.http.httpClientBuilder
-import f2.client.ktor.rsocket.rSocketF2ClientBuilderDefault
+import f2.client.ktor.rsocket.builder.rSocketF2ClientBuilderDefault
 import io.ktor.client.engine.HttpClientEngineConfig
 import kotlinx.serialization.json.Json
 
