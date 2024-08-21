@@ -1,6 +1,7 @@
 package f2.client.ktor.http
 
 import f2.client.ktor.common.F2ClientConfigLambda
+import f2.client.ktor.common.applyConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.CIOEngineConfig
@@ -40,12 +41,7 @@ actual class HttpClientBuilder(
 	 */
 	private fun httpClient(): HttpClient {
 		return HttpClient(CIO) {
-			json?.let {
-				install(ContentNegotiation) {
-					json(it)
-				}
-			}
-			config?.let { it(this) }
+			applyConfig(json, config)
 		}
 	}
 

@@ -1,12 +1,11 @@
 package f2.client.ktor.http
 
+import f2.client.ktor.common.F2ClientConfigLambda
+import f2.client.ktor.common.applyConfig
 import io.ktor.client.HttpClient
-import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.js.Js
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.DefaultJson
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 /**
@@ -18,7 +17,7 @@ import kotlinx.serialization.json.Json
 @JsName("HttpClientBuilder")
 actual class HttpClientBuilder(
 	private val json: Json? = DefaultJson,
-	private val config: HttpClientConfig<HttpClientEngineConfig>.() -> Unit = {}
+	private val config: F2ClientConfigLambda<HttpClientEngineConfig>? = {}
 ) {
 
 	/**
@@ -36,13 +35,7 @@ actual class HttpClientBuilder(
 
 	private fun httpClient(): HttpClient {
 		return HttpClient(Js) {
-			json?.let {
-				install(ContentNegotiation) {
-					json(json)
-				}
-			}
-
-			config.let { it(this) }
+			applyConfig(json, config)
 		}
 	}
 
