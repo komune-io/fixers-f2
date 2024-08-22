@@ -1,20 +1,12 @@
-package f2.client.ktor.rsocket
+package f2.client.ktor.rsocket.builder
 
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.websocket.WebSockets
 import io.rsocket.kotlin.core.RSocketConnector
 import io.rsocket.kotlin.ktor.client.RSocketSupport
 import io.rsocket.kotlin.payload.PayloadMimeType
-import kotlin.time.ExperimentalTime
 
-//fun rsocketClientBuilder(): RSocketClientBuilder
-//
-//class RSocketClientBuilder {
-//	fun build(): HttpClient
-//}
-
-@OptIn(ExperimentalTime::class)
-fun HttpClientConfig<*>.withRSocket() {
+fun HttpClientConfig<*>.applyRSocket() {
 	install(WebSockets)
 	install(RSocketSupport) {
 		connector = RSocketConnector {

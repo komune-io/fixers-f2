@@ -23,7 +23,7 @@ actual class RSocketF2Client(
 		@JsExport.Ignore
 		override suspend fun invoke(): Flow<RESPONSE> {
 			return rSocketClient.requestStream(route).map {
-				json.decodeFromString<Response<RESPONSE>>(it).paylaod
+				json.decodeFromString<RSocketResponse<RESPONSE>>(it).paylaod
 			}
 		}
 
@@ -37,7 +37,7 @@ actual class RSocketF2Client(
 		p1.map { query ->
 			val toSend = handlePayload(query, queryTypeInfo)
 			val payload = rSocketClient.requestResponse(route, toSend)
-			json.decodeFromString<Response<RESPONSE>>(payload).paylaod
+			json.decodeFromString<RSocketResponse<RESPONSE>>(payload).paylaod
 		}
 	}
 

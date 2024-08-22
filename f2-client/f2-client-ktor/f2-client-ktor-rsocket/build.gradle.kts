@@ -7,8 +7,8 @@ plugins {
 dependencies {
 	commonMainApi(project(":f2-client:f2-client-core"))
 	commonMainApi(project(":f2-dsl:f2-dsl-cqrs"))
+	commonMainApi(project(":f2-client:f2-client-ktor:f2-client-ktor-common"))
 
-	Dependencies.Mpp.rsocketKtorClient(::commonMainApi)
-
-	jvmMainImplementation("io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}")
+	Dependencies.Mpp.Ktor.clientRsocket(::commonMainApi)
+	Dependencies.Mpp.Ktor.client(::commonMainApi, ::jvmMainApi, ::jsMainApi)
 }

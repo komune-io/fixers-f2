@@ -3,11 +3,11 @@ package f2.client.ktor.http
 import f2.client.ktor.http.model.F2FilePart
 import f2.client.ktor.http.plugin.F2Auth
 import f2.client.ktor.http.plugin.model.AuthRealmClientSecret
-import f2.client.ktor.http.plugin.model.AuthRealmPassword
 import f2.client.ktor.http.server.ServerClient
 import f2.client.ktor.http.server.command.ServerConsumeCommand
 import f2.client.ktor.http.server.command.ServerUploadCommand
 import f2.client.ktor.http.server.command.ServerUploadCommandBody
+import f2.spring.KSerializationMapper.Companion.defaultJson
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -17,7 +17,6 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
 import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
@@ -33,6 +32,34 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 
 class HttpF2ClientTest {
+
+	@Test
+	fun testBuilderExtensionFunctionApi(): Unit = runTest {
+		HttpClientBuilder(json = defaultJson){
+			install(Logging) {
+				logger = Logger.DEFAULT
+				level = LogLevel.ALL
+			}
+		}.build("http://localhost:8090")
+
+		HttpClientBuilder.builder(json = defaultJson){
+			install(Logging) {
+				logger = Logger.DEFAULT
+				level = LogLevel.ALL
+			}
+		}.build("http://localhost:8090")
+
+		HttpClientBuilder(json = defaultJson){
+			install(Logging) {
+				logger = Logger.DEFAULT
+				level = LogLevel.ALL
+			}
+		}.build("http://localhost:8090")
+
+		HttpClientBuilder.default()
+		HttpClientBuilder.generics(json = defaultJson) {}
+
+	}
 
 //	@Test
 	fun auth(): Unit = runTest {

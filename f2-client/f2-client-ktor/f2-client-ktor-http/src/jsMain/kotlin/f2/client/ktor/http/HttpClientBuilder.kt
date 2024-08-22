@@ -1,34 +1,44 @@
 package f2.client.ktor.http
 
+import f2.client.ktor.common.F2ClientConfigLambda
+import f2.client.ktor.common.applyConfig
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.js.Js
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
-import kotlin.js.Promise
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.promise
+import io.ktor.serialization.kotlinx.json.DefaultJson
 import kotlinx.serialization.json.Json
 
+/**
+ * Builder class for creating instances of [HttpF2Client].
+ *
+ * @constructor Creates an instance of [HttpClientBuilder].
+ */
 @JsExport
 @JsName("HttpClientBuilder")
 actual class HttpClientBuilder(
-	private val json: Json = F2DefaultJson
+	private val json: Json? = DefaultJson,
+	private val config: F2ClientConfigLambda<HttpClientEngineConfig>? = {}
 ) {
 
+	/**
+	 * Builds an [HttpF2Client] with the specified base URL.
+	 *
+	 * @param urlBase The base URL for the HTTP client.
+	 * @return An instance of [HttpF2Client].
+	 */
 	actual fun build(urlBase: String): HttpF2Client {
 		return HttpF2Client(
 			urlBase = urlBase,
-			httpClient = httpClient(json)
+			httpClient = httpClient()
 		)
 	}
 
-	private fun httpClient(json: Json = F2DefaultJson): HttpClient {
+	private fun httpClient(): HttpClient {
 		return HttpClient(Js) {
-			install(ContentNegotiation) {
-				json(json)
-			}
+			applyConfig(json, config)
 		}
 	}
-}
 
-actual fun httpClientBuilder() = HttpClientBuilder()
+	actual companion object
+
+}

@@ -54,9 +54,29 @@ object Versions {
 
 object Dependencies {
 	object Mpp {
-		fun rsocketKtorClient(scope: Scope) = scope.add(
-			"io.rsocket.kotlin:rsocket-ktor-client:${Versions.rsocket}"
-		)
+
+		object Ktor {
+			fun clientFeatures(scope: Scope) = scope.add(
+				"io.ktor:ktor-client-content-negotiation:${Versions.Kotlin.ktor}",
+				"io.ktor:ktor-serialization-kotlinx-json:${Versions.Kotlin.ktor}",
+				"io.ktor:ktor-client-logging:${Versions.Kotlin.ktor}"
+			)
+
+			fun client(commonMainApi: Scope, jvmScope: Scope, jsScope: Scope) {
+				jvmScope.add(
+					"io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}"
+				)
+				jsScope.add(
+					"io.ktor:ktor-client-js:${Versions.Kotlin.ktor}"
+				)
+				clientFeatures(commonMainApi)
+			}
+
+			fun clientRsocket(scope: Scope) = scope.add(
+				"io.rsocket.kotlin:rsocket-ktor-client:${Versions.rsocket}"
+			)
+		}
+
 		fun kotlinxDatetime(scope: Scope) = scope.add(
 			"org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlin.datetime}"
 		)
