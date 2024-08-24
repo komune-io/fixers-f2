@@ -5,18 +5,16 @@ import f2.client.ktor.common.applyConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.js.Js
-import io.ktor.serialization.kotlinx.json.DefaultJson
-import kotlinx.serialization.json.Json
 
 /**
  * Builder class for creating instances of [HttpF2Client].
  *
  * @constructor Creates an instance of [HttpClientBuilder].
+ * @param config Additional configuration for the HTTP client. Defaults to an empty lambda.
  */
 @JsExport
 @JsName("HttpClientBuilder")
 actual class HttpClientBuilder(
-	private val json: Json? = DefaultJson,
 	private val config: F2ClientConfigLambda<HttpClientEngineConfig>? = {}
 ) {
 
@@ -35,7 +33,7 @@ actual class HttpClientBuilder(
 
 	private fun httpClient(): HttpClient {
 		return HttpClient(Js) {
-			applyConfig(json, config)
+			applyConfig(config)
 		}
 	}
 

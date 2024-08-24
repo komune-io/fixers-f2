@@ -1,6 +1,6 @@
 package f2.client.ktor.http.plugin
 
-import f2.client.ktor.http.F2DefaultJson
+import f2.client.ktor.common.F2DefaultJson
 import f2.client.ktor.http.plugin.model.AuthRealm
 import f2.client.ktor.http.plugin.model.AuthRealmClientSecret
 import f2.client.ktor.http.plugin.model.AuthRealmPassword

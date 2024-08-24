@@ -3,7 +3,6 @@ package f2.client.ktor.http
 
 import f2.client.ktor.common.F2ClientConfigLambda
 import io.ktor.client.engine.cio.CIOEngineConfig
-import kotlinx.serialization.json.Json
 
 
 
@@ -15,38 +14,32 @@ import kotlinx.serialization.json.Json
 actual fun httpClientBuilderDefault(): HttpClientBuilder = HttpClientBuilder()
 
 /**
- * Provides a generic instance of [HttpClientBuilder] with optional JSON configuration.
+ * Provides a generic instance of [HttpClientBuilder].
  *
- * @param json The JSON configuration to use. Defaults to [F2DefaultJson].
  * @param config Additional configuration for the HTTP client. Defaults to null.
  * @return An instance of [HttpClientBuilder] with the specified configuration.
  */
 actual fun httpClientBuilderGenerics(
-    json: Json?,
     config: F2ClientConfigLambda<*>?
-): HttpClientBuilder = HttpClientBuilder(json)
+): HttpClientBuilder = HttpClientBuilder(config)
 
 
 /**
- * Provides a generic instance of [HttpClientBuilder] with optional JSON configuration.
+ * Provides a generic instance of [HttpClientBuilder].
  *
- * @param json The JSON configuration to use. Defaults to [F2DefaultJson].
  * @param config Additional configuration for the HTTP client. Defaults to an empty lambda.
  * @return An instance of [HttpClientBuilder] with the specified configuration.
  */
 fun httpClientBuilder(
-    json: Json? = F2DefaultJson,
     config: F2ClientConfigLambda<CIOEngineConfig>? = {  }
-) = HttpClientBuilder(json, config)
+) = HttpClientBuilder(config)
 
 /**
- * Provides an instance of [HttpClientBuilder] with optional JSON configuration using the builder function.
+ * Provides an instance of [HttpClientBuilder] using the builder function.
  *
- * @param json The JSON configuration to use. Defaults to [F2DefaultJson].
  * @param config Additional configuration for the HTTP client. Defaults to an empty lambda.
  * @return An instance of [HttpClientBuilder] with the specified configuration.
  */
 fun HttpClientBuilder.Companion.builder(
-    json: Json? = F2DefaultJson,
     config: F2ClientConfigLambda<CIOEngineConfig>? = { }
-) = HttpClientBuilder(json, config)
+) = HttpClientBuilder(config)

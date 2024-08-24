@@ -2,12 +2,10 @@ package f2.client.ktor
 
 import f2.client.F2Client
 import f2.client.ktor.common.F2ClientConfigLambda
-import f2.client.ktor.http.F2DefaultJson
 import f2.client.ktor.http.httpClientBuilderDefault
 import f2.client.ktor.http.httpClientBuilderGenerics
 import f2.client.ktor.rsocket.builder.rSocketF2ClientBuilderDefault
 import f2.client.ktor.rsocket.builder.rSocketF2ClientBuilderGenerics
-import kotlinx.serialization.json.Json
 
 /**
  * Builder object for creating instances of [F2Client] based on different protocols.
@@ -37,22 +35,20 @@ object F2ClientBuilder {
      * Creates an [F2Client] for various protocols including HTTP, HTTPS, TCP, WS, and WSS.
      *
      * @param urlBase The base URL to connect to. Must start with "http:", "https:", "tcp:", "ws:", or "wss:".
-     * @param json Optional JSON configuration. Defaults to [F2DefaultJson].
      * @param config Additional configuration for the client. Defaults to null.
      * @return An instance of [F2Client].
      * @throws InvalidUrlException if the URL does not start with a valid protocol.
      */
     suspend fun get(
         urlBase: String,
-        json: Json? = F2DefaultJson,
         config: F2ClientConfigLambda<*>? = null
     ): F2Client {
         return when {
-            urlBase.startsWith("http:") -> httpClientBuilderGenerics(json, config).build(urlBase)
-            urlBase.startsWith("https:") -> httpClientBuilderGenerics(json, config).build(urlBase)
-            urlBase.startsWith("tcp:") -> rSocketF2ClientBuilderGenerics(json, config).build(urlBase, false)
-            urlBase.startsWith("ws:") -> rSocketF2ClientBuilderGenerics(json, config).build(urlBase, false)
-            urlBase.startsWith("wss:") -> rSocketF2ClientBuilderGenerics(json, config).build(urlBase, true)
+            urlBase.startsWith("http:") -> httpClientBuilderGenerics(config).build(urlBase)
+            urlBase.startsWith("https:") -> httpClientBuilderGenerics(config).build(urlBase)
+            urlBase.startsWith("tcp:") -> rSocketF2ClientBuilderGenerics(config).build(urlBase, false)
+            urlBase.startsWith("ws:") -> rSocketF2ClientBuilderGenerics(config).build(urlBase, false)
+            urlBase.startsWith("wss:") -> rSocketF2ClientBuilderGenerics(config).build(urlBase, true)
             else -> throw InvalidUrlException(urlBase)
         }
     }
