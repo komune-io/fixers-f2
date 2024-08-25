@@ -5,23 +5,22 @@ import f2.client.ktor.common.applyConfig
 import f2.client.ktor.rsocket.RSocketClient
 import f2.client.ktor.rsocket.RSocketF2Client
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.js.Js
 import io.rsocket.kotlin.RSocket
 import io.rsocket.kotlin.ktor.client.rSocket
 import kotlin.js.Promise
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
-import kotlinx.serialization.json.Json
+
 /**
  * Actual implementation of [RSocketF2ClientBuilder] for the JavaScript platform.
  *
- * @param json Optional JSON configuration. Defaults to null.
  * @param config Additional configuration for the RSocket client. Defaults to null.
  */
 @JsExport
 actual class RSocketF2ClientBuilder(
-	private val json: Json? = null,
-	private val config: F2ClientConfigLambda<*>? = null
+	private val config: F2ClientConfigLambda<HttpClientEngineConfig>? = null
 ) {
 	/**
 	 * Builds an [RSocketF2Client] for RSocket communication.
@@ -61,7 +60,7 @@ actual class RSocketF2ClientBuilder(
 	 */
 	private fun build(): HttpClient = HttpClient(Js) {
 		applyRSocket()
-		applyConfig(json, config)
+		applyConfig(config)
 	}
 
 	/**
@@ -89,15 +88,25 @@ actual class RSocketF2ClientBuilder(
 actual fun rSocketF2ClientBuilderDefault(): RSocketF2ClientBuilder = RSocketF2ClientBuilder()
 
 /**
- * Provides a generic instance of [RSocketF2ClientBuilder] with optional JSON configuration.
+ * Provides a generic instance of [RSocketF2ClientBuilder] with configuration.
  *
- * @param json The JSON configuration to use. Defaults to null.
  * @param config Additional configuration for the RSocket client. Defaults to null.
  * @return An instance of [RSocketF2ClientBuilder] with the specified configuration.
  */
 actual fun rSocketF2ClientBuilderGenerics(
-	json: Json?,
 	config: F2ClientConfigLambda<*>?
 ): RSocketF2ClientBuilder {
-	return RSocketF2ClientBuilder(json, config)
+	return RSocketF2ClientBuilder(config)
+}
+
+/**
+ * Provides a generic instance of [RSocketF2ClientBuilder] with configuration.
+ *
+ * @param config Additional configuration for the RSocket client. Defaults to an empty lambda.
+ * @return An instance of [RSocketF2ClientBuilder] with the specified configuration.
+ */
+fun rSocketClientBuilder(
+	config: F2ClientConfigLambda<HttpClientEngineConfig>?
+): RSocketF2ClientBuilder {
+	return RSocketF2ClientBuilder(config)
 }

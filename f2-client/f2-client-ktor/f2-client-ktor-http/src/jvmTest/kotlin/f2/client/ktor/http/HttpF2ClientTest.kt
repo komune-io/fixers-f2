@@ -35,21 +35,21 @@ class HttpF2ClientTest {
 
 	@Test
 	fun testBuilderExtensionFunctionApi(): Unit = runTest {
-		HttpClientBuilder(json = defaultJson){
+		HttpClientBuilder{
 			install(Logging) {
 				logger = Logger.DEFAULT
 				level = LogLevel.ALL
 			}
 		}.build("http://localhost:8090")
 
-		HttpClientBuilder.builder(json = defaultJson){
+		HttpClientBuilder.builder{
 			install(Logging) {
 				logger = Logger.DEFAULT
 				level = LogLevel.ALL
 			}
 		}.build("http://localhost:8090")
 
-		HttpClientBuilder(json = defaultJson){
+		HttpClientBuilder{
 			install(Logging) {
 				logger = Logger.DEFAULT
 				level = LogLevel.ALL
@@ -57,8 +57,17 @@ class HttpF2ClientTest {
 		}.build("http://localhost:8090")
 
 		HttpClientBuilder.default()
-		HttpClientBuilder.generics(json = defaultJson) {}
-
+		HttpClientBuilder.generics {
+			install(Logging) {
+				logger = Logger.DEFAULT
+				level = LogLevel.ALL
+			}
+			install(ContentNegotiation) {
+				json(Json {
+					ignoreUnknownKeys = true
+				})
+			}
+		}.build("http://localhost:8090")
 	}
 
 //	@Test

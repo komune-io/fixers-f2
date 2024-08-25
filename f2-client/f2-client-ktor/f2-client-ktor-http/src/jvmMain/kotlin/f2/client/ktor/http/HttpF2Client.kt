@@ -2,6 +2,7 @@ package f2.client.ktor.http
 
 import f2.client.F2Client
 import f2.client.F2ClientType
+import f2.client.ktor.common.F2DefaultJson
 import f2.client.ktor.http.model.F2UploadCommand
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.exception.F2Exception
@@ -163,8 +164,8 @@ actual open class HttpF2Client(
 }
 
 private class FormDataBodyBuilder<T>(
-	val json: Json = F2DefaultJson,
-	queryTypeInfo: TypeInfo
+    val json: Json = F2DefaultJson,
+    queryTypeInfo: TypeInfo
 ) {
 	private val formParts = mutableListOf<FormPart<*>>()
 

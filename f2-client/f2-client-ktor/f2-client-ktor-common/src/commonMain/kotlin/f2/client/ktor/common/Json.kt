@@ -1,4 +1,4 @@
-package f2.client.ktor.http
+package f2.client.ktor.common
 
 import kotlinx.serialization.json.Json
 

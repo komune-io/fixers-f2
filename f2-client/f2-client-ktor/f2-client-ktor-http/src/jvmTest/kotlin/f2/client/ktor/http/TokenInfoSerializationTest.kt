@@ -1,5 +1,6 @@
 package f2.client.ktor.http
 
+import f2.client.ktor.common.F2DefaultJson
 import f2.client.ktor.http.plugin.model.TokenInfo
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
