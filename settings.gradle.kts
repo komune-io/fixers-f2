@@ -17,6 +17,7 @@ include(
 
 include(
 	"f2-client:f2-client-core",
+	"f2-client:f2-client-domain",
 	"f2-client:f2-client-ktor",
 	"f2-client:f2-client-ktor:f2-client-ktor-common",
 	"f2-client:f2-client-ktor:f2-client-ktor-http",

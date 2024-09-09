@@ -7,6 +7,7 @@ plugins {
 
 dependencies {
     commonMainApi(project(":f2-client:f2-client-core"))
+    commonMainApi(project(":f2-client:f2-client-domain"))
     commonMainApi(project(":f2-dsl:f2-dsl-cqrs"))
     commonMainApi(project(":f2-client:f2-client-ktor:f2-client-ktor-common"))
 

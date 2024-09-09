@@ -1,4 +1,4 @@
-package f2.client.ktor.http.plugin.model
+package f2.client.domain
 
 import kotlin.js.JsExport
 
@@ -27,7 +27,7 @@ data class AuthRealmClientSecret(
     override val serverUrl: String,
     override val realmId: RealmId,
     override val clientId: String,
-    override val redirectUrl: String?,
+    override val redirectUrl: String? = null,
     val clientSecret: String,
     val isPublic: Boolean = false,
 ): AuthRealm(serverUrl, realmId, clientId, redirectUrl)
