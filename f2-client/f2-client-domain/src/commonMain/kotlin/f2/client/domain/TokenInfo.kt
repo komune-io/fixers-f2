@@ -1,4 +1,4 @@
-package f2.client.ktor.http.plugin.model
+package f2.client.domain
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

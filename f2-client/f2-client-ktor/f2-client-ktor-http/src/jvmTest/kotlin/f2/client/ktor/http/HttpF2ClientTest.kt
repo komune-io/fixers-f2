@@ -2,12 +2,11 @@ package f2.client.ktor.http
 
 import f2.client.ktor.http.model.F2FilePart
 import f2.client.ktor.http.plugin.F2Auth
-import f2.client.ktor.http.plugin.model.AuthRealmClientSecret
+import f2.client.domain.AuthRealmClientSecret
 import f2.client.ktor.http.server.ServerClient
 import f2.client.ktor.http.server.command.ServerConsumeCommand
 import f2.client.ktor.http.server.command.ServerUploadCommand
 import f2.client.ktor.http.server.command.ServerUploadCommandBody
-import f2.spring.KSerializationMapper.Companion.defaultJson
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
