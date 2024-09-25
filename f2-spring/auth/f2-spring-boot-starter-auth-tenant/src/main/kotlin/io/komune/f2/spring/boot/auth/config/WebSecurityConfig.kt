@@ -1,6 +1,7 @@
 package io.komune.f2.spring.boot.auth.config
 
 import io.komune.f2.spring.boot.auth.security.TrustedIssuerJwtAuthenticationManagerResolver
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
@@ -33,6 +34,8 @@ abstract class WebSecurityConfig {
         const val ROLE_PREFIX = "ROLE_"
     }
 
+    private val logger = LoggerFactory.getLogger(WebSecurityConfig::class.java)
+
     @Value("\${spring.cloud.function.web.path:}")
     lateinit var contextPath: String
 
@@ -49,28 +52,40 @@ abstract class WebSecurityConfig {
     @Bean(SPRING_SECURITY_FILTER_CHAIN)
     @ConditionalOnExpression(NO_AUTHENTICATION_REQUIRED_EXPRESSION)
     fun dummyAuthenticationProvider(http: ServerHttpSecurity): SecurityWebFilterChain {
-        http.authorizeExchange{ exchange ->
+        logger.trace("Executing dummyAuthenticationProvider (permitAll)")
+
+        http.authorizeExchange { exchange ->
+            logger.trace("Setting up authorization for all exchanges to permitAll")
             exchange.anyExchange().permitAll()
         }
         http.csrf { csrf ->
+            logger.trace("Disabling CSRF")
             csrf.disable()
         }
         http.corsConfig()
+
+        logger.trace("Building dummy SecurityWebFilterChain (permitAll)")
         return http.build()
     }
 
     @Bean(SPRING_SECURITY_FILTER_CHAIN)
     @ConditionalOnExpression(AUTHENTICATION_REQUIRED_EXPRESSION)
     fun oauthAuthenticationProvider(http: ServerHttpSecurity): SecurityWebFilterChain {
+        logger.trace("Executing oauthAuthenticationProvider (with authentication required)")
+
         addAuthenticationRules(http)
         http.csrf { csrf ->
+            logger.trace("Disabling CSRF")
             csrf.disable()
         }
         http.corsConfig()
+
+        logger.trace("Building SecurityWebFilterChain with authentication required")
         return http.build()
     }
 
     fun addAuthenticationRules(http: ServerHttpSecurity) {
+        logger.trace("Adding authentication rules")
         addRolesAllowedRules(http)
         addPermitAllRules(http)
         addMandatoryAuthRules(http)
@@ -80,17 +95,27 @@ abstract class WebSecurityConfig {
     private fun authenticate(
         authentication: Mono<Authentication>
     ): Mono<AuthorizationDecision> {
+        logger.trace("Authenticating using custom filter")
+
         return authentication.map { auth ->
             if (auth !is JwtAuthenticationToken || auth.token == null) {
+                logger.trace("Authentication failed: JWT token is missing or invalid")
                 return@map false
             }
 
             val filters = authFilter()
-            filters.isEmpty() || filters.all { (key, value) -> auth.token.claims[key] == value }
+            val decision = filters.isEmpty() || filters.all { (key, value) ->
+                auth.token.claims[key] == value
+            }
+
+            logger.trace("Authentication decision: $decision")
+            decision
         }.map(::AuthorizationDecision)
     }
 
     private fun ServerHttpSecurity.corsConfig() {
+        logger.trace("Setting up CORS configuration")
+
         val config = CorsConfiguration()
         config.allowedOrigins = listOf("*")
         config.allowCredentials = false
@@ -100,17 +125,21 @@ abstract class WebSecurityConfig {
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", config)
         cors { spec ->
+            logger.trace("Registering CORS configuration")
             spec.configurationSource(source)
         }
     }
 
     fun addRolesAllowedRules(http: ServerHttpSecurity) {
+        logger.trace("Adding RolesAllowed rules")
+
         applicationContext.getBeanNamesForAnnotation(RolesAllowed::class.java)
             .associateWith { bean ->
                 applicationContext.findAnnotationOnBean(bean, RolesAllowed::class.java)!!.value
             }
             .forEach { (name, roles) ->
-                http.authorizeExchange{ exchange ->
+                logger.trace("Setting up role-based authorization for $name with roles: ${roles.joinToString()}")
+                http.authorizeExchange { exchange ->
                     exchange.pathMatchers("$contextPath/$name")
                         .hasAnyRole(*roles)
                 }
@@ -118,11 +147,14 @@ abstract class WebSecurityConfig {
     }
 
     fun addPermitAllRules(http: ServerHttpSecurity) {
+        logger.trace("Adding PermitAll rules")
+
         val permitAllBeans = applicationContext.getBeanNamesForAnnotation(PermitAll::class.java)
             .map { bean -> "$contextPath/$bean" }
             .toTypedArray()
 
         if (permitAllBeans.isNotEmpty()) {
+            logger.trace("Setting up permitAll for beans: ${permitAllBeans.joinToString()}")
             http.authorizeExchange { exchange ->
                 exchange.pathMatchers(*permitAllBeans).permitAll()
             }
@@ -130,23 +162,27 @@ abstract class WebSecurityConfig {
     }
 
     fun addMandatoryAuthRules(http: ServerHttpSecurity) {
+        logger.trace("Adding mandatory authentication rules")
         http.authorizeExchange { exchange ->
             exchange.anyExchange()
                 .access { authentication, _ ->
+                    logger.trace("Processing authentication")
                     authenticate(authentication)
                 }
         }
     }
 
     fun addJwtParsingRules(http: ServerHttpSecurity) {
+        logger.trace("Adding JWT parsing rules")
+
         val trustedIssuerJwtAuthenticationManagerResolver = TrustedIssuerJwtAuthenticationManagerResolver(
             f2TrustedIssuersResolver
         )
         http.oauth2ResourceServer { oauth2 ->
+            logger.trace("Setting up OAuth2 resource server with trusted issuers")
             oauth2.authenticationManagerResolver(
                 JwtIssuerReactiveAuthenticationManagerResolver(trustedIssuerJwtAuthenticationManagerResolver)
             )
         }
     }
-
 }
