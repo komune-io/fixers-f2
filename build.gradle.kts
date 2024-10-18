@@ -33,9 +33,9 @@ tasks {
 }
 
 fixers {
-	npm {
-		version = "0.17.0-SNAPSHOT"
-	}
+//	npm {
+//		version = "0.22.0-SNAPSHOT"
+//	}
 	d2 {
 		outputDirectory = file("storybook/d2/")
 	}
@@ -44,5 +44,9 @@ fixers {
 		name = "F2"
 		description = "Wrapper around Spring Cloud Function"
 		url = "https://github.com/komune-io/fixers-f2"
+	}
+	sonar {
+		organization = "komune-io"
+		projectKey = "komune-io_connect-fs"
 	}
 }
