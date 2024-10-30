@@ -42,7 +42,7 @@ import kotlinx.serialization.serializer
 @JsExport
 actual open class HttpF2Client(
 	actual val httpClient: HttpClient,
-	val urlBase: String,
+	actual val urlBase: String,
 	val json: Json = F2DefaultJson
 ) : F2Client {
 
