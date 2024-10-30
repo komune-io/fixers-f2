@@ -5,4 +5,5 @@ import io.ktor.client.HttpClient
 
 expect open class HttpF2Client : F2Client {
     val httpClient: HttpClient
+    val urlBase: String
 }
