@@ -4,6 +4,7 @@ import f2.client.ktor.common.F2DefaultJson
 import f2.client.domain.AuthRealm
 import f2.client.domain.AuthRealmClientSecret
 import f2.client.domain.AuthRealmPassword
+import f2.client.domain.AuthRealmProvider
 import f2.client.domain.TokenInfo
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.error.asException
@@ -31,7 +32,7 @@ class F2Auth(
 
     private lateinit var authPlugin: Auth
 
-    lateinit var getAuth: suspend () -> AuthRealm
+    lateinit var getAuth: AuthRealmProvider
 
     companion object Plugin: HttpClientPlugin<F2Auth, F2Auth> {
         val LOGGER = KtorSimpleLogger("f2.client.ktor.http.plugin.F2Auth")
