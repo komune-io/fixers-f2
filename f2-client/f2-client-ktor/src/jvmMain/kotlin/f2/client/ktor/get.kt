@@ -4,11 +4,11 @@ import f2.client.F2Client
 import f2.client.ktor.common.F2ClientConfigLambda
 import f2.client.ktor.http.httpClientBuilder
 import f2.client.ktor.rsocket.builder.rSocketF2ClientBuilderDefault
-import io.ktor.client.engine.cio.CIOEngineConfig
+import io.ktor.client.engine.java.JavaHttpConfig
 
 suspend fun F2ClientBuilder.get(
     urlBase: String,
-    config: F2ClientConfigLambda<CIOEngineConfig>? = null
+    config: F2ClientConfigLambda<JavaHttpConfig>? = null
 ): F2Client {
 	return when {
 		urlBase.startsWith("http:") -> httpClientBuilder(config).build(urlBase)

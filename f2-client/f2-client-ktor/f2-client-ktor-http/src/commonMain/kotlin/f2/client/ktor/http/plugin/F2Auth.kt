@@ -6,6 +6,7 @@ import f2.client.domain.AuthRealmClientSecret
 import f2.client.domain.AuthRealmPassword
 import f2.client.domain.AuthRealmProvider
 import f2.client.domain.TokenInfo
+import f2.client.ktor.http.httpClientBuilderGenerics
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.error.asException
 import io.ktor.client.HttpClient
@@ -13,8 +14,8 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpClientPlugin
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
-import io.ktor.client.plugins.auth.providers.RefreshTokensParams
 import io.ktor.client.plugins.auth.providers.bearer
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -24,6 +25,7 @@ import io.ktor.util.AttributeKey
 import io.ktor.util.logging.KtorSimpleLogger
 import kotlinx.serialization.json.Json
 
+typealias OnTokenRequestSentAction = HttpRequestBuilder.() -> Unit
 
 class F2Auth(
     protected var json: Json = F2DefaultJson,
@@ -52,49 +54,72 @@ class F2Auth(
         }
 
         private fun F2Auth.prepareAuth() = Auth.prepare {
-            bearer {
-                loadTokens {
-                    lastBearerTokens
+            try {
+                bearer {
+                    loadTokens {
+                        genOAuthToken(lastBearerTokens) {
+
+                        }
+                    }
+
+                    refreshTokens {
+                        genOAuthToken(oldTokens) {
+                            markAsRefreshTokenRequest()
+                        }
+                    }
                 }
 
-                refreshTokens {
-                    val authRealm = getAuth()
-                    val parameters: Map<String, String> = if (oldTokens?.refreshToken.isNullOrBlank()) {
-                        generateNewToken(authRealm)
-                    } else {
-                        refreshToken(authRealm)
-                    }
-                    val params = parametersOf(parameters.mapValues { (_, value) -> listOf(value) })
-                    val refreshTokenInfoRequest = client.post {
-                        url("${authRealm.serverUrl}/realms/${authRealm.realmId}/protocol/openid-connect/token")
-                        setBody(FormDataContent(params))
-                        markAsRefreshTokenRequest()
-                    }
-                    val tokenInfo = refreshTokenInfoRequest.body<String>()
-                    try {
-                        val refreshTokenInfo = json.decodeFromString<TokenInfo>(tokenInfo)
-                        lastBearerTokens = BearerTokens(
-                            refreshTokenInfo.accessToken,
-                            refreshTokenInfo.refreshToken ?: ""
-                        )
-                        lastBearerTokens
-                    } catch (e: IllegalArgumentException) {
-                        val debugInfo = if (debug) "Invalid argument encountered: $tokenInfo" else ""
-                        throw F2Error(
-                            message = "Unable to decode response from auth provider. $debugInfo"
-                        ).asException(e)
-                    } catch (e: Exception) {
-                        val debugInfo = if (debug) " Response: $tokenInfo" else ""
-                        throw F2Error(
-                            message = "Unknown exception occurred.$debugInfo"
-                        ).asException(e)
-                    }
-                }
+            } catch (e: Throwable) {
+                throw F2Error(
+                    message = "Unknown error occurred."
+                ).asException(e)
+
             }
         }
 
 
-        private fun RefreshTokensParams.refreshToken(authRealm: AuthRealm): Map<String, String> {
+        private suspend fun F2Auth.genOAuthToken(
+            oldTokens: BearerTokens?,
+            onTokenRequestSent: OnTokenRequestSentAction?
+        ): BearerTokens? {
+            val authRealm = getAuth()
+            val parameters: Map<String, String> = if (oldTokens?.refreshToken.isNullOrBlank()) {
+                generateNewToken(authRealm)
+            } else {
+                refreshToken(oldTokens, authRealm)
+            }
+            val params = parametersOf(parameters.mapValues { (_, value) -> listOf(value) })
+            val client = httpClientBuilderGenerics().build(authRealm.serverUrl).httpClient
+            val refreshTokenInfoRequest = client.post {
+                url("${authRealm.serverUrl}/realms/${authRealm.realmId}/protocol/openid-connect/token")
+                setBody(FormDataContent(params))
+                if(onTokenRequestSent != null) {
+                    onTokenRequestSent()
+                }
+            }
+            val tokenInfo = refreshTokenInfoRequest.body<String>()
+            return try {
+                val refreshTokenInfo = json.decodeFromString<TokenInfo>(tokenInfo)
+                lastBearerTokens = BearerTokens(
+                    refreshTokenInfo.accessToken,
+                    refreshTokenInfo.refreshToken ?: ""
+                )
+                lastBearerTokens
+            } catch (e: IllegalArgumentException) {
+                val debugInfo = if (debug) "Invalid argument encountered: $tokenInfo" else ""
+                throw F2Error(
+                    message = "Unable to decode response from auth provider. $debugInfo"
+                ).asException(e)
+            } catch (e: Exception) {
+                val debugInfo = if (debug) " Response: $tokenInfo" else ""
+                throw F2Error(
+                    message = "Unknown exception occurred.$debugInfo"
+                ).asException(e)
+            }
+        }
+
+
+        private fun refreshToken(oldTokens: BearerTokens?, authRealm: AuthRealm): Map<String, String> {
             LOGGER.debug("Refresh Token: grant_type[refresh_token] with client_id[${authRealm.clientId}] " +
                     "and refresh_token=${oldTokens?.refreshToken?.take(n=5)}...}")
             return mapOf(
