@@ -3,8 +3,8 @@ package f2.client.ktor.http
 import f2.client.ktor.common.F2ClientConfigLambda
 import f2.client.ktor.common.applyConfig
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.engine.cio.CIOEngineConfig
+import io.ktor.client.engine.java.Java
+import io.ktor.client.engine.java.JavaHttpConfig
 
 /**
  * Builder class for creating instances of [HttpF2Client].
@@ -13,7 +13,7 @@ import io.ktor.client.engine.cio.CIOEngineConfig
  * @param config Additional configuration for the HTTP client. Defaults to an empty lambda.
  */
 actual class HttpClientBuilder(
-	private val config: F2ClientConfigLambda<CIOEngineConfig>? = {}
+	private val config: F2ClientConfigLambda<JavaHttpConfig>? = {}
 ) {
 	/**
 	 * Builds an [HttpF2Client] with the specified base URL.
@@ -35,7 +35,7 @@ actual class HttpClientBuilder(
 	 * @return An instance of [HttpClient].
 	 */
 	private fun httpClient(): HttpClient {
-		return HttpClient(CIO) {
+		return HttpClient(Java) {
 			applyConfig(config)
 		}
 	}

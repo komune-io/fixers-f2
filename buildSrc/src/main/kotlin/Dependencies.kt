@@ -64,7 +64,7 @@ object Dependencies {
 
 			fun client(commonMainApi: Scope, jvmScope: Scope, jsScope: Scope) {
 				jvmScope.add(
-					"io.ktor:ktor-client-cio:${Versions.Kotlin.ktor}"
+					"io.ktor:ktor-client-java:${Versions.Kotlin.ktor}"
 				)
 				jsScope.add(
 					"io.ktor:ktor-client-js:${Versions.Kotlin.ktor}"

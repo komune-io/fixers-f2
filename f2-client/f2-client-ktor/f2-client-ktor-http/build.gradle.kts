@@ -14,6 +14,8 @@ dependencies {
     commonMainApi("io.ktor:ktor-client-core:${Versions.Kotlin.ktor}")
     commonMainApi("io.ktor:ktor-client-auth:${Versions.Kotlin.ktor}")
 
+
+
     Dependencies.Mpp.Ktor.client(::commonMainApi, ::jvmMainApi, ::jsMainApi)
 
     Dependencies.Mpp.uuid(::commonMainApi)

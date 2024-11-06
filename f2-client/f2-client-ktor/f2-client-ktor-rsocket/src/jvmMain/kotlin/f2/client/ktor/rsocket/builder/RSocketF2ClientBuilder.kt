@@ -5,8 +5,8 @@ import f2.client.ktor.common.applyConfig
 import f2.client.ktor.rsocket.RSocketClient
 import f2.client.ktor.rsocket.RSocketF2Client
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.engine.cio.CIOEngineConfig
+import io.ktor.client.engine.java.Java
+import io.ktor.client.engine.java.JavaHttpConfig
 import io.rsocket.kotlin.RSocket
 import io.rsocket.kotlin.ktor.client.rSocket
 
@@ -16,7 +16,7 @@ import io.rsocket.kotlin.ktor.client.rSocket
  * @param config Additional configuration for the RSocket client. Defaults to null.
  */
 actual class RSocketF2ClientBuilder(
-	private val config: F2ClientConfigLambda<CIOEngineConfig>? = null,
+	private val config: F2ClientConfigLambda<JavaHttpConfig>? = null,
 ) {
 
 	/**
@@ -41,7 +41,7 @@ actual class RSocketF2ClientBuilder(
 	 *
 	 * @return An instance of [HttpClient].
 	 */
-	private fun build(): HttpClient = HttpClient(CIO) {
+	private fun build(): HttpClient = HttpClient(Java) {
 		applyRSocket()
 		applyConfig(config)
 	}
@@ -90,7 +90,7 @@ actual fun rSocketF2ClientBuilderGenerics(
  * @return An instance of [RSocketClientBuilder] with the specified configuration.
  */
 fun rSocketClientBuilder(
-	config: F2ClientConfigLambda<CIOEngineConfig>? = {  }
+	config: F2ClientConfigLambda<JavaHttpConfig>? = {  }
 ) = RSocketF2ClientBuilder(config)
 
 /**
@@ -100,6 +100,6 @@ fun rSocketClientBuilder(
  * @return An instance of [RSocketClientBuilder] with the specified configuration.
  */
 fun RSocketF2ClientBuilder.Companion.builder(
-	config: F2ClientConfigLambda<CIOEngineConfig>? = { }
+	config: F2ClientConfigLambda<JavaHttpConfig>? = { }
 ) = RSocketF2ClientBuilder(config)
 

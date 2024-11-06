@@ -8,7 +8,7 @@ import f2.client.ktor.http.server.command.ServerConsumeCommand
 import f2.client.ktor.http.server.command.ServerUploadCommand
 import f2.client.ktor.http.server.command.ServerUploadCommandBody
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.java.Java
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
@@ -107,7 +107,7 @@ class HttpF2ClientTest {
 	fun test(): Unit = runTest {
 		val client = ServerClient(
 			client = HttpF2Client(
-				httpClient = HttpClient(CIO) {
+				httpClient = HttpClient(Java) {
 					install(ContentNegotiation) {
 						json(Json {
 							ignoreUnknownKeys = true
