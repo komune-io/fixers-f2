@@ -2,17 +2,14 @@ package f2.spring.http.cucumber
 
 import f2.bdd.spring.lambda.HttpF2GenericsSteps
 import f2.bdd.spring.lambda.single.StringConsumerReceiver
-import f2.client.consumer
 import f2.client.consumerSingle
 import f2.client.function
 import f2.client.ktor.F2ClientBuilder
-import f2.client.ktor.get
 import f2.client.supplierSingle
 import f2.spring.http.F2SpringHttpCucumberConfig
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 

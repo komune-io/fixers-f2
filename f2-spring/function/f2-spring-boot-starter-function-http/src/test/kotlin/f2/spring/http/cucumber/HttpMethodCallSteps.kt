@@ -5,7 +5,6 @@ import f2.bdd.spring.lambda.single.StringConsumerReceiver
 import f2.client.consumer
 import f2.client.function
 import f2.client.ktor.F2ClientBuilder
-import f2.client.ktor.get
 import f2.client.supplier
 import f2.spring.http.F2SpringHttpCucumberConfig
 import io.cucumber.datatable.DataTable

@@ -16,15 +16,8 @@
 
 package org.springframework.cloud.function.context.config;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
@@ -38,6 +31,12 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * FIX KOMUNE - https://github.com/spring-cloud/spring-cloud-function/issues/901.

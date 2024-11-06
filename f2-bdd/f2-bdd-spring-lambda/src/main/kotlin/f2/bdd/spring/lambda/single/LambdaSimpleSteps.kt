@@ -1,6 +1,5 @@
 package f2.bdd.spring.lambda.single
 
-import f2.bdd.spring.autoconfigure.steps.LambdaListStepsBase
 import f2.bdd.spring.autoconfigure.steps.LambdaSingleStepsBase
 import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
 import io.cucumber.datatable.DataTable

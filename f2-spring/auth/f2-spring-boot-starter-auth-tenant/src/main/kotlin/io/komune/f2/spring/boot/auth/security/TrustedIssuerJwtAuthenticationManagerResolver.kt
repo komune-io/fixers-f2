@@ -2,6 +2,8 @@ package io.komune.f2.spring.boot.auth.security
 
 import io.komune.f2.spring.boot.auth.config.F2TrustedIssuersConfig
 import io.komune.f2.spring.boot.auth.config.WebSecurityConfig
+import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.ReactiveAuthenticationManagerResolver
 import org.springframework.security.core.GrantedAuthority
@@ -13,8 +15,6 @@ import org.springframework.security.oauth2.server.resource.authentication.Reacti
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
-import java.time.Duration
-import java.util.concurrent.ConcurrentHashMap
 
 class TrustedIssuerJwtAuthenticationManagerResolver(
     val trustedIssuersConfig: F2TrustedIssuersConfig

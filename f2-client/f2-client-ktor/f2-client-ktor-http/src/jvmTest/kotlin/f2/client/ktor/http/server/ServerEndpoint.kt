@@ -5,6 +5,10 @@ import f2.client.ktor.http.server.command.ServerUploadCommandBody
 import f2.client.ktor.http.server.command.ServerUploadedEvent
 import f2.client.ktor.http.toBase64
 import f2.dsl.fnc.f2Function
+import java.io.IOException
+import java.io.InputStream
+import java.io.PipedInputStream
+import java.io.PipedOutputStream
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.buffer.DataBuffer
@@ -16,10 +20,6 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import reactor.core.scheduler.Schedulers
-import java.io.IOException
-import java.io.InputStream
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
 
 @RestController
 @RequestMapping

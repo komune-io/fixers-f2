@@ -1,6 +1,7 @@
 package io.komune.f2.spring.boot.auth
 
 import io.komune.f2.spring.boot.auth.config.WebSecurityConfig
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.reactor.ReactorContext
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -8,7 +9,6 @@ import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import reactor.core.publisher.Mono
-import kotlin.coroutines.coroutineContext
 
 const val ORGANIZATION_ID_CLAIM_NAME = "memberOf"
 const val AZP_CLAIM_NAME = "azp"
