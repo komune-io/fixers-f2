@@ -1,7 +1,5 @@
 package f2.spring.exception.config
 
-import com.fasterxml.jackson.databind.exc.InvalidDefinitionException
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.exception.F2Exception

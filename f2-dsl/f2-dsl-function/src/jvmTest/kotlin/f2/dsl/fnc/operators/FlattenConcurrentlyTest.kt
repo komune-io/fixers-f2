@@ -1,6 +1,7 @@
 package f2.dsl.fnc.operators
 
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

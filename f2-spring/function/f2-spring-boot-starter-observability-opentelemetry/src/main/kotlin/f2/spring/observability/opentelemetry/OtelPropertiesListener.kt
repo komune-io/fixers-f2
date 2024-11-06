@@ -1,9 +1,9 @@
 package f2.spring.observability.opentelemetry
 
+import java.util.Properties
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.core.env.PropertiesPropertySource
-import java.util.*
 
 
 class OtelPropertiesListener: ApplicationListener<ApplicationEnvironmentPreparedEvent> {
