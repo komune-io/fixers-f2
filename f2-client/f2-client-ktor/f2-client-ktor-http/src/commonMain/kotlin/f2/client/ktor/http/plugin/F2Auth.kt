@@ -9,6 +9,7 @@ import f2.client.ktor.common.F2DefaultJson
 import f2.client.ktor.http.httpClientBuilderGenerics
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.error.asException
+import f2.dsl.cqrs.exception.F2Exception
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpClientPlugin
@@ -57,11 +58,8 @@ class F2Auth(
             try {
                 bearer {
                     loadTokens {
-                        genOAuthToken(lastBearerTokens) {
-
-                        }
+                        genOAuthToken(lastBearerTokens)
                     }
-
                     refreshTokens {
                         genOAuthToken(oldTokens) {
                             markAsRefreshTokenRequest()
@@ -69,6 +67,8 @@ class F2Auth(
                     }
                 }
 
+            } catch (e: F2Exception) {
+                throw e
             } catch (e: Throwable) {
                 throw F2Error(
                     message = "Unknown error occurred."
@@ -80,7 +80,7 @@ class F2Auth(
 
         private suspend fun F2Auth.genOAuthToken(
             oldTokens: BearerTokens?,
-            onTokenRequestSent: OnTokenRequestSentAction?
+            onTokenRequestSent: OnTokenRequestSentAction? = null
         ): BearerTokens? {
             val authRealm = getAuth()
             val parameters: Map<String, String> = if (oldTokens?.refreshToken.isNullOrBlank()) {
