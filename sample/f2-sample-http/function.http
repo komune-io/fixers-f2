@@ -1,10 +1,20 @@
+
+### uuid
 GET http://localhost:8080/uuid
+
+### uuid
+GET http://localhost:8080/uuid2
+
+### uuids
+GET http://localhost:8080/uuids
+Accept: text/event-stream
 
 ### sha256
 POST http://localhost:8080/sha256
 Content-Type: application/json
 
 ["a", "b", "c"]
+
 
 ### sha256
 POST http://localhost:8080/println
