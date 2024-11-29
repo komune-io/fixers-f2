@@ -23,7 +23,6 @@ interface PagePaginationDTO: Pagination {
 	val size: Int?
 }
 
-
 @Serializable
 @JsExport
 @JsName("OffsetPagination")
