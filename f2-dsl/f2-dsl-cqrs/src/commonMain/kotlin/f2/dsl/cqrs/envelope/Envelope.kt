@@ -1,5 +1,6 @@
 package f2.dsl.cqrs.envelope
 
+import f2.dsl.cqrs.Message
 import kotlin.js.JsExport
 import kotlin.js.JsName
 import kotlinx.serialization.Serializable
@@ -7,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @JsExport
 @JsName("EnvelopeDTO")
-interface EnvelopeDTO<T>: WithEnvelopeId, WithEnvelopeData<T> {
+interface EnvelopeDTO<T>: WithEnvelopeId, WithEnvelopeData<T>, Message {
     override val id: String
     override val data: T
     val type: String
