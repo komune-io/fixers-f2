@@ -34,7 +34,8 @@ inline fun <reified T> T.asEnvelope(
  * @param source The source of the envelope. Defaults to the source of the `from` envelope or null.
  * @param id The ID of the envelope. Defaults to the ID of the `from` envelope or a randomly generated UUID.
  * @param time The time of the envelope. Defaults to the time of the `from` envelope or null.
- * @param datacontenttype The data content type of the envelope. Defaults to the data content type of the `from` envelope or null.
+ * @param datacontenttype The data content type of the envelope.
+ *      Defaults to the data content type of the `from` envelope or null.
  * @return An Envelope containing the object.
  */
 fun <T> T.asEnvelopeWithType(
