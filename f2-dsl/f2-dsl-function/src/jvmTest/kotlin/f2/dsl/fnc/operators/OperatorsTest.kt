@@ -22,7 +22,7 @@ class OperatorsTest {
 
         // Chunk the flow into lists of 3 elements
         // Data: [1, 2, 3], [4, 5, 6], [7, 8, 9]
-        val chunkedFlow: Flow<List<Int>> = initialFlow.chunk(InvokeChunk(size = 3)) { it }
+        val chunkedFlow: Flow<List<Int>> = initialFlow.chunk(size = 3) { it }
 
 
         // Flatten the chunked flow concurrently

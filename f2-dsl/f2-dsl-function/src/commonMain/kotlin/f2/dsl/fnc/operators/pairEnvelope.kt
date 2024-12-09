@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.channelFlow
  * @return A Flow emitting pairs of original data and corresponding results.
  */
 inline fun <reified T, R> Flow<Envelope<T>>.pairEnvelope(
-    props: InvokeChunk = InvokeChunk(),
+    chunk: Int = CHUNK_DEFAULT_SIZE,
     crossinline execute: suspend (Flow<Envelope<T>>) -> Flow<Envelope<R>>
 ): Flow<Pair<T, R>> = channelFlow {
-    chunk(props).collect { chunked ->
+    chunk(chunk).collect { chunked ->
         val commandMap: Map<String, Envelope<T>> = chunked.associateBy { it.id }
 
         val envelopedCommands = commandMap.values.asFlow()
