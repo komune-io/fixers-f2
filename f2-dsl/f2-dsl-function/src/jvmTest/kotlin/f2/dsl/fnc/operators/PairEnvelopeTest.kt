@@ -38,7 +38,7 @@ class PairEnvelopeTest {
             Envelope(id = "3", data = 3, type = 3::class.simpleName!!),
             Envelope(id = "4", data = 4, type = 4::class.simpleName!!)
         )
-        val result = flow.pairEnvelope(InvokeChunk(size = 2)) { inputFlow ->
+        val result = flow.pairEnvelope(chunk = 2) { inputFlow ->
             inputFlow.map { envelope ->
                 Envelope(id = envelope.id, data = envelope.data * 2, Int::class.simpleName!!)
             }
