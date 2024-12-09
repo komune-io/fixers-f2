@@ -26,7 +26,7 @@ val BATCH_DEFAULT_CONCURRENCY: Int = DEFAULT_CONCURRENCY
 /**
  * Default concurrency level for batching.
  */
-val BATCH_DEFAULT_SIZE: Int = CHUNK_DEFAULT_SIZE
+const val BATCH_DEFAULT_SIZE: Int = CHUNK_DEFAULT_SIZE
 
 /**
  * Data class representing the configuration for batching elements in a Flow.
