@@ -3,7 +3,11 @@ package f2.dsl.fnc.operators
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
+/**
+ * Default size of each chunk.
+ */
 const val CHUNK_DEFAULT_SIZE: Int = 128
+
 /**
  * Extension function to chunk elements of a Flow into lists
  * of a specified size and apply a transformation function to each chunk.
