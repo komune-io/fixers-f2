@@ -19,6 +19,19 @@ fun <T, R> Flow<T>.batch(
 ): Flow<R> = chunk(batch.size, fnc).flattenConcurrently(batch.concurrency)
 
 /**
+ * Extension function to batch elements of a Flow into lists of a specified size and
+ * apply a transformation function to each batch.
+ *
+ * @param batch An instance of [Batch] containing the size of each batch and the concurrency level.
+ * @param fnc A suspend function to apply to each batch of elements.
+ * @return A Flow emitting transformed elements.
+ */
+fun <T, R> Flow<T>.batchFlow(
+    batch: Batch,
+    fnc: suspend (t: List<T>) -> Flow<R>
+): Flow<R> = chunkFlow(batch.size, fnc).flattenConcurrently(batch.concurrency)
+
+/**
  * Default concurrency level for batching.
  */
 val BATCH_DEFAULT_CONCURRENCY: Int = DEFAULT_CONCURRENCY

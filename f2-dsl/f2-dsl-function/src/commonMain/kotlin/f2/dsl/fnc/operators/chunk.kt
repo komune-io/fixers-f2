@@ -43,18 +43,18 @@ fun <T, R> Flow<T>.chunk(
  */
 fun <T, R> Flow<T>.chunkFlow(
     size: Int = CHUNK_DEFAULT_SIZE,
-    fnc: suspend (t: Flow<T>) -> Flow<R>
-): Flow<R> = flow {
+    fnc: suspend (t: List<T>) -> Flow<R>
+): Flow<Flow<R>> = flow {
     val buffer = mutableListOf<T>()
     collect { value ->
         buffer.add(value)
         if (buffer.size == size) {
-            fnc(buffer.asFlow()).collect { emit(it) }
+            fnc(buffer).let { emit(it) }
             buffer.clear()
         }
     }
     if (buffer.isNotEmpty()) {
-        fnc(buffer.asFlow()).collect { emit(it) }
+        fnc(buffer).let { emit(it) }
     }
 }
 
