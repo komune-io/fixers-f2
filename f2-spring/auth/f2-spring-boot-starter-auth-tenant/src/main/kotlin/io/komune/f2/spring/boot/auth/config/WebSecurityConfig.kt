@@ -13,6 +13,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
 import org.springframework.security.authorization.AuthorizationDecision
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.core.Authentication
@@ -23,11 +24,11 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import reactor.core.publisher.Mono
 
-@Suppress("UnnecessaryAbstractClass")
+@Order(value = 100)
 @Configuration
 @ConditionalOnMissingBean(WebSecurityConfig::class)
 @EnableConfigurationProperties(F2TrustedIssuersConfig::class)
-abstract class WebSecurityConfig {
+class WebSecurityConfig {
 
     companion object {
         const val SPRING_SECURITY_FILTER_CHAIN = "springSecurityFilterChain"
