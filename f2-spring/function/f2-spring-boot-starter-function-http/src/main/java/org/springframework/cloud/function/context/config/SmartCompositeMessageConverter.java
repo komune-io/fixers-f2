@@ -16,14 +16,24 @@
 
 package org.springframework.cloud.function.context.config;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.Supplier;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
+import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
@@ -31,12 +41,6 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * FIX KOMUNE - https://github.com/spring-cloud/spring-cloud-function/issues/901.
@@ -49,13 +53,22 @@ public class SmartCompositeMessageConverter extends CompositeMessageConverter {
 
     private Log logger = LogFactory.getLog(this.getClass());
 
+    private final Supplier<Collection<MessageConverterHelper>> messageConverterHelpersSupplier;
+
     public SmartCompositeMessageConverter(Collection<MessageConverter> converters) {
+        this(converters, null);
+    }
+
+    public SmartCompositeMessageConverter(Collection<MessageConverter> converters, Supplier<Collection<MessageConverterHelper>> messageConverterHelpersSupplier) {
         super(converters);
+        this.messageConverterHelpersSupplier = messageConverterHelpersSupplier;
     }
 
     @Override
     @Nullable
     public Object fromMessage(Message<?> message, Class<?> targetClass) {
+        Collection<MessageConverterHelper> messageConverterHelpers = this.messageConverterHelpersSupplier != null
+                ? this.messageConverterHelpersSupplier.get() : Collections.emptyList();
         for (MessageConverter converter : getConverters()) {
             if (!(message.getPayload() instanceof byte[]) && targetClass.isInstance(message.getPayload()) && !(message.getPayload() instanceof Collection<?>)) {
                 return message.getPayload();
@@ -76,14 +89,18 @@ public class SmartCompositeMessageConverter extends CompositeMessageConverter {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Failure during type conversion by " + converter + ". Will try the next converter.", e);
                 }
+                this.failConversionIfNecessary(message, messageConverterHelpers, e);
             }
         }
+
         return null;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Object fromMessage(Message<?> message, Class<?> targetClass, @Nullable Object conversionHint) {
+        Collection<MessageConverterHelper> messageConverterHelpers = this.messageConverterHelpersSupplier != null
+                ? this.messageConverterHelpersSupplier.get() : Collections.emptyList();
         if (!(message.getPayload() instanceof byte[]) && targetClass.isInstance(message.getPayload()) && !(message.getPayload() instanceof Collection<?>)) {
             return message.getPayload();
         }
@@ -112,8 +129,12 @@ public class SmartCompositeMessageConverter extends CompositeMessageConverter {
                         }
                     }
                 }
+                if (!isConverted) {
+                    this.postProcessBatchMessage(message, messageConverterHelpers, resultList.size());
+                    this.failConversionIfNecessary(message, messageConverterHelpers, null);
+                }
             }
-            result = resultList;
+            return resultList;
         }
         else {
             for (MessageConverter converter : getConverters()) {
@@ -127,8 +148,23 @@ public class SmartCompositeMessageConverter extends CompositeMessageConverter {
                 }
             }
         }
-
+        this.failConversionIfNecessary(message, messageConverterHelpers, null);
         return result;
+    }
+
+    private void failConversionIfNecessary(Message<?> message, Collection<MessageConverterHelper> messageConverterHelpers, Throwable t) {
+        for (MessageConverterHelper messageConverterHelper : messageConverterHelpers) {
+            if (messageConverterHelper.shouldFailIfCantConvert(message, t)) {
+                throw new MessageConversionException("Failed to convert Message: " + message
+                        + ". None of the available Message converters were able to convert this Message");
+            }
+        }
+    }
+
+    private void postProcessBatchMessage(Message<?> message, Collection<MessageConverterHelper> messageConverterHelpers, int index) {
+        for (MessageConverterHelper messageConverterHelper : messageConverterHelpers) {
+            messageConverterHelper.postProcessBatchMessageOnFailure(message, index);
+        }
     }
 
     @Override
