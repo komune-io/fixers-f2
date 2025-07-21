@@ -11,11 +11,11 @@ build:
 test:
 	./gradlew test
 
-publish:
-	VERSION=$(VERSION) PKG_MAVEN_REPO=github ./gradlew publish -Dorg.gradle.parallel=true
+stage:
+	VERSION=$(VERSION) ./gradlew stage
 
 promote:
-	VERSION=$(VERSION) PKG_MAVEN_REPO=sonatype_oss ./gradlew publish
+	VERSION=$(VERSION) ./gradlew promote
 
 version:
 	@echo "$(VERSION)"
