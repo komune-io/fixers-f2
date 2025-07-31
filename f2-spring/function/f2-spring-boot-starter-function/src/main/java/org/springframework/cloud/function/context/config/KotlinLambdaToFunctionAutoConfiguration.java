@@ -16,26 +16,6 @@
 
 package org.springframework.cloud.function.context.config;
 
-import com.fasterxml.jackson.module.kotlin.KotlinModule;
-import kotlin.Unit;
-import kotlin.jvm.functions.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
-import org.springframework.cloud.function.context.FunctionRegistration;
-import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.ResolvableType;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.util.ObjectUtils;
-import reactor.core.publisher.Flux;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -43,6 +23,26 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function1;
+import kotlin.jvm.functions.Function2;
+import kotlin.jvm.functions.Function3;
+import kotlin.jvm.functions.Function4;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Flux;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.cloud.function.context.FunctionRegistration;
+import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.ResolvableType;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Configuration class which defines the required infrastructure to bootstrap Kotlin
@@ -53,24 +53,11 @@ import java.util.function.Supplier;
  * @author Dmitriy Tsypov
  * @since 2.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(name = "kotlin.jvm.functions.Function0")
 public class KotlinLambdaToFunctionAutoConfiguration {
 
     protected final Log logger = LogFactory.getLog(getClass());
-
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnClass(name = {"org.springframework.http.converter.json.Jackson2ObjectMapperBuilder",
-            "com.fasterxml.jackson.module.kotlin.KotlinModule"})
-    Jackson2ObjectMapperBuilderCustomizer customizer() {
-        return new Jackson2ObjectMapperBuilderCustomizer() {
-            @Override
-            public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
-                jacksonObjectMapperBuilder.modulesToInstall(KotlinModule.class);
-            }
-        };
-    }
 
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
