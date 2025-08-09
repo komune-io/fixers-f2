@@ -16,14 +16,28 @@
 
 package org.springframework.cloud.function.context.config;
 
+import f2.spring.KSerializationMapper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
-import f2.spring.KSerializationMapper;
 import io.cloudevents.spring.messaging.CloudEventMessageConverter;
 import kotlinx.serialization.json.Json;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -31,14 +45,18 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.function.cloudevent.CloudEventsFunctionInvocationHelper;
-import org.springframework.cloud.function.context.*;
+import org.springframework.cloud.function.context.DefaultMessageRoutingHandler;
+import org.springframework.cloud.function.context.FunctionCatalog;
+import org.springframework.cloud.function.context.FunctionProperties;
+import org.springframework.cloud.function.context.FunctionRegistration;
+import org.springframework.cloud.function.context.FunctionRegistry;
+import org.springframework.cloud.function.context.MessageRoutingCallback;
 import org.springframework.cloud.function.context.catalog.BeanFactoryAwareFunctionRegistry;
 import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
 import org.springframework.cloud.function.core.FunctionInvocationHelper;
 import org.springframework.cloud.function.json.GsonMapper;
 import org.springframework.cloud.function.json.JacksonMapper;
 import org.springframework.cloud.function.json.JsonMapper;
-import org.springframework.cloud.function.utils.PrimitiveTypesFromStringMessageConverter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -47,28 +65,25 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.expression.BeanFactoryResolver;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
+import org.springframework.messaging.converter.ContentTypeResolver;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.InvalidMimeTypeException;
+import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * @author Dave Syer
@@ -84,6 +99,7 @@ import java.util.stream.Collectors;
 @AutoConfigureAfter(name = {"org.springframework.cloud.function.deployer.FunctionDeployerConfiguration"})
 public class ContextFunctionCatalogAutoConfiguration {
 
+    private static Log logger = LogFactory.getLog(ContextFunctionCatalogAutoConfiguration.class);
     /**
      * The name of the property to specify desired JSON mapper. Available values are `jackson' and 'gson'.
      */
@@ -91,7 +107,7 @@ public class ContextFunctionCatalogAutoConfiguration {
 
     @Bean
     public FunctionRegistry functionCatalog(List<MessageConverter> messageConverters, JsonMapper jsonMapper,
-                                            ConfigurableApplicationContext context, @Nullable FunctionInvocationHelper<Message<?>> functionInvocationHelper) {
+            ConfigurableApplicationContext context, @Nullable FunctionInvocationHelper<Message<?>> functionInvocationHelper) {
         ConfigurableConversionService conversionService = (ConfigurableConversionService) context.getBeanFactory().getConversionService();
         if (conversionService == null) {
             conversionService = new DefaultConversionService();
@@ -122,10 +138,27 @@ public class ContextFunctionCatalogAutoConfiguration {
 
         mcList.add(new JsonMessageConverter(jsonMapper));
         mcList.add(new ByteArrayMessageConverter());
-        mcList.add(new StringMessageConverter());
-        mcList.add(new PrimitiveTypesFromStringMessageConverter(conversionService));
+        StringMessageConverter stringConverter = new StringMessageConverter();
+        stringConverter.setSerializedPayloadClass(String.class);
+        stringConverter.setContentTypeResolver(new ContentTypeResolver() {
+            @Override
+            public MimeType resolve(MessageHeaders headers) throws InvalidMimeTypeException {
+                if (headers.containsKey(MessageHeaders.CONTENT_TYPE)) {
+                    if (headers.get(MessageHeaders.CONTENT_TYPE).toString().startsWith("text")) {
+                        return MimeType.valueOf("text/plain");
+                    }
+                    else {
+                        return MimeType.valueOf(headers.get(MessageHeaders.CONTENT_TYPE).toString());
+                    }
+                }
+                return null;
+            }
+        });
+        mcList.add(stringConverter);
 
-        messageConverter = new SmartCompositeMessageConverter(mcList);
+        messageConverter = new SmartCompositeMessageConverter(mcList, () -> {
+            return context.getBeansOfType(MessageConverterHelper.class).values();
+        });
         if (functionInvocationHelper instanceof CloudEventsFunctionInvocationHelper) {
             ((CloudEventsFunctionInvocationHelper) functionInvocationHelper).setMessageConverter(messageConverter);
         }
@@ -136,8 +169,8 @@ public class ContextFunctionCatalogAutoConfiguration {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Bean(RoutingFunction.FUNCTION_NAME)
     public RoutingFunction functionRouter(FunctionCatalog functionCatalog, FunctionProperties functionProperties,
-                                          BeanFactory beanFactory, @Nullable MessageRoutingCallback routingCallback,
-                                          @Nullable DefaultMessageRoutingHandler defaultMessageRoutingHandler) {
+            BeanFactory beanFactory, @Nullable MessageRoutingCallback routingCallback,
+            @Nullable DefaultMessageRoutingHandler defaultMessageRoutingHandler) {
         if (defaultMessageRoutingHandler != null) {
             FunctionRegistration functionRegistration = new FunctionRegistration(defaultMessageRoutingHandler, RoutingFunction.DEFAULT_ROUTE_HANDLER);
             functionRegistration.type(FunctionTypeUtils.consumerType(ResolvableType.forClassWithGenerics(Message.class, Object.class).getType()));
@@ -177,6 +210,7 @@ public class ContextFunctionCatalogAutoConfiguration {
     @Configuration(proxyBeanMethods = false)
     public static class JsonMapperConfiguration {
         @Bean
+        @ConditionalOnMissingBean(JsonMapper.class)
         public JsonMapper jsonMapper(ApplicationContext context) {
             String preferredMapper = context.getEnvironment().getProperty(JSON_MAPPER_PROPERTY);
             if (StringUtils.hasText(preferredMapper)) {
@@ -226,8 +260,7 @@ public class ContextFunctionCatalogAutoConfiguration {
 		}
         // KOMUNE End Of Modification
 
-        // KOMUNE Modification
-        // THIS WILL BE FIXED BE THE NEXT spring CLOUD VERSION be the commit 1cd93cb27000c2bfeca43882961edf22c3000655
+        @SuppressWarnings("unchecked")
         private JsonMapper jackson(ApplicationContext context) {
             ObjectMapper mapper;
             try {
@@ -235,12 +268,63 @@ public class ContextFunctionCatalogAutoConfiguration {
             }
             catch (Exception e) {
                 mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
             }
-            mapper.registerModule(new JavaTimeModule());
+            mapper.registerModule(new JodaModule());
+            if (KotlinDetector.isKotlinPresent()) {
+                try {
+                    if (!mapper.getRegisteredModuleIds().contains("com.fasterxml.jackson.module.kotlin.KotlinModule")) {
+                        Class<? extends Module> kotlinModuleClass = (Class<? extends Module>)
+                                ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", ClassUtils.getDefaultClassLoader());
+                        Module kotlinModule = BeanUtils.instantiateClass(kotlinModuleClass);
+                        mapper.registerModule(kotlinModule);
+                    }
+                }
+                catch (ClassNotFoundException ex) {
+                    // jackson-module-kotlin not available
+                }
+            }
             mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-            mapper.configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true);
+//			mapper.configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true);
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            if (logger.isDebugEnabled()) {
+                logger.debug("ObjectMapper configuration: " + getConfigDetails(mapper));
+            }
             return new JacksonMapper(mapper);
         }
-        // KOMUNE End Of Modification
+
+        private static String getConfigDetails(ObjectMapper mapper) {
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("Modules:\n");
+            if (mapper.getRegisteredModuleIds().isEmpty()) {
+                sb.append("\t").append("-none-").append("\n");
+            }
+            for (Object m : mapper.getRegisteredModuleIds()) {
+                sb.append("  ").append(m).append("\n");
+            }
+
+            sb.append("\nSerialization Features:\n");
+            for (SerializationFeature f : SerializationFeature.values()) {
+                sb.append("\t").append(f).append(" -> ")
+                        .append(mapper.getSerializationConfig().hasSerializationFeatures(f.getMask()));
+                if (f.enabledByDefault()) {
+                    sb.append(" (enabled by default)");
+                }
+                sb.append("\n");
+            }
+
+            sb.append("\nDeserialization Features:\n");
+            for (DeserializationFeature f : DeserializationFeature.values()) {
+                sb.append("\t").append(f).append(" -> ")
+                        .append(mapper.getDeserializationConfig().hasDeserializationFeatures(f.getMask()));
+                if (f.enabledByDefault()) {
+                    sb.append(" (enabled by default)");
+                }
+                sb.append("\n");
+            }
+
+            return sb.toString();
+        }
     }
 }
