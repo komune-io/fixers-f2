@@ -38,13 +38,6 @@ include(
 	"f2-spring:auth:f2-spring-boot-starter-auth-tenant",
 )
 
-// TODO: Disable data need before removing it
-//include(
-//	"f2-spring:data:f2-spring-data",
-//	"f2-spring:data:f2-spring-data-mongodb",
-//	"f2-spring:data:f2-spring-data-mongodb-test"
-//)
-
 include(
 	"f2-spring:exception:f2-spring-boot-exception-http",
 	"f2-spring:openapi:f2-spring-boot-openapi"

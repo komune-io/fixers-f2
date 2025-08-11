@@ -183,10 +183,6 @@ object Modules {
 		val f2SpringAuth = ":f2-spring:auth:f2-spring-boot-starter-auth"
 		val f2SpringAuthKeycloak = ":f2-spring:auth:f2-spring-boot-starter-auth-keycloak"
 
-		val f2SpringData = ":f2-spring:data:f2-spring-data"
-		val f2SpringDataMongodb = ":f2-spring:data:f2-spring-data-mongodb"
-		val f2SpringDataMongodbTest = ":f2-spring:data:f2-spring-data-mongodb-test"
-
 		val f2SpringExceptionHttp = ":f2-spring:exception:f2-spring-boot-exception-http"
 		val f2SpringOpenApi = ":f2-spring:openapi:f2-spring-boot-openapi"
 
