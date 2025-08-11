@@ -24,7 +24,6 @@ include(
 	"f2-client:f2-client-ktor",
 	"f2-client:f2-client-ktor:f2-client-ktor-common",
 	"f2-client:f2-client-ktor:f2-client-ktor-http",
-	"f2-client:f2-client-ktor:f2-client-ktor-rsocket"
 )
 
 include(
@@ -54,7 +53,6 @@ include(
 include(
 	"f2-spring:function:f2-spring-boot-starter-function",
 	"f2-spring:function:f2-spring-boot-starter-function-http",
-	"f2-spring:function:f2-spring-boot-starter-function-rsocket",
 	"f2-spring:function:f2-spring-boot-starter-observability-opentelemetry"
 )
 
@@ -66,5 +64,4 @@ include(
 
 include(
 	"sample:f2-sample-http",
-	"sample:f2-sample-rsocket"
 )
