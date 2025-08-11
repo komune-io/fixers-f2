@@ -41,9 +41,9 @@ object Versions {
 	}
 
 	object Observability {
-		const val micrometer = "1.2.2"
-		const val micrometerOtlp = "1.12.3"
-		const val opentelemetry = "1.34.1"
+		const val micrometer = "1.5.2"
+		const val micrometerOtlp = "1.15.2"
+		const val opentelemetry = "1.53.0"
 	}
 	const val cucumber = FixersVersions.Test.cucumber
 //	const val springdoc = "1.8.0"
