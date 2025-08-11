@@ -4,8 +4,6 @@ import f2.client.F2Client
 import f2.client.ktor.common.F2ClientConfigLambda
 import f2.client.ktor.http.httpClientBuilderDefault
 import f2.client.ktor.http.httpClientBuilderGenerics
-import f2.client.ktor.rsocket.builder.rSocketF2ClientBuilderDefault
-import f2.client.ktor.rsocket.builder.rSocketF2ClientBuilderGenerics
 
 /**
  * Builder object for creating instances of [F2Client] based on different protocols.
@@ -46,9 +44,6 @@ object F2ClientBuilder {
         return when {
             urlBase.startsWith("http:") -> httpClientBuilderGenerics(config).build(urlBase)
             urlBase.startsWith("https:") -> httpClientBuilderGenerics(config).build(urlBase)
-            urlBase.startsWith("tcp:") -> rSocketF2ClientBuilderGenerics(config).build(urlBase, false)
-            urlBase.startsWith("ws:") -> rSocketF2ClientBuilderGenerics(config).build(urlBase, false)
-            urlBase.startsWith("wss:") -> rSocketF2ClientBuilderGenerics(config).build(urlBase, true)
             else -> throw InvalidUrlException(urlBase)
         }
     }
@@ -66,9 +61,6 @@ object F2ClientBuilder {
         return when {
             url.startsWith("http:") -> httpClientBuilderDefault().build(url)
             url.startsWith("https:") -> httpClientBuilderDefault().build(url)
-            url.startsWith("tcp:") -> rSocketF2ClientBuilderDefault().build(url, false)
-            url.startsWith("ws:") -> rSocketF2ClientBuilderDefault().build(url, false)
-            url.startsWith("wss:") -> rSocketF2ClientBuilderDefault().build(url, false)
             else -> throw IllegalArgumentException(
                 "Invalid Url[${url}] must start by one of http:, https:, tcp:, ws:, wss:"
             )

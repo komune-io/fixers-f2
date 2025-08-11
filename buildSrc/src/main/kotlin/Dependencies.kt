@@ -41,9 +41,9 @@ object Versions {
 	}
 
 	object Observability {
-		const val micrometer = "1.2.2"
-		const val micrometerOtlp = "1.12.3"
-		const val opentelemetry = "1.34.1"
+		const val micrometer = "1.5.2"
+		const val micrometerOtlp = "1.15.2"
+		const val opentelemetry = "1.53.0"
 	}
 	const val cucumber = FixersVersions.Test.cucumber
 //	const val springdoc = "1.8.0"
@@ -182,10 +182,6 @@ object Modules {
 	object Spring {
 		val f2SpringAuth = ":f2-spring:auth:f2-spring-boot-starter-auth"
 		val f2SpringAuthKeycloak = ":f2-spring:auth:f2-spring-boot-starter-auth-keycloak"
-
-		val f2SpringData = ":f2-spring:data:f2-spring-data"
-		val f2SpringDataMongodb = ":f2-spring:data:f2-spring-data-mongodb"
-		val f2SpringDataMongodbTest = ":f2-spring:data:f2-spring-data-mongodb-test"
 
 		val f2SpringExceptionHttp = ":f2-spring:exception:f2-spring-boot-exception-http"
 		val f2SpringOpenApi = ":f2-spring:openapi:f2-spring-boot-openapi"
