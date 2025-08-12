@@ -4,9 +4,12 @@ plugins {
 
 repositories {
 	mavenCentral()
-	maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots") }
+	maven { url = uri("https://central.sonatype.com/repository/maven-snapshots") }
+	if(System.getenv("MAVEN_LOCAL_USE") == "true") {
+		mavenLocal()
+	}
 }
 
 dependencies {
-	implementation("io.komune.fixers.gradle:dependencies:0.24.0-SNAPSHOT")
+	implementation("io.komune.fixers.gradle:dependencies:0.26.0-SNAPSHOT")
 }

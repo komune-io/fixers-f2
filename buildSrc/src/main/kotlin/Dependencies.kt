@@ -1,8 +1,8 @@
-import io.komune.gradle.dependencies.FixersDependencies
-import io.komune.gradle.dependencies.FixersPluginVersions
-import io.komune.gradle.dependencies.FixersVersions
-import io.komune.gradle.dependencies.Scope
-import io.komune.gradle.dependencies.add
+import io.komune.fixers.gradle.dependencies.FixersDependencies
+import io.komune.fixers.gradle.dependencies.FixersPluginVersions
+import io.komune.fixers.gradle.dependencies.FixersVersions
+import io.komune.fixers.gradle.dependencies.Scope
+import io.komune.fixers.gradle.dependencies.add
 import java.net.URI
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 
@@ -41,9 +41,9 @@ object Versions {
 	}
 
 	object Observability {
-		const val micrometer = "1.2.2"
-		const val micrometerOtlp = "1.12.3"
-		const val opentelemetry = "1.34.1"
+		const val micrometer = "1.5.2"
+		const val micrometerOtlp = "1.15.2"
+		const val opentelemetry = "1.53.0"
 	}
 	const val cucumber = FixersVersions.Test.cucumber
 //	const val springdoc = "1.8.0"
@@ -183,10 +183,6 @@ object Modules {
 		val f2SpringAuth = ":f2-spring:auth:f2-spring-boot-starter-auth"
 		val f2SpringAuthKeycloak = ":f2-spring:auth:f2-spring-boot-starter-auth-keycloak"
 
-		val f2SpringData = ":f2-spring:data:f2-spring-data"
-		val f2SpringDataMongodb = ":f2-spring:data:f2-spring-data-mongodb"
-		val f2SpringDataMongodbTest = ":f2-spring:data:f2-spring-data-mongodb-test"
-
 		val f2SpringExceptionHttp = ":f2-spring:exception:f2-spring-boot-exception-http"
 		val f2SpringOpenApi = ":f2-spring:openapi:f2-spring-boot-openapi"
 
@@ -204,7 +200,8 @@ object Modules {
 
 fun RepositoryHandler.defaultRepo() {
 	mavenCentral()
-	maven { url = URI("https://s01.oss.sonatype.org/content/repositories/snapshots") }
-	maven { url = URI("https://repo.spring.io/milestone") }
-	mavenLocal()
+	maven { url = URI("https://central.sonatype.com/repository/maven-snapshots") }
+	if(System.getenv("MAVEN_LOCAL_USE") == "true") {
+		mavenLocal()
+	}
 }
