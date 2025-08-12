@@ -32,7 +32,7 @@ object Versions {
         const val spring = "4.0.1"
     }
 	object Spring {
-		const val function = "4.1.3"
+		const val function = "4.3.0"
 		const val security = FixersVersions.Spring.security
 		const val boot = FixersVersions.Spring.boot
 		const val framework = FixersVersions.Spring.framework

@@ -16,9 +16,19 @@
 
 package org.springframework.cloud.function.web.util;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionProperties;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
@@ -32,14 +42,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * !INTERNAL USE ONLY!
@@ -56,7 +58,7 @@ public final class FunctionWebRequestProcessingHelper {
     }
 
     public static FunctionInvocationWrapper findFunction(FunctionProperties functionProperties, HttpMethod method, FunctionCatalog functionCatalog,
-                                                         Map<String, Object> attributes, String path) {
+            Map<String, Object> attributes, String path) {
         // FIX KOMUNE - For web browser we need to answer empty OPTIONS REQUEST -
         // TODO Try to replace it with OptionFunctionController
         if (method.equals(HttpMethod.OPTIONS)) {
@@ -78,20 +80,20 @@ public final class FunctionWebRequestProcessingHelper {
     public static boolean isFunctionValidForMethod(String httpMethod, String functionDefinition, FunctionHttpProperties functionHttpProperties) {
         String functionDefinitions = null;
         switch (httpMethod) {
-            case "GET":
-                functionDefinitions = functionHttpProperties.getGet();
-                break;
-            case "POST":
-                functionDefinitions = functionHttpProperties.getPost();
-                break;
-            case "PUT":
-                functionDefinitions = functionHttpProperties.getPut();
-                break;
-            case "DELETE":
-                functionDefinitions = functionHttpProperties.getDelete();
-                break;
-            default:
-                return false;
+        case "GET":
+            functionDefinitions = functionHttpProperties.getGet();
+            break;
+        case "POST":
+            functionDefinitions = functionHttpProperties.getPost();
+            break;
+        case "PUT":
+            functionDefinitions = functionHttpProperties.getPut();
+            break;
+        case "DELETE":
+            functionDefinitions = functionHttpProperties.getDelete();
+            break;
+        default:
+            return false;
         }
         if (StringUtils.hasText(functionDefinitions)) {
             return Arrays.asList(functionDefinitions.split(";")).contains(functionDefinition);
@@ -186,7 +188,7 @@ public final class FunctionWebRequestProcessingHelper {
     }
 
     private static FunctionInvocationWrapper doFindFunction(String functionDefinition, HttpMethod method, FunctionCatalog functionCatalog,
-                                                            Map<String, Object> attributes, String path) {
+            Map<String, Object> attributes, String path) {
 
         path = path.startsWith("/") ? path.substring(1) : path;
         if (method.equals(HttpMethod.GET)) {
@@ -239,15 +241,14 @@ public final class FunctionWebRequestProcessingHelper {
         else if (result instanceof Mono) {
             result = ((Mono) result).map(v -> postProcessResult(v, isMessage));
         }
-        else if (result instanceof Message) {
-            if (((Message) result).getPayload() instanceof byte[]) {
-                String str = new String((byte[]) ((Message) result).getPayload());
-                result = MessageBuilder.withPayload(str).copyHeaders(((Message) result).getHeaders()).build();
+        else if (result instanceof Message messageResult) {
+            if (messageResult.getPayload() instanceof byte[]) {
+                //String str = new String((byte[]) messageResult.getPayload());
+                result = MessageBuilder.withPayload(messageResult.getPayload()).copyHeaders(((Message) result).getHeaders()).build();
             }
         }
-
-        if (result instanceof byte[]) {
-            result = new String((byte[]) result);
+        else if (result instanceof byte[]) {
+            result = new String((byte[]) result, StandardCharsets.UTF_8);
         }
         return result;
     }
