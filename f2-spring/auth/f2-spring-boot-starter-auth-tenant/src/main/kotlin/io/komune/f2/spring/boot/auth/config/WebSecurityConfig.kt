@@ -6,6 +6,7 @@ import jakarta.annotation.security.RolesAllowed
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -52,6 +53,7 @@ class WebSecurityConfig {
 
     @Bean(SPRING_SECURITY_FILTER_CHAIN)
     @ConditionalOnExpression(NO_AUTHENTICATION_REQUIRED_EXPRESSION)
+    @ConditionalOnBean(ServerHttpSecurity::class)
     fun dummyAuthenticationProvider(http: ServerHttpSecurity): SecurityWebFilterChain {
         logger.trace("Executing dummyAuthenticationProvider (permitAll)")
 
