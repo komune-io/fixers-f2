@@ -4,7 +4,8 @@ import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.error.F2ErrorDTO
 import kotlin.js.JsExport
 import kotlin.js.JsName
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 @JsExport
 @JsName("F2Exception")
@@ -13,6 +14,7 @@ open class F2Exception(
 	cause: Throwable? = null
 ) : RuntimeException(error.message, cause) {
 	companion object {
+		@OptIn(ExperimentalTime::class)
 		operator fun invoke(
 			message: String, id: String = "", requestId: String = "", code: Int = 500, cause: Throwable? = null
 		) = F2Exception(

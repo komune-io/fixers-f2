@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authorization.AuthorizationDecision
+import org.springframework.security.authorization.AuthorizationResult
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
@@ -89,7 +90,7 @@ abstract class WebSecurityConfig {
 
     private fun authenticate(
         authentication: Mono<Authentication>, context: AuthorizationContext
-    ): Mono<AuthorizationDecision> {
+    ): Mono<AuthorizationResult> {
         return authentication.map { auth ->
             if (auth !is JwtAuthenticationToken || auth.token == null) {
                 return@map false
@@ -97,7 +98,7 @@ abstract class WebSecurityConfig {
 
             val filters = authFilter()
             filters.isEmpty() || filters.all { (key, value) -> auth.token.claims[key] == value }
-        }.map(::AuthorizationDecision)
+        }.map { granted -> AuthorizationDecision(granted) }
     }
 
     private fun ServerHttpSecurity.corsConfig() {
@@ -142,7 +143,7 @@ abstract class WebSecurityConfig {
     fun addMandatoryAuthRules(http: ServerHttpSecurity) {
         http.authorizeExchange { exchange ->
             exchange.anyExchange()
-                .access(::authenticate)
+                .access { authentication, context -> authenticate(authentication, context) }
         }
     }
 

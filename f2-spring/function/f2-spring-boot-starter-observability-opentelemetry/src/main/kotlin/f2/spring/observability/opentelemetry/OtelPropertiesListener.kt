@@ -21,10 +21,16 @@ class OtelPropertiesListener: ApplicationListener<ApplicationEnvironmentPrepared
 
         const val MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE = "management.endpoints.web.exposure.include"
         const val MANAGEMENT_ENDPOINT_METRICS_ENABLED = "management.endpoint.metrics.enabled"
+        const val MANAGEMENT_TRACING_ENABLED = "management.tracing.enabled"
         const val MANAGEMENT_TRACING_SAMPLING_PROBABILITY = "management.tracing.sampling.probability"
-        const val MANAGEMENT_OTLP_TRACING_ENDPOINT = "management.otlp.tracing.endpoint"
+        const val MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT = "management.opentelemetry.tracing.export.otlp.endpoint"
         const val MANAGEMENT_OTLP_METRICS_EXPORT_URL = "management.otlp.metrics.export.url"
+        const val MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED = "management.otlp.metrics.export.enabled"
         const val MANAGEMENT_METRICS_TAGS_APPLICATION = "management.metrics.tags.application"
+        const val SPRING_AUTOCONFIGURE_EXCLUDE = "spring.autoconfigure.exclude"
+        @Suppress("MaxLineLength")
+        const val OPENTELEMETRY_TRACING_AUTOCONFIG =
+            "org.springframework.boot.micrometer.tracing.opentelemetry.autoconfigure.OpenTelemetryTracingAutoConfiguration"
     }
 
     override fun onApplicationEvent(event: ApplicationEnvironmentPreparedEvent) {
@@ -47,10 +53,18 @@ class OtelPropertiesListener: ApplicationListener<ApplicationEnvironmentPrepared
             props[MANAGEMENT_METRICS_TAGS_APPLICATION] = application
         }
         if(tracingEndpoint != null) {
-            props[MANAGEMENT_OTLP_TRACING_ENDPOINT] = tracingEndpoint
+            props[MANAGEMENT_TRACING_ENABLED] = "true"
+            props[MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT] = tracingEndpoint
+        } else {
+            props[MANAGEMENT_TRACING_ENABLED] = "false"
+            // Exclude OpenTelemetry tracing auto-configuration since it doesn't check management.tracing.enabled
+            props[SPRING_AUTOCONFIGURE_EXCLUDE] = OPENTELEMETRY_TRACING_AUTOCONFIG
         }
         if(metricsEndpoint != null) {
+            props[MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED] = "true"
             props[MANAGEMENT_OTLP_METRICS_EXPORT_URL] = metricsEndpoint
+        } else {
+            props[MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED] = "false"
         }
         environment.propertySources.addFirst(PropertiesPropertySource(F2_OTEL_PROPS, props))
     }

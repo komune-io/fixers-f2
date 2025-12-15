@@ -1,7 +1,6 @@
 package f2.spring
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.exception.F2Exception
 import java.io.ByteArrayInputStream
@@ -13,7 +12,7 @@ import java.nio.charset.StandardCharsets
 import java.util.UUID
 import java.util.function.Consumer
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.encodeToString
+import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromStream
@@ -21,6 +20,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.cloud.function.json.JsonMapper
 import org.springframework.core.ResolvableType
 import org.springframework.util.ConcurrentReferenceHashMap
+import tools.jackson.databind.DatabindException
 
 
 /**
@@ -38,7 +38,8 @@ class KSerializationMapper(
             ignoreUnknownKeys = true
         }
     }
-    private val serializerCache: MutableMap<Type, KSerializer<Any>?> = ConcurrentReferenceHashMap()
+    private val serializerCache: MutableMap<Type, KSerializer<Any>> =
+        ConcurrentReferenceHashMap<Type, KSerializer<Any>>()
     fun configureObjectMapper(configurer: Consumer<Json>) {
         configurer.accept(mapper)
     }
@@ -57,7 +58,7 @@ class KSerializationMapper(
             } else {
                 error( "Failed to convert. Unknown type ${json::class.qualifiedName}")
             }
-        } catch (e: kotlinx.serialization.MissingFieldException) {
+        } catch (e: MissingFieldException) {
             throw F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
                 timestamp = System.currentTimeMillis().toString(),
@@ -102,7 +103,7 @@ class KSerializationMapper(
     override fun toString(value: Any): String {
         return try {
             mapper.encodeToString(value)
-        } catch (e: JsonProcessingException) {
+        } catch (e: DatabindException) {
             logger.debug("Ignored Error while serializing $value", e)
             return "Cannot convert to JSON"
         }

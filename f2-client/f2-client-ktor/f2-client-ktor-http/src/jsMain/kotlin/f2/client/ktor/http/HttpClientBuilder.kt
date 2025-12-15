@@ -5,6 +5,7 @@ import f2.client.ktor.common.applyConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.js.Js
+import io.ktor.client.engine.js.JsClientEngineConfig
 
 /**
  * Builder class for creating instances of [HttpF2Client].
@@ -15,7 +16,7 @@ import io.ktor.client.engine.js.Js
 @JsExport
 @JsName("HttpClientBuilder")
 actual class HttpClientBuilder(
-	private val config: F2ClientConfigLambda<HttpClientEngineConfig>? = {}
+	private val config: F2ClientConfigLambda<JsClientEngineConfig>? = {}
 ) {
 
 	/**
