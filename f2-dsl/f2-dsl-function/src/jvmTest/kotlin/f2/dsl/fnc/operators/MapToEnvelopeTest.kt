@@ -41,7 +41,7 @@ class MapToEnvelopeTest {
     @Test
     fun `test mapToEnvelope with custom ID function`() = runTest {
         val flow = flowOf("a", "b", "c")
-        val result = flow.mapToEnvelope { it.toUpperCase() }.toList()
+        val result = flow.mapToEnvelope { it.uppercase() }.toList()
         assertThat(result).hasSize(3)
         result.forEach { envelope ->
             assertThat(envelope.id).isIn("A", "B", "C")

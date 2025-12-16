@@ -6,10 +6,12 @@ plugins {
 }
 
 dependencies {
-    kapt("org.springframework.boot:spring-boot-configuration-processor:${Versions.Spring.boot}")
+    Dependencies.Jvm.Spring.configurationProcessor(::kapt)
 
     api(project(":f2-dsl:f2-dsl-cqrs"))
 
     Dependencies.Jvm.Spring.cloudFunction(::implementation)
     Dependencies.Jvm.Spring.cloudFunctionWebflux(::api)
+    Dependencies.Jvm.Spring.webflux(::api)
+    Dependencies.Jvm.Spring.autoconfigure(::api)
 }

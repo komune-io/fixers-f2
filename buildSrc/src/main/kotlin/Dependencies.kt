@@ -25,14 +25,14 @@ object Versions {
 
 	object Json {
 		const val jackson = FixersVersions.Json.jacksonKotlin
-		const val gson = "2.11.0"
+        const val gson = "2.13.2"
 	}
 
 	object CloudEvent {
         const val spring = "4.0.1"
     }
 	object Spring {
-		const val function = "4.3.0"
+		const val function = "5.0.0"
 		const val security = FixersVersions.Spring.security
 		const val boot = FixersVersions.Spring.boot
 		const val framework = FixersVersions.Spring.framework
@@ -41,13 +41,13 @@ object Versions {
 	}
 
 	object Observability {
-		const val micrometer = "1.5.2"
-		const val micrometerOtlp = "1.15.2"
-		const val opentelemetry = "1.53.0"
+		const val micrometer = "1.16.1"
+		const val micrometerTracing = "1.6.1"
+		const val opentelemetry = "1.57.0"
 	}
 	const val cucumber = FixersVersions.Test.cucumber
-//	const val springdoc = "1.8.0"
-	const val springdoc = "1.6.11"
+	const val springdoc = "1.8.0"
+//	const val springdoc = "1.6.11"
 	const val rsocket = "0.16.0"
 	const val uuid = "0.8.4"
 }
@@ -56,6 +56,18 @@ object Dependencies {
 	object Mpp {
 
 		object Ktor {
+			fun clientCore(scope: Scope) = scope.add(
+				"io.ktor:ktor-client-core:${Versions.Kotlin.ktor}"
+			)
+
+			fun clientAuth(scope: Scope) = scope.add(
+				"io.ktor:ktor-client-auth:${Versions.Kotlin.ktor}"
+			)
+
+			fun utils(scope: Scope) = scope.add(
+				"io.ktor:ktor-utils:${Versions.Kotlin.ktor}"
+			)
+
 			fun clientFeatures(scope: Scope) = scope.add(
 				"io.ktor:ktor-client-content-negotiation:${Versions.Kotlin.ktor}",
 				"io.ktor:ktor-serialization-kotlinx-json:${Versions.Kotlin.ktor}",
@@ -125,6 +137,22 @@ object Dependencies {
 				"org.springframework.boot:spring-boot-configuration-processor:${Versions.Spring.boot}"
 			)
 
+			fun actuator(scope: Scope) = scope.add(
+				"org.springframework.boot:spring-boot-starter-actuator:${Versions.Spring.boot}"
+			)
+
+			fun opentelemetry(scope: Scope) = scope.add(
+				"org.springframework.boot:spring-boot-starter-opentelemetry:${Versions.Spring.boot}"
+			)
+
+			fun webflux(scope: Scope) = scope.add(
+				"org.springframework.boot:spring-boot-starter-webflux:${Versions.Spring.boot}"
+			)
+
+			fun springdocOpenapi(scope: Scope) = scope.add(
+				"org.springdoc:springdoc-openapi-webflux-ui:${Versions.springdoc}"
+			)
+
 			fun cloudFunctionDep(scope: Scope) = scope.add(
 				"com.google.code.gson:gson:${Versions.Json.gson}",
 				"io.cloudevents:cloudevents-spring:${Versions.CloudEvent.spring}",
@@ -133,7 +161,7 @@ object Dependencies {
 				"org.springframework.cloud:spring-cloud-function-context:${Versions.Spring.function}",
 				"org.springframework.cloud:spring-cloud-function-kotlin:${Versions.Spring.function}",
 				"org.springframework.boot:spring-boot-autoconfigure:${Versions.Spring.boot}",
-				"com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.Json.jackson}",
+				"tools.jackson.module:jackson-module-kotlin:${Versions.Json.jackson}",
 				"org.springframework:spring-web:${Versions.Spring.framework}",
 			)
 
@@ -143,6 +171,20 @@ object Dependencies {
 
 			fun cloudFunctionRSocket(scope: Scope) = scope.add(
 				"org.springframework.cloud:spring-cloud-function-rsocket:${Versions.Spring.function}"
+			)
+		}
+
+		object Observability {
+			fun micrometerTracingOtel(scope: Scope) = scope.add(
+				"io.micrometer:micrometer-tracing-bridge-otel:${Versions.Observability.micrometerTracing}"
+			)
+
+			fun opentelemetryExporterOtlp(scope: Scope) = scope.add(
+				"io.opentelemetry:opentelemetry-exporter-otlp:${Versions.Observability.opentelemetry}"
+			)
+
+			fun micrometerRegistryOtlp(scope: Scope) = scope.add(
+				"io.micrometer:micrometer-registry-otlp:${Versions.Observability.micrometer}"
 			)
 		}
 	}

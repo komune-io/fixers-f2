@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.security.authorization.AuthorizationDecision
+import org.springframework.security.authorization.AuthorizationResult
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
@@ -97,7 +98,7 @@ class WebSecurityConfig {
 
     private fun authenticate(
         authentication: Mono<Authentication>
-    ): Mono<AuthorizationDecision> {
+    ): Mono<AuthorizationResult> {
         logger.trace("Authenticating using custom filter")
 
         return authentication.map { auth ->
@@ -113,7 +114,7 @@ class WebSecurityConfig {
 
             logger.trace("Authentication decision: $decision")
             decision
-        }.map(::AuthorizationDecision)
+        }.map { granted -> AuthorizationDecision(granted) }
     }
 
     private fun ServerHttpSecurity.corsConfig() {

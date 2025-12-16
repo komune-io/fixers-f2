@@ -7,5 +7,5 @@ plugins {
 
 dependencies {
     Dependencies.Jvm.Spring.cloudFunction(::api)
-    api("org.springdoc:springdoc-openapi-webflux-ui:${Versions.springdoc}")
+    Dependencies.Jvm.Spring.springdocOpenapi(::api)
 }

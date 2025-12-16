@@ -2,6 +2,7 @@ package f2.client.ktor.http
 
 import f2.client.ktor.common.F2ClientConfigLambda
 import io.ktor.client.engine.HttpClientEngineConfig
+import io.ktor.client.engine.js.JsClientEngineConfig
 
 /**
  * Provides a default instance of [HttpClientBuilder].
@@ -29,5 +30,5 @@ actual fun httpClientBuilderGenerics(
  * @return An instance of [HttpClientBuilder] with the specified configuration.
  */
 fun httpClientBuilder(
-	config: F2ClientConfigLambda<HttpClientEngineConfig>? = {  }
+	config: F2ClientConfigLambda<JsClientEngineConfig>? = {  }
 ) = HttpClientBuilder(config)
