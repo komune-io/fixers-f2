@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
-import tools.jackson.databind.json.JsonMapper;
 import com.google.gson.Gson;
 import io.cloudevents.spring.messaging.CloudEventMessageConverter;
 import kotlinx.serialization.json.Json;
@@ -265,7 +264,7 @@ public class ContextFunctionCatalogAutoConfiguration {
                 mapper = context.getBean(ObjectMapper.class).rebuild().build();
             }
             catch (Exception e) {
-                mapper = JsonMapper.builder()
+                mapper = tools.jackson.databind.json.JsonMapper.builder()
                         .addModule(new JodaModule())
                         .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)

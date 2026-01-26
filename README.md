@@ -1,25 +1,75 @@
-# Welcome to F2
+# Fixers F2
 
-F2 is a framework built using the Kotlin programming language that 
-is built on top of [Spring Cloud Function](https://github.com/spring-cloud/spring-cloud-function) for the server side 
-and [ktor](https://ktor.io/) for multiplatform client. 
-It aims to make it easier to develop Command and Query Responsibility Segregation (CQRS) 
-based applications by providing a set of tools and abstractions to handle the different parts of a CQRS-based architecture.
-The goal of F2 is to help developers build event-driven, scalable, and resilient systems that are easy to understand and maintain.
+F2 is a framework built using the Kotlin programming language that is built on top of [Spring Cloud Function](https://github.com/spring-cloud/spring-cloud-function) for the server side and [ktor](https://ktor.io/) for multiplatform client. It aims to make it easier to develop Command and Query Responsibility Segregation (CQRS) based applications.
 
-The Command and Query Responsibility Segregation (CQRS) architecture is a pattern
-that separates the responsibilities of handling commands, which change the state of an application,
-and queries, which retrieve information from the application.
+## Overview
 
-HTTP is a widely-used protocol for sending and receiving information over the internet,
-and is a popular choice for building RESTful web services. By supporting HTTP,
-F2 and its client can easily integrate with a wide range of other technologies and services that use HTTP for communication.
+The goal of F2 is to help developers build event-driven, scalable, and resilient systems that are easy to understand and maintain. It provides tools and abstractions to handle the different parts of a CQRS-based architecture.
 
-RSocket, on the other hand, is a binary protocol for use on top of TCP or WebSockets.
-It is designed for high-performance and low-latency communication, and provides features such as bi-directional streaming,
-flow control, and error handling. By supporting RSocket, F2 and its client can provide high-performance
-and efficient communication between serverless functions and their clients.
+The Command and Query Responsibility Segregation (CQRS) architecture is a pattern that separates the responsibilities of handling commands, which change the state of an application, and queries, which retrieve information from the application.
 
+HTTP is a widely-used protocol for sending and receiving information over the internet, and is a popular choice for building RESTful web services. By supporting HTTP, F2 and its client can easily integrate with a wide range of other technologies and services that use HTTP for communication.
+
+RSocket, on the other hand, is a binary protocol for use on top of TCP or WebSockets. It is designed for high-performance and low-latency communication, and provides features such as bi-directional streaming, flow control, and error handling. By supporting RSocket, F2 and its client can provide high-performance and efficient communication between serverless functions and their clients.
+
+## Requirements
+
+- JDK 17+
+- Docker (for Storybook/documentation)
+- Node.js & Yarn (managed by Gradle for Storybook)
+
+## Project Structure
+
+The project is organized into several modules:
+
+- **f2-bdd**: Configuration and utilities for Behavior Driven Development (Cucumber).
+- **f2-client**: Multiplatform clients (Ktor based) for HTTP and RSocket.
+- **f2-dsl**: Domain Specific Languages for Functions, CQRS, and Events.
+- **f2-spring**: Spring Boot starters and integrations (Auth, Exception, OpenAPI, etc.).
+- **f2-feature**: Reusable feature modules (Catalog, Version, etc.).
+- **sample**: Example applications demonstrating F2 usage.
+- **storybook**: Documentation and UI components.
+
+## Development
+
+### Setup
+
+Clone the repository:
+```bash
+git clone https://github.com/komune-io/fixers-f2.git
+cd fixers-f2
+```
+
+### Scripts
+
+The project uses `make` and `gradle` for build operations.
+
+> **Note:** The `Makefile` in the root currently points to `libs.mk` and `docs.mk`. Use `make -f make_libs.mk <target>` or `make -f make_docs.mk <target>` if the default `make` command fails.
+
+| Command | Description |
+| --- | --- |
+| `./gradlew build` | Build the project. |
+| `./gradlew test` | Run unit tests. |
+| `./gradlew detekt` | Run code linting. |
+| `make -f make_libs.mk build` | Build libraries (clean, build, publishToMavenLocal). |
+| `make -f make_libs.mk test` | Run tests via Make. |
+| `make -f make_libs.mk lint` | Run linter via Make. |
+| `make -f make_docs.mk build-storybook` | Build Storybook documentation. |
+
+### Environment Variables
+
+| Variable | Description |
+| --- | --- |
+| `VERSION` | Project version (default: `experimental-SNAPSHOT`). |
+| `NPM_AUTH_TOKEN` | Auth token for NPM/Yarn (required for Storybook publishing). |
+
+## License
+
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+# Usage Guide
 
 # Dependencies
 
