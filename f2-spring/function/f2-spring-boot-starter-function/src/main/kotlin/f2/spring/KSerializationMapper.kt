@@ -13,6 +13,7 @@ import java.util.UUID
 import java.util.function.Consumer
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.MissingFieldException
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromStream
@@ -20,7 +21,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.cloud.function.json.JsonMapper
 import org.springframework.core.ResolvableType
 import org.springframework.util.ConcurrentReferenceHashMap
-import tools.jackson.databind.DatabindException
 
 
 /**
@@ -65,7 +65,7 @@ class KSerializationMapper(
                 message = "Missing parameter `${e.missingFields.joinToString(",")}`",
                 code = 400,
             ), e)
-        } catch (e: kotlinx.serialization.SerializationException) {
+        } catch (e: SerializationException) {
             throw F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
                 timestamp = System.currentTimeMillis().toString(),
@@ -103,7 +103,7 @@ class KSerializationMapper(
     override fun toString(value: Any): String {
         return try {
             mapper.encodeToString(value)
-        } catch (e: DatabindException) {
+        } catch (e: SerializationException) {
             logger.debug("Ignored Error while serializing $value", e)
             return "Cannot convert to JSON"
         }

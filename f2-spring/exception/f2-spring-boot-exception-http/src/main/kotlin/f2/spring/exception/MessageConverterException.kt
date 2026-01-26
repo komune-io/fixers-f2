@@ -11,7 +11,6 @@ class MessageConverterException(cause: DatabindException): F2HttpException(
 ) {
     companion object {
         private fun computeMessage(exception: DatabindException): String {
-            println(exception::class.simpleName)
             return when (exception) {
                 is MismatchedInputException -> "Cannot convert parameter `${exception.path.first().propertyName}` " +
                         "to type `${exception.targetType.simpleName}`"

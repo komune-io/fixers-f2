@@ -55,6 +55,6 @@ include(
 	"f2-feature:version:f2-feature-version"
 )
 
-include(
-	"sample:f2-sample-http",
-)
+//include(
+//	"sample:f2-sample-http",
+//)

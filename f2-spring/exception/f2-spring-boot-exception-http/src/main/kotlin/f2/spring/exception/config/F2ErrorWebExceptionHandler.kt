@@ -66,6 +66,6 @@ class F2ErrorWebExceptionHandler(
         val error = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL))
         val status: Int = error[F2Error::code.name] as Int? ?: INTERNAL_ERROR
         return ServerResponse.status(status).contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue<Map<String, Any>>(error as Map<String, Any>))
+            .body(BodyInserters.fromValue(error.filterValues { it != null }))
     }
 }
