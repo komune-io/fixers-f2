@@ -72,6 +72,7 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 		}
 	}
 
+	@Suppress("TooGenericExceptionCaught")
 	private fun step(name: String, block: suspend () -> Unit) = runBlocking {
 		try {
 			block()

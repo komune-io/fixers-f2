@@ -28,7 +28,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-@Suppress("UnnecessaryAbstractClass")
+@Suppress("UnnecessaryAbstractClass", "TooManyFunctions")
 @Configuration
 @ConditionalOnMissingBean(WebSecurityConfig::class)
 @EnableConfigurationProperties(F2TrustedIssuersConfig::class)
@@ -88,6 +88,7 @@ abstract class WebSecurityConfig {
         addJwtParsingRules(http)
     }
 
+    @Suppress("UnusedParameter")
     private fun authenticate(
         authentication: Mono<Authentication>, context: AuthorizationContext
     ): Mono<AuthorizationResult> {

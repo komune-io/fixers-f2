@@ -44,6 +44,7 @@ class KSerializationMapper(
         configurer.accept(mapper)
     }
 
+    @Suppress("TooGenericExceptionCaught", "ThrowsCount")
     override fun <T> doFromJson(json: Any, type: Type): T {
         try {
             val serializerType = serializer(type)!!
@@ -79,6 +80,7 @@ class KSerializationMapper(
             )
         }
     }
+    @Suppress("TooGenericExceptionCaught")
     override fun toJson(value: Any): ByteArray {
         val type = ResolvableType.forClass(value::class.java)
         val ser = serializer(type.type)!!
@@ -109,6 +111,7 @@ class KSerializationMapper(
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun serializer(type: Type): KSerializer<Any>? {
         return serializerCache.getOrPut(type) {
             try {

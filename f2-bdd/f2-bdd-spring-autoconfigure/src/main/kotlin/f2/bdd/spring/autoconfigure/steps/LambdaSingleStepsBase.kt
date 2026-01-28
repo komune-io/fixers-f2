@@ -10,6 +10,7 @@ import kotlin.reflect.KFunction
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
+@Suppress("TooManyFunctions")
 abstract class LambdaSingleStepsBase<P, R> : F2SpringStep() {
 
 	@Suppress("LongMethod")
