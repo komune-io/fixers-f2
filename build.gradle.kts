@@ -9,7 +9,7 @@ plugins {
 
 	id("io.komune.fixers.gradle.config") version PluginVersions.fixers
 	id("io.komune.fixers.gradle.check") version PluginVersions.fixers
-	id("io.komune.fixers.gradle.d2") version PluginVersions.d2
+//	id("io.komune.fixers.gradle.d2") version PluginVersions.d2
 }
 
 allprojects {
@@ -36,9 +36,9 @@ fixers {
 //	npm {
 //		version = "0.22.0-SNAPSHOT"
 //	}
-	d2 {
-		outputDirectory = file("storybook/d2/")
-	}
+//	d2 {
+//		outputDirectory = file("storybook/d2/")
+//	}
 	bundle {
 		id = "f2"
 		name = "F2"
