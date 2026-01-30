@@ -5,8 +5,6 @@ plugins {
 	id("org.springframework.boot") version PluginVersions.springBoot apply false
 	//id("io.komune.fixers.gradle.npm") version PluginVersions.fixers  apply false
 
-	id("com.moowork.node") version "1.3.1"
-
 	id("io.komune.fixers.gradle.config") version PluginVersions.fixers
 	id("io.komune.fixers.gradle.check") version PluginVersions.fixers
 //	id("io.komune.fixers.gradle.d2") version PluginVersions.d2
@@ -17,18 +15,6 @@ allprojects {
 	version = System.getenv("VERSION") ?: "experimental-SNAPSHOT"
 	repositories {
 		defaultRepo()
-	}
-}
-
-tasks {
-	val storybookDir = "${project.rootDir}/storybook"
-	create<com.moowork.gradle.node.yarn.YarnTask>("installYarn") {
-		args = listOf("--cwd", storybookDir, "install")
-	}
-
-	create<com.moowork.gradle.node.yarn.YarnTask>("storybook") {
-		dependsOn("yarn_install")
-		args = listOf("--cwd", storybookDir, "storybook")
 	}
 }
 
@@ -47,6 +33,6 @@ fixers {
 	}
 	sonar {
 		organization = "komune-io"
-		projectKey = "komune-io_connect-fs"
+		projectKey = "komune-io_fixers-f2"
 	}
 }
