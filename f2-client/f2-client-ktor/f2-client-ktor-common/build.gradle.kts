@@ -9,8 +9,8 @@ dependencies {
     commonMainApi(project(":f2-client:f2-client-core"))
     commonMainApi(project(":f2-dsl:f2-dsl-cqrs"))
 
-    commonMainApi("io.ktor:ktor-client-core:${Versions.Kotlin.ktor}")
-    commonMainApi("io.ktor:ktor-client-auth:${Versions.Kotlin.ktor}")
+    Dependencies.Mpp.Ktor.clientCore(::commonMainApi)
+    Dependencies.Mpp.Ktor.clientAuth(::commonMainApi)
 
     Dependencies.Mpp.Ktor.client(::commonMainApi, ::jvmMainApi, ::jsMainApi)
 

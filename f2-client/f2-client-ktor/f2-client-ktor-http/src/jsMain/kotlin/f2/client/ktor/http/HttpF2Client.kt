@@ -46,7 +46,7 @@ actual open class HttpF2Client(
 	val json: Json = F2DefaultJson
 ) : F2Client {
 
-	override val type: F2ClientType = F2ClientType.HTTP
+	actual override val type: F2ClientType = F2ClientType.HTTP
 
 	@Suppress("SwallowedException")
 	private suspend fun handleError(response: HttpResponse) {
@@ -79,7 +79,7 @@ actual open class HttpF2Client(
 		}
 	}
 
-	override fun <RESPONSE> supplier(
+	actual override fun <RESPONSE> supplier(
 		route: String, responseTypeInfo: TypeInfo
 	): F2Supplier<RESPONSE> = F2Supplier<RESPONSE> {
 		httpClient.get("$urlBase/${route}").let { response ->
@@ -87,9 +87,9 @@ actual open class HttpF2Client(
 		}
 	}
 
-	override fun <MSG, RESPONSE> function(
+	actual override fun <QUERY, RESPONSE> function(
 		route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo
-	) = F2Function<MSG, RESPONSE> { messageFlow ->
+	) = F2Function<QUERY, RESPONSE> { messageFlow ->
 		doPost(route, queryTypeInfo, messageFlow).asFlow().transform { response ->
 			if (!response.status.isSuccess()) {
 				handleError(response)
@@ -104,7 +104,9 @@ actual open class HttpF2Client(
 		}
 	}
 
-	override fun <MSG> consumer(route: String, queryTypeInfo: TypeInfo): F2Consumer<MSG> = F2Consumer { messages ->
+	actual override fun <QUERY> consumer(
+		route: String, queryTypeInfo: TypeInfo
+	): F2Consumer<QUERY> = F2Consumer { messages ->
 		doPost(route, queryTypeInfo, messages)
 	}
 

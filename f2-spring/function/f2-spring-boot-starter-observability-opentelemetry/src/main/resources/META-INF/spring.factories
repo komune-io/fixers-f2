@@ -1,1 +1,3 @@
-org.springframework.context.ApplicationListener=f2.spring.observability.opentelemetry.OtelPropertiesListener
+# Spring Boot 3.x/4.x also uses META-INF/spring/org.springframework.boot.env.EnvironmentPostProcessor.imports
+# This file is kept for backward compatibility and test support
+org.springframework.boot.env.EnvironmentPostProcessor=f2.spring.observability.opentelemetry.OtelPropertiesListener

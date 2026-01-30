@@ -15,6 +15,7 @@
  */
 
 @file:JvmName("CoroutinesUtils")
+@file:Suppress("TooManyFunctions")
 package org.springframework.cloud.function.context.config
 
 import kotlinx.coroutines.Dispatchers

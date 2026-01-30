@@ -7,15 +7,13 @@ plugins {
 dependencies {
     Dependencies.Jvm.Spring.configurationProcessor(::kapt)
 
-    api("org.springframework.boot:spring-boot-starter-actuator:${Versions.Spring.boot}")
+    Dependencies.Jvm.Spring.actuator(::api)
 
-    api("io.micrometer:micrometer-tracing-bridge-otel:${Versions.Observability.micrometer}")
-
-    // OtlpTracingConfigurations.Exporters.otlpHttpSpanExporter => management.otlp.tracing.endpoint
-    implementation ("io.opentelemetry:opentelemetry-exporter-otlp:${Versions.Observability.opentelemetry}")
+    // Spring Boot 4.0 starter that brings OpenTelemetry SDK and auto-configuration
+    Dependencies.Jvm.Spring.opentelemetry(::api)
 
     // FOR OtlpMetricsExportAutoConfiguration => management.otlp.metrics.export.url
-    implementation("io.micrometer:micrometer-registry-otlp:${Versions.Observability.micrometerOtlp}")
+    Dependencies.Jvm.Observability.micrometerRegistryOtlp(::implementation)
 
     Dependencies.Jvm.Test.springTest(::implementation)
 }

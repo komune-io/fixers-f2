@@ -1,7 +1,6 @@
 package f2.spring
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.exception.F2Exception
 import java.io.ByteArrayInputStream
@@ -13,7 +12,8 @@ import java.nio.charset.StandardCharsets
 import java.util.UUID
 import java.util.function.Consumer
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.encodeToString
+import kotlinx.serialization.MissingFieldException
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromStream
@@ -38,11 +38,13 @@ class KSerializationMapper(
             ignoreUnknownKeys = true
         }
     }
-    private val serializerCache: MutableMap<Type, KSerializer<Any>?> = ConcurrentReferenceHashMap()
+    private val serializerCache: MutableMap<Type, KSerializer<Any>> =
+        ConcurrentReferenceHashMap<Type, KSerializer<Any>>()
     fun configureObjectMapper(configurer: Consumer<Json>) {
         configurer.accept(mapper)
     }
 
+    @Suppress("TooGenericExceptionCaught", "ThrowsCount")
     override fun <T> doFromJson(json: Any, type: Type): T {
         try {
             val serializerType = serializer(type)!!
@@ -57,14 +59,14 @@ class KSerializationMapper(
             } else {
                 error( "Failed to convert. Unknown type ${json::class.qualifiedName}")
             }
-        } catch (e: kotlinx.serialization.MissingFieldException) {
+        } catch (e: MissingFieldException) {
             throw F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
                 timestamp = System.currentTimeMillis().toString(),
                 message = "Missing parameter `${e.missingFields.joinToString(",")}`",
                 code = 400,
             ), e)
-        } catch (e: kotlinx.serialization.SerializationException) {
+        } catch (e: SerializationException) {
             throw F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
                 timestamp = System.currentTimeMillis().toString(),
@@ -78,6 +80,7 @@ class KSerializationMapper(
             )
         }
     }
+    @Suppress("TooGenericExceptionCaught")
     override fun toJson(value: Any): ByteArray {
         val type = ResolvableType.forClass(value::class.java)
         val ser = serializer(type.type)!!
@@ -102,12 +105,13 @@ class KSerializationMapper(
     override fun toString(value: Any): String {
         return try {
             mapper.encodeToString(value)
-        } catch (e: JsonProcessingException) {
+        } catch (e: SerializationException) {
             logger.debug("Ignored Error while serializing $value", e)
             return "Cannot convert to JSON"
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun serializer(type: Type): KSerializer<Any>? {
         return serializerCache.getOrPut(type) {
             try {

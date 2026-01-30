@@ -7,7 +7,7 @@ import io.ktor.util.reflect.TypeInfo
 import io.ktor.util.reflect.typeInfo
 
 enum class F2ClientType {
-	HTTP, RSOCKET
+	HTTP
 }
 expect interface F2Client {
 	val type: F2ClientType

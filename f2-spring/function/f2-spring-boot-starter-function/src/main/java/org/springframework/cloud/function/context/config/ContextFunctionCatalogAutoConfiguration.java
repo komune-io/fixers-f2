@@ -25,19 +25,15 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 import com.google.gson.Gson;
 import io.cloudevents.spring.messaging.CloudEventMessageConverter;
 import kotlinx.serialization.json.Json;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -84,6 +80,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
+import tools.jackson.datatype.joda.JodaModule;
 
 /**
  * @author Dave Syer
@@ -222,12 +219,12 @@ public class ContextFunctionCatalogAutoConfiguration {
                 if ("gson".equals(preferredMapper) && ClassUtils.isPresent("com.google.gson.Gson", null)) {
                     return gson(context);
                 }
-                else if ("jackson".equals(preferredMapper) && ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", null)) {
+                else if ("jackson".equals(preferredMapper) && ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", null)) {
                     return jackson(context);
                 }
             }
             else {
-                if (ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", null)) {
+                if (ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", null)) {
                     return jackson(context);
                 }
                 else if (ClassUtils.isPresent("com.google.gson.Gson", null)) {
@@ -261,70 +258,22 @@ public class ContextFunctionCatalogAutoConfiguration {
         // KOMUNE End Of Modification
 
         @SuppressWarnings("unchecked")
-        private JsonMapper jackson(ApplicationContext context) {
+        private org.springframework.cloud.function.json.JsonMapper jackson(ApplicationContext context) {
             ObjectMapper mapper;
             try {
-                mapper = context.getBean(ObjectMapper.class).copy();
+                mapper = context.getBean(ObjectMapper.class).rebuild().build();
             }
             catch (Exception e) {
-                mapper = new ObjectMapper();
-                mapper.registerModule(new JavaTimeModule());
+                mapper = tools.jackson.databind.json.JsonMapper.builder()
+                        .addModule(new JodaModule())
+                        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                        .build();
             }
-            mapper.registerModule(new JodaModule());
-            if (KotlinDetector.isKotlinPresent()) {
-                try {
-                    if (!mapper.getRegisteredModuleIds().contains("com.fasterxml.jackson.module.kotlin.KotlinModule")) {
-                        Class<? extends Module> kotlinModuleClass = (Class<? extends Module>)
-                                ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", ClassUtils.getDefaultClassLoader());
-                        Module kotlinModule = BeanUtils.instantiateClass(kotlinModuleClass);
-                        mapper.registerModule(kotlinModule);
-                    }
-                }
-                catch (ClassNotFoundException ex) {
-                    // jackson-module-kotlin not available
-                }
-            }
-            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-//			mapper.configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true);
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             if (logger.isDebugEnabled()) {
-                logger.debug("ObjectMapper configuration: " + getConfigDetails(mapper));
+                logger.debug("ObjectMapper configuration initialized");
             }
             return new JacksonMapper(mapper);
-        }
-
-        private static String getConfigDetails(ObjectMapper mapper) {
-            StringBuilder sb = new StringBuilder();
-
-            sb.append("Modules:\n");
-            if (mapper.getRegisteredModuleIds().isEmpty()) {
-                sb.append("\t").append("-none-").append("\n");
-            }
-            for (Object m : mapper.getRegisteredModuleIds()) {
-                sb.append("  ").append(m).append("\n");
-            }
-
-            sb.append("\nSerialization Features:\n");
-            for (SerializationFeature f : SerializationFeature.values()) {
-                sb.append("\t").append(f).append(" -> ")
-                        .append(mapper.getSerializationConfig().hasSerializationFeatures(f.getMask()));
-                if (f.enabledByDefault()) {
-                    sb.append(" (enabled by default)");
-                }
-                sb.append("\n");
-            }
-
-            sb.append("\nDeserialization Features:\n");
-            for (DeserializationFeature f : DeserializationFeature.values()) {
-                sb.append("\t").append(f).append(" -> ")
-                        .append(mapper.getDeserializationConfig().hasDeserializationFeatures(f.getMask()));
-                if (f.enabledByDefault()) {
-                    sb.append(" (enabled by default)");
-                }
-                sb.append("\n");
-            }
-
-            return sb.toString();
         }
     }
 }

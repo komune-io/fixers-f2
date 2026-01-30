@@ -1,6 +1,6 @@
 package f2.feature.cloudEvent.storming
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import f2.feature.cloudEvent.storming.entity.CloudEventEntityRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

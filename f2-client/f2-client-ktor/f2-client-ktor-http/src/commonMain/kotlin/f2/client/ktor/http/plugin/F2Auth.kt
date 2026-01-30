@@ -13,7 +13,9 @@ import f2.dsl.cqrs.exception.F2Exception
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpClientPlugin
+import io.ktor.client.plugins.api.ClientPluginInstance
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.AuthConfig
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.request.HttpRequestBuilder
@@ -33,7 +35,7 @@ class F2Auth(
     private val debug: Boolean = true
 ) {
 
-    private lateinit var authPlugin: Auth
+    private lateinit var authPlugin: ClientPluginInstance<AuthConfig>
 
     lateinit var getAuth: AuthRealmProvider
 
@@ -54,7 +56,7 @@ class F2Auth(
             Auth.install(plugin.authPlugin, scope)
         }
 
-        private fun F2Auth.prepareAuth() = Auth.prepare {
+        private fun F2Auth.prepareAuth(): ClientPluginInstance<AuthConfig> = Auth.prepare {
             try {
                 bearer {
                     loadTokens {

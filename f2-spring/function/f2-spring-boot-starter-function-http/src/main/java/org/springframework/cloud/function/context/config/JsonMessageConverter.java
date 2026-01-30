@@ -20,7 +20,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
+import tools.jackson.databind.DatabindException;
 
 import org.springframework.cloud.function.cloudevent.CloudEventMessageUtils;
 import org.springframework.cloud.function.json.JsonMapper;
@@ -118,7 +118,7 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 				}
 				// KOMUNE Modification
 				// force message conversion error propagation
-				else if ("application/json".equals(message.getHeaders().get("Content-Type")) && e.getCause() instanceof JsonMappingException) {
+				else if ("application/json".equals(message.getHeaders().get("Content-Type")) && e.getCause() instanceof DatabindException) {
 					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error parsing json", e.getCause());
 				}
 				// KOMUNE End Of Modification
