@@ -15,5 +15,8 @@ dependencies {
     // FOR OtlpMetricsExportAutoConfiguration => management.otlp.metrics.export.url
     Dependencies.Jvm.Observability.micrometerRegistryOtlp(::implementation)
 
-    Dependencies.Jvm.Test.springTest(::implementation)
+    Dependencies.Jvm.Test.springTest(::testImplementation)
+
+    // OpenTelemetry SDK testing utilities (InMemorySpanExporter, etc.)
+    testImplementation("io.opentelemetry:opentelemetry-sdk-testing:${Versions.Observability.opentelemetry}")
 }

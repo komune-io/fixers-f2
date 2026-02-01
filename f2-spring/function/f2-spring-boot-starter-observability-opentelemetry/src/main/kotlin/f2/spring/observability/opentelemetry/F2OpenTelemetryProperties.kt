@@ -3,46 +3,65 @@ package f2.spring.observability.opentelemetry
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 /**
- * Defines OpenTelemetry properties specific to a feature or module "F2".
- * If the endpoint is set, it automatically configures metrics.endpoint to `${endpoint}/metrics`
- * and traces.endpoint to `${endpoint}/trace`.
+ * Defines OpenTelemetry properties for F2 observability configuration.
+ *
+ * This class only binds user-provided properties. The actual endpoint path derivation
+ * (appending `/v1/metrics` and `/v1/traces` per OTLP spec) is handled by [OtelPropertiesListener],
+ * which is the single source of truth for translating F2 properties to Spring management properties.
+ *
+ * @see OtelPropertiesListener
  */
 @ConfigurationProperties(prefix = OtelPropertiesListener.F2_OTEL_PREFIX)
-class F2OpenTelemetryProperties (
+class F2OpenTelemetryProperties(
     /**
-     * Optional String to specify the endpoint for OpenTelemetry. Null if not specified.
+     * Base endpoint for OpenTelemetry. When set, [OtelPropertiesListener] derives
+     * metrics, traces, and logs endpoints by appending `/v1/metrics`, `/v1/traces`,
+     * and `/v1/logs` respectively.
      */
-    val endpoint: String?
-) {
+    val endpoint: String? = null,
     /**
      * Properties related to OpenTelemetry metrics.
      */
-    val metrics: F2OpenTelemetryMetricsProperties = F2OpenTelemetryMetricsProperties(endpoint?.let { "$it/metrics" })
-
+    val metrics: F2OpenTelemetryMetricsProperties = F2OpenTelemetryMetricsProperties(),
     /**
      * Properties related to OpenTelemetry traces.
      */
-    val traces: F2OpenTelemetryTracesProperties = F2OpenTelemetryTracesProperties(endpoint?.let { "$it/trace" })
-}
-
-/**
- * Properties for OpenTelemetry metrics specific to "F2".
- */
-data class F2OpenTelemetryMetricsProperties(
+    val traces: F2OpenTelemetryTracesProperties = F2OpenTelemetryTracesProperties(),
     /**
-     * Specifies the metrics endpoint for OpenTelemetry.
-     * Defaults to `${parentEndpoint}/metrics` if parent endpoint is set.
+     * Properties related to OpenTelemetry logs.
      */
-    val endpoint: String?
+    val logs: F2OpenTelemetryLogsProperties = F2OpenTelemetryLogsProperties()
 )
 
 /**
- * Properties for OpenTelemetry traces specific to "F2".
+ * Properties for OpenTelemetry metrics specific to F2.
+ */
+data class F2OpenTelemetryMetricsProperties(
+    /**
+     * Explicit metrics endpoint for OpenTelemetry.
+     * When set, overrides the derived endpoint from the base endpoint.
+     */
+    val endpoint: String? = null
+)
+
+/**
+ * Properties for OpenTelemetry traces specific to F2.
  */
 data class F2OpenTelemetryTracesProperties(
     /**
-     * Specifies the traces endpoint for OpenTelemetry.
-     * Defaults to `${parentEndpoint}/trace` if parent endpoint is set.
+     * Explicit traces endpoint for OpenTelemetry.
+     * When set, overrides the derived endpoint from the base endpoint.
      */
-    val endpoint: String?
+    val endpoint: String? = null
+)
+
+/**
+ * Properties for OpenTelemetry logs specific to F2.
+ */
+data class F2OpenTelemetryLogsProperties(
+    /**
+     * Explicit logs endpoint for OpenTelemetry.
+     * When set, overrides the derived endpoint from the base endpoint.
+     */
+    val endpoint: String? = null
 )
