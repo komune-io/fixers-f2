@@ -17,7 +17,7 @@ import org.springframework.context.annotation.ConfigurationCondition
  * - `f2.observability.opentelemetry.logs.endpoint` (logs-specific endpoint)
  *
  * The actual environment property setup is handled by [OtelPropertiesListener] which runs
- * as an [org.springframework.boot.env.EnvironmentPostProcessor] before the application context is created.
+ * as an [org.springframework.boot.EnvironmentPostProcessor] before the application context is created.
  */
 @AutoConfiguration
 @EnableConfigurationProperties(F2OpenTelemetryProperties::class)
