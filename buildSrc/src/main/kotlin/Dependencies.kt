@@ -37,7 +37,6 @@ object Versions {
 		const val boot = FixersVersions.Spring.boot
 		const val framework = FixersVersions.Spring.framework
 		const val data = FixersVersions.Spring.data
-		const val slf4j = FixersVersions.Logging.slf4j
 	}
 
 	object Observability {
@@ -49,7 +48,6 @@ object Versions {
 	const val springdoc = "1.8.0"
 //	const val springdoc = "1.6.11"
 	const val rsocket = "0.16.0"
-	const val uuid = "0.8.4"
 }
 
 object Dependencies {
@@ -88,13 +86,6 @@ object Dependencies {
 				"io.rsocket.kotlin:rsocket-ktor-client:${Versions.rsocket}"
 			)
 		}
-
-		fun kotlinxDatetime(scope: Scope) = scope.add(
-			"org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlin.datetime}"
-		)
-		fun uuid(scope: Scope) = scope.add(
-			"com.benasher44:uuid:${Versions.uuid}"
-		)
 	}
 
 	object Jvm {

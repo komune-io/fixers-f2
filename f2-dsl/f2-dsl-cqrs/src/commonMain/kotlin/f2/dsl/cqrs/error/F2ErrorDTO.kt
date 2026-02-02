@@ -1,6 +1,7 @@
 package f2.dsl.cqrs.error
 
-import com.benasher44.uuid.uuid4
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 import f2.dsl.cqrs.Problem
 import kotlin.js.JsExport
 import kotlin.js.JsName
@@ -21,10 +22,10 @@ interface F2ErrorDTO: Problem {
 @Serializable
 @JsExport
 @JsName("F2Error")
-@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
 open class F2Error(
     override val message: String,
-    override val id: String? = uuid4().toString(),
+    override val id: String? = Uuid.random().toString(),
     override val timestamp: String = Clock.System.now().toString(),
     override val code: Int = 500,
     override val requestId: String? = null,

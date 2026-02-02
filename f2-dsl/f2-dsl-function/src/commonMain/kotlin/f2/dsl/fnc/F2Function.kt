@@ -1,5 +1,6 @@
 package f2.dsl.fnc
 
+import kotlin.js.JsExport
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -8,9 +9,10 @@ import kotlinx.coroutines.flow.Flow
 typealias F2LambdaFunction<T, R> = suspend (Flow<T>) -> Flow<R>
 
 /**
- * Expect fun interface representing a function that transforms a Flow of type T to a Flow of type R.
+ * Fun interface representing a function that transforms a Flow of type T to a Flow of type R.
  */
-expect fun interface F2Function<in T, out R> : F2LambdaFunction<T, R> {
+@JsExport
+fun interface F2Function<in T, out R> : F2LambdaFunction<T, R> {
     /**
      * Invokes the function with the given Flow of type T and returns a Flow of type R.
      *

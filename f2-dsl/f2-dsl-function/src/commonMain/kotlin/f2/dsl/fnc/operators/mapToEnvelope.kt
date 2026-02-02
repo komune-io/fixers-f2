@@ -1,6 +1,7 @@
 package f2.dsl.fnc.operators
 
-import com.benasher44.uuid.uuid4
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 import f2.dsl.cqrs.envelope.Envelope
 import f2.dsl.cqrs.envelope.asEnvelope
 import f2.dsl.cqrs.envelope.asEnvelopeWithType
@@ -36,8 +37,9 @@ import kotlinx.coroutines.flow.map
  * @param id A function to generate an ID for each input. Defaults to a random UUID.
  * @return A Flow emitting Envelopes containing the results.
  */
+@OptIn(ExperimentalUuidApi::class)
 inline fun <T, reified R> F2Function<T, R>.mapToEnvelope(
-    crossinline id: (T) -> String = { uuid4().toString() },
+    crossinline id: (T) -> String = { Uuid.random().toString() },
 ): F2Function<T, Envelope<R>> = F2Function { inputs: Flow<T> ->
     inputs.map { input ->
         val resultFlow = this.invoke(flowOf(input))
@@ -55,8 +57,9 @@ inline fun <T, reified R> F2Function<T, R>.mapToEnvelope(
  * @param id A function to generate an ID for each input. Defaults to a random UUID.
  * @return A Flow emitting Envelopes containing the inputs.
  */
+@OptIn(ExperimentalUuidApi::class)
 inline fun <reified T> Flow<T>.mapToEnvelope(
-    crossinline id: (T) -> String = { uuid4().toString() },
+    crossinline id: (T) -> String = { Uuid.random().toString() },
 ): Flow<Envelope<T>> = map { input ->
     input.asEnvelope(
         id = id(input),
@@ -69,9 +72,10 @@ inline fun <reified T> Flow<T>.mapToEnvelope(
  * @param id A function to generate an ID for each input. Defaults to a random UUID.
  * @return A Flow emitting Envelopes containing the inputs.
  */
+@OptIn(ExperimentalUuidApi::class)
 fun <T> Flow<T>.mapToEnvelope(
     type: String,
-    id: (T) -> String = { uuid4().toString() },
+    id: (T) -> String = { Uuid.random().toString() },
 ): Flow<Envelope<T>> = map { input ->
     input.asEnvelopeWithType(
         id = id(input),

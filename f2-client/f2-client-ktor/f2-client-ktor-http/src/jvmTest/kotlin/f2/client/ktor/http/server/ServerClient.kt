@@ -1,6 +1,7 @@
 package f2.client.ktor.http.server
 
 import f2.client.ktor.http.HttpF2Client
+import f2.client.ktor.http.function
 import f2.client.ktor.http.server.command.ServerConsumeFunction
 import f2.client.ktor.http.server.command.ServerUploadFunction
 

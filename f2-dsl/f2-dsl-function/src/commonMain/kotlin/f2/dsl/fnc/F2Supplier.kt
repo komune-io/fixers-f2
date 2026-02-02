@@ -1,5 +1,6 @@
 package f2.dsl.fnc
 
+import kotlin.js.JsExport
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -8,9 +9,10 @@ import kotlinx.coroutines.flow.Flow
 typealias F2LambdaSupplier<R> = suspend () -> Flow<R>
 
 /**
- * Expect fun interface representing a supplier of a Flow of type R.
+ * Fun interface representing a supplier of a Flow of type R.
  */
-expect fun interface F2Supplier<R> : F2LambdaSupplier<R> {
+@JsExport
+fun interface F2Supplier<R> : F2LambdaSupplier<R> {
     /**
      * Invokes the supplier to get a Flow of type R.
      *
@@ -25,9 +27,10 @@ expect fun interface F2Supplier<R> : F2LambdaSupplier<R> {
 typealias F2LambdaSupplierSingle<R> = suspend () -> R
 
 /**
- * Expect fun interface representing a supplier of a single value of type R.
+ * Fun interface representing a supplier of a single value of type R.
  */
-expect fun interface F2SupplierSingle<R> : F2LambdaSupplierSingle<R> {
+@JsExport
+fun interface F2SupplierSingle<R> : F2LambdaSupplierSingle<R> {
     /**
      * Invokes the supplier to get a single value of type R.
      *

@@ -6,9 +6,7 @@ plugins {
 }
 
 dependencies {
-    Dependencies.Mpp.kotlinxDatetime(::commonMainApi)
     Dependencies.Jvm.Spring.dataCommons(::jvmMainImplementation)
-    Dependencies.Mpp.uuid(::commonMainApi)
 
     Dependencies.Jvm.Test.junit(::jvmTestImplementation)
 }
