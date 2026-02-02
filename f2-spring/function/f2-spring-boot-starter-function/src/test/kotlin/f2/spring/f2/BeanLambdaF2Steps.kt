@@ -17,17 +17,17 @@ class BeanLambdaF2Steps : LambdaF2Steps(), En {
 	}
 
 	override fun function(values: List<String>): List<String> = runBlocking {
-		val lambda: F2Function<String, String> = LambdaF2::functionF2.functionF2Bean()
+		val lambda: F2Function<String, String> = LambdaF2::functionBasic.functionF2Bean()
 		lambda(values.asFlow()).toList()
 	}
 
 	override fun supplier(): List<String> = runBlocking {
-		val lambda: F2Supplier<String> = LambdaF2::supplierF2.supplierF2Bean()
+		val lambda: F2Supplier<String> = LambdaF2::supplierBasic.supplierF2Bean()
 		lambda().toList()
 	}
 
 	override fun consumer(values: List<String>) = runBlocking {
-		val lambda: F2Consumer<String> = LambdaF2::consumerF2.consumerF2Bean()
+		val lambda: F2Consumer<String> = LambdaF2::consumerBasic.consumerF2Bean()
 		val flow = values.asFlow()
 		lambda(flow)
 	}

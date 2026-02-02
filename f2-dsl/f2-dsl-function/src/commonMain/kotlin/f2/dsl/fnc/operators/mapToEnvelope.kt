@@ -11,26 +11,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
-
-//fun <T, R> F2Function<T, R>.wrap(): F2Function<Envelope<T>, Envelope<R>> {
-//    return F2Function { envelopes: Flow<Envelope<T>> ->
-//        envelopes.map { envelope ->
-//            val resultFlow = this.invoke(flowOf(envelope.data))
-//            resultFlow.map { result ->
-//                Envelope(
-//                    id = envelope.id,
-//                    data = result,
-//                    type = envelope.type,
-//                    datacontenttype = envelope.datacontenttype,
-//                    specversion = envelope.specversion,
-//                    source = envelope.source,
-//                    time = envelope.time
-//                )
-//            }.first()
-//        }
-//    }
-//}
-
 /**
  * Extension function to map a Flow of inputs to a Flow of Envelopes containing the results.
  *

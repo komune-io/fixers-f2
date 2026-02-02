@@ -18,7 +18,6 @@ open class F2SpringContextStep: F2SpringStep(), En {
 
 		When("I start a valid spring application context") {
 			bag.httpPort = Random.nextInt(from = 6000, until = 6999)
-			bag.rsoketPort = Random.nextInt(from = 6000, until = 6999)
 			println("////////////////////////////////////////////////////////")
 			println("////////////////////////////////////////////////////////")
 			println(System.getProperty("spring.cloud.function.preferred-json-mapper"))
@@ -28,10 +27,6 @@ open class F2SpringContextStep: F2SpringStep(), En {
 				types = arrayOf(ApplicationContextBuilder.SimpleConfiguration::class.java),
 				config = mapOf(
 					"server.port" to "${bag.httpPort}",
-					"spring.rsocket.server.port" to "${bag.rsoketPort}",
-					"spring.rsocket.server.transport" to "websocket",
-					"logging.level.io.rsocket.FrameLogger" to "DEBUG",
-					"logging.level.org.springframework.boot.rsocket" to "DEBUG",
 					"spring.cloud.function.preferred-json-mapper" to System.getProperty("spring.cloud.function.preferred-json-mapper")
 				)
 			)
@@ -66,7 +61,7 @@ open class F2SpringContextStep: F2SpringStep(), En {
 	private fun DataTable.asCucumberF2SpringDeclaration(): List<CucumberF2SpringDeclaration> {
 		return asMaps().map { columns ->
 			CucumberF2SpringDeclaration(
-				name = columns[CucumberF2SpringDeclaration::name.name]!!.toString(),
+				name = columns[CucumberF2SpringDeclaration::name.name]!!,
 			)
 		}
 	}

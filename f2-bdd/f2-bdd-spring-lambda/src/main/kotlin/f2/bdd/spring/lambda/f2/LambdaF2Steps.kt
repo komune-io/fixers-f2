@@ -5,14 +5,15 @@ import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
 import f2.bdd.spring.lambda.single.LambdaSimple
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
+import org.springframework.core.ParameterizedTypeReference
 
 abstract class LambdaF2Steps : LambdaListStepsBase<String, String>() {
 
 	fun En.prepareLambdaSteps() {
 		prepareLambdaSteps(
-			functionName = LambdaF2::functionF2.name,
-			supplierName = LambdaF2::supplierF2.name,
-			consumerName = LambdaF2::consumerF2.name
+			functionName = LambdaF2::functionBasic.name,
+			supplierName = LambdaF2::supplierBasic.name,
+			consumerName = LambdaF2::consumerBasic.name
 		)
 	}
 
@@ -21,6 +22,8 @@ abstract class LambdaF2Steps : LambdaListStepsBase<String, String>() {
 	}
 
 	override fun receiver(): ConsumerReceiver<String> {
-		return bag.applicationContext!!.getBean(LambdaSimple::lambdaSingleReceiver.name) as ConsumerReceiver<String>
+		return bag.applicationContext!!.getBeanProvider(
+            object: ParameterizedTypeReference<ConsumerReceiver<String>>() {}
+        ).getObject( LambdaSimple::lambdaSingleReceiver.name)
 	}
 }
