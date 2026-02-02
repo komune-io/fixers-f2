@@ -24,11 +24,12 @@ class OtelPropertiesListenerTest {
     open class App
 
     @Test
-    fun `should configure both metrics and traces when explicit endpoints are provided`() {
+    fun `should configure metrics traces and logs when explicit endpoints are provided`() {
         val context = SpringApplicationBuilder(App::class.java)
             .properties(
                 "f2.observability.opentelemetry.metrics.endpoint=$TEST_ENDPOINT/v1/metrics",
                 "f2.observability.opentelemetry.traces.endpoint=$TEST_ENDPOINT/v1/traces",
+                "f2.observability.opentelemetry.logs.endpoint=$TEST_ENDPOINT/v1/logs",
                 SPRING_APPLICATION_NAME_PROPERTIES
             ).run()
 
@@ -39,7 +40,7 @@ class OtelPropertiesListenerTest {
     }
 
     @Test
-    fun `should derive both endpoints from base endpoint`() {
+    fun `should derive all endpoints from base endpoint`() {
         val context = SpringApplicationBuilder(App::class.java)
             .properties(
                 "f2.observability.opentelemetry.endpoint=$TEST_ENDPOINT",
@@ -79,6 +80,14 @@ class OtelPropertiesListenerTest {
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_METRICS_TAGS_APPLICATION))
                 .isNull()
 
+            // Verify OpenTelemetry SDK exporters are disabled to prevent localhost:4317/4318 connection attempts
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_TRACES_EXPORTER))
+                .isEqualTo("none")
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_METRICS_EXPORTER))
+                .isEqualTo("none")
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_LOGS_EXPORTER))
+                .isEqualTo("none")
+
             assertThatThrownBy {
                 it.getBean<SpanProcessor>()
             }.isInstanceOf(NoSuchBeanDefinitionException::class.java)
@@ -103,8 +112,19 @@ class OtelPropertiesListenerTest {
                 .isEqualTo("false")
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_URL))
                 .isNull()
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_LOGGING_EXPORT_OTLP_ENABLED))
+                .isEqualTo("false")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_LOGGING_ENDPOINT))
+                .isNull()
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE))
                 .isEqualTo("health, metrics")
+            // Verify metrics and logs exporters are disabled but traces exporter is not
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_TRACES_EXPORTER))
+                .isNull()
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_METRICS_EXPORTER))
+                .isEqualTo("none")
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_LOGS_EXPORTER))
+                .isEqualTo("none")
         }
     }
 
@@ -126,8 +146,53 @@ class OtelPropertiesListenerTest {
                 .isEqualTo("true")
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_URL))
                 .isEqualTo("$TEST_ENDPOINT/v1/metrics")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_LOGGING_EXPORT_OTLP_ENABLED))
+                .isEqualTo("false")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_LOGGING_ENDPOINT))
+                .isNull()
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE))
                 .isEqualTo("health, metrics")
+            // Verify traces and logs exporters are disabled but metrics exporter is not
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_TRACES_EXPORTER))
+                .isEqualTo("none")
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_METRICS_EXPORTER))
+                .isNull()
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_LOGS_EXPORTER))
+                .isEqualTo("none")
+        }
+    }
+
+    @Test
+    fun `should configure only logs when only logs endpoint is provided`() {
+        val context = SpringApplicationBuilder(App::class.java)
+            .properties(
+                "f2.observability.opentelemetry.logs.endpoint=$TEST_ENDPOINT/v1/logs",
+                SPRING_APPLICATION_NAME_PROPERTIES
+            ).run()
+
+        context.use {
+            val environment = it.environment
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_TRACING_ENABLED))
+                .isEqualTo("false")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT))
+                .isNull()
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED))
+                .isEqualTo("false")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_URL))
+                .isNull()
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_LOGGING_EXPORT_OTLP_ENABLED))
+                .isEqualTo("true")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_LOGGING_ENDPOINT))
+                .isEqualTo("$TEST_ENDPOINT/v1/logs")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE))
+                .isEqualTo("health, metrics")
+            // Verify traces and metrics exporters are disabled but logs exporter is not
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_TRACES_EXPORTER))
+                .isEqualTo("none")
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_METRICS_EXPORTER))
+                .isEqualTo("none")
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_LOGS_EXPORTER))
+                .isNull()
         }
     }
 
@@ -138,6 +203,7 @@ class OtelPropertiesListenerTest {
                 "f2.observability.opentelemetry.endpoint=   ",
                 "f2.observability.opentelemetry.traces.endpoint=",
                 "f2.observability.opentelemetry.metrics.endpoint=  ",
+                "f2.observability.opentelemetry.logs.endpoint=",
                 SPRING_APPLICATION_NAME_PROPERTIES
             ).run()
 
@@ -147,10 +213,21 @@ class OtelPropertiesListenerTest {
                 .isEqualTo("false")
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED))
                 .isEqualTo("false")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_LOGGING_EXPORT_OTLP_ENABLED))
+                .isEqualTo("false")
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT))
                 .isNull()
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_URL))
                 .isNull()
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_LOGGING_ENDPOINT))
+                .isNull()
+            // Verify OpenTelemetry SDK exporters are disabled when blank endpoints are treated as unset
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_TRACES_EXPORTER))
+                .isEqualTo("none")
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_METRICS_EXPORTER))
+                .isEqualTo("none")
+            assertThat(environment.getProperty(OtelPropertiesListener.OTEL_LOGS_EXPORTER))
+                .isEqualTo("none")
         }
     }
 
@@ -161,6 +238,7 @@ class OtelPropertiesListenerTest {
                 "f2.observability.opentelemetry.endpoint=http://base-endpoint:4318",
                 "f2.observability.opentelemetry.traces.endpoint=http://custom-traces:4318/v1/traces",
                 "f2.observability.opentelemetry.metrics.endpoint=http://custom-metrics:4318/v1/metrics",
+                "f2.observability.opentelemetry.logs.endpoint=http://custom-logs:4318/v1/logs",
                 SPRING_APPLICATION_NAME_PROPERTIES
             ).run()
 
@@ -170,6 +248,8 @@ class OtelPropertiesListenerTest {
                 .isEqualTo("http://custom-traces:4318/v1/traces")
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_URL))
                 .isEqualTo("http://custom-metrics:4318/v1/metrics")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_LOGGING_ENDPOINT))
+                .isEqualTo("http://custom-logs:4318/v1/logs")
         }
     }
 
@@ -190,6 +270,65 @@ class OtelPropertiesListenerTest {
                 .isEqualTo("true")
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED))
                 .isEqualTo("true")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_LOGGING_EXPORT_OTLP_ENABLED))
+                .isEqualTo("true")
+        }
+    }
+
+    @Test
+    fun `should handle trailing slash in endpoint`() {
+        val context = SpringApplicationBuilder(App::class.java)
+            .properties(
+                "f2.observability.opentelemetry.endpoint=$TEST_ENDPOINT/",
+                SPRING_APPLICATION_NAME_PROPERTIES
+            ).run()
+
+        context.use {
+            val environment = it.environment
+            // Documents current behavior: trailing slash is NOT stripped,
+            // resulting in double slash (e.g., http://host:4318//v1/traces)
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT))
+                .isEqualTo("$TEST_ENDPOINT//v1/traces")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_URL))
+                .isEqualTo("$TEST_ENDPOINT//v1/metrics")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_LOGGING_ENDPOINT))
+                .isEqualTo("$TEST_ENDPOINT//v1/logs")
+        }
+    }
+
+    @Test
+    fun `should set autoconfigure exclude when tracing disabled`() {
+        val context = SpringApplicationBuilder(App::class.java)
+            .properties(
+                SPRING_APPLICATION_NAME_PROPERTIES
+                // No endpoints configured
+            ).run()
+
+        context.use {
+            val environment = it.environment
+            assertThat(environment.getProperty(OtelPropertiesListener.SPRING_AUTOCONFIGURE_EXCLUDE))
+                .isEqualTo(OtelPropertiesListener.OPENTELEMETRY_TRACING_AUTOCONFIG)
+        }
+    }
+
+    @Test
+    fun `should handle endpoint with existing path`() {
+        val endpointWithPath = "http://proxy:8080/otel"
+        val context = SpringApplicationBuilder(App::class.java)
+            .properties(
+                "f2.observability.opentelemetry.endpoint=$endpointWithPath",
+                SPRING_APPLICATION_NAME_PROPERTIES
+            ).run()
+
+        context.use {
+            val environment = it.environment
+            // Documents current behavior: path is simply appended
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT))
+                .isEqualTo("$endpointWithPath/v1/traces")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_URL))
+                .isEqualTo("$endpointWithPath/v1/metrics")
+            assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_LOGGING_ENDPOINT))
+                .isEqualTo("$endpointWithPath/v1/logs")
         }
     }
 
@@ -208,6 +347,10 @@ class OtelPropertiesListenerTest {
             .isEqualTo("true")
         assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_URL))
             .isEqualTo("$TEST_ENDPOINT/v1/metrics")
+        assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_LOGGING_EXPORT_OTLP_ENABLED))
+            .isEqualTo("true")
+        assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_LOGGING_ENDPOINT))
+            .isEqualTo("$TEST_ENDPOINT/v1/logs")
         assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_METRICS_TAGS_APPLICATION))
             .isEqualTo("myTestApp")
     }

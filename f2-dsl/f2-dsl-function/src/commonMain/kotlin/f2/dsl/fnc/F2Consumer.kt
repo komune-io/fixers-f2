@@ -1,5 +1,6 @@
 package f2.dsl.fnc
 
+import kotlin.js.JsExport
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -8,9 +9,10 @@ import kotlinx.coroutines.flow.Flow
 typealias F2LambdaConsumer<T> = suspend (Flow<T>) -> Unit
 
 /**
- * Expect fun interface representing a consumer of a Flow of type T.
+ * Fun interface representing a consumer of a Flow of type T.
  */
-expect fun interface F2Consumer<T> : F2LambdaConsumer<T> {
+@JsExport
+fun interface F2Consumer<T> : F2LambdaConsumer<T> {
     /**
      * Invokes the consumer with the given Flow of type T.
      *

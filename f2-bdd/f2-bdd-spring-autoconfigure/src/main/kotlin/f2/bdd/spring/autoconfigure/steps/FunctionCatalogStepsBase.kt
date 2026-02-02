@@ -15,7 +15,7 @@ abstract class FunctionCatalogStepsBase<P, R>(
 		prepareSteps()
 
 		When("${prefix}Function catalog contains") { table: DataTable ->
-			val functionCatalog = bag.applicationContext!!.getBean(FunctionCatalog::class.java)
+			val functionCatalog = bag.getFunctionCatalog()
 			table.asList().forEach { name ->
 				val result = functionCatalog.lookup<Any>(name)
 				Assertions.assertThat(result).isNotNull
@@ -23,14 +23,14 @@ abstract class FunctionCatalogStepsBase<P, R>(
 		}
 
 		When("${prefix}Function catalog execute {string}") { functionName: String ->
-			val functionCatalog = bag.applicationContext!!.getBean(FunctionCatalog::class.java)
+			val functionCatalog =  bag.getFunctionCatalog()
 			val lambda = functionCatalog.lookup<Any>(functionName) as SimpleFunctionRegistry.FunctionInvocationWrapper
 			val result = lambda.apply(null)
 			handleResult(lambda, functionName, result)
 		}
 
 		When("${prefix}Function catalog execute {string} with") { functionName: String, table: DataTable ->
-			val functionCatalog = bag.applicationContext!!.getBean(FunctionCatalog::class.java)
+			val functionCatalog =  bag.getFunctionCatalog()
 			val lambda = functionCatalog.lookup<Any>(functionName) as SimpleFunctionRegistry.FunctionInvocationWrapper
 			val result = lambda.apply(transform(table))
 			handleResult(lambda, functionName, result)

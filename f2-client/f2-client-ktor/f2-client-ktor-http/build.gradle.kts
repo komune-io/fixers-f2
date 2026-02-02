@@ -18,8 +18,6 @@ dependencies {
 
     Dependencies.Mpp.Ktor.client(::commonMainApi, ::jvmMainApi, ::jsMainApi)
 
-    Dependencies.Mpp.uuid(::commonMainApi)
-
     Dependencies.Jvm.Test.junit(::jvmTestImplementation)
 
     jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http"))

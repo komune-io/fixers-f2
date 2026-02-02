@@ -3,7 +3,6 @@ package f2.client.ktor
 import f2.client.F2Client
 import f2.client.ktor.common.F2ClientConfigLambda
 import f2.client.ktor.http.httpClientBuilder
-import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.js.JsClientEngineConfig
 
 suspend fun F2ClientBuilder.get(

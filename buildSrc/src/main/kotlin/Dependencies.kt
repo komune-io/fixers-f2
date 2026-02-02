@@ -37,7 +37,6 @@ object Versions {
 		const val boot = FixersVersions.Spring.boot
 		const val framework = FixersVersions.Spring.framework
 		const val data = FixersVersions.Spring.data
-		const val slf4j = FixersVersions.Logging.slf4j
 	}
 
 	object Observability {
@@ -49,7 +48,6 @@ object Versions {
 	const val springdoc = "1.8.0"
 //	const val springdoc = "1.6.11"
 	const val rsocket = "0.16.0"
-	const val uuid = "0.8.4"
 }
 
 object Dependencies {
@@ -88,13 +86,6 @@ object Dependencies {
 				"io.rsocket.kotlin:rsocket-ktor-client:${Versions.rsocket}"
 			)
 		}
-
-		fun kotlinxDatetime(scope: Scope) = scope.add(
-			"org.jetbrains.kotlinx:kotlinx-datetime:${Versions.Kotlin.datetime}"
-		)
-		fun uuid(scope: Scope) = scope.add(
-			"com.benasher44:uuid:${Versions.uuid}"
-		)
 	}
 
 	object Jvm {
@@ -192,50 +183,49 @@ object Dependencies {
 
 object Modules {
 	object Bdd {
-		val f2BddConfig = ":f2-bdd:f2-bdd-config"
-		val f2BddSpringAutoconfigure = ":f2-bdd:f2-bdd-spring-autoconfigure"
-		val f2BddSpringLambda = ":f2-bdd:f2-bdd-spring-lambda"
+		const val f2BddConfig = ":f2-bdd:f2-bdd-config"
+		const val f2BddSpringAutoconfigure = ":f2-bdd:f2-bdd-spring-autoconfigure"
+		const val f2BddSpringLambda = ":f2-bdd:f2-bdd-spring-lambda"
 	}
 
 	object Client {
-		val f2ClientCore = ":f2-client:f2-client-core"
-		val f2ClientKtor = ":f2-client:f2-client-ktor"
-		val f2ClientKtorHttp = ":f2-client:f2-client-ktor:f2-client-ktor-http"
-		val f2ClientKtorRSocket = ":f2-client:f2-client-ktor:f2-client-ktor-rsocket"
+		const val f2ClientCore = ":f2-client:f2-client-core"
+		const val f2ClientKtor = ":f2-client:f2-client-ktor"
+		const val f2ClientKtorHttp = ":f2-client:f2-client-ktor:f2-client-ktor-http"
+		const val f2ClientKtorRSocket = ":f2-client:f2-client-ktor:f2-client-ktor-rsocket"
 	}
 
 	object Dsl {
-		val f2DslFunction = ":f2-dsl:f2-dsl-function"
-		val f2DslCqrs = ":f2-dsl:f2-dsl-cqrs"
-		val f2DslEvent = ":f2-dsl:f2-dsl-event"
+		const val f2DslFunction = ":f2-dsl:f2-dsl-function"
+		const val f2DslCqrs = ":f2-dsl:f2-dsl-cqrs"
+		const val f2DslEvent = ":f2-dsl:f2-dsl-event"
 	}
 
 	object Feature {
-		val f2FeatureVcClient = ":f2-feature:f2-feature-vc-client"
-		val f2FeatureVcFunction = ":f2-feature:f2-feature-vc-function"
-		val f2FeatureVcModel = ":f2-feature:f2-feature-vc-model"
+		const val f2FeatureVcClient = ":f2-feature:f2-feature-vc-client"
+		const val f2FeatureVcFunction = ":f2-feature:f2-feature-vc-function"
+		const val f2FeatureVcModel = ":f2-feature:f2-feature-vc-model"
 
-		val f2FeatureCatalog = ":f2-feature:catalog:f2-feature-catalog"
-		val f2FeatureCloudEventStorming = ":f2-feature:cloud-event-storming:f2-feature-cloud-event-storming"
-		val f2FeatureVersion = ":f2-feature:version:f2-feature-version"
-
+		const val f2FeatureCatalog = ":f2-feature:catalog:f2-feature-catalog"
+		const val f2FeatureCloudEventStorming = ":f2-feature:cloud-event-storming:f2-feature-cloud-event-storming"
+		const val f2FeatureVersion = ":f2-feature:version:f2-feature-version"
 	}
 
 	object Spring {
-		val f2SpringAuth = ":f2-spring:auth:f2-spring-boot-starter-auth"
-		val f2SpringAuthKeycloak = ":f2-spring:auth:f2-spring-boot-starter-auth-keycloak"
+		const val f2SpringAuth = ":f2-spring:auth:f2-spring-boot-starter-auth"
+		const val f2SpringAuthKeycloak = ":f2-spring:auth:f2-spring-boot-starter-auth-keycloak"
 
-		val f2SpringExceptionHttp = ":f2-spring:exception:f2-spring-boot-exception-http"
-		val f2SpringOpenApi = ":f2-spring:openapi:f2-spring-boot-openapi"
+		const val f2SpringExceptionHttp = ":f2-spring:exception:f2-spring-boot-exception-http"
+		const val f2SpringOpenApi = ":f2-spring:openapi:f2-spring-boot-openapi"
 
-		val f2SpringFunction = ":f2-spring:function:f2-spring-boot-starter-function"
-		val f2SpringFunctionHttp = ":f2-spring:function:f2-spring-boot-starter-function-http"
-		val f2SpringFunctionRSocket = ":f2-spring:function:f2-spring-boot-starter-function-rsocket"
+		const val f2SpringFunction = ":f2-spring:function:f2-spring-boot-starter-function"
+		const val f2SpringFunctionHttp = ":f2-spring:function:f2-spring-boot-starter-function-http"
+		const val f2SpringFunctionRSocket = ":f2-spring:function:f2-spring-boot-starter-function-rsocket"
 	}
 
 	object Sample {
-		val f2SampleHttp = ":sample:f2-sample-http"
-		val f2SampleRSocket = ":sample:f2-sample-rsocket"
+		const val f2SampleHttp = ":sample:f2-sample-http"
+		const val f2SampleRSocket = ":sample:f2-sample-rsocket"
 	}
 
 }
