@@ -1,5 +1,6 @@
 package org.springframework.cloud.function.context.config
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -328,7 +329,7 @@ class CoroutinesUtilsTest {
         val inputFlux = Flux.just("a", "b", "c")
         invokeSuspendingConsumer(consumer as Function2<*, *, *>, inputFlux)
 
-        Thread.sleep(100)
+        delay(100)
         assertEquals(listOf("a", "b", "c"), processed)
     }
 }
