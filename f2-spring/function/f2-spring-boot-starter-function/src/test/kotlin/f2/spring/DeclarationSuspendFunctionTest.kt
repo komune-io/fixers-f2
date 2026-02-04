@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 class DeclarationSuspendFunctionTest {
 
     @Test
-    fun `invokeFunction returns suspend function that delegates to F2Function`() = runBlocking {
+    suspend fun `invokeFunction returns suspend function that delegates to F2Function`() {
         val f2Function = F2Function<Any, Any> { flow ->
             flow.map { (it as String).uppercase() }
         }
@@ -27,7 +27,7 @@ class DeclarationSuspendFunctionTest {
     }
 
     @Test
-    fun `invokeFunction preserves flow transformation`() = runBlocking {
+    suspend fun `invokeFunction preserves flow transformation`() {
         val f2Function = F2Function<Any, Any> { flow ->
             flow.map { (it as Int) * 2 }
         }
@@ -40,7 +40,7 @@ class DeclarationSuspendFunctionTest {
     }
 
     @Test
-    fun `invokeConsumer returns suspend function that delegates to F2Consumer`() = runBlocking {
+    suspend fun `invokeConsumer returns suspend function that delegates to F2Consumer`() {
         val consumed = mutableListOf<Any>()
         val f2Consumer = F2Consumer<Any> { flow ->
             flow.toList(consumed)
@@ -54,7 +54,7 @@ class DeclarationSuspendFunctionTest {
     }
 
     @Test
-    fun `invokeConsumer processes all flow elements`() = runBlocking {
+    suspend fun `invokeConsumer processes all flow elements`() {
         var sum = 0
         val f2Consumer = F2Consumer<Any> { flow ->
             flow.collect { sum += it as Int }
@@ -68,7 +68,7 @@ class DeclarationSuspendFunctionTest {
     }
 
     @Test
-    fun `invokeSupplier returns suspend function that delegates to F2Supplier`() = runBlocking {
+    suspend fun `invokeSupplier returns suspend function that delegates to F2Supplier`() {
         val f2Supplier = F2Supplier<Any> {
             flowOf("supplied1", "supplied2")
         }
@@ -80,7 +80,7 @@ class DeclarationSuspendFunctionTest {
     }
 
     @Test
-    fun `invokeSupplier returns flow from supplier`() = runBlocking {
+    suspend fun `invokeSupplier returns flow from supplier`() {
         val f2Supplier = F2Supplier<Any> {
             flowOf(10, 20, 30)
         }
@@ -92,7 +92,7 @@ class DeclarationSuspendFunctionTest {
     }
 
     @Test
-    fun `invokeFunction handles empty flow`() = runBlocking {
+    suspend fun `invokeFunction handles empty flow`() {
         val f2Function = F2Function<Any, Any> { flow ->
             flow.map { it }
         }
@@ -105,7 +105,7 @@ class DeclarationSuspendFunctionTest {
     }
 
     @Test
-    fun `invokeConsumer handles empty flow`() = runBlocking {
+    suspend fun `invokeConsumer handles empty flow`() {
         var invoked = false
         val f2Consumer = F2Consumer<Any> { flow ->
             flow.collect { invoked = true }
@@ -119,7 +119,7 @@ class DeclarationSuspendFunctionTest {
     }
 
     @Test
-    fun `invokeSupplier can return empty flow`() = runBlocking {
+    suspend fun `invokeSupplier can return empty flow`() {
         val f2Supplier = F2Supplier<Any> {
             flowOf()
         }

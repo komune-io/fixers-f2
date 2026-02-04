@@ -5,14 +5,13 @@ import f2.dsl.fnc.F2Function
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class MapToEnvelopeTest {
 
     @Test
-    fun `test mapToEnvelope with default ID`() = runTest {
+    suspend fun `test mapToEnvelope with default ID`() {
         val function = F2Function<Int, String> { flow -> flow.map { it.toString() } }
         val result = function.mapToEnvelope().invoke(flowOf(1, 2, 3)).toList()
         assertThat(result).hasSize(3)
@@ -20,7 +19,7 @@ class MapToEnvelopeTest {
     }
 
     @Test
-    fun `test mapToEnvelope with custom ID`() = runTest {
+    suspend fun `test mapToEnvelope with custom ID`() {
         val function = F2Function<Int, String> { flow -> flow.map { it.toString() } }
         val result = function.mapToEnvelope { it.toString() }.invoke(flowOf(1, 2, 3)).toList()
         assertThat(result).hasSize(3)
@@ -29,7 +28,7 @@ class MapToEnvelopeTest {
 
 
     @Test
-    fun `test mapToEnvelope with default ID function`() = runTest {
+    suspend fun `test mapToEnvelope with default ID function`() {
         val flow = flowOf(1, 2, 3)
         val result = flow.mapToEnvelope().toList()
         assertThat(result).hasSize(3)
@@ -40,7 +39,7 @@ class MapToEnvelopeTest {
     }
 
     @Test
-    fun `test mapToEnvelope with custom ID function`() = runTest {
+    suspend fun `test mapToEnvelope with custom ID function`() {
         val flow = flowOf("a", "b", "c")
         val result = flow.mapToEnvelope { it.uppercase() }.toList()
         assertThat(result).hasSize(3)
@@ -51,7 +50,7 @@ class MapToEnvelopeTest {
     }
 
     @Test
-    fun `test mapToEnvelope with type parameter`() = runTest {
+    suspend fun `test mapToEnvelope with type parameter`() {
         val flow = flowOf(1, 2, 3)
         val result = flow.mapToEnvelope(type = "IntType") { "id-$it" }.toList()
         assertThat(result).hasSize(3)
@@ -61,7 +60,7 @@ class MapToEnvelopeTest {
     }
 
     @Test
-    fun `test mapEnvelope transforms envelope data`() = runTest {
+    suspend fun `test mapEnvelope transforms envelope data`() {
         val envelope = 10.asEnvelope(id = "test-id")
         val result = envelope.mapEnvelope<Int, Int>(transform = { it * 2 })
         assertThat(result.id).isEqualTo("test-id")
@@ -69,7 +68,7 @@ class MapToEnvelopeTest {
     }
 
     @Test
-    fun `test mapEnvelopeWithType transforms with explicit type`() = runTest {
+    suspend fun `test mapEnvelopeWithType transforms with explicit type`() {
         val envelope = 10.asEnvelope(id = "test-id")
         val result = envelope.mapEnvelopeWithType(
             transform = { it.toString() },
@@ -81,7 +80,7 @@ class MapToEnvelopeTest {
     }
 
     @Test
-    fun `test mapEnvelopesReified transforms flow of envelopes`() = runTest {
+    suspend fun `test mapEnvelopesReified transforms flow of envelopes`() {
         val flow = flowOf(
             1.asEnvelope(id = "1"),
             2.asEnvelope(id = "2")
@@ -92,7 +91,7 @@ class MapToEnvelopeTest {
     }
 
     @Test
-    fun `test mapEnvelopes transforms with type`() = runTest {
+    suspend fun `test mapEnvelopes transforms with type`() {
         val flow = flowOf(
             1.asEnvelope(id = "1"),
             2.asEnvelope(id = "2")

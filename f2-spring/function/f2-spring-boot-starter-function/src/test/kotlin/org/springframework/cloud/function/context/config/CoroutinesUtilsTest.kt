@@ -317,7 +317,7 @@ class CoroutinesUtilsTest {
     }
 
     @Test
-    fun `invokeSuspendingConsumer processes Flow input`() {
+    suspend fun `invokeSuspendingConsumer processes Flow input`() {
         val processed = mutableListOf<String>()
         val consumer: suspend (Flow<String>) -> Unit = { flow ->
             runBlocking {

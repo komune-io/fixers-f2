@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -33,7 +32,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 class HttpF2ClientTest {
 
 	@Test
-	fun testBuilderExtensionFunctionApi(): Unit = runTest {
+    fun testBuilderExtensionFunctionApi() {
 		HttpClientBuilder{
 			install(Logging) {
 				logger = Logger.DEFAULT
@@ -70,7 +69,7 @@ class HttpF2ClientTest {
 	}
 
 //	@Test
-	fun auth(): Unit = runTest {
+	suspend fun auth() {
 		val client = HttpClient {
 			install(ContentNegotiation) {
 				json(Json {
@@ -104,7 +103,7 @@ class HttpF2ClientTest {
 	}
 
 //	@Test
-	fun test(): Unit = runTest {
+	suspend fun test() {
 		val client = ServerClient(
 			client = HttpF2Client(
 				httpClient = HttpClient(Java) {

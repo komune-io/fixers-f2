@@ -5,14 +5,13 @@ import f2.dsl.cqrs.envelope.asEnvelope
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class PairEnvelopeTest {
 
     @Test
-    fun `test pairEnvelope with simple transformation`() = runTest {
+    suspend fun `test pairEnvelope with simple transformation`() {
         val flow = flowOf(
             1.asEnvelope(id = "1"),
             2.asEnvelope(id = "2"),
@@ -31,7 +30,7 @@ class PairEnvelopeTest {
     }
 
     @Test
-    fun `test pairEnvelope with chunking`() = runTest {
+    suspend fun `test pairEnvelope with chunking`() {
         val flow = flowOf(
             Envelope(id = "1", data = 1, type = 1::class.simpleName!!),
             Envelope(id = "2", data = 2, type = 2::class.simpleName!!),

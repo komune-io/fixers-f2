@@ -13,9 +13,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.reflect.TypeInfo
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
@@ -37,7 +37,7 @@ class HttpF2ClientMockTest {
     }
 
     @Test
-    fun `supplier returns single response from GET request`() = runTest {
+    suspend fun `supplier returns single response from GET request`() {
         val mockClient = HttpClient(MockEngine { request ->
             assertThat(request.method).isEqualTo(HttpMethod.Get)
             assertThat(request.url.encodedPath).isEqualTo("/test-route")
@@ -66,7 +66,7 @@ class HttpF2ClientMockTest {
     }
 
     @Test
-    fun `supplier returns collection items individually in flow`() = runTest {
+    suspend fun `supplier returns collection items individually in flow`() {
         val mockClient = HttpClient(MockEngine { request ->
             respond(
                 content = """[{"result": "first", "count": 1}, {"result": "second", "count": 2}]""",
@@ -93,7 +93,7 @@ class HttpF2ClientMockTest {
     }
 
     @Test
-    fun `function posts JSON and returns response`() = runTest {
+    suspend fun `function posts JSON and returns response`() {
         val mockClient = HttpClient(MockEngine { request ->
             assertThat(request.method).isEqualTo(HttpMethod.Post)
             assertThat(request.url.encodedPath).isEqualTo("/process")
@@ -124,7 +124,7 @@ class HttpF2ClientMockTest {
     }
 
     @Test
-    fun `function handles multiple inputs`() = runTest {
+    suspend fun `function handles multiple inputs`() {
         var requestCount = 0
 
         val mockClient = HttpClient(MockEngine { request ->
@@ -159,7 +159,7 @@ class HttpF2ClientMockTest {
     }
 
     @Test
-    fun `function returns collection items as flow`() = runTest {
+    suspend fun `function returns collection items as flow`() {
         val mockClient = HttpClient(MockEngine { request ->
             respond(
                 content = """[{"result": "a", "count": 1}, {"result": "b", "count": 2}]""",
@@ -185,7 +185,7 @@ class HttpF2ClientMockTest {
     }
 
     @Test
-    fun `consumer posts data without expecting response body`() = runTest {
+    suspend fun `consumer posts data without expecting response body`() {
         var receivedRequest = false
 
         val mockClient = HttpClient(MockEngine { request ->
@@ -214,7 +214,7 @@ class HttpF2ClientMockTest {
     }
 
     @Test
-    fun `supplier throws F2Exception on error response`() = runTest {
+    suspend fun `supplier throws F2Exception on error response`() {
         val mockClient = HttpClient(MockEngine { request ->
             respondError(
                 status = HttpStatusCode.InternalServerError,
@@ -240,7 +240,7 @@ class HttpF2ClientMockTest {
     }
 
     @Test
-    fun `function throws F2Exception on error response`() = runTest {
+    suspend fun `function throws F2Exception on error response`() {
         val mockClient = HttpClient(MockEngine { request ->
             respondError(
                 status = HttpStatusCode.BadRequest,
@@ -267,7 +267,7 @@ class HttpF2ClientMockTest {
     }
 
     @Test
-    fun `supplier handles F2Error JSON response`() = runTest {
+    suspend fun `supplier handles F2Error JSON response`() {
         val errorJson = """{
             "id": "error-123",
             "timestamp": "2024-01-01T00:00:00Z",
@@ -302,7 +302,7 @@ class HttpF2ClientMockTest {
     }
 
     @Test
-    fun `function posts List type content in single request`() = runTest {
+    suspend fun `function posts List type content in single request`() {
         var requestCount = 0
 
         val mockClient = HttpClient(MockEngine { request ->
@@ -339,7 +339,7 @@ class HttpF2ClientMockTest {
     }
 
     @Test
-    fun `client builds correct URL with base and route`() = runTest {
+    suspend fun `client builds correct URL with base and route`() {
         var capturedUrl: String? = null
 
         val mockClient = HttpClient(MockEngine { request ->
@@ -367,7 +367,7 @@ class HttpF2ClientMockTest {
     }
 
     @Test
-    fun `function handles empty flow input`() = runTest {
+    suspend fun `function handles empty flow input`() {
         var requestCount = 0
 
         val mockClient = HttpClient(MockEngine { request ->
@@ -390,7 +390,7 @@ class HttpF2ClientMockTest {
             responseTypeInfo = TypeInfo(TestResponse::class, typeOf<TestResponse>())
         )
 
-        val results = function.invoke(kotlinx.coroutines.flow.emptyFlow()).toList()
+        val results = function.invoke(emptyFlow()).toList()
 
         assertThat(results).isEmpty()
         assertThat(requestCount).isEqualTo(0)
