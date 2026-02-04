@@ -2,14 +2,13 @@ package f2.dsl.fnc.operators
 
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class FlattenConcurrentlyTest {
 
     @Test
-    fun `test flattenConcurrently with Flow of Flows`() = runTest {
+    suspend fun `test flattenConcurrently with Flow of Flows`() {
         val flow = flowOf(
             flowOf(1, 2, 3),
             flowOf(4, 5, 6),
@@ -20,7 +19,7 @@ class FlattenConcurrentlyTest {
     }
 
     @Test
-    fun `test flattenConcurrently with Flow of Lists`() = runTest {
+    suspend fun `test flattenConcurrently with Flow of Lists`() {
         val flow = flowOf(
             listOf(1, 2, 3),
             listOf(4, 5, 6),
@@ -31,7 +30,7 @@ class FlattenConcurrentlyTest {
     }
 
     @Test
-    fun `test flattenConcurrently with custom concurrency`() = runTest {
+    suspend fun `test flattenConcurrently with custom concurrency`() {
         val flow = flowOf(
             listOf(1, 2, 3),
             listOf(4, 5, 6),

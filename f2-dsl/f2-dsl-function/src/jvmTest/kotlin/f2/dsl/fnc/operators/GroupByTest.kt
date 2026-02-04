@@ -2,14 +2,13 @@ package f2.dsl.fnc.operators
 
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class GroupByTest {
 
     @Test
-    fun `test groupBy with integers`() = runTest {
+    suspend fun `test groupBy with integers`() {
         val flow = flowOf(1, 2, 3, 4, 5, 6)
         val result = flow.groupBy { it % 2 }.toList()
         val evenGroup = result.first { it.first == 0 }.second.toList()
@@ -19,7 +18,7 @@ class GroupByTest {
     }
 
     @Test
-    fun `test groupBy with strings`() = runTest {
+    suspend fun `test groupBy with strings`() {
         val flow = flowOf("apple", "banana", "apricot", "blueberry")
         val result = flow.groupBy { it.first() }.toList()
         val aGroup = result.first { it.first == 'a' }.second.toList()

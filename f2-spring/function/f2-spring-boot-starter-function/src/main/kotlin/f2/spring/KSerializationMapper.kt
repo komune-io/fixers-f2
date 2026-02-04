@@ -36,6 +36,7 @@ class KSerializationMapper(
         val defaultJson = Json {
             ignoreUnknownKeys = true
         }
+        private const val LOG_SERIALIZATION_ERROR = "Ignored Error while serializing {}"
     }
     private val serializerCache: MutableMap<Type, KSerializer<Any>> =
         ConcurrentReferenceHashMap<Type, KSerializer<Any>>()
@@ -92,12 +93,12 @@ class KSerializationMapper(
             try {
                 jsonBytes = mapper.encodeToString(ser, value).toByteArray()
             } catch (e: Exception) {
-                logger.debug("Ignored Error while serializing {}", value, e)
+                logger.debug(LOG_SERIALIZATION_ERROR, value, e)
                 // Mandatory to deserialize Collections.SingletonMap used by spring boot rsocket
                 try {
                     jsonBytes = ObjectMapper().writeValueAsBytes(value)
                 } catch (e: java.lang.Exception) {
-                    logger.debug("Ignored Error while serializing {}", value, e)
+                    logger.debug(LOG_SERIALIZATION_ERROR, value, e)
                     //ignore and let other converters have a chance
                 }
             }
@@ -109,7 +110,7 @@ class KSerializationMapper(
         return try {
             mapper.encodeToString(value)
         } catch (e: SerializationException) {
-            logger.debug("Ignored Error while serializing {}", value, e)
+            logger.debug(LOG_SERIALIZATION_ERROR, value, e)
             return "Cannot convert to JSON"
         }
     }
@@ -120,7 +121,7 @@ class KSerializationMapper(
             try {
                 kotlinx.serialization.serializer(type)
             } catch (e: Exception) {
-                logger.debug("Ignored Error while serializing {}", type, e)
+                logger.debug(LOG_SERIALIZATION_ERROR, type, e)
                 JsonElement.serializer() as KSerializer<Any>
             }
         }

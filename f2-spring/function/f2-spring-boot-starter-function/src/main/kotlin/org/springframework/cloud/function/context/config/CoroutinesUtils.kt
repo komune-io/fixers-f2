@@ -89,7 +89,14 @@ private fun getContinuationTypeArguments(type: Type): Type {
 	return wildcardType.lowerBounds[0]
 }
 
+@Suppress("UNCHECKED_CAST")
 fun invokeSuspendingFunction(kotlinLambdaTarget: Any, arg0: Any): Flux<Any> {
+	require(kotlinLambdaTarget is Function2<*, *, *>) {
+		"kotlinLambdaTarget must be a Function2, but was ${kotlinLambdaTarget::class.qualifiedName}"
+	}
+	require(arg0 is Flux<*>) {
+		"arg0 must be a Flux, but was ${arg0::class.qualifiedName}"
+	}
 	val function = kotlinLambdaTarget as SuspendFunction
 	val flux = arg0 as Flux<Any>
 	return mono(Dispatchers.Unconfined) {
@@ -101,21 +108,11 @@ fun invokeSuspendingFunction(kotlinLambdaTarget: Any, arg0: Any): Flux<Any> {
 	}
 }
 
-// KOMUNE Changes Start
-// allow suspend () -> Any? to be invoked
-//fun invokeSuspendingSupplier(kotlinLambdaTarget: Any): Flux<Any> {
-//	val supplier = kotlinLambdaTarget as SuspendSupplier
-//	return mono(Dispatchers.Unconfined) {
-//		suspendCoroutineUninterceptedOrReturn<Flow<Any>> {
-//			supplier.invoke(it)
-//		}
-//	}.flatMapMany {
-//		it.asFlux()
-//	}
-//}
-
-
+@Suppress("UNCHECKED_CAST")
 fun invokeSuspendingSupplier(kotlinLambdaTarget: Any): Flux<Any> {
+	require(kotlinLambdaTarget is Function1<*, *>) {
+		"kotlinLambdaTarget must be a Function1, but was ${kotlinLambdaTarget::class.qualifiedName}"
+	}
 	val supplier = kotlinLambdaTarget as SuspendSupplier
 	return mono(Dispatchers.Unconfined) {
 		val result = suspendCoroutineUninterceptedOrReturn<Any> {
@@ -134,12 +131,18 @@ fun invokeSuspendingSupplier(kotlinLambdaTarget: Any): Flux<Any> {
 }
 //KOMUNE Changes End
 
+@Suppress("UNCHECKED_CAST")
 fun invokeSuspendingConsumer(kotlinLambdaTarget: Any, arg0: Any) {
+	require(kotlinLambdaTarget is Function2<*, *, *>) {
+		"kotlinLambdaTarget must be a Function2, but was ${kotlinLambdaTarget::class.qualifiedName}"
+	}
+	require(arg0 is Flux<*>) {
+		"arg0 must be a Flux, but was ${arg0::class.qualifiedName}"
+	}
 	val consumer = kotlinLambdaTarget as SuspendConsumer
-	val flux = arg0 as Flux<*>
 	mono(Dispatchers.Unconfined) {
 		suspendCoroutineUninterceptedOrReturn<Unit> {
-			consumer.invoke(flux.asFlow(), it)
+			consumer.invoke(arg0.asFlow(), it)
 		}
 	}.subscribe()
 }

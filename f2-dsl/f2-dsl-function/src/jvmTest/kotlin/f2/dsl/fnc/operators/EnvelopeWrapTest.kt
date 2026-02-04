@@ -6,14 +6,13 @@ import f2.dsl.fnc.f2Function
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class EnvelopeWrapTest {
 
     @Test
-    fun `wrap message in envelope`() = runTest {
+    suspend fun `wrap message in envelope`() {
         val myFunction: F2Function<Letter, String> = f2Function { msg ->
             msg.content
         }

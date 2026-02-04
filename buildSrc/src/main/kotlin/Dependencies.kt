@@ -85,6 +85,10 @@ object Dependencies {
 			fun clientRsocket(scope: Scope) = scope.add(
 				"io.rsocket.kotlin:rsocket-ktor-client:${Versions.rsocket}"
 			)
+
+			fun clientMock(scope: Scope) = scope.add(
+				"io.ktor:ktor-client-mock:${Versions.Kotlin.ktor}"
+			)
 		}
 	}
 

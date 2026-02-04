@@ -19,6 +19,7 @@ dependencies {
     Dependencies.Mpp.Ktor.client(::commonMainApi, ::jvmMainApi, ::jsMainApi)
 
     Dependencies.Jvm.Test.junit(::jvmTestImplementation)
+    Dependencies.Mpp.Ktor.clientMock(::jvmTestImplementation)
 
     jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http"))
 

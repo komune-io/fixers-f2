@@ -7,14 +7,13 @@ import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class OperatorsTest {
 
     @Test
-    fun `test chunk, flattenConcurrently, groupBy, mapToEnvelope, pairEnvelope integration`() = runTest {
+    suspend fun `test chunk, flattenConcurrently, groupBy, mapToEnvelope, pairEnvelope integration`() {
         // Initial flow of integers
         // Data: 1, 2, 3, 4, 5, 6, 7, 8, 9
         val initialFlow: Flow<Int> = flowOf(1, 2, 3, 4, 5, 6, 7, 8, 9)

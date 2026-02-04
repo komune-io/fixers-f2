@@ -9,6 +9,11 @@ import org.assertj.core.api.Assertions
 
 open class F2SpringContextStep: F2SpringStep(), En {
 
+	companion object {
+		private const val SEPARATOR_LINE = "////////////////////////////////////////////////////////"
+		private const val PREFERRED_JSON_MAPPER_PROPERTY = "spring.cloud.function.preferred-json-mapper"
+	}
+
 	init {
 		prepareSteps()
 
@@ -18,16 +23,16 @@ open class F2SpringContextStep: F2SpringStep(), En {
 
 		When("I start a valid spring application context") {
 			bag.httpPort = Random.nextInt(from = 6000, until = 6999)
-			println("////////////////////////////////////////////////////////")
-			println("////////////////////////////////////////////////////////")
-			println(System.getProperty("spring.cloud.function.preferred-json-mapper"))
-			println("////////////////////////////////////////////////////////")
-			println("////////////////////////////////////////////////////////")
+			println(SEPARATOR_LINE)
+			println(SEPARATOR_LINE)
+			println(System.getProperty(PREFERRED_JSON_MAPPER_PROPERTY))
+			println(SEPARATOR_LINE)
+			println(SEPARATOR_LINE)
 			bag.applicationContext = ApplicationContextBuilder().create(
 				types = arrayOf(ApplicationContextBuilder.SimpleConfiguration::class.java),
 				config = mapOf(
 					"server.port" to "${bag.httpPort}",
-					"spring.cloud.function.preferred-json-mapper" to System.getProperty("spring.cloud.function.preferred-json-mapper")
+					PREFERRED_JSON_MAPPER_PROPERTY to System.getProperty(PREFERRED_JSON_MAPPER_PROPERTY)
 				)
 			)
 		}
