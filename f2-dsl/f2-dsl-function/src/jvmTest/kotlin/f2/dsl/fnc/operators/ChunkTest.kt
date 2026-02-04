@@ -31,4 +31,41 @@ class ChunkTest {
         val result = flow.chunk(chunkSize).toList()
         assertThat(result).isEqualTo(listOf(listOf(1, 2), listOf(3, 4), listOf(5)))
     }
+
+    @Test
+    fun `test chunk with empty flow`() = runTest {
+        val flow = flowOf<Int>()
+        val result = flow.chunk(3).toList()
+        assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun `test chunkFlow transforms chunks to flows`() = runTest {
+        val flow = flowOf(1, 2, 3, 4)
+        val result = flow.chunkFlow(2) { chunk ->
+            flowOf(*chunk.map { it * 10 }.toTypedArray())
+        }.toList().map { it.toList() }
+        assertThat(result).isEqualTo(listOf(listOf(10, 20), listOf(30, 40)))
+    }
+
+    @Test
+    fun `test chunkFlow with remaining elements`() = runTest {
+        val flow = flowOf(1, 2, 3, 4, 5)
+        val result = flow.chunkFlow(2) { chunk ->
+            flowOf(*chunk.toTypedArray())
+        }.toList().map { it.toList() }
+        assertThat(result).isEqualTo(listOf(listOf(1, 2), listOf(3, 4), listOf(5)))
+    }
+
+    @Test
+    fun `test chunkFlow with empty flow`() = runTest {
+        val flow = flowOf<Int>()
+        val result = flow.chunkFlow(3) { flowOf(*it.toTypedArray()) }.toList()
+        assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun `test CHUNK_DEFAULT_SIZE constant`() {
+        assertThat(CHUNK_DEFAULT_SIZE).isEqualTo(128)
+    }
 }
