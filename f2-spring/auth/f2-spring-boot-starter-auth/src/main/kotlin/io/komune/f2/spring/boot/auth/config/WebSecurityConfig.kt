@@ -88,9 +88,8 @@ abstract class WebSecurityConfig {
         addJwtParsingRules(http)
     }
 
-    @Suppress("UnusedParameter")
     private fun authenticate(
-        authentication: Mono<Authentication>, context: AuthorizationContext
+        authentication: Mono<Authentication>
     ): Mono<AuthorizationResult> {
         return authentication.map { auth ->
             if (auth !is JwtAuthenticationToken || auth.token == null) {
@@ -144,7 +143,7 @@ abstract class WebSecurityConfig {
     fun addMandatoryAuthRules(http: ServerHttpSecurity) {
         http.authorizeExchange { exchange ->
             exchange.anyExchange()
-                .access { authentication, context -> authenticate(authentication, context) }
+                .access { authentication, _ -> authenticate(authentication) }
         }
     }
 

@@ -17,7 +17,7 @@ open class F2SpringStep {
 			bag = F2SpringContextBag.init(scenario)
 		}
 
-		After { scenario: Scenario ->
+		After { _: Scenario ->
 			bag.applicationContext?.stop()
 		}
 	}
