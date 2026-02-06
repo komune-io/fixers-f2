@@ -2,6 +2,7 @@ package f2.spring.exception.config
 
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.exception.F2Exception
+import java.util.UUID
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.web.WebProperties
 import org.springframework.boot.webflux.autoconfigure.error.DefaultErrorWebExceptionHandler
@@ -17,7 +18,6 @@ import org.springframework.web.reactive.result.view.ViewResolver
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import tools.jackson.module.kotlin.KotlinInvalidNullException
-import java.util.UUID
 
 @Configuration
 @Suppress("MagicNumber")

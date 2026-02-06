@@ -1,6 +1,7 @@
 package f2.spring
 
 import f2.dsl.cqrs.exception.F2Exception
+import java.io.StringReader
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.io.StringReader
 
 class KSerializationMapperTest {
 

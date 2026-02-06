@@ -23,10 +23,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;

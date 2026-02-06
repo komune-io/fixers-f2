@@ -1,11 +1,11 @@
 package f2.dsl.fnc.operators
 
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import f2.dsl.cqrs.envelope.Envelope
 import f2.dsl.cqrs.envelope.asEnvelope
 import f2.dsl.cqrs.envelope.asEnvelopeWithType
 import f2.dsl.fnc.F2Function
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf

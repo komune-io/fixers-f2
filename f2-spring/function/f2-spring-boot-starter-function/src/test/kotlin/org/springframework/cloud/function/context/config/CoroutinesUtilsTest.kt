@@ -1,5 +1,8 @@
 package org.springframework.cloud.function.context.config
 
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.WildcardType
+import kotlin.coroutines.Continuation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -12,9 +15,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import reactor.core.publisher.Flux
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.WildcardType
-import kotlin.coroutines.Continuation
 
 class CoroutinesUtilsTest {
 

@@ -1,9 +1,7 @@
 package f2.spring
 
-import tools.jackson.databind.ObjectMapper
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.exception.F2Exception
-import kotlinx.serialization.ExperimentalSerializationApi
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
@@ -11,6 +9,7 @@ import java.io.Reader
 import java.lang.reflect.Type
 import java.nio.charset.StandardCharsets
 import java.util.UUID
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.SerializationException
@@ -21,6 +20,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.cloud.function.json.JsonMapper
 import org.springframework.core.ResolvableType
 import org.springframework.util.ConcurrentReferenceHashMap
+import tools.jackson.databind.ObjectMapper
 
 /**
  * @author Dave Syer
