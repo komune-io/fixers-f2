@@ -3,7 +3,6 @@ package f2.bdd.spring.autoconfigure.steps
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions
-import org.springframework.cloud.function.context.FunctionCatalog
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry
 import reactor.core.publisher.Flux
 

@@ -1,13 +1,13 @@
 package f2.dsl.cqrs.error
 
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import f2.dsl.cqrs.Problem
 import kotlin.js.JsExport
 import kotlin.js.JsName
-import kotlinx.serialization.Serializable
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlinx.serialization.Serializable
 
 @JsExport
 @JsName("F2ErrorDTO")

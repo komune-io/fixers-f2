@@ -16,7 +16,9 @@
 
 package org.springframework.cloud.function.context.config;
 
+import com.google.gson.Gson;
 import f2.spring.KSerializationMapper;
+import io.cloudevents.spring.messaging.CloudEventMessageConverter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +26,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.SerializationFeature;
-import com.google.gson.Gson;
-import io.cloudevents.spring.messaging.CloudEventMessageConverter;
 import kotlinx.serialization.json.Json;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -61,7 +56,6 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.expression.BeanFactoryResolver;
-import org.springframework.core.KotlinDetector;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.convert.support.ConfigurableConversionService;
@@ -80,6 +74,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 import tools.jackson.datatype.joda.JodaModule;
 
 /**

@@ -18,18 +18,18 @@
 @file:Suppress("TooManyFunctions")
 package org.springframework.cloud.function.context.config
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactor.asFlux
-import kotlinx.coroutines.reactor.mono
-import reactor.core.publisher.Flux
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.asFlux
+import kotlinx.coroutines.reactor.mono
+import reactor.core.publisher.Flux
 
 /**
  * @author Adrien Poupard

@@ -1,10 +1,10 @@
 package f2.feature.cloudEvent.storming
 
-import tools.jackson.databind.ObjectMapper
 import f2.feature.cloudEvent.storming.entity.CloudEventEntityRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.repository.core.support.ReactiveRepositoryFactorySupport
+import tools.jackson.databind.ObjectMapper
 
 @Configuration
 class F2StormingCloudEventConfig {
