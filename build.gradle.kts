@@ -35,7 +35,7 @@ fixers {
 		organization = "komune-io"
 		projectKey = "komune-io_fixers-f2"
 		properties {
-			property("sonar.coverage.exclusions", "src/generated/**/*, **/models/*.kt")
+			property("sonar.coverage.exclusions", "f2-bdd/**/*")
 		}
 	}
 }
