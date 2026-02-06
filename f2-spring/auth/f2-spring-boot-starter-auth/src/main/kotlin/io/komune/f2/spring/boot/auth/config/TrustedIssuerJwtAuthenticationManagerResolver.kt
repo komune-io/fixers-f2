@@ -30,7 +30,7 @@ class TrustedIssuerJwtAuthenticationManagerResolver(
             }.subscribeOn(Schedulers.boundedElastic())
                 .cache(
                     { Duration.ofMillis(Long.MAX_VALUE) },
-                    { ex: Throwable? -> Duration.ZERO }
+                    { _: Throwable? -> Duration.ZERO }
                 ) { Duration.ZERO }
         }
     }

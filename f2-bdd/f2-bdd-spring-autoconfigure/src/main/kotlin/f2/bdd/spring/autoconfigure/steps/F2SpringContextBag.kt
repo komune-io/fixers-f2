@@ -16,8 +16,12 @@ class F2SpringContextBag {
 					uuid = UUID.randomUUID().toString()
 				}
 			}
-			return cucumbers[scenario.id]!!
+			return cucumbers.getValue(scenario.id)
 		}
+
+        fun clear(scenario: Scenario) {
+            cucumbers.remove(scenario.id)
+        }
 	}
 
 	@SuppressWarnings("MagicNumber")

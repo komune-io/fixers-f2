@@ -22,7 +22,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtIssuerReactiveAuthenticationManagerResolver
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter
 import org.springframework.security.web.server.SecurityWebFilterChain
-import org.springframework.security.web.server.authorization.AuthorizationContext
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import reactor.core.publisher.Flux
@@ -88,9 +87,8 @@ abstract class WebSecurityConfig {
         addJwtParsingRules(http)
     }
 
-    @Suppress("UnusedParameter")
     private fun authenticate(
-        authentication: Mono<Authentication>, context: AuthorizationContext
+        authentication: Mono<Authentication>
     ): Mono<AuthorizationResult> {
         return authentication.map { auth ->
             if (auth !is JwtAuthenticationToken || auth.token == null) {
@@ -144,7 +142,7 @@ abstract class WebSecurityConfig {
     fun addMandatoryAuthRules(http: ServerHttpSecurity) {
         http.authorizeExchange { exchange ->
             exchange.anyExchange()
-                .access { authentication, context -> authenticate(authentication, context) }
+                .access { authentication, _ -> authenticate(authentication) }
         }
     }
 
