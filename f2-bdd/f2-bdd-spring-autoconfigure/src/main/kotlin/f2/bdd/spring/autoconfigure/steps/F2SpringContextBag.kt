@@ -18,6 +18,10 @@ class F2SpringContextBag {
 			}
 			return cucumbers.getValue(scenario.id)
 		}
+
+        fun clear(scenario: Scenario) {
+            cucumbers.remove(scenario.id)
+        }
 	}
 
 	@SuppressWarnings("MagicNumber")
