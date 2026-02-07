@@ -18,5 +18,5 @@ dependencies {
     Dependencies.Jvm.Test.springTest(::testImplementation)
 
     // OpenTelemetry SDK testing utilities (InMemorySpanExporter, etc.)
-    testImplementation("io.opentelemetry:opentelemetry-sdk-testing:${Versions.Observability.opentelemetry}")
+    Dependencies.Jvm.Observability.opentelemetrySdkTesting(::testImplementation)
 }

@@ -86,6 +86,10 @@ object Dependencies {
 				"io.rsocket.kotlin:rsocket-ktor-client:${Versions.rsocket}"
 			)
 
+			fun clientLogging(scope: Scope) = scope.add(
+				"io.ktor:ktor-client-logging:${Versions.Kotlin.ktor}"
+			)
+
 			fun clientMock(scope: Scope) = scope.add(
 				"io.ktor:ktor-client-mock:${Versions.Kotlin.ktor}"
 			)
@@ -180,6 +184,10 @@ object Dependencies {
 
 			fun micrometerRegistryOtlp(scope: Scope) = scope.add(
 				"io.micrometer:micrometer-registry-otlp:${Versions.Observability.micrometer}"
+			)
+
+			fun opentelemetrySdkTesting(scope: Scope) = scope.add(
+				"io.opentelemetry:opentelemetry-sdk-testing:${Versions.Observability.opentelemetry}"
 			)
 		}
 	}

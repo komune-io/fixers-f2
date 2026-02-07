@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    commonMainApi("io.ktor:ktor-client-logging:${Versions.Kotlin.ktor}")
+    Dependencies.Mpp.Ktor.clientLogging(::commonMainApi)
     commonMainApi(project(":f2-client:f2-client-core"))
     commonMainApi(project(":f2-client:f2-client-ktor:f2-client-ktor-http"))
 }
