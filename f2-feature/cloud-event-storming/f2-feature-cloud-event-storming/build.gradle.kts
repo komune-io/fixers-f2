@@ -1,6 +1,6 @@
 plugins {
-    id("io.komune.fixers.gradle.kotlin.jvm")
-    kotlin("plugin.spring")
+    alias(libs.plugins.fixers.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
 }
 
 dependencies {
@@ -8,9 +8,9 @@ dependencies {
     api(project(":f2-dsl:f2-dsl-cqrs"))
     api(project(":f2-dsl:f2-dsl-event"))
 
-    Dependencies.Jvm.Spring.webflux(::implementation)
-    Dependencies.Jvm.Spring.autoconfigure(::implementation)
+    implementation(libs.spring.boot.starter.webflux)
+    implementation(libs.spring.boot.autoconfigure)
 
-    Dependencies.Jvm.Spring.dataCommons(::implementation)
-    Dependencies.Jvm.Json.jackson(::implementation)
+    implementation(libs.bundles.spring.data.commons)
+    implementation(libs.jackson.module.kotlin)
 }

@@ -1,16 +1,15 @@
 
 plugins {
-    id("io.komune.fixers.gradle.kotlin.jvm")
-    id("io.komune.fixers.gradle.publish")
-    kotlin("plugin.spring")
-    kotlin("kapt")
+    alias(libs.plugins.fixers.kotlin.jvm)
+    alias(libs.plugins.fixers.publish)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlin.kapt)
 }
 
 dependencies {
-    Dependencies.Jvm.Spring.configurationProcessor(::kapt)
-    Dependencies.Jvm.Spring.security(::api)
-    Dependencies.Jvm.Spring.oauth2(::api)
-//    Dependencies.Jvm.Spring.autoconfigure(::implementation)
+    kapt(libs.spring.boot.configuration.processor)
+    api(libs.spring.boot.starter.security)
+    api(libs.bundles.spring.oauth2)
 }
 
 

@@ -1,18 +1,18 @@
 plugins {
-    id("io.komune.fixers.gradle.kotlin.jvm")
-    id("io.komune.fixers.gradle.publish")
-    id("org.jetbrains.kotlin.plugin.serialization")
+    alias(libs.plugins.fixers.kotlin.jvm)
+    alias(libs.plugins.fixers.publish)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
-    Dependencies.Jvm.Spring.cloudFunctionDep(::compileOnly)
-    Dependencies.Jvm.Spring.slf4J(::implementation)
+    compileOnly(libs.bundles.spring.cloud.function.dep)
+    implementation(libs.slf4j.api)
 
     api(project(":f2-dsl:f2-dsl-cqrs"))
     api(project(":f2-dsl:f2-dsl-function"))
 
-    Dependencies.Jvm.Kotlin.coroutines(::api)
-    Dependencies.Jvm.Spring.cloudFunction(::api)
+    api(libs.bundles.coroutines)
+    api(libs.bundles.spring.cloud.function)
 
     testImplementation(project(":f2-bdd:f2-bdd-spring-lambda"))
 }

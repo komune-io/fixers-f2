@@ -1,22 +1,22 @@
 plugins {
-    id("io.komune.fixers.gradle.kotlin.jvm")
-    id("io.komune.fixers.gradle.publish")
-    kotlin("kapt")
+    alias(libs.plugins.fixers.kotlin.jvm)
+    alias(libs.plugins.fixers.publish)
+    alias(libs.plugins.kotlin.kapt)
 }
 
 dependencies {
-    Dependencies.Jvm.Spring.configurationProcessor(::kapt)
+    kapt(libs.spring.boot.configuration.processor)
 
-    Dependencies.Jvm.Spring.actuator(::api)
+    api(libs.spring.boot.starter.actuator)
 
     // Spring Boot 4.0 starter that brings OpenTelemetry SDK and auto-configuration
-    Dependencies.Jvm.Spring.opentelemetry(::api)
+    api(libs.spring.boot.starter.opentelemetry)
 
     // FOR OtlpMetricsExportAutoConfiguration => management.otlp.metrics.export.url
-    Dependencies.Jvm.Observability.micrometerRegistryOtlp(::implementation)
+    implementation(libs.micrometer.registry.otlp)
 
-    Dependencies.Jvm.Test.springTest(::testImplementation)
+    testImplementation(libs.bundles.spring.test)
 
     // OpenTelemetry SDK testing utilities (InMemorySpanExporter, etc.)
-    Dependencies.Jvm.Observability.opentelemetrySdkTesting(::testImplementation)
+    testImplementation(libs.opentelemetry.sdk.testing)
 }

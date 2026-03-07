@@ -1,0 +1,147 @@
+[versions]
+fixers = "0.28.0-SNAPSHOT"
+kotlin = "2.3.0"
+spring-boot = "4.0.1"
+spring-framework = "7.0.1"
+spring-data = "4.0.0"
+spring-security = "7.0.0"
+spring-function = "5.0.0"
+spring-reactor = "4.0.5"
+jakarta-persistence = "3.2.0"
+ktor = "3.4.0"
+coroutines = "1.10.2"
+serialization = "1.10.0"
+datetime = "0.7.1"
+jackson = "3.0.3"
+slf4j = "2.0.17"
+junit = "6.0.2"
+junit-platform = "1.12.2"
+assertj = "3.27.7"
+cucumber = "7.33.0"
+cloudevents = "4.0.1"
+micrometer = "1.16.1"
+micrometer-tracing = "1.6.1"
+opentelemetry = "1.57.0"
+rsocket = "0.16.0"
+springdoc = "1.8.0"
+gson = "2.13.2"
+arrow = "2.2.1.1"
+
+[libraries]
+# Ktor
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-auth = { group = "io.ktor", name = "ktor-client-auth", version.ref = "ktor" }
+ktor-utils = { group = "io.ktor", name = "ktor-utils", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+ktor-client-java = { group = "io.ktor", name = "ktor-client-java", version.ref = "ktor" }
+ktor-client-js = { group = "io.ktor", name = "ktor-client-js", version.ref = "ktor" }
+ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
+ktor-client-mock = { group = "io.ktor", name = "ktor-client-mock", version.ref = "ktor" }
+ktor-serialization-jackson = { group = "io.ktor", name = "ktor-serialization-jackson", version.ref = "ktor" }
+
+# Kotlin
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-reactor = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor", version.ref = "coroutines" }
+kotlinx-coroutines-reactive = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactive", version.ref = "coroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "serialization" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "datetime" }
+
+# Spring Boot
+spring-boot-autoconfigure = { group = "org.springframework.boot", name = "spring-boot-autoconfigure", version.ref = "spring-boot" }
+spring-boot-configuration-processor = { group = "org.springframework.boot", name = "spring-boot-configuration-processor", version.ref = "spring-boot" }
+spring-boot-starter-security = { group = "org.springframework.boot", name = "spring-boot-starter-security", version.ref = "spring-boot" }
+spring-boot-starter-test = { group = "org.springframework.boot", name = "spring-boot-starter-test", version.ref = "spring-boot" }
+spring-boot-starter-actuator = { group = "org.springframework.boot", name = "spring-boot-starter-actuator", version.ref = "spring-boot" }
+spring-boot-starter-opentelemetry = { group = "org.springframework.boot", name = "spring-boot-starter-opentelemetry", version.ref = "spring-boot" }
+spring-boot-starter-webflux = { group = "org.springframework.boot", name = "spring-boot-starter-webflux", version.ref = "spring-boot" }
+spring-boot-restclient = { group = "org.springframework.boot", name = "spring-boot-restclient", version.ref = "spring-boot" }
+spring-boot-resttestclient = { group = "org.springframework.boot", name = "spring-boot-resttestclient", version.ref = "spring-boot" }
+spring-boot-testcontainers = { group = "org.springframework.boot", name = "spring-boot-testcontainers", version.ref = "spring-boot" }
+spring-boot-starter-data-redis-reactive = { group = "org.springframework.boot", name = "spring-boot-starter-data-redis-reactive", version.ref = "spring-boot" }
+spring-boot-starter-data-mongodb-reactive = { group = "org.springframework.boot", name = "spring-boot-starter-data-mongodb-reactive", version.ref = "spring-boot" }
+spring-boot-starter-data-r2dbc = { group = "org.springframework.boot", name = "spring-boot-starter-data-r2dbc", version.ref = "spring-boot" }
+
+# Spring Framework
+spring-context = { group = "org.springframework", name = "spring-context", version.ref = "spring-framework" }
+spring-web = { group = "org.springframework", name = "spring-web", version.ref = "spring-framework" }
+spring-tx = { group = "org.springframework", name = "spring-tx", version.ref = "spring-framework" }
+spring-data-commons = { group = "org.springframework.data", name = "spring-data-commons", version.ref = "spring-data" }
+
+# Spring Security
+spring-security-oauth2-resource-server = { group = "org.springframework.security", name = "spring-security-oauth2-resource-server", version.ref = "spring-security" }
+spring-security-oauth2-jose = { group = "org.springframework.security", name = "spring-security-oauth2-jose", version.ref = "spring-security" }
+
+# Spring Cloud Function
+spring-cloud-function-context = { group = "org.springframework.cloud", name = "spring-cloud-function-context", version.ref = "spring-function" }
+spring-cloud-function-kotlin = { group = "org.springframework.cloud", name = "spring-cloud-function-kotlin", version.ref = "spring-function" }
+spring-cloud-starter-function-webflux = { group = "org.springframework.cloud", name = "spring-cloud-starter-function-webflux", version.ref = "spring-function" }
+
+# Reactor
+reactor-test = { group = "io.projectreactor", name = "reactor-test", version.ref = "spring-reactor" }
+
+# Jakarta
+jakarta-persistence-api = { group = "jakarta.persistence", name = "jakarta.persistence-api", version.ref = "jakarta-persistence" }
+
+# JSON
+jackson-module-kotlin = { group = "tools.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+
+# Logging
+slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+
+# Test
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
+junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit" }
+junit-platform-suite = { group = "org.junit.platform", name = "junit-platform-suite", version.ref = "junit-platform" }
+assertj-core = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }
+
+# Cucumber
+cucumber-java = { group = "io.cucumber", name = "cucumber-java", version.ref = "cucumber" }
+cucumber-java8 = { group = "io.cucumber", name = "cucumber-java8", version.ref = "cucumber" }
+cucumber-junit-platform-engine = { group = "io.cucumber", name = "cucumber-junit-platform-engine", version.ref = "cucumber" }
+
+# Cloud Events
+cloudevents-spring = { group = "io.cloudevents", name = "cloudevents-spring", version.ref = "cloudevents" }
+
+# Observability
+micrometer-tracing-bridge-otel = { group = "io.micrometer", name = "micrometer-tracing-bridge-otel", version.ref = "micrometer-tracing" }
+micrometer-registry-otlp = { group = "io.micrometer", name = "micrometer-registry-otlp", version.ref = "micrometer" }
+opentelemetry-exporter-otlp = { group = "io.opentelemetry", name = "opentelemetry-exporter-otlp", version.ref = "opentelemetry" }
+opentelemetry-sdk-testing = { group = "io.opentelemetry", name = "opentelemetry-sdk-testing", version.ref = "opentelemetry" }
+
+# RSocket
+rsocket-ktor-client = { group = "io.rsocket.kotlin", name = "rsocket-ktor-client", version.ref = "rsocket" }
+
+# Springdoc
+springdoc-openapi-webflux-ui = { group = "org.springdoc", name = "springdoc-openapi-webflux-ui", version.ref = "springdoc" }
+
+# Arrow
+arrow-core = { group = "io.arrow-kt", name = "arrow-core", version.ref = "arrow" }
+arrow-optics = { group = "io.arrow-kt", name = "arrow-optics", version.ref = "arrow" }
+arrow-optics-ksp-plugin = { group = "io.arrow-kt", name = "arrow-optics-ksp-plugin", version.ref = "arrow" }
+
+[bundles]
+spring-data-commons = ["jakarta-persistence-api", "spring-context", "spring-data-commons"]
+spring-cloud-function = ["spring-cloud-function-context", "spring-cloud-function-kotlin", "spring-boot-autoconfigure", "jackson-module-kotlin", "spring-web"]
+spring-cloud-function-dep = ["gson", "cloudevents-spring"]
+spring-oauth2 = ["spring-security-oauth2-resource-server", "spring-security-oauth2-jose"]
+ktor-client-features = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
+coroutines = ["kotlinx-coroutines-core", "kotlinx-coroutines-reactor", "kotlinx-coroutines-reactive"]
+test-junit = ["junit-jupiter", "junit-jupiter-api", "junit-platform-suite", "assertj-core", "kotlinx-coroutines-test"]
+spring-test = ["spring-boot-starter-test", "junit-jupiter", "junit-jupiter-api", "junit-platform-suite", "assertj-core", "kotlinx-coroutines-test"]
+cucumber = ["cucumber-java", "cucumber-java8", "cucumber-junit-platform-engine"]
+
+[plugins]
+fixers-config = { id = "io.komune.fixers.gradle.config", version.ref = "fixers" }
+fixers-check = { id = "io.komune.fixers.gradle.check", version.ref = "fixers" }
+fixers-publish = { id = "io.komune.fixers.gradle.publish", version.ref = "fixers" }
+fixers-kotlin-jvm = { id = "io.komune.fixers.gradle.kotlin.jvm", version.ref = "fixers" }
+fixers-kotlin-mpp = { id = "io.komune.fixers.gradle.kotlin.mpp", version.ref = "fixers" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
