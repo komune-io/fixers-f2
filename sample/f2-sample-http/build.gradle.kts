@@ -1,7 +1,7 @@
 plugins {
-    id("org.springframework.boot")
-    id("io.komune.fixers.gradle.kotlin.jvm")
-    kotlin("plugin.spring")
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.fixers.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
 }
 
 repositories {
@@ -13,7 +13,7 @@ dependencies {
 
     implementation(project(":f2-spring:function:f2-spring-boot-starter-function-http"))
 
-    Dependencies.Jvm.Test.springTest(::testImplementation)
+    testImplementation(libs.bundles.spring.test)
 }
 
 tasks.withType<Test> {

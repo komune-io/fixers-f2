@@ -1,11 +1,10 @@
 plugins {
-    id("io.komune.fixers.gradle.kotlin.mpp")
-    id("io.komune.fixers.gradle.publish")
-    //id("io.komune.fixers.gradle.npm")
-    kotlin("plugin.serialization")
+    alias(libs.plugins.fixers.kotlin.mpp)
+    alias(libs.plugins.fixers.publish)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
-    Dependencies.Mpp.Ktor.utils(::commonMainApi)
+    commonMainApi(libs.ktor.utils)
     commonMainApi(project(":f2-dsl:f2-dsl-function"))
 }

@@ -13,6 +13,10 @@ pluginManagement {
 rootProject.name = "fixers-f2"
 
 include(
+	"f2-bom",
+)
+
+include(
 	"f2-bdd:f2-bdd-config",
 	"f2-bdd:f2-bdd-spring-autoconfigure",
 	"f2-bdd:f2-bdd-spring-lambda",

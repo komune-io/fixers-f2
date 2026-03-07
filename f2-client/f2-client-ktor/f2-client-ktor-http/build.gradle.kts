@@ -1,8 +1,7 @@
 plugins {
-    id("io.komune.fixers.gradle.kotlin.mpp")
-    id("io.komune.fixers.gradle.publish")
-    //id("io.komune.fixers.gradle.npm")
-    kotlin("plugin.serialization")
+    alias(libs.plugins.fixers.kotlin.mpp)
+    alias(libs.plugins.fixers.publish)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
@@ -11,15 +10,15 @@ dependencies {
     commonMainApi(project(":f2-dsl:f2-dsl-cqrs"))
     commonMainApi(project(":f2-client:f2-client-ktor:f2-client-ktor-common"))
 
-    Dependencies.Mpp.Ktor.clientCore(::commonMainApi)
-    Dependencies.Mpp.Ktor.clientAuth(::commonMainApi)
+    commonMainApi(libs.ktor.client.core)
+    commonMainApi(libs.ktor.client.auth)
 
+    commonMainApi(libs.bundles.ktor.client.features)
+    jvmMainApi(libs.ktor.client.java)
+    jsMainApi(libs.ktor.client.js)
 
-
-    Dependencies.Mpp.Ktor.client(::commonMainApi, ::jvmMainApi, ::jsMainApi)
-
-    Dependencies.Jvm.Test.junit(::jvmTestImplementation)
-    Dependencies.Mpp.Ktor.clientMock(::jvmTestImplementation)
+    jvmTestImplementation(libs.bundles.test.junit)
+    jvmTestImplementation(libs.ktor.client.mock)
 
     jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http"))
 

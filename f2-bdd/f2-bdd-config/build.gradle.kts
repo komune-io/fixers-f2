@@ -1,7 +1,7 @@
 plugins {
-	id("io.komune.fixers.gradle.kotlin.jvm")
+	alias(libs.plugins.fixers.kotlin.jvm)
 }
 
 dependencies {
-	Dependencies.Jvm.cucumber(::api)
+	api(libs.bundles.cucumber)
 }

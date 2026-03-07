@@ -1,11 +1,11 @@
 plugins {
-    id("io.komune.fixers.gradle.kotlin.jvm")
-    id("io.komune.fixers.gradle.publish")
-    kotlin("plugin.spring")
-    kotlin("kapt")
+    alias(libs.plugins.fixers.kotlin.jvm)
+    alias(libs.plugins.fixers.publish)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlin.kapt)
 }
 
 dependencies {
-    Dependencies.Jvm.Spring.cloudFunction(::api)
-    Dependencies.Jvm.Spring.springdocOpenapi(::api)
+    api(libs.bundles.spring.cloud.function)
+    api(libs.springdoc.openapi.webflux.ui)
 }
