@@ -136,6 +136,7 @@ dependencies {
 		api("io.micrometer:micrometer-registry-otlp:$micrometerVersion")
 		api("io.opentelemetry:opentelemetry-exporter-otlp:$opentelemetryVersion")
 		api("io.opentelemetry:opentelemetry-sdk-testing:$opentelemetryVersion")
+		api("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:$opentelemetryVersion")
 
 		// RSocket
 		api("io.rsocket.kotlin:rsocket-ktor-client:$rsocketVersion")
