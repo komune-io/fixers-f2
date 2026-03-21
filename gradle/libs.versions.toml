@@ -1,7 +1,7 @@
 [versions]
 fixers = "0.30.0-SNAPSHOT"
 kotlin = "2.3.0"
-spring-boot = "4.0.1"
+spring-boot = "4.0.4"
 spring-framework = "7.0.1"
 spring-data = "4.0.0"
 spring-security = "7.0.0"
