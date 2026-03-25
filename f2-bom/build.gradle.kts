@@ -26,9 +26,15 @@ dependencies {
 		api("io.komune.f2:f2-spring-boot-starter-auth-keycloak:${project.version}")
 		api("io.komune.f2:f2-spring-boot-starter-auth-tenant:${project.version}")
 		api("io.komune.f2:f2-spring-boot-exception-http:${project.version}")
+		api("io.komune.f2:f2-spring-boot-exception-http-webflux:${project.version}")
+		api("io.komune.f2:f2-spring-boot-exception-http-mvc:${project.version}")
 		api("io.komune.f2:f2-spring-boot-openapi:${project.version}")
+		api("io.komune.f2:f2-spring-boot-openapi-mvc:${project.version}")
+		api("io.komune.f2:f2-spring-boot-openapi-webflux:${project.version}")
 		api("io.komune.f2:f2-spring-boot-starter-function:${project.version}")
 		api("io.komune.f2:f2-spring-boot-starter-function-http:${project.version}")
+		api("io.komune.f2:f2-spring-boot-starter-function-http-webflux:${project.version}")
+		api("io.komune.f2:f2-spring-boot-starter-function-http-mvc:${project.version}")
 		api("io.komune.f2:f2-spring-boot-starter-observability-opentelemetry:${project.version}")
 
 		// ═══════════════════════════════════════════
@@ -89,6 +95,7 @@ dependencies {
 		api("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
 		api("org.springframework.boot:spring-boot-starter-opentelemetry:$springBootVersion")
 		api("org.springframework.boot:spring-boot-starter-webflux:$springBootVersion")
+		api("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
 		api("org.springframework.boot:spring-boot-restclient:$springBootVersion")
 		api("org.springframework.boot:spring-boot-resttestclient:$springBootVersion")
 		api("org.springframework.boot:spring-boot-testcontainers:$springBootVersion")
@@ -127,6 +134,7 @@ dependencies {
 		api("org.springframework.cloud:spring-cloud-function-context:$springFunctionVersion")
 		api("org.springframework.cloud:spring-cloud-function-kotlin:$springFunctionVersion")
 		api("org.springframework.cloud:spring-cloud-starter-function-webflux:$springFunctionVersion")
+		api("org.springframework.cloud:spring-cloud-starter-function-web:$springFunctionVersion")
 
 		// Cloud Events
 		api("io.cloudevents:cloudevents-spring:$cloudeventsVersion")
@@ -142,7 +150,9 @@ dependencies {
 		api("io.rsocket.kotlin:rsocket-ktor-client:$rsocketVersion")
 
 		// Springdoc
-		api("org.springdoc:springdoc-openapi-webflux-ui:$springdocVersion")
+		api("org.springdoc:springdoc-openapi-starter-common:$springdocVersion")
+		api("org.springdoc:springdoc-openapi-starter-webflux-ui:$springdocVersion")
+		api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
 
 		// Gson
 		api("com.google.code.gson:gson:$gsonVersion")
