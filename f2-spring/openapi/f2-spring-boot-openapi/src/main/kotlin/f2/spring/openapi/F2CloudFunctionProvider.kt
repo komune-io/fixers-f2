@@ -15,7 +15,6 @@ import org.springdoc.core.fn.RouterOperation
 import org.springdoc.core.properties.SpringDocConfigProperties
 import org.springdoc.core.providers.CloudFunctionProvider
 import org.springdoc.core.utils.SpringDocAnnotationsUtils
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.core.ResolvableType
@@ -24,12 +23,10 @@ import org.springframework.web.bind.annotation.RequestMethod
 
 class F2CloudFunctionProvider(
     private val springDocConfigProperties: SpringDocConfigProperties,
+    private val prefix: String,
 ) : CloudFunctionProvider, ApplicationContextAware {
 
     private lateinit var applicationContext: ApplicationContext
-
-    @Value("\${spring.cloud.function.web.path:}")
-    private var prefix: String = ""
 
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         this.applicationContext = applicationContext
@@ -134,7 +131,8 @@ class F2CloudFunctionProvider(
         }
         operation.responses(apiResponses)
 
-        val path = if (prefix.isEmpty()) "/$name" else "$prefix/$name"
+        val normalizedPrefix = prefix.trimEnd('/')
+        val path = if (normalizedPrefix.isEmpty()) "/$name" else "/$normalizedPrefix/$name".replace("//", "/")
 
         return RouterOperation().apply {
             setPath(path)
