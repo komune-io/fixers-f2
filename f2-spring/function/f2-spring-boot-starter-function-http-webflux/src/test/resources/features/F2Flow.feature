@@ -19,14 +19,14 @@ Feature:
     Then Flow: The result for "supplierFlow" is
       | supplierFlow |
 
-  Scenario: Execute flow consumer from the catalog
+  Scenario: Execute flow consumer with single input
     When Flow: Execute consumer "consumerFlow" with
       | alpine |
 
     Then Flow: The result for "consumerFlow" is
       | alpine |
 
-  Scenario: Execute flow consumer from the catalog
+  Scenario: Execute flow consumer with multiple inputs
     When Flow: Execute consumer "consumerFlow" with
       | alpine |
 

@@ -19,14 +19,14 @@ Feature:
     Then List: The result for "supplierList" is
       | supplierValuePureKotlinValue |
 
-  Scenario: Execute list consumer from the catalog
+  Scenario: Execute list consumer with single batch
     When List: Execute consumer "consumerList" with
       | alpine,tesla |
 
     Then List: The result for "consumerList" is
       | alpine,tesla |
 
-  Scenario: Execute list consumer from the catalog
+  Scenario: Execute list consumer with multiple batches
     When List: Execute consumer "consumerList" with
       | alpine,tesla |
 

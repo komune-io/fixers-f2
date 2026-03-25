@@ -44,7 +44,7 @@ class F2SampleHttpApp {
 
     @Bean
     fun uuids(): F2Supplier<String> = f2Supplier {
-        (0..UUID_COUNT)
+        (0 until UUID_COUNT)
             .asFlow()
             .onEach { delay(UUID_DELAY_MS) }
             .map { UUID.randomUUID().toString() }

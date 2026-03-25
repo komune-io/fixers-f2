@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.fixers.kotlin.jvm)
     alias(libs.plugins.fixers.publish)
     alias(libs.plugins.kotlin.spring)
-    alias(libs.plugins.kotlin.kapt)
 }
 
 dependencies {

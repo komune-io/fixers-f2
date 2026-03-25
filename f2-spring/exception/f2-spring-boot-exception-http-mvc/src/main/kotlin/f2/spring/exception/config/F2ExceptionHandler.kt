@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import tools.jackson.module.kotlin.KotlinInvalidNullException
 
+private const val EXCEPTION_HANDLER_ORDER = -2
+
 @Configuration
 @RestControllerAdvice
-@Suppress("MagicNumber")
-@Order(-2)
+@Order(EXCEPTION_HANDLER_ORDER)
 class F2ExceptionHandler {
 
     @ExceptionHandler(F2Exception::class)

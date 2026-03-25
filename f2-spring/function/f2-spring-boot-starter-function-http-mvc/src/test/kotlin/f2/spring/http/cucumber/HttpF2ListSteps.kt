@@ -21,9 +21,10 @@ class HttpF2ListSteps : HttpF2GenericsSteps<String, String>("List: "), En {
 	}
 
 	override fun transform(dataTable: DataTable): List<String> {
-		return dataTable.asList().map {
-			it.split(",")
-		}.flatten()
+		return dataTable.asList()
+			.flatMap { it.split(",") }
+			.map { it.trim() }
+			.filter { it.isNotEmpty() }
 	}
 
 	override fun consumerReceiver(): List<String> {
