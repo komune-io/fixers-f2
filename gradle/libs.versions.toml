@@ -79,6 +79,7 @@ spring-security-oauth2-jose = { group = "org.springframework.security", name = "
 # Spring Cloud Function
 spring-cloud-function-context = { group = "org.springframework.cloud", name = "spring-cloud-function-context", version.ref = "spring-function" }
 spring-cloud-function-kotlin = { group = "org.springframework.cloud", name = "spring-cloud-function-kotlin", version.ref = "spring-function" }
+spring-cloud-function-web = { group = "org.springframework.cloud", name = "spring-cloud-function-web", version.ref = "spring-function" }
 spring-cloud-starter-function-webflux = { group = "org.springframework.cloud", name = "spring-cloud-starter-function-webflux", version.ref = "spring-function" }
 spring-cloud-starter-function-web = { group = "org.springframework.cloud", name = "spring-cloud-starter-function-web", version.ref = "spring-function" }
 
