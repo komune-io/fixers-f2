@@ -49,8 +49,9 @@ include(
 )
 
 include(
-	"f2-spring:openapi:f2-spring-boot-openapi-webflux",
+	"f2-spring:openapi:f2-spring-boot-openapi",
 	"f2-spring:openapi:f2-spring-boot-openapi-mvc",
+	"f2-spring:openapi:f2-spring-boot-openapi-webflux",
 )
 
 include(

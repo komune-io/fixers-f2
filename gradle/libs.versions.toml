@@ -23,7 +23,7 @@ micrometer = "1.16.1"
 micrometer-tracing = "1.6.1"
 opentelemetry = "1.57.0"
 rsocket = "0.16.0"
-springdoc = "1.8.0"
+springdoc = "3.0.2"
 gson = "2.13.2"
 arrow = "2.2.1.1"
 
@@ -121,8 +121,9 @@ opentelemetry-sdk-extension-autoconfigure = { group = "io.opentelemetry", name =
 rsocket-ktor-client = { group = "io.rsocket.kotlin", name = "rsocket-ktor-client", version.ref = "rsocket" }
 
 # Springdoc
-springdoc-openapi-webflux-ui = { group = "org.springdoc", name = "springdoc-openapi-webflux-ui", version.ref = "springdoc" }
-springdoc-openapi-ui = { group = "org.springdoc", name = "springdoc-openapi-ui", version.ref = "springdoc" }
+springdoc-openapi-common = { group = "org.springdoc", name = "springdoc-openapi-starter-common", version.ref = "springdoc" }
+springdoc-openapi-webflux-ui = { group = "org.springdoc", name = "springdoc-openapi-starter-webflux-ui", version.ref = "springdoc" }
+springdoc-openapi-ui = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
 
 # Arrow
 arrow-core = { group = "io.arrow-kt", name = "arrow-core", version.ref = "arrow" }

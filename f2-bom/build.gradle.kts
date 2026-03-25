@@ -28,8 +28,9 @@ dependencies {
 		api("io.komune.f2:f2-spring-boot-exception-http:${project.version}")
 		api("io.komune.f2:f2-spring-boot-exception-http-webflux:${project.version}")
 		api("io.komune.f2:f2-spring-boot-exception-http-mvc:${project.version}")
-		api("io.komune.f2:f2-spring-boot-openapi-webflux:${project.version}")
+		api("io.komune.f2:f2-spring-boot-openapi:${project.version}")
 		api("io.komune.f2:f2-spring-boot-openapi-mvc:${project.version}")
+		api("io.komune.f2:f2-spring-boot-openapi-webflux:${project.version}")
 		api("io.komune.f2:f2-spring-boot-starter-function:${project.version}")
 		api("io.komune.f2:f2-spring-boot-starter-function-http:${project.version}")
 		api("io.komune.f2:f2-spring-boot-starter-function-http-webflux:${project.version}")
@@ -149,8 +150,9 @@ dependencies {
 		api("io.rsocket.kotlin:rsocket-ktor-client:$rsocketVersion")
 
 		// Springdoc
-		api("org.springdoc:springdoc-openapi-webflux-ui:$springdocVersion")
-		api("org.springdoc:springdoc-openapi-ui:$springdocVersion")
+		api("org.springdoc:springdoc-openapi-starter-common:$springdocVersion")
+		api("org.springdoc:springdoc-openapi-starter-webflux-ui:$springdocVersion")
+		api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
 
 		// Gson
 		api("com.google.code.gson:gson:$gsonVersion")

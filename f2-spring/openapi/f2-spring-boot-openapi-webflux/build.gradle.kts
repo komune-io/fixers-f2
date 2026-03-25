@@ -1,11 +1,9 @@
 plugins {
     alias(libs.plugins.fixers.kotlin.jvm)
     alias(libs.plugins.fixers.publish)
-    alias(libs.plugins.kotlin.spring)
-    alias(libs.plugins.kotlin.kapt)
 }
 
 dependencies {
-    api(libs.bundles.spring.cloud.function)
+    api(project(":f2-spring:openapi:f2-spring-boot-openapi"))
     api(libs.springdoc.openapi.webflux.ui)
 }
