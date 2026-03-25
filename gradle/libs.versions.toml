@@ -58,6 +58,7 @@ spring-boot-starter-test = { group = "org.springframework.boot", name = "spring-
 spring-boot-starter-actuator = { group = "org.springframework.boot", name = "spring-boot-starter-actuator", version.ref = "spring-boot" }
 spring-boot-starter-opentelemetry = { group = "org.springframework.boot", name = "spring-boot-starter-opentelemetry", version.ref = "spring-boot" }
 spring-boot-starter-webflux = { group = "org.springframework.boot", name = "spring-boot-starter-webflux", version.ref = "spring-boot" }
+spring-boot-starter-web = { group = "org.springframework.boot", name = "spring-boot-starter-web", version.ref = "spring-boot" }
 spring-boot-restclient = { group = "org.springframework.boot", name = "spring-boot-restclient", version.ref = "spring-boot" }
 spring-boot-resttestclient = { group = "org.springframework.boot", name = "spring-boot-resttestclient", version.ref = "spring-boot" }
 spring-boot-testcontainers = { group = "org.springframework.boot", name = "spring-boot-testcontainers", version.ref = "spring-boot" }
@@ -79,6 +80,7 @@ spring-security-oauth2-jose = { group = "org.springframework.security", name = "
 spring-cloud-function-context = { group = "org.springframework.cloud", name = "spring-cloud-function-context", version.ref = "spring-function" }
 spring-cloud-function-kotlin = { group = "org.springframework.cloud", name = "spring-cloud-function-kotlin", version.ref = "spring-function" }
 spring-cloud-starter-function-webflux = { group = "org.springframework.cloud", name = "spring-cloud-starter-function-webflux", version.ref = "spring-function" }
+spring-cloud-starter-function-web = { group = "org.springframework.cloud", name = "spring-cloud-starter-function-web", version.ref = "spring-function" }
 
 # Reactor
 reactor-test = { group = "io.projectreactor", name = "reactor-test", version.ref = "spring-reactor" }
@@ -119,6 +121,7 @@ rsocket-ktor-client = { group = "io.rsocket.kotlin", name = "rsocket-ktor-client
 
 # Springdoc
 springdoc-openapi-webflux-ui = { group = "org.springdoc", name = "springdoc-openapi-webflux-ui", version.ref = "springdoc" }
+springdoc-openapi-ui = { group = "org.springdoc", name = "springdoc-openapi-ui", version.ref = "springdoc" }
 
 # Arrow
 arrow-core = { group = "io.arrow-kt", name = "arrow-core", version.ref = "arrow" }

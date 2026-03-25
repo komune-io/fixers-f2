@@ -44,12 +44,20 @@ include(
 
 include(
 	"f2-spring:exception:f2-spring-boot-exception-http",
-	"f2-spring:openapi:f2-spring-boot-openapi"
+	"f2-spring:exception:f2-spring-boot-exception-http-webflux",
+	"f2-spring:exception:f2-spring-boot-exception-http-mvc",
+)
+
+include(
+	"f2-spring:openapi:f2-spring-boot-openapi-webflux",
+	"f2-spring:openapi:f2-spring-boot-openapi-mvc",
 )
 
 include(
 	"f2-spring:function:f2-spring-boot-starter-function",
 	"f2-spring:function:f2-spring-boot-starter-function-http",
+	"f2-spring:function:f2-spring-boot-starter-function-http-webflux",
+	"f2-spring:function:f2-spring-boot-starter-function-http-mvc",
 	"f2-spring:function:f2-spring-boot-starter-observability-opentelemetry"
 )
 
@@ -61,4 +69,5 @@ include(
 
 include(
 	"sample:f2-sample-http",
+	"sample:f2-sample-http-mvc",
 )

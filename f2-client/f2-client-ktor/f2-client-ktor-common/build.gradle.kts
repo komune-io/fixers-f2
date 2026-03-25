@@ -17,7 +17,7 @@ dependencies {
 
     jvmTestImplementation(libs.bundles.test.junit)
 
-    jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http"))
+    jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http-webflux"))
 
 }
 

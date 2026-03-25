@@ -10,9 +10,7 @@ repositories {
 }
 
 dependencies {
-
-    implementation(project(":f2-spring:function:f2-spring-boot-starter-function-http-webflux"))
-
+    implementation(project(":f2-spring:function:f2-spring-boot-starter-function-http-mvc"))
     testImplementation(libs.bundles.spring.test)
 }
 
