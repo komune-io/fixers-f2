@@ -1,5 +1,6 @@
 package io.komune.f2.spring.boot.auth.config
 
+import io.komune.f2.spring.boot.auth.ROLE_PREFIX
 import jakarta.annotation.security.PermitAll
 import jakarta.annotation.security.RolesAllowed
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,7 +36,6 @@ abstract class WebSecurityConfig {
 
     companion object {
         const val SPRING_SECURITY_FILTER_CHAIN = "springSecurityFilterChain"
-        const val ROLE_PREFIX = "ROLE_"
     }
 
     @Value("\${spring.cloud.function.web.path:}")

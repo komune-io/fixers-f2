@@ -37,6 +37,7 @@ include(
 )
 
 include(
+	"f2-spring:auth:f2-spring-boot-starter-auth-commons",
 	"f2-spring:auth:f2-spring-boot-starter-auth",
 	"f2-spring:auth:f2-spring-boot-starter-auth-keycloak",
 	"f2-spring:auth:f2-spring-boot-starter-auth-tenant",

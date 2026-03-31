@@ -1,7 +1,7 @@
 package io.komune.f2.spring.boot.auth.security
 
+import io.komune.f2.spring.boot.auth.ROLE_PREFIX
 import io.komune.f2.spring.boot.auth.config.F2TrustedIssuersConfig
-import io.komune.f2.spring.boot.auth.config.WebSecurityConfig
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import org.springframework.security.authentication.ReactiveAuthenticationManager
@@ -51,7 +51,7 @@ class TrustedIssuerJwtAuthenticationManagerResolver(
     fun jwtAuthoritiesConverter(jwt: Jwt): Flux<GrantedAuthority> {
         val realmAccess = jwt.claims["realm_access"] as Map<String, List<String>>?
         return realmAccess?.get("roles").orEmpty().map { role ->
-            SimpleGrantedAuthority("${WebSecurityConfig.ROLE_PREFIX}$role")
+            SimpleGrantedAuthority("$ROLE_PREFIX$role")
         }.let { Flux.fromIterable(it) }
     }
 }

@@ -1,5 +1,6 @@
 package io.komune.f2.spring.boot.auth.config
 
+import io.komune.f2.spring.boot.auth.ROLE_PREFIX
 import io.komune.f2.spring.boot.auth.security.TrustedIssuerJwtAuthenticationManagerResolver
 import jakarta.annotation.security.PermitAll
 import jakarta.annotation.security.RolesAllowed
@@ -34,7 +35,6 @@ class WebSecurityConfig {
 
     companion object {
         const val SPRING_SECURITY_FILTER_CHAIN = "springSecurityFilterChain"
-        const val ROLE_PREFIX = "ROLE_"
     }
 
     private val logger = LoggerFactory.getLogger(WebSecurityConfig::class.java)

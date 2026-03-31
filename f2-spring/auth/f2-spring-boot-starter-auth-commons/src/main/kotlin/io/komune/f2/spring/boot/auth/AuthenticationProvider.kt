@@ -1,6 +1,5 @@
 package io.komune.f2.spring.boot.auth
 
-import io.komune.f2.spring.boot.auth.config.WebSecurityConfig
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.reactor.ReactorContext
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -12,6 +11,7 @@ import reactor.core.publisher.Mono
 
 const val ORGANIZATION_ID_CLAIM_NAME = "memberOf"
 const val AZP_CLAIM_NAME = "azp"
+const val ROLE_PREFIX = "ROLE_"
 
 object AuthenticationProvider {
     suspend fun getSecurityContext(): SecurityContext? {
@@ -32,16 +32,20 @@ object AuthenticationProvider {
         return getPrincipal()?.getClaim<String>(ORGANIZATION_ID_CLAIM_NAME)
     }
 
-    suspend fun getIssuer(): String {
-        return getPrincipal()?.issuer.toString()
+    suspend fun getIssuer(): String? {
+        return getPrincipal()?.issuer?.toString()
     }
 
     suspend fun getClientId(): String? {
         return getPrincipal()?.getClaim<String>(AZP_CLAIM_NAME)
     }
 
+    suspend fun getTenant(): String? {
+        return getIssuer()?.substringAfterLast("/", "")?.ifEmpty { null }
+    }
+
     suspend fun hasRole(role: String): Boolean {
-        return SimpleGrantedAuthority("${WebSecurityConfig.ROLE_PREFIX}$role") in getAuthentication()
+        return SimpleGrantedAuthority("$ROLE_PREFIX$role") in getAuthentication()
             ?.authorities
             .orEmpty()
     }
