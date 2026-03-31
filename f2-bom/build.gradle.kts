@@ -116,6 +116,7 @@ dependencies {
 
 		// JSON
 		api("tools.jackson.module:jackson-module-kotlin:$jacksonVersion")
+		api("tools.jackson.dataformat:jackson-dataformat-csv:$jacksonVersion")
 
 		// Logging
 		api("org.slf4j:slf4j-api:$slf4jVersion")
@@ -128,6 +129,7 @@ dependencies {
 		api("io.cucumber:cucumber-java:$cucumberVersion")
 		api("io.cucumber:cucumber-java8:$cucumberVersion")
 		api("io.cucumber:cucumber-junit-platform-engine:$cucumberVersion")
+		api("io.cucumber:cucumber-spring:$cucumberVersion")
 
 		// ═══════════════════════════════════════════
 		// F2-specific deps
