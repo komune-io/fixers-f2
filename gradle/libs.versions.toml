@@ -147,6 +147,7 @@ fixers-check = { id = "io.komune.fixers.gradle.check", version.ref = "fixers" }
 fixers-publish = { id = "io.komune.fixers.gradle.publish", version.ref = "fixers" }
 fixers-kotlin-jvm = { id = "io.komune.fixers.gradle.kotlin.jvm", version.ref = "fixers" }
 fixers-kotlin-mpp = { id = "io.komune.fixers.gradle.kotlin.mpp", version.ref = "fixers" }
+kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
 kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
