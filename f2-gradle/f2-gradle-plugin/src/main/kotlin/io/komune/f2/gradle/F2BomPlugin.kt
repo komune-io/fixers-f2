@@ -9,18 +9,22 @@ class F2BomPlugin : Plugin<Project> {
         val bomVersion = loadBomVersion()
         val bomNotation = "io.komune.f2:f2-gradle-bom:$bomVersion"
 
-        project.subprojects.forEach { sub ->
-            sub.configurations.matching { it.name == "kapt" }.configureEach {
-                val bomDep = sub.dependencies.platform(bomNotation)
-                sub.dependencies.add(name, bomDep)
+        fun Project.configureBom() {
+            val proj = this
+            configurations.matching { it.name == "kapt" }.configureEach {
+                proj.dependencies.add(name, proj.dependencies.platform(bomNotation))
             }
-            sub.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
-                sub.dependencies.add("api", sub.dependencies.platform(bomNotation))
+            pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+                val config = if (configurations.findByName("api") != null) "api" else "implementation"
+                dependencies.add(config, dependencies.platform(bomNotation))
             }
-            sub.pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
-                sub.dependencies.add("commonMainApi", sub.dependencies.platform(bomNotation))
+            pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+                dependencies.add("commonMainApi", dependencies.platform(bomNotation))
             }
         }
+
+        project.configureBom()
+        project.subprojects { configureBom() }
     }
 
     private fun loadBomVersion(): String {

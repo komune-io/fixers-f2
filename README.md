@@ -40,7 +40,7 @@ Add the F2 version catalog and BOM in your `settings.gradle.kts`:
 dependencyResolutionManagement {
     versionCatalogs {
         create("f2") {
-            from("io.komune.f2:f2-version-catalog:${VERSION}")
+            from("io.komune.f2:f2-gradle-catalog:${VERSION}")
         }
     }
 }
@@ -69,8 +69,8 @@ The version catalog provides plugin aliases with compatible versions:
 
 ```kotlin
 plugins {
-    alias(f2.plugins.gradle.config)
-    alias(f2.plugins.gradle.check)
+    alias(f2.plugins.fixers.gradle.config)
+    alias(f2.plugins.fixers.gradle.check)
     alias(f2.plugins.kotlin.spring) apply false
     alias(f2.plugins.spring.boot) apply false
 }
@@ -82,9 +82,9 @@ With the BOM applied, F2 dependencies require no explicit version:
 
 ```kotlin
 dependencies {
-    implementation(libs.f2.dsl.function)
-    implementation(libs.f2.dsl.cqrs)
-    implementation(libs.f2.spring.boot.starter.function.http.mvc)
+    implementation(f2.dsl.function)
+    implementation(f2.dsl.cqrs)
+    implementation(f2.spring.boot.starter.function.http.mvc)
 }
 ```
 
