@@ -1,5 +1,4 @@
 plugins {
-    id("f2-bom-conventions")
     alias(catalogue.plugins.kotlin.kapt) apply false
     alias(catalogue.plugins.kotlin.spring) apply false
     alias(catalogue.plugins.spring.boot) apply false
@@ -10,6 +9,23 @@ plugins {
     alias(catalogue.plugins.fixers.gradle.publish)
     alias(catalogue.plugins.fixers.gradle.kotlin.jvm) apply false
     alias(catalogue.plugins.fixers.gradle.kotlin.mpp) apply false
+}
+
+subprojects {
+    configurations.matching { it.name == "kapt" }.configureEach {
+        val bomDep = project.dependencies.platform(project(":f2-gradle:f2-gradle-bom"))
+        project.dependencies.add(name, bomDep)
+    }
+    pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+        dependencies {
+            "api"(platform(project(":f2-gradle:f2-gradle-bom")))
+        }
+    }
+    pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+        dependencies {
+            "commonMainApi"(platform(project(":f2-gradle:f2-gradle-bom")))
+        }
+    }
 }
 
 fixers {
