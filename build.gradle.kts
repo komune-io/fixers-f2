@@ -1,31 +1,21 @@
 plugins {
-    alias(libs.plugins.kotlin.kapt) apply false
-    alias(libs.plugins.kotlin.spring) apply false
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.spring.boot) apply false
+    id("f2-bom-conventions")
+    alias(catalogue.plugins.kotlin.kapt) apply false
+    alias(catalogue.plugins.kotlin.spring) apply false
+    alias(catalogue.plugins.spring.boot) apply false
+    alias(catalogue.plugins.kotlin.serialization)
 
-    alias(libs.plugins.fixers.config)
-    alias(libs.plugins.fixers.check)
-    alias(libs.plugins.fixers.publish)
-    alias(libs.plugins.fixers.kotlin.jvm) apply false
-    alias(libs.plugins.fixers.kotlin.mpp) apply false
-}
-
-allprojects {
-    group = "io.komune.f2"
-    version = System.getenv("VERSION") ?: "experimental-SNAPSHOT"
-    repositories {
-        if (System.getenv("MAVEN_LOCAL_USE") == "true") {
-            mavenLocal()
-        }
-        mavenCentral()
-        maven { url = uri("https://central.sonatype.com/repository/maven-snapshots") }
-    }
+    alias(catalogue.plugins.fixers.gradle.config)
+    alias(catalogue.plugins.fixers.gradle.check)
+    alias(catalogue.plugins.fixers.gradle.publish)
+    alias(catalogue.plugins.fixers.gradle.kotlin.jvm) apply false
+    alias(catalogue.plugins.fixers.gradle.kotlin.mpp) apply false
 }
 
 fixers {
     bundle {
         id = "f2"
+        group = "io.komune.f2"
         name = "F2"
         description = "Wrapper around Spring Cloud Function"
         url = "https://github.com/komune-io/fixers-f2"

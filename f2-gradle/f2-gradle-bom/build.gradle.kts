@@ -1,6 +1,6 @@
 plugins {
 	`java-platform`
-	alias(libs.plugins.fixers.publish)
+	alias(catalogue.plugins.fixers.gradle.publish)
 }
 
 javaPlatform {
@@ -8,13 +8,15 @@ javaPlatform {
 }
 
 dependencies {
-	api(platform("org.springframework.boot:spring-boot-dependencies:${libs.versions.spring.boot.get()}"))
-	api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:${libs.versions.coroutines.get()}"))
-	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:${libs.versions.serialization.get()}"))
-	api(platform("io.ktor:ktor-bom:${libs.versions.ktor.get()}"))
-	api(platform("io.opentelemetry:opentelemetry-bom:${libs.versions.opentelemetry.get()}"))
-	api(platform("io.cucumber:cucumber-bom:${libs.versions.cucumber.get()}"))
-	api(platform("io.arrow-kt:arrow-stack:${libs.versions.arrow.get()}"))
+	api(platform("org.springframework.boot:spring-boot-dependencies:${catalogue.versions.spring.boot.get()}"))
+	api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:${catalogue.versions.coroutines.get()}"))
+	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:${catalogue.versions.serialization.get()}"))
+	api(platform("io.ktor:ktor-bom:${catalogue.versions.ktor.get()}"))
+	api(platform("io.opentelemetry:opentelemetry-bom:${catalogue.versions.opentelemetry.get()}"))
+	api(platform("io.cucumber:cucumber-bom:${catalogue.versions.cucumber.get()}"))
+	api(platform("io.arrow-kt:arrow-stack:${catalogue.versions.arrow.get()}"))
+	api(platform("org.springframework.cloud:spring-cloud-dependencies:${catalogue.versions.spring.cloud.get()}"))
+	api(platform("org.springdoc:springdoc-openapi-bom:${catalogue.versions.springdoc.get()}"))
 
 	constraints {
 		// ═══════════════════════════════════════════
@@ -53,29 +55,13 @@ dependencies {
 		// Third-party deps (not managed by Spring Boot BOM)
 		// ═══════════════════════════════════════════
 
-		val datetimeVersion = libs.versions.datetime.get()
-		val springFunctionVersion = libs.versions.spring.function.get()
-		val cloudeventsVersion = libs.versions.cloudevents.get()
-		val rsocketVersion = libs.versions.rsocket.get()
-		val springdocVersion = libs.versions.springdoc.get()
+		val datetimeVersion = catalogue.versions.datetime.get()
+		val cloudeventsVersion = catalogue.versions.cloudevents.get()
 
 		// Kotlin
 		api("org.jetbrains.kotlinx:kotlinx-datetime:$datetimeVersion")
 
-		// Spring Cloud Function
-		api("org.springframework.cloud:spring-cloud-function-context:$springFunctionVersion")
-		api("org.springframework.cloud:spring-cloud-function-kotlin:$springFunctionVersion")
-		api("org.springframework.cloud:spring-cloud-starter-function-webflux:$springFunctionVersion")
-		api("org.springframework.cloud:spring-cloud-starter-function-web:$springFunctionVersion")
-
 		// Cloud Events
 		api("io.cloudevents:cloudevents-spring:$cloudeventsVersion")
-
-		api("io.rsocket.kotlin:rsocket-ktor-client:$rsocketVersion")
-
-		// Springdoc
-		api("org.springdoc:springdoc-openapi-starter-common:$springdocVersion")
-		api("org.springdoc:springdoc-openapi-starter-webflux-ui:$springdocVersion")
-		api("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
 	}
 }
