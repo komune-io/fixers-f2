@@ -10,10 +10,20 @@ pluginManagement {
 	}
 }
 
+dependencyResolutionManagement {
+	versionCatalogs {
+		create("catalogue") {
+			from(files("gradle/catalogue.versions.toml"))
+		}
+	}
+}
+
 rootProject.name = "fixers-f2"
 
 include(
-	"f2-bom",
+	"f2-gradle:f2-gradle-bom",
+	"f2-gradle:f2-gradle-catalog",
+	"f2-gradle:f2-gradle-plugin",
 )
 
 include(

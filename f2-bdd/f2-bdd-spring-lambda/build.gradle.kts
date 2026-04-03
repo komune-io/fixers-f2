@@ -1,7 +1,7 @@
 plugins {
-	alias(libs.plugins.fixers.kotlin.jvm)
-	alias(libs.plugins.kotlin.spring)
-	alias(libs.plugins.kotlin.serialization)
+	alias(catalogue.plugins.fixers.gradle.kotlin.jvm)
+	alias(catalogue.plugins.kotlin.spring)
+	alias(catalogue.plugins.kotlin.serialization)
 }
 
 dependencies {

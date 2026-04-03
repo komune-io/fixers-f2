@@ -10,8 +10,6 @@ The Command and Query Responsibility Segregation (CQRS) architecture is a patter
 
 HTTP is a widely-used protocol for sending and receiving information over the internet, and is a popular choice for building RESTful web services. By supporting HTTP, F2 and its client can easily integrate with a wide range of other technologies and services that use HTTP for communication.
 
-RSocket, on the other hand, is a binary protocol for use on top of TCP or WebSockets. It is designed for high-performance and low-latency communication, and provides features such as bi-directional streaming, flow control, and error handling. By supporting RSocket, F2 and its client can provide high-performance and efficient communication between serverless functions and their clients.
-
 ## Requirements
 
 - JDK 17+
@@ -22,13 +20,75 @@ RSocket, on the other hand, is a binary protocol for use on top of TCP or WebSoc
 
 The project is organized into several modules:
 
+- **f2-bom**: Bill of Materials (BOM) that manages versions for all F2 modules and upstream dependencies (Spring Boot, Ktor, coroutines, etc.).
+- **f2-version-catalog**: Published Gradle version catalog (`f2.versions.toml`) providing library aliases, plugin aliases, and the BOM reference for consumer projects.
 - **f2-bdd**: Configuration and utilities for Behavior Driven Development (Cucumber).
-- **f2-client**: Multiplatform clients (Ktor based) for HTTP and RSocket.
+- **f2-client**: Multiplatform clients (Ktor based) for HTTP.
 - **f2-dsl**: Domain Specific Languages for Functions, CQRS, and Events.
 - **f2-spring**: Spring Boot starters and integrations (Auth, Exception, OpenAPI, etc.).
 - **f2-feature**: Reusable feature modules (Catalog, Version, etc.).
 - **sample**: Example applications demonstrating F2 usage.
 - **storybook**: Documentation and UI components.
+
+## Using F2 in your project
+
+### Setup
+
+Add the F2 version catalog and BOM in your `settings.gradle.kts`:
+
+```kotlin
+dependencyResolutionManagement {
+    versionCatalogs {
+        create("f2") {
+            from("io.komune.f2:f2-gradle-catalog:${VERSION}")
+        }
+    }
+}
+```
+
+Apply the BOM to all subprojects in your root `build.gradle.kts`:
+
+```kotlin
+subprojects {
+    pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+        dependencies {
+            "api"(platform(f2.bom))
+        }
+    }
+    pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+        dependencies {
+            "commonMainApi"(platform(f2.bom))
+        }
+    }
+}
+```
+
+### Using plugins
+
+The version catalog provides plugin aliases with compatible versions:
+
+```kotlin
+plugins {
+    alias(f2.plugins.fixers.gradle.config)
+    alias(f2.plugins.fixers.gradle.check)
+    alias(f2.plugins.kotlin.spring) apply false
+    alias(f2.plugins.spring.boot) apply false
+}
+```
+
+### Adding dependencies
+
+With the BOM applied, F2 dependencies require no explicit version:
+
+```kotlin
+dependencies {
+    implementation(f2.dsl.function)
+    implementation(f2.dsl.cqrs)
+    implementation(f2.spring.boot.starter.function.http.mvc)
+}
+```
+
+Third-party dependencies managed by the BOM (Spring Boot, Ktor, coroutines, etc.) also resolve their versions automatically.
 
 ## Development
 
@@ -79,16 +139,15 @@ Spring Cloud Function provides a functional programming model for building cloud
 enabling you to write simple, single-purpose functions that can be easily composed and deployed in a cloud environment. 
 It allows you to take advantage of the many features of the Spring framework, such as data access, transaction management, 
 security, and more, while still enjoying the scalability and cost-effectiveness of a serverless architecture. 
-It supports multiple communication protocols, including HTTP, gRPC, and RSocket, and the choice of protocol 
+It supports multiple communication protocols, including HTTP and gRPC, and the choice of protocol
 will depend on the specific requirements of your application and the type of function being written.
 
 ## Ktor
-F2 provides a multiplatform client using the Ktor client for HTTP and RSocket protocols. 
-The Ktor client is a high-performance HTTP client for the Kotlin language that makes it easy to perform HTTP requests 
-from your Kotlin applications. It supports both synchronous and asynchronous programming, 
-and provides a wide range of features for working with HTTP and RSocket protocols, including connection pooling, 
+F2 provides a multiplatform client using the Ktor client for HTTP.
+The Ktor client is a high-performance HTTP client for the Kotlin language that makes it easy to perform HTTP requests
+from your Kotlin applications. It supports both synchronous and asynchronous programming,
+and provides a wide range of features for working with HTTP, including connection pooling,
 request and response streaming, and automatic decompression of response bodies.
-For `rsocket` implementation, we use [rsocket-kotlin](https://github.com/rsocket/rsocket-kotlin)
 
 # Dsl
 
@@ -328,21 +387,6 @@ implementation("io.komune.f2:f2-spring-boot-starter-function-http:${Versions.f2}
 </dependency>
 ```
 
-
-### Dependency to bind function to rSocket protocol
-* gradle
-```gradle
-implementation("io.komune.f2:f2-spring-boot-starter-function-rsocket:${Versions.f2}")
-```
-
-* maven
-```
-<dependency>
-  <groupId>io.komune.f2</groupId>
-  <artifactId>f2-spring-boot-starter-function-rsocket</artifactId>
-  <version>${Versions.f2}</version>
-</dependency>
-```
 
 ## Example
 
