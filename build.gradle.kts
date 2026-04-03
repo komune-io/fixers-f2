@@ -43,4 +43,10 @@ fixers {
             property("sonar.coverage.exclusions", "f2-bdd/**/*")
         }
     }
+    repositories {
+        sonatypeSnapshots = true
+    }
+    publish {
+        gradlePluginPortalEnabled = false
+    }
 }

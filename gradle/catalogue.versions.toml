@@ -3,7 +3,6 @@ fixers = "0.30.0-SNAPSHOT"
 kotlin = "2.3.10"
 spring-boot = "4.0.4"
 spring-cloud = "2025.1.1"
-spring-function = "5.0.1"
 ktor = "3.4.1"
 coroutines = "1.10.2"
 serialization = "1.10.0"
@@ -13,6 +12,7 @@ cucumber = "7.34.3"
 cloudevents = "4.0.1"
 springdoc = "3.0.2"
 arrow = "2.2.2.1"
+gradle-plugin-publish = "2.1.1"
 
 [libraries]
 # BOM (version required — consumers use platform(f2.bom))
@@ -77,3 +77,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish" }
