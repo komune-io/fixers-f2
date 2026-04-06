@@ -11,7 +11,9 @@ opentelemetry = "1.58.0"
 cucumber = "7.34.3"
 cloudevents = "4.0.1"
 springdoc = "3.0.2"
+testcontainers = "2.0.4"
 arrow = "2.2.2.1"
+ksp = "2.3.6"
 gradle-plugin-publish = "2.1.1"
 
 [libraries]
@@ -63,6 +65,9 @@ feature-catalog = { group = "io.komune.f2", name = "f2-feature-catalog" }
 feature-cloud-event-storming = { group = "io.komune.f2", name = "f2-feature-cloud-event-storming" }
 feature-version = { group = "io.komune.f2", name = "f2-feature-version" }
 
+# Testcontainers
+testcontainers-bom = { group = "org.testcontainers", name = "testcontainers-bom", version.ref = "testcontainers" }
+
 [plugins]
 f2-bom = { id = "io.komune.f2.bom", version.ref = "fixers" }
 fixers-gradle-config = { id = "io.komune.fixers.gradle.config", version.ref = "fixers" }
@@ -77,4 +82,5 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish" }

@@ -11,7 +11,7 @@ class F2BomPlugin : Plugin<Project> {
 
         fun Project.configureBom() {
             val proj = this
-            configurations.matching { it.name == "kapt" }.configureEach {
+            configurations.matching { it.name == "kapt" || it.name.startsWith("ksp") }.configureEach {
                 proj.dependencies.add(name, proj.dependencies.platform(bomNotation))
             }
             pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {

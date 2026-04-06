@@ -17,6 +17,7 @@ dependencies {
 	api(platform("io.arrow-kt:arrow-stack:${catalogue.versions.arrow.get()}"))
 	api(platform("org.springframework.cloud:spring-cloud-dependencies:${catalogue.versions.spring.cloud.get()}"))
 	api(platform("org.springdoc:springdoc-openapi-bom:${catalogue.versions.springdoc.get()}"))
+	api(platform("org.testcontainers:testcontainers-bom:${catalogue.versions.testcontainers.get()}"))
 
 	constraints {
 		// ═══════════════════════════════════════════
@@ -68,9 +69,16 @@ dependencies {
 
 		val datetimeVersion = catalogue.versions.datetime.get()
 		val cloudeventsVersion = catalogue.versions.cloudevents.get()
+		val kspVersion = catalogue.versions.ksp.get()
 
 		// Kotlin
 		api("org.jetbrains.kotlinx:kotlinx-datetime:$datetimeVersion")
+
+		// KSP
+		api("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
+
+		// Arrow KSP (not included in arrow-stack BOM)
+		api("io.arrow-kt:arrow-optics-ksp-plugin:${catalogue.versions.arrow.get()}")
 
 		// Cloud Events
 		api("io.cloudevents:cloudevents-spring:$cloudeventsVersion")
