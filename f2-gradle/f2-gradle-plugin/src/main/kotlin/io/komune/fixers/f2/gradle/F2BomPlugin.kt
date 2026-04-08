@@ -1,4 +1,4 @@
-package io.komune.f2.gradle
+package io.komune.fixers.f2.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project

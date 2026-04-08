@@ -7,8 +7,8 @@ plugins {
 gradlePlugin {
     plugins {
         create("f2Bom") {
-            id = "io.komune.f2.bom"
-            implementationClass = "io.komune.f2.gradle.F2BomPlugin"
+            id = "io.komune.fixers.f2.bom"
+            implementationClass = "io.komune.fixers.f2.gradle.F2BomPlugin"
             displayName = "F2 BOM Convention Plugin"
             description = "Applies the F2 BOM to all Kotlin subprojects for automatic dependency version management"
         }
