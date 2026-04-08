@@ -1,16 +1,19 @@
 plugins {
-    `java-gradle-plugin`
     `kotlin-dsl`
+    alias(catalogue.plugins.gradle.plugin.publish)
     alias(catalogue.plugins.fixers.gradle.publish)
 }
 
 gradlePlugin {
+    website = "https://github.com/komune-io/fixers-f2"
+    vcsUrl = "https://github.com/komune-io/fixers-f2"
     plugins {
         create("f2Bom") {
             id = "io.komune.fixers.f2.bom"
             implementationClass = "io.komune.fixers.f2.gradle.F2BomPlugin"
             displayName = "F2 BOM Convention Plugin"
             description = "Applies the F2 BOM to all Kotlin subprojects for automatic dependency version management"
+            tags = listOf("Komune", "F2", "BOM", "kotlin", "dependency-management")
         }
     }
 }
