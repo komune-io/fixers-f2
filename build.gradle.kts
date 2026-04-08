@@ -46,7 +46,4 @@ fixers {
     repositories {
         sonatypeSnapshots = true
     }
-    publish {
-        gradlePluginPortalEnabled = false
-    }
 }
