@@ -1,5 +1,5 @@
 [versions]
-fixers = "0.35.0-SNAPSHOT"
+fixers = "0.35.0"
 kotlin = "2.3.10"
 spring-boot = "4.0.4"
 spring-cloud = "2025.1.1"
