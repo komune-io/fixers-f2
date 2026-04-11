@@ -1,7 +1,7 @@
 
 pluginManagement {
 	repositories {
-		if(System.getenv("FIXERS_REPOSITORIES_MAVEN_LOCAL") == "true" || System.getenv("MAVEN_LOCAL_USE") == "true") {
+		if(System.getenv("FIXERS_REPOSITORIES_MAVEN_LOCAL") == "true") {
 			mavenLocal()
 		}
 		gradlePluginPortal()
@@ -11,6 +11,13 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+	repositories {
+		mavenCentral()
+		maven { url = uri("https://central.sonatype.com/repository/maven-snapshots") }
+		if(System.getenv("FIXERS_REPOSITORIES_MAVEN_LOCAL") == "true") {
+			mavenLocal()
+		}
+	}
 	versionCatalogs {
 		create("catalogue") {
 			from(files("gradle/catalogue.versions.toml"))
