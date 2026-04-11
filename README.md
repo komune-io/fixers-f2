@@ -121,7 +121,7 @@ The project uses `make` and `gradle` for build operations.
 | Variable | Description |
 | --- | --- |
 | `VERSION` | Project version (default: `experimental-SNAPSHOT`). |
-| `NPM_AUTH_TOKEN` | Auth token for NPM/Yarn (required for Storybook publishing). |
+| `FIXERS_PUBLISH_NPM_GITHUB_TOKEN` | Auth token for NPM/Yarn against GitHub Packages (required for Storybook publishing). Renamed from `NPM_AUTH_TOKEN`. |
 
 ## License
 
