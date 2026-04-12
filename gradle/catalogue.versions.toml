@@ -73,6 +73,7 @@ f2-bom = { id = "io.komune.fixers.f2.bom", version.ref = "fixers" }
 fixers-gradle-config = { id = "io.komune.fixers.gradle.config", version.ref = "fixers" }
 fixers-gradle-check = { id = "io.komune.fixers.gradle.check", version.ref = "fixers" }
 fixers-gradle-publish = { id = "io.komune.fixers.gradle.publish", version.ref = "fixers" }
+fixers-gradle-npm = { id = "io.komune.fixers.gradle.npm", version.ref = "fixers" }
 fixers-gradle-kotlin-jvm = { id = "io.komune.fixers.gradle.kotlin.jvm", version.ref = "fixers" }
 fixers-gradle-kotlin-mpp = { id = "io.komune.fixers.gradle.kotlin.mpp", version.ref = "fixers" }
 
