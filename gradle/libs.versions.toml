@@ -1,7 +1,7 @@
 [versions]
 fixers = "0.40.0-SNAPSHOT"
 kotlin = "2.3.21"
-spring-boot = "4.0.4"
+spring-boot = "4.0.6"
 spring-cloud = "2025.1.1"
 ktor = "3.4.1"
 coroutines = "1.10.2"
@@ -11,9 +11,9 @@ opentelemetry = "1.58.0"
 cucumber = "7.34.3"
 cloudevents = "4.0.1"
 springdoc = "3.0.2"
-testcontainers = "2.0.4"
+testcontainers = "2.0.5"
 arrow = "2.2.2.1"
-ksp = "2.3.6"
+ksp = "2.3.7"
 gradle-plugin-publish = "2.1.1"
 
 [libraries]
