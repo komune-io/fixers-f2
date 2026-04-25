@@ -1,4 +1,73 @@
+[versions]
+fixers = "0.40.0-SNAPSHOT"
+kotlin = "2.3.10"
+spring-boot = "4.0.4"
+spring-cloud = "2025.1.1"
+ktor = "3.4.1"
+coroutines = "1.10.2"
+serialization = "1.10.0"
+datetime = "0.7.1"
+opentelemetry = "1.58.0"
+cucumber = "7.34.3"
+cloudevents = "4.0.1"
+springdoc = "3.0.2"
+testcontainers = "2.0.4"
+arrow = "2.2.2.1"
+ksp = "2.3.6"
+gradle-plugin-publish = "2.1.1"
+
 [libraries]
+# BOM (version required — consumers use platform(f2.bom))
+bom = { group = "io.komune.f2", name = "f2-gradle-bom", version.ref = "fixers" }
+
+# f2-dsl
+dsl-function = { group = "io.komune.f2", name = "f2-dsl-function" }
+dsl-cqrs = { group = "io.komune.f2", name = "f2-dsl-cqrs" }
+dsl-event = { group = "io.komune.f2", name = "f2-dsl-event" }
+
+# f2-client
+client-core = { group = "io.komune.f2", name = "f2-client-core" }
+client-domain = { group = "io.komune.f2", name = "f2-client-domain" }
+client-ktor = { group = "io.komune.f2", name = "f2-client-ktor" }
+client-ktor-common = { group = "io.komune.f2", name = "f2-client-ktor-common" }
+client-ktor-http = { group = "io.komune.f2", name = "f2-client-ktor-http" }
+
+# f2-spring (auth)
+spring-boot-starter-auth = { group = "io.komune.f2", name = "f2-spring-boot-starter-auth" }
+spring-boot-starter-auth-commons = { group = "io.komune.f2", name = "f2-spring-boot-starter-auth-commons" }
+spring-boot-starter-auth-keycloak = { group = "io.komune.f2", name = "f2-spring-boot-starter-auth-keycloak" }
+spring-boot-starter-auth-tenant = { group = "io.komune.f2", name = "f2-spring-boot-starter-auth-tenant" }
+
+# f2-spring (exception)
+spring-boot-exception-http = { group = "io.komune.f2", name = "f2-spring-boot-exception-http" }
+spring-boot-exception-http-webflux = { group = "io.komune.f2", name = "f2-spring-boot-exception-http-webflux" }
+spring-boot-exception-http-mvc = { group = "io.komune.f2", name = "f2-spring-boot-exception-http-mvc" }
+
+# f2-spring (openapi)
+spring-boot-openapi = { group = "io.komune.f2", name = "f2-spring-boot-openapi" }
+spring-boot-openapi-mvc = { group = "io.komune.f2", name = "f2-spring-boot-openapi-mvc" }
+spring-boot-openapi-webflux = { group = "io.komune.f2", name = "f2-spring-boot-openapi-webflux" }
+
+# f2-spring (function)
+spring-boot-starter-function = { group = "io.komune.f2", name = "f2-spring-boot-starter-function" }
+spring-boot-starter-function-http = { group = "io.komune.f2", name = "f2-spring-boot-starter-function-http" }
+spring-boot-starter-function-http-webflux = { group = "io.komune.f2", name = "f2-spring-boot-starter-function-http-webflux" }
+spring-boot-starter-function-http-mvc = { group = "io.komune.f2", name = "f2-spring-boot-starter-function-http-mvc" }
+spring-boot-starter-observability-opentelemetry = { group = "io.komune.f2", name = "f2-spring-boot-starter-observability-opentelemetry" }
+
+# f2-bdd
+bdd-config = { group = "io.komune.f2", name = "f2-bdd-config" }
+bdd-spring-autoconfigure = { group = "io.komune.f2", name = "f2-bdd-spring-autoconfigure" }
+bdd-spring-lambda = { group = "io.komune.f2", name = "f2-bdd-spring-lambda" }
+
+# f2-feature
+feature-catalog = { group = "io.komune.f2", name = "f2-feature-catalog" }
+feature-cloud-event-storming = { group = "io.komune.f2", name = "f2-feature-cloud-event-storming" }
+feature-version = { group = "io.komune.f2", name = "f2-feature-version" }
+
+# Testcontainers
+testcontainers-bom = { group = "org.testcontainers", name = "testcontainers-bom", version.ref = "testcontainers" }
+
 # Ktor
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core" }
 ktor-client-auth = { group = "io.ktor", name = "ktor-client-auth" }
@@ -85,3 +154,21 @@ coroutines = ["kotlinx-coroutines-core", "kotlinx-coroutines-reactor", "kotlinx-
 test-junit = ["junit-jupiter", "junit-jupiter-api", "junit-platform-suite", "assertj-core", "kotlinx-coroutines-test"]
 spring-test = ["spring-boot-starter-test", "junit-jupiter", "junit-jupiter-api", "junit-platform-suite", "assertj-core", "kotlinx-coroutines-test"]
 cucumber = ["cucumber-java", "cucumber-java8", "cucumber-junit-platform-engine"]
+
+[plugins]
+f2-bom = { id = "io.komune.fixers.f2.bom", version.ref = "fixers" }
+fixers-gradle-config = { id = "io.komune.fixers.gradle.config", version.ref = "fixers" }
+fixers-gradle-check = { id = "io.komune.fixers.gradle.check", version.ref = "fixers" }
+fixers-gradle-publish = { id = "io.komune.fixers.gradle.publish", version.ref = "fixers" }
+fixers-gradle-npm = { id = "io.komune.fixers.gradle.npm", version.ref = "fixers" }
+fixers-gradle-kotlin-jvm = { id = "io.komune.fixers.gradle.kotlin.jvm", version.ref = "fixers" }
+fixers-gradle-kotlin-mpp = { id = "io.komune.fixers.gradle.kotlin.mpp", version.ref = "fixers" }
+
+kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish" }
