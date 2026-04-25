@@ -13,7 +13,7 @@ cloudevents = "4.0.1"
 springdoc = "3.0.2"
 testcontainers = "2.0.4"
 arrow = "2.2.2.1"
-ksp = "2.3.6"
+ksp = "2.3.7"
 gradle-plugin-publish = "2.1.1"
 
 [libraries]
