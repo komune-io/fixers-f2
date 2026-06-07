@@ -11,21 +11,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
-// =====================================================================================
-// Required-id variants — the caller decides what the envelope id is.
-//
-// The previous default `{ Uuid.random().toString() }` silently severed any caller-side
-// correlation between input commands and resulting outcomes (the envelope id flows
-// through s2's PersistOutcome.msgId). Callers that need fire-and-forget random ids
-// must now opt in explicitly via `mapToEnvelopeWithRandomId(...)`.
-// =====================================================================================
-
-/**
- * Maps each input through this [F2Function] and wraps the result in an [Envelope]
- * whose id is derived from the input via [id]. Use this when the caller needs to
- * correlate outputs back to inputs (any pipeline that surfaces per-msgId failure
- * routing).
- */
 inline fun <T, reified R> F2Function<T, R>.mapToEnvelope(
     crossinline id: (T) -> String,
 ): F2Function<T, Envelope<R>> = F2Function { inputs: Flow<T> ->
@@ -39,9 +24,6 @@ inline fun <T, reified R> F2Function<T, R>.mapToEnvelope(
     }
 }
 
-/**
- * Wraps each element of this [Flow] in an [Envelope] whose id is derived via [id].
- */
 inline fun <reified T> Flow<T>.mapToEnvelope(
     crossinline id: (T) -> String,
 ): Flow<Envelope<T>> = map { input ->
@@ -50,10 +32,6 @@ inline fun <reified T> Flow<T>.mapToEnvelope(
     )
 }
 
-/**
- * Wraps each element of this [Flow] in an [Envelope] with the given [type], whose id
- * is derived via [id].
- */
 fun <T> Flow<T>.mapToEnvelope(
     type: String,
     id: (T) -> String,
@@ -63,11 +41,6 @@ fun <T> Flow<T>.mapToEnvelope(
         type = type,
     )
 }
-
-// =====================================================================================
-// Explicit random-id opt-in variants — for fire-and-forget cases (output wrappings,
-// anonymous transforms) where caller-side correlation is not needed.
-// =====================================================================================
 
 @OptIn(ExperimentalUuidApi::class)
 inline fun <T, reified R> F2Function<T, R>.mapToEnvelopeWithRandomId(): F2Function<T, Envelope<R>> =
@@ -81,10 +54,6 @@ inline fun <reified T> Flow<T>.mapToEnvelopeWithRandomId(): Flow<Envelope<T>> =
 fun <T> Flow<T>.mapToEnvelopeWithRandomId(
     type: String,
 ): Flow<Envelope<T>> = mapToEnvelope(type) { Uuid.random().toString() }
-
-// =====================================================================================
-// Envelope-preserving transformations — unchanged.
-// =====================================================================================
 
 suspend inline fun <T, reified R> Envelope<T>.mapEnvelope(
     crossinline transform: suspend (value: T) -> R,
