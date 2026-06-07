@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test
 class MapToEnvelopeTest {
 
     @Test
-    suspend fun `test mapToEnvelope with default ID`() {
+    suspend fun `test mapToEnvelopeWithRandomId on F2Function`() {
         val function = F2Function<Int, String> { flow -> flow.map { it.toString() } }
-        val result = function.mapToEnvelope().invoke(flowOf(1, 2, 3)).toList()
+        val result = function.mapToEnvelopeWithRandomId().invoke(flowOf(1, 2, 3)).toList()
         assertThat(result).hasSize(3)
         assertThat(result.map { it.data }).containsExactly("1", "2", "3")
     }
@@ -28,9 +28,9 @@ class MapToEnvelopeTest {
 
 
     @Test
-    suspend fun `test mapToEnvelope with default ID function`() {
+    suspend fun `test mapToEnvelopeWithRandomId on Flow`() {
         val flow = flowOf(1, 2, 3)
-        val result = flow.mapToEnvelope().toList()
+        val result = flow.mapToEnvelopeWithRandomId().toList()
         assertThat(result).hasSize(3)
         result.forEach { envelope ->
             assertThat(envelope.id).isNotNull()
