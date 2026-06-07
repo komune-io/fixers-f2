@@ -24,7 +24,7 @@ class EnvelopeWrapTest {
         )
 
         // Invoke the wrapped function with the Flow of envelopes
-        val results: Flow<Envelope<String>> = myFunction.mapToEnvelope().invoke(envelopes)
+        val results: Flow<Envelope<String>> = myFunction.mapToEnvelopeWithRandomId().invoke(envelopes)
         val collectedResults = results.toList()
 
         // Assert the results using AssertJ

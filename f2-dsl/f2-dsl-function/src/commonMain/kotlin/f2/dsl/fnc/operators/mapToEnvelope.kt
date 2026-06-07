@@ -11,15 +11,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
-/**
- * Extension function to map a Flow of inputs to a Flow of Envelopes containing the results.
- *
- * @param id A function to generate an ID for each input. Defaults to a random UUID.
- * @return A Flow emitting Envelopes containing the results.
- */
-@OptIn(ExperimentalUuidApi::class)
 inline fun <T, reified R> F2Function<T, R>.mapToEnvelope(
-    crossinline id: (T) -> String = { Uuid.random().toString() },
+    crossinline id: (T) -> String,
 ): F2Function<T, Envelope<R>> = F2Function { inputs: Flow<T> ->
     inputs.map { input ->
         val resultFlow = this.invoke(flowOf(input))
@@ -31,43 +24,42 @@ inline fun <T, reified R> F2Function<T, R>.mapToEnvelope(
     }
 }
 
-/**
- * Extension function to map a Flow of inputs to a Flow of Envelopes containing the inputs.
- *
- * @param id A function to generate an ID for each input. Defaults to a random UUID.
- * @return A Flow emitting Envelopes containing the inputs.
- */
-@OptIn(ExperimentalUuidApi::class)
 inline fun <reified T> Flow<T>.mapToEnvelope(
-    crossinline id: (T) -> String = { Uuid.random().toString() },
+    crossinline id: (T) -> String,
 ): Flow<Envelope<T>> = map { input ->
     input.asEnvelope(
         id = id(input),
     )
 }
 
-/**
- * Extension function to map a Flow of inputs to a Flow of Envelopes containing the inputs.
- *
- * @param id A function to generate an ID for each input. Defaults to a random UUID.
- * @return A Flow emitting Envelopes containing the inputs.
- */
-@OptIn(ExperimentalUuidApi::class)
-fun <T> Flow<T>.mapToEnvelope(
+inline fun <T> Flow<T>.mapToEnvelope(
     type: String,
-    id: (T) -> String = { Uuid.random().toString() },
+    crossinline id: (T) -> String,
 ): Flow<Envelope<T>> = map { input ->
     input.asEnvelopeWithType(
         id = id(input),
-        type = type
+        type = type,
     )
 }
+
+@OptIn(ExperimentalUuidApi::class)
+inline fun <T, reified R> F2Function<T, R>.mapToEnvelopeWithRandomId(): F2Function<T, Envelope<R>> =
+    mapToEnvelope { Uuid.random().toString() }
+
+@OptIn(ExperimentalUuidApi::class)
+inline fun <reified T> Flow<T>.mapToEnvelopeWithRandomId(): Flow<Envelope<T>> =
+    mapToEnvelope { Uuid.random().toString() }
+
+@OptIn(ExperimentalUuidApi::class)
+inline fun <T> Flow<T>.mapToEnvelopeWithRandomId(
+    type: String,
+): Flow<Envelope<T>> = mapToEnvelope(type) { Uuid.random().toString() }
 
 suspend inline fun <T, reified R> Envelope<T>.mapEnvelope(
     crossinline transform: suspend (value: T) -> R,
     source: String? = null,
     id: String = this.id,
-    type: String =  R::class.simpleName ?: "Unknown",
+    type: String = R::class.simpleName ?: "Unknown",
     time: String? = null,
     datacontenttype: String? = null
 ): Envelope<R> {
@@ -83,29 +75,16 @@ suspend fun <T, R> Envelope<T>.mapEnvelopeWithType(
     time: String? = null,
     datacontenttype: String? = null
 ): Envelope<R> {
-    return transform(data).asEnvelopeWithType(type,this, source, id, time, datacontenttype)
+    return transform(data).asEnvelopeWithType(type, this, source, id, time, datacontenttype)
 }
 
 
-
-/**
- * Extension function to map a Flow of inputs to a Flow of Envelopes containing the inputs.
- *
- * @param id A function to generate an ID for each input. Defaults to a random UUID.
- * @return A Flow emitting Envelopes containing the inputs.
- */
 inline fun <T, reified R> Flow<Envelope<T>>.mapEnvelopesReified(
     crossinline transform: suspend (value: T) -> R
 ): Flow<Envelope<R>> = map { input ->
     input.mapEnvelope(transform)
 }
 
-/**
- * Extension function to map a Flow of inputs to a Flow of Envelopes containing the inputs.
- *
- * @param id A function to generate an ID for each input. Defaults to a random UUID.
- * @return A Flow emitting Envelopes containing the inputs.
- */
 fun <T, R> Flow<Envelope<T>>.mapEnvelopes(
     transform: suspend (value: T) -> R,
     type: String
