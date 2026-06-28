@@ -1,6 +1,6 @@
 [versions]
 fixers = "0.41.0-SNAPSHOT"
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 spring-boot = "4.0.6"
 spring-cloud = "2025.1.1"
 ktor = "3.4.1"
