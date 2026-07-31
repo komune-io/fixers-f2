@@ -1,6 +1,7 @@
 package f2.feature.catalog
 
 import java.util.function.Consumer
+import java.util.function.Function
 import java.util.function.Supplier
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
