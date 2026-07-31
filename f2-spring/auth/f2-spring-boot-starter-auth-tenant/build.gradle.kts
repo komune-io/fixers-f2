@@ -11,6 +11,9 @@ dependencies {
     api(project(":f2-spring:auth:f2-spring-boot-starter-auth-commons"))
     api(libs.spring.boot.starter.security)
     api(libs.bundles.spring.oauth2)
+
+    testImplementation(libs.bundles.spring.test)
+    testImplementation(libs.spring.boot.starter.webflux)
 }
 
 

@@ -6,4 +6,6 @@ plugins {
 
 dependencies {
     api(project(":f2-spring:auth:f2-spring-boot-starter-auth"))
+
+    testImplementation(libs.bundles.spring.test)
 }

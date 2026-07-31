@@ -5,4 +5,6 @@ plugins {
 
 dependencies {
     api(libs.bundles.spring.cloud.function)
+
+    testImplementation(libs.bundles.spring.test)
 }

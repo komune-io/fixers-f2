@@ -7,4 +7,6 @@ dependencies {
     api(project(":f2-spring:function:f2-spring-boot-starter-function"))
 
     api(libs.spring.boot.autoconfigure)
+
+    testImplementation(libs.bundles.spring.test)
 }
