@@ -11,4 +11,7 @@ dependencies {
     api(libs.bundles.spring.oauth2)
 
     implementation(libs.spring.boot.autoconfigure)
+
+    testImplementation(libs.bundles.spring.test)
+    testImplementation(libs.spring.boot.starter.webflux)
 }
