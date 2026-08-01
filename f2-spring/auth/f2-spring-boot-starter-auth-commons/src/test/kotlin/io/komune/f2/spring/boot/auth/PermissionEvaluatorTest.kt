@@ -1,7 +1,6 @@
 package io.komune.f2.spring.boot.auth
 
 import kotlinx.coroutines.reactor.asCoroutineContext
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -22,10 +21,10 @@ class PermissionEvaluatorTest {
         .claim(ORGANIZATION_ID_CLAIM_NAME, "organization-1")
         .build()
 
-    private fun <T> withAuthentication(
+    private suspend fun <T> withAuthentication(
         vararg roles: String,
         block: suspend () -> T
-    ): T = runBlocking {
+    ): T {
         val authentication = JwtAuthenticationToken(
             jwt(),
             roles.map { role -> SimpleGrantedAuthority("$ROLE_PREFIX$role") }
@@ -35,13 +34,13 @@ class PermissionEvaluatorTest {
             SecurityContext::class.java,
             Mono.just(securityContext)
         )
-        withContext(reactorContext.asCoroutineContext()) {
+        return withContext(reactorContext.asCoroutineContext()) {
             block()
         }
     }
 
     @Test
-    fun `isSuperAdmin should return true with super_admin role`() {
+    suspend fun `isSuperAdmin should return true with super_admin role`() {
         val isSuperAdmin = withAuthentication(SUPER_ADMIN_ROLE) {
             permissionEvaluator.isSuperAdmin()
         }
@@ -49,7 +48,7 @@ class PermissionEvaluatorTest {
     }
 
     @Test
-    fun `isSuperAdmin should return false without super_admin role`() {
+    suspend fun `isSuperAdmin should return false without super_admin role`() {
         val isSuperAdmin = withAuthentication("user") {
             permissionEvaluator.isSuperAdmin()
         }
@@ -57,17 +56,17 @@ class PermissionEvaluatorTest {
     }
 
     @Test
-    fun `isSuperAdmin should return false without authentication`() = runBlocking<Unit> {
+    suspend fun `isSuperAdmin should return false without authentication`() {
         assertThat(permissionEvaluator.isSuperAdmin()).isFalse()
     }
 
     @Test
-    fun `checkOrganizationId should return false for null organizationId`() = runBlocking<Unit> {
+    suspend fun `checkOrganizationId should return false for null organizationId`() {
         assertThat(permissionEvaluator.checkOrganizationId(null)).isFalse()
     }
 
     @Test
-    fun `checkOrganizationId should return true when it matches the authenticated organization`() {
+    suspend fun `checkOrganizationId should return true when it matches the authenticated organization`() {
         val checked = withAuthentication("user") {
             permissionEvaluator.checkOrganizationId("organization-1")
         }
@@ -75,7 +74,7 @@ class PermissionEvaluatorTest {
     }
 
     @Test
-    fun `checkOrganizationId should return false when it does not match`() {
+    suspend fun `checkOrganizationId should return false when it does not match`() {
         val checked = withAuthentication("user") {
             permissionEvaluator.checkOrganizationId("organization-2")
         }
@@ -83,7 +82,7 @@ class PermissionEvaluatorTest {
     }
 
     @Test
-    fun `checkOrganizationId should return false without authentication`() = runBlocking<Unit> {
+    suspend fun `checkOrganizationId should return false without authentication`() {
         assertThat(permissionEvaluator.checkOrganizationId("organization-1")).isFalse()
     }
 }

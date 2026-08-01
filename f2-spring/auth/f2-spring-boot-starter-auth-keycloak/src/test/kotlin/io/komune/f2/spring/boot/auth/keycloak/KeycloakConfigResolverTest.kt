@@ -39,19 +39,19 @@ class KeycloakConfigResolverTest {
     }
 
     @Test
-    fun `getKeycloakConfig should return first config for null name`() = runBlocking<Unit> {
+    suspend fun `getKeycloakConfig should return first config for null name`() {
         val config = resolver.getKeycloakConfig(null)
         assertThat(config.realm).isEqualTo("master")
     }
 
     @Test
-    fun `getKeycloakConfig should return first config for blank name`() = runBlocking<Unit> {
+    suspend fun `getKeycloakConfig should return first config for blank name`() {
         val config = resolver.getKeycloakConfig("")
         assertThat(config.realm).isEqualTo("master")
     }
 
     @Test
-    fun `getKeycloakConfig should return config matching the name`() = runBlocking<Unit> {
+    suspend fun `getKeycloakConfig should return config matching the name`() {
         val config = resolver.getKeycloakConfig("second")
         assertThat(config.realm).isEqualTo("tenant")
     }
