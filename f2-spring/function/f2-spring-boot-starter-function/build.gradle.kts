@@ -12,6 +12,7 @@ dependencies {
     api(project(":f2-dsl:f2-dsl-function"))
 
     api(libs.bundles.coroutines)
+    api(libs.kotlinx.serialization.json)
     api(libs.bundles.spring.cloud.function)
 
     testImplementation(project(":f2-bdd:f2-bdd-spring-lambda"))

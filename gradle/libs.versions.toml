@@ -84,6 +84,8 @@ kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 kotlinx-coroutines-reactor = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor" }
 kotlinx-coroutines-reactive = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactive" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test" }
+kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json" }
 
 # Spring Boot
 spring-boot-autoconfigure = { group = "org.springframework.boot", name = "spring-boot-autoconfigure" }
@@ -110,6 +112,9 @@ spring-cloud-function-kotlin = { group = "org.springframework.cloud", name = "sp
 spring-cloud-function-web = { group = "org.springframework.cloud", name = "spring-cloud-function-web" }
 spring-cloud-starter-function-webflux = { group = "org.springframework.cloud", name = "spring-cloud-starter-function-webflux" }
 spring-cloud-starter-function-web = { group = "org.springframework.cloud", name = "spring-cloud-starter-function-web" }
+
+# Reactor
+reactor-core = { group = "io.projectreactor", name = "reactor-core" }
 
 # Jakarta
 jakarta-persistence-api = { group = "jakarta.persistence", name = "jakarta.persistence-api" }

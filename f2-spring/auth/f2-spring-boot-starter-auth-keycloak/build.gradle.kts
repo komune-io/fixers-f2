@@ -7,5 +7,7 @@ plugins {
 dependencies {
     api(project(":f2-spring:auth:f2-spring-boot-starter-auth"))
 
+    implementation(libs.kotlinx.coroutines.core)
+
     testImplementation(libs.bundles.spring.test)
 }

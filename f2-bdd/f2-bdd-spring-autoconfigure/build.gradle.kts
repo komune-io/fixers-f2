@@ -8,4 +8,6 @@ dependencies {
 	api(project(":f2-dsl:f2-dsl-function"))
 	api(libs.bundles.spring.cloud.function)
 	api(libs.bundles.spring.test)
+
+	implementation(libs.kotlinx.coroutines.core)
 }

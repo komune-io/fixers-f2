@@ -8,6 +8,8 @@ dependencies {
     api(project(":f2-dsl:f2-dsl-cqrs"))
     api(project(":f2-dsl:f2-dsl-event"))
 
+    implementation(libs.kotlinx.coroutines.core)
+
     implementation(libs.spring.boot.starter.webflux)
     implementation(libs.spring.boot.autoconfigure)
 
