@@ -10,6 +10,9 @@ import f2.client.ktor.http.httpClientBuilderGenerics
  */
 object F2ClientBuilder {
 
+    private const val HTTP_PREFIX = "http:"
+    private const val HTTPS_PREFIX = "https:"
+
     /**
      * Creates an [F2Client] for HTTP or HTTPS communication.
      *
@@ -21,8 +24,8 @@ object F2ClientBuilder {
         url: String,
     ): F2Client {
         return when {
-            url.startsWith("http:") -> httpClientBuilderDefault().build(url)
-            url.startsWith("https:") -> httpClientBuilderDefault().build(url)
+            url.startsWith(HTTP_PREFIX) -> httpClientBuilderDefault().build(url)
+            url.startsWith(HTTPS_PREFIX) -> httpClientBuilderDefault().build(url)
             else -> throw IllegalArgumentException(
                 "Invalid Url[${url}] must start by one of http:, https:, tcp:, ws:, wss:"
             )
@@ -42,8 +45,8 @@ object F2ClientBuilder {
         config: F2ClientConfigLambda<*>? = null
     ): F2Client {
         return when {
-            urlBase.startsWith("http:") -> httpClientBuilderGenerics(config).build(urlBase)
-            urlBase.startsWith("https:") -> httpClientBuilderGenerics(config).build(urlBase)
+            urlBase.startsWith(HTTP_PREFIX) -> httpClientBuilderGenerics(config).build(urlBase)
+            urlBase.startsWith(HTTPS_PREFIX) -> httpClientBuilderGenerics(config).build(urlBase)
             else -> throw InvalidUrlException(urlBase)
         }
     }
@@ -59,8 +62,8 @@ object F2ClientBuilder {
         url: String,
     ): F2Client {
         return when {
-            url.startsWith("http:") -> httpClientBuilderDefault().build(url)
-            url.startsWith("https:") -> httpClientBuilderDefault().build(url)
+            url.startsWith(HTTP_PREFIX) -> httpClientBuilderDefault().build(url)
+            url.startsWith(HTTPS_PREFIX) -> httpClientBuilderDefault().build(url)
             else -> throw IllegalArgumentException(
                 "Invalid Url[${url}] must start by one of http:, https:, tcp:, ws:, wss:"
             )

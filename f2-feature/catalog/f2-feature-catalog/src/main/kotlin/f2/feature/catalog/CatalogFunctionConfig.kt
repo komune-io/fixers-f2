@@ -17,7 +17,7 @@ class CatalogFunctionConfig {
 	@Bean
 	fun catalogFunction(): () -> Array<String> {
 		return {
-			val namesFunction = catalog.getNames(Function::class.java)
+			val namesFunction: Set<String> = catalog.getNames(Function::class.java)
 			namesFunction.filter { !it.startsWith("&") }.toTypedArray()
 		}
 	}
@@ -25,7 +25,7 @@ class CatalogFunctionConfig {
 	@Bean
 	fun catalogSupplier(): () -> Array<String> {
 		return {
-			val namesFunction = catalog.getNames(Supplier::class.java)
+			val namesFunction: Set<String> = catalog.getNames(Supplier::class.java)
 			namesFunction.filter { !it.startsWith("&") }.toTypedArray()
 		}
 	}
@@ -33,7 +33,7 @@ class CatalogFunctionConfig {
 	@Bean
 	fun catalogConsumer(): () -> Array<String> {
 		return {
-			val namesFunction = catalog.getNames(Consumer::class.java)
+			val namesFunction: Set<String> = catalog.getNames(Consumer::class.java)
 			namesFunction.filter { !it.startsWith("&") }.toTypedArray()
 		}
 	}
