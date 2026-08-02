@@ -5,6 +5,9 @@ plugins {
 }
 
 dependencies {
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.reactor)
+
     api(libs.spring.boot.starter.security)
     api(libs.bundles.spring.oauth2)
 

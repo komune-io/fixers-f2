@@ -1,7 +1,6 @@
 package io.komune.f2.spring.boot.auth
 
 import kotlinx.coroutines.reactor.asCoroutineContext
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -33,22 +32,22 @@ class AuthenticationProviderTest {
         roles.map { role -> SimpleGrantedAuthority("$ROLE_PREFIX$role") }
     )
 
-    private fun <T> withSecurityContext(
+    private suspend fun <T> withSecurityContext(
         authentication: JwtAuthenticationToken,
         block: suspend () -> T
-    ): T = runBlocking {
+    ): T {
         val securityContext: SecurityContext = SecurityContextImpl(authentication)
         val reactorContext = Context.of(
             SecurityContext::class.java,
             Mono.just(securityContext)
         )
-        withContext(reactorContext.asCoroutineContext()) {
+        return withContext(reactorContext.asCoroutineContext()) {
             block()
         }
     }
 
     @Test
-    fun `getSecurityContext should return null without reactor context`() = runBlocking<Unit> {
+    suspend fun `getSecurityContext should return null without reactor context`() {
         assertThat(AuthenticationProvider.getSecurityContext()).isNull()
         assertThat(AuthenticationProvider.getAuthentication()).isNull()
         assertThat(AuthenticationProvider.getPrincipal()).isNull()
@@ -59,7 +58,7 @@ class AuthenticationProviderTest {
     }
 
     @Test
-    fun `getSecurityContext should return context from coroutine reactor context`() {
+    suspend fun `getSecurityContext should return context from coroutine reactor context`() {
         val securityContext = withSecurityContext(authentication(jwt())) {
             AuthenticationProvider.getSecurityContext()
         }
@@ -68,7 +67,7 @@ class AuthenticationProviderTest {
     }
 
     @Test
-    fun `getAuthentication should return the jwt authentication token`() {
+    suspend fun `getAuthentication should return the jwt authentication token`() {
         val authentication = withSecurityContext(authentication(jwt())) {
             AuthenticationProvider.getAuthentication()
         }
@@ -77,7 +76,7 @@ class AuthenticationProviderTest {
     }
 
     @Test
-    fun `getPrincipal should return the jwt`() {
+    suspend fun `getPrincipal should return the jwt`() {
         val principal = withSecurityContext(authentication(jwt())) {
             AuthenticationProvider.getPrincipal()
         }
@@ -86,7 +85,7 @@ class AuthenticationProviderTest {
     }
 
     @Test
-    fun `getOrganizationId should return memberOf claim`() {
+    suspend fun `getOrganizationId should return memberOf claim`() {
         val organizationId = withSecurityContext(authentication(jwt())) {
             AuthenticationProvider.getOrganizationId()
         }
@@ -94,7 +93,7 @@ class AuthenticationProviderTest {
     }
 
     @Test
-    fun `getIssuer should return issuer claim`() {
+    suspend fun `getIssuer should return issuer claim`() {
         val issuer = withSecurityContext(authentication(jwt())) {
             AuthenticationProvider.getIssuer()
         }
@@ -102,7 +101,7 @@ class AuthenticationProviderTest {
     }
 
     @Test
-    fun `getClientId should return azp claim`() {
+    suspend fun `getClientId should return azp claim`() {
         val clientId = withSecurityContext(authentication(jwt())) {
             AuthenticationProvider.getClientId()
         }
@@ -110,7 +109,7 @@ class AuthenticationProviderTest {
     }
 
     @Test
-    fun `getTenant should return last segment of issuer`() {
+    suspend fun `getTenant should return last segment of issuer`() {
         val tenant = withSecurityContext(authentication(jwt())) {
             AuthenticationProvider.getTenant()
         }
@@ -118,7 +117,7 @@ class AuthenticationProviderTest {
     }
 
     @Test
-    fun `getTenant should return null when issuer ends with slash`() {
+    suspend fun `getTenant should return null when issuer ends with slash`() {
         val tenant = withSecurityContext(authentication(jwt(issuer = "http://localhost:8080/"))) {
             AuthenticationProvider.getTenant()
         }
@@ -126,7 +125,7 @@ class AuthenticationProviderTest {
     }
 
     @Test
-    fun `hasRole should return true when authority is present`() {
+    suspend fun `hasRole should return true when authority is present`() {
         val hasRole = withSecurityContext(authentication(jwt(), "admin")) {
             AuthenticationProvider.hasRole("admin")
         }
@@ -134,7 +133,7 @@ class AuthenticationProviderTest {
     }
 
     @Test
-    fun `hasRole should return false when authority is missing`() {
+    suspend fun `hasRole should return false when authority is missing`() {
         val hasRole = withSecurityContext(authentication(jwt(), "user")) {
             AuthenticationProvider.hasRole("admin")
         }
@@ -142,7 +141,7 @@ class AuthenticationProviderTest {
     }
 
     @Test
-    fun `hasRole should return false without authentication`() = runBlocking<Unit> {
+    suspend fun `hasRole should return false without authentication`() {
         assertThat(AuthenticationProvider.hasRole("admin")).isFalse()
     }
 }

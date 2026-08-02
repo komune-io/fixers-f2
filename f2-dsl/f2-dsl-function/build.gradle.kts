@@ -8,6 +8,9 @@ plugins {
 dependencies {
     commonMainApi(project(":f2-dsl:f2-dsl-cqrs"))
 
+    commonMainApi(libs.kotlinx.coroutines.core)
+    commonMainApi(libs.kotlinx.serialization.core)
+
     jvmTestImplementation(libs.bundles.test.junit)
 
 }

@@ -5,5 +5,5 @@ plugins {
 }
 
 dependencies {
-
+    commonMainApi(libs.kotlinx.serialization.core)
 }

@@ -10,6 +10,7 @@ dependencies {
     api(libs.spring.boot.starter.security)
     api(libs.bundles.spring.oauth2)
 
+    implementation(libs.reactor.core)
     implementation(libs.spring.boot.autoconfigure)
 
     testImplementation(libs.bundles.spring.test)

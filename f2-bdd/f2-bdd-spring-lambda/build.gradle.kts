@@ -10,4 +10,7 @@ dependencies {
 	api(project(":f2-dsl:f2-dsl-cqrs"))
 	api(libs.bundles.spring.cloud.function)
 	api(libs.bundles.spring.test)
+
+	implementation(libs.kotlinx.coroutines.core)
+	implementation(libs.kotlinx.serialization.core)
 }

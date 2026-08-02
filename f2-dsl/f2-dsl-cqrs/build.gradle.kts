@@ -5,6 +5,9 @@ plugins {
 }
 
 dependencies {
+    commonMainApi(libs.kotlinx.coroutines.core)
+    commonMainApi(libs.kotlinx.serialization.core)
+
     jvmMainImplementation(libs.bundles.spring.data.commons)
 
     jvmTestImplementation(libs.bundles.test.junit)
