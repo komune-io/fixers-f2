@@ -66,7 +66,7 @@ open class F2SpringContextStep: F2SpringStep(), En {
 	private fun DataTable.asCucumberF2SpringDeclaration(): List<CucumberF2SpringDeclaration> {
 		return asMaps().map { columns ->
 			CucumberF2SpringDeclaration(
-				name = columns[CucumberF2SpringDeclaration::name.name]!!,
+				name = columns.getValue(CucumberF2SpringDeclaration::name.name),
 			)
 		}
 	}
