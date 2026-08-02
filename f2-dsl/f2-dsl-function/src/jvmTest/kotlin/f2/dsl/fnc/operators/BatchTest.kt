@@ -36,4 +36,28 @@ class BatchTest {
         val expected = listOf(2, 4, 6)
         assertEquals(expected, result)
     }
+
+    @Test
+    suspend fun `test batchFlow function emits transformed batches`() {
+        val input = (1..6).toList().asFlow()
+        val batch = Batch(size = 2, concurrency = 1)
+        val result = input.batchFlow(batch) { items ->
+            listOf(items.map { it * 2 }).asFlow()
+        }.toList()
+
+        val expected = listOf(
+            listOf(2, 4),
+            listOf(6, 8),
+            listOf(10, 12)
+        )
+        assertEquals(expected, result)
+    }
+
+    @Test
+    suspend fun `test batch default configuration`() {
+        val batch = Batch()
+
+        assertEquals(BATCH_DEFAULT_SIZE, batch.size)
+        assertEquals(BATCH_DEFAULT_CONCURRENCY, batch.concurrency)
+    }
 }

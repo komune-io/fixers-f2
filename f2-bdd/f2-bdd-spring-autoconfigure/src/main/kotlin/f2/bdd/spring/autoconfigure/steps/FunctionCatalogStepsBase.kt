@@ -47,7 +47,7 @@ abstract class FunctionCatalogStepsBase<P, R>(
 		result: Any?
 	) {
 		if (lambda.isFunction || lambda.isSupplier) {
-			bag.result[functionName] = (result as Flux<String>).collectList().block()!!
+			bag.result[functionName] = (result as Flux<*>).collectList().block()!!
 		} else if (lambda.isConsumer) {
 			bag.result[functionName] = consumerReceiver()
 		}

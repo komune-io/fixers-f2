@@ -20,12 +20,12 @@ class F2ExceptionHandler {
 
     @ExceptionHandler(F2Exception::class)
     fun handleF2Exception(ex: F2Exception): ResponseEntity<Map<String, Any?>> {
-        val body = mapOf(
-            F2Error::id.name to ex.error.id,
-            F2Error::code.name to ex.error.code,
-            F2Error::message.name to ex.error.message,
-            F2Error::timestamp.name to ex.error.timestamp,
-        ).filterValues { it != null }
+        val body = buildMap {
+            ex.error.id?.let { put(F2Error::id.name, it) }
+            put(F2Error::code.name, ex.error.code)
+            put(F2Error::message.name, ex.error.message)
+            put(F2Error::timestamp.name, ex.error.timestamp)
+        }
         val status = HttpStatus.resolve(ex.error.code) ?: HttpStatus.INTERNAL_SERVER_ERROR
         return ResponseEntity.status(status).body(body)
     }
@@ -38,12 +38,12 @@ class F2ExceptionHandler {
             message = "Missing parameter `${ex.kotlinPropertyName}`",
             code = 400,
         )
-        val body = mapOf(
+        val body = mapOf<String, Any?>(
             F2Error::id.name to error.id,
             F2Error::code.name to error.code,
             F2Error::message.name to error.message,
             F2Error::timestamp.name to error.timestamp,
-        ).filterValues { it != null }
+        )
         return ResponseEntity.badRequest().body(body)
     }
 }

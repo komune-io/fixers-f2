@@ -41,28 +41,10 @@ class KSerializationMapper(
     private val serializerCache: MutableMap<Type, KSerializer<Any>> =
         ConcurrentReferenceHashMap<Type, KSerializer<Any>>()
 
-    @OptIn(ExperimentalSerializationApi::class)
-    @Suppress("TooGenericExceptionCaught", "ThrowsCount")
+    @Suppress("TooGenericExceptionCaught", "ThrowsCount", "UNCHECKED_CAST")
     override fun <T> doFromJson(json: Any, type: Type): T {
         try {
-            val serializerType = serializer(type)
-            return when (json) {
-                is String -> {
-                    mapper.decodeFromString(serializerType, json) as T
-                }
-                is ByteArray -> {
-                    mapper.decodeFromString(serializerType, String(json)) as T
-                }
-                is Reader -> {
-                    mapper.decodeFromStream(serializerType, json.toInputStream()) as T
-                }
-                is JsonElement -> {
-                    mapper.decodeFromJsonElement(serializerType, json) as T
-                }
-                else -> {
-                    error("Failed to convert. Unknown type ${json::class.qualifiedName}")
-                }
-            }
+            return decode(json, type) as T
         } catch (e: MissingFieldException) {
             throw F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
@@ -84,6 +66,19 @@ class KSerializationMapper(
             )
         }
     }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    private fun decode(json: Any, type: Type): Any {
+        val serializerType = serializer(type)
+        return when (json) {
+            is String -> mapper.decodeFromString(serializerType, json)
+            is ByteArray -> mapper.decodeFromString(serializerType, String(json))
+            is Reader -> mapper.decodeFromStream(serializerType, json.toInputStream())
+            is JsonElement -> mapper.decodeFromJsonElement(serializerType, json)
+            else -> error("Failed to convert. Unknown type ${json::class.qualifiedName}")
+        }
+    }
+
     @Suppress("TooGenericExceptionCaught")
     override fun toJson(value: Any): ByteArray {
         val type = ResolvableType.forClass(value::class.java)
@@ -115,7 +110,7 @@ class KSerializationMapper(
         }
     }
 
-    @Suppress("TooGenericExceptionCaught")
+    @Suppress("TooGenericExceptionCaught", "UNCHECKED_CAST")
     private fun serializer(type: Type): KSerializer<Any> {
         return serializerCache.getOrPut(type) {
             try {

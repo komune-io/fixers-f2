@@ -49,8 +49,9 @@ class TrustedIssuerJwtAuthenticationManagerResolver(
     }
 
     fun jwtAuthoritiesConverter(jwt: Jwt): Flux<GrantedAuthority> {
-        val realmAccess = jwt.claims["realm_access"] as Map<String, List<String>>?
-        return realmAccess?.get("roles").orEmpty().map { role ->
+        val realmAccess = jwt.claims["realm_access"] as? Map<*, *>
+        val roles = (realmAccess?.get("roles") as? List<*>).orEmpty().filterIsInstance<String>()
+        return roles.map { role ->
             SimpleGrantedAuthority("$ROLE_PREFIX$role")
         }.let { Flux.fromIterable(it) }
     }

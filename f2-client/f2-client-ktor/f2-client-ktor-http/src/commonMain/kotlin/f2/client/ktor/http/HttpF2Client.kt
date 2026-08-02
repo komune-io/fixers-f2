@@ -33,6 +33,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -72,13 +73,16 @@ open class HttpF2Client(
 			if (!response.status.isSuccess()) {
 				handleError(response)
 			}
-			response.body<T>(typeInfo).let { result ->
-				if (result is Collection<*>) {
-					result.forEach { emit(it as T) }
-				} else {
-					emit(result)
-				}
-			}
+			emitPayload(response.body<T>(typeInfo))
+		}
+	}
+
+	private suspend fun <T> FlowCollector<T>.emitPayload(result: T) {
+		if (result is Collection<*>) {
+			@Suppress("UNCHECKED_CAST")
+			(result as Collection<T>).forEach { emit(it) }
+		} else {
+			emit(result)
 		}
 	}
 
@@ -97,13 +101,7 @@ open class HttpF2Client(
 			if (!response.status.isSuccess()) {
 				handleError(response)
 			}
-			response.body<RESPONSE>(responseTypeInfo).let { result ->
-				if (result is Collection<*>) {
-					result.forEach { emit(it as RESPONSE) }
-				} else {
-					emit(result)
-				}
-			}
+			emitPayload(response.body<RESPONSE>(responseTypeInfo))
 		}
 	}
 
