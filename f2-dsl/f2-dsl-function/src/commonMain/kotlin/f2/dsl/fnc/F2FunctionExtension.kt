@@ -59,9 +59,7 @@ fun <R> f2SupplierSingle(fnc: suspend () -> R): F2SupplierSingle<R> = F2Supplier
  * @return An F2Supplier that wraps the suspend function.
  */
 fun <R> f2Supplier(fnc: suspend () -> Flow<R>): F2Supplier<R> = F2Supplier {
-    flow {
-        emitAll(fnc())
-    }
+    flow { emitAll(fnc()) }
 }
 
 /**
