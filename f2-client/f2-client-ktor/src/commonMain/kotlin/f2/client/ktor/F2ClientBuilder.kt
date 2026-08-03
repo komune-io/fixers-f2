@@ -4,10 +4,13 @@ import f2.client.F2Client
 import f2.client.ktor.common.F2ClientConfigLambda
 import f2.client.ktor.http.httpClientBuilderDefault
 import f2.client.ktor.http.httpClientBuilderGenerics
+import kotlin.js.JsExport
+import kotlin.js.JsName
 
 /**
  * Builder object for creating instances of [F2Client] based on different protocols.
  */
+@JsExport
 object F2ClientBuilder {
 
     private const val HTTP_PREFIX = "http:"
@@ -40,6 +43,7 @@ object F2ClientBuilder {
      * @return An instance of [F2Client].
      * @throws InvalidUrlException if the URL does not start with a valid protocol.
      */
+    @JsName("getWithConfig")
     suspend fun get(
         urlBase: String,
         config: F2ClientConfigLambda<*>? = null

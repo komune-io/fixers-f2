@@ -1,8 +1,10 @@
 package f2.client.domain
 
+import kotlin.js.JsExport
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@JsExport
 @Serializable
 data class TokenInfo(
     @SerialName("access_token") val accessToken: String,
