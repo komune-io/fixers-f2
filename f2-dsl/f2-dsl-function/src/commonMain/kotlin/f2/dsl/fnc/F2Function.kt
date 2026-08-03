@@ -10,6 +10,9 @@ typealias F2LambdaFunction<T, R> = (Flow<T>) -> Flow<R>
 
 /**
  * Fun interface representing a function that transforms a Flow of type T to a Flow of type R.
+ *
+ * Intentionally does NOT extend [F2LambdaFunction]: Kotlin/JS prohibits an interface from
+ * implementing a (non-suspend) function type, and this module compiles to JS.
  */
 @JsExport
 fun interface F2Function<in T, out R> {

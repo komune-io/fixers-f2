@@ -10,6 +10,9 @@ typealias F2LambdaSupplier<R> = () -> Flow<R>
 
 /**
  * Fun interface representing a supplier of a Flow of type R.
+ *
+ * Intentionally does NOT extend [F2LambdaSupplier]: Kotlin/JS prohibits an interface from
+ * implementing a (non-suspend) function type, and this module compiles to JS.
  */
 @JsExport
 fun interface F2Supplier<R> {
