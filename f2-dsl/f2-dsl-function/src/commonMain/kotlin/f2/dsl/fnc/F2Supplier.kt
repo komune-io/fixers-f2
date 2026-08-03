@@ -4,21 +4,21 @@ import kotlin.js.JsExport
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Type alias for a suspend function that supplies a Flow of type R.
+ * Type alias for a function that supplies a Flow of type R.
  */
-typealias F2LambdaSupplier<R> = suspend () -> Flow<R>
+typealias F2LambdaSupplier<R> = () -> Flow<R>
 
 /**
  * Fun interface representing a supplier of a Flow of type R.
  */
 @JsExport
-fun interface F2Supplier<R> : F2LambdaSupplier<R> {
+fun interface F2Supplier<R> {
     /**
      * Invokes the supplier to get a Flow of type R.
      *
      * @return The Flow of type R.
      */
-    override suspend operator fun invoke(): Flow<R>
+    operator fun invoke(): Flow<R>
 }
 
 /**

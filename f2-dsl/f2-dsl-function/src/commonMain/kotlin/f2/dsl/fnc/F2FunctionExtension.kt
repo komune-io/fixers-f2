@@ -3,7 +3,9 @@ package f2.dsl.fnc
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
@@ -51,12 +53,15 @@ fun <R> f2SupplierSingle(fnc: suspend () -> R): F2SupplierSingle<R> = F2Supplier
 
 /**
  * Creates an F2Supplier from a suspend function that returns a Flow.
+ * The suspending call is deferred into a cold flow, so it runs at collection time.
  *
  * @param fnc The suspend function to convert.
  * @return An F2Supplier that wraps the suspend function.
  */
 fun <R> f2Supplier(fnc: suspend () -> Flow<R>): F2Supplier<R> = F2Supplier {
-    fnc()
+    flow {
+        emitAll(fnc())
+    }
 }
 
 /**

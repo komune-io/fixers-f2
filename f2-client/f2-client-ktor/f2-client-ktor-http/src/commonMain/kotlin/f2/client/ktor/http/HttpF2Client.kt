@@ -34,6 +34,7 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -67,7 +68,7 @@ open class HttpF2Client(
 		throw F2Exception(error = error)
 	}
 
-	private suspend inline fun <T> handlePayloadResponse(response: HttpResponse, typeInfo: TypeInfo): Flow<T> {
+	private inline fun <T> handlePayloadResponse(response: HttpResponse, typeInfo: TypeInfo): Flow<T> {
 		return flow {
 			if (!response.status.isSuccess()) {
 				handleError(response)
@@ -85,25 +86,30 @@ open class HttpF2Client(
 	override fun <RESPONSE> supplier(
 		route: String, responseTypeInfo: TypeInfo
 	): F2Supplier<RESPONSE> = F2Supplier<RESPONSE> {
-		httpClient.get("$urlBase/${route}").let { response ->
-			handlePayloadResponse(response, responseTypeInfo)
+		flow {
+			httpClient.get("$urlBase/${route}").let { response ->
+				emitAll(handlePayloadResponse<RESPONSE>(response, responseTypeInfo))
+			}
 		}
 	}
 
 	override fun <QUERY, RESPONSE> function(
 		route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo
 	) = F2Function<QUERY, RESPONSE> { messageFlow ->
-		doPost(route, queryTypeInfo, messageFlow).asFlow().transform { response ->
-			if (!response.status.isSuccess()) {
-				handleError(response)
-			}
-			response.body<RESPONSE>(responseTypeInfo).let { result ->
-				if (result is Collection<*>) {
-					result.forEach { emit(it as RESPONSE) }
-				} else {
-					emit(result)
+		flow {
+			val responses = doPost(route, queryTypeInfo, messageFlow).asFlow().transform { response ->
+				if (!response.status.isSuccess()) {
+					handleError(response)
+				}
+				response.body<RESPONSE>(responseTypeInfo).let { result ->
+					if (result is Collection<*>) {
+						result.forEach { emit(it as RESPONSE) }
+					} else {
+						emit(result)
+					}
 				}
 			}
+			emitAll(responses)
 		}
 	}
 
