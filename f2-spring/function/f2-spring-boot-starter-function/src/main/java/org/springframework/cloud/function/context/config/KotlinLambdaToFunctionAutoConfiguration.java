@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import f2.spring.F2FunctionInvokers;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
@@ -100,9 +99,6 @@ public class KotlinLambdaToFunctionAutoConfiguration {
 
         @Override
         public Object invoke(Object arg0) {
-            if (F2FunctionInvokers.isValidFlowFunction(kotlinLambdaTarget, arg0)) {
-                return F2FunctionInvokers.invokeFlowFunction(kotlinLambdaTarget, arg0);
-            }
             if (CoroutinesUtils.isValidSuspendingFunction(kotlinLambdaTarget, arg0)) {
                 return CoroutinesUtils.invokeSuspendingFunction(kotlinLambdaTarget, arg0);
             }
@@ -118,9 +114,6 @@ public class KotlinLambdaToFunctionAutoConfiguration {
 
         @Override
         public Object invoke() {
-            if (F2FunctionInvokers.isValidFlowSupplier(kotlinLambdaTarget)) {
-                return F2FunctionInvokers.invokeFlowSupplier(kotlinLambdaTarget);
-            }
             if (CoroutinesUtils.isValidSuspendingSupplier(kotlinLambdaTarget)) {
                 return CoroutinesUtils.invokeSuspendingSupplier(kotlinLambdaTarget);
             }
@@ -152,20 +145,7 @@ public class KotlinLambdaToFunctionAutoConfiguration {
             FunctionRegistration<?> registration = new FunctionRegistration<>(this, name);
             Type[] types = ((ParameterizedType) functionType).getActualTypeArguments();
 
-            if (isValidF2Function(functionType)) {
-                functionType = ResolvableType.forClassWithGenerics(
-                        Function.class,
-                        ResolvableType.forClassWithGenerics(Flux.class, ResolvableType.forType(types[0])),
-                        ResolvableType.forClassWithGenerics(Flux.class, ResolvableType.forType(types[1]))
-                ).getType();
-            }
-            else if (isValidF2Supplier(functionType)) {
-                functionType = ResolvableType.forClassWithGenerics(
-                        Supplier.class,
-                        ResolvableType.forClassWithGenerics(Flux.class, ResolvableType.forType(types[0]))
-                ).getType();
-            }
-            else if (isValidKotlinSupplier(functionType)) {
+            if (isValidKotlinSupplier(functionType)) {
                 functionType = ResolvableType.forClassWithGenerics(Supplier.class, ResolvableType.forType(types[0]))
                         .getType();
             }
@@ -207,19 +187,6 @@ public class KotlinLambdaToFunctionAutoConfiguration {
             }
             registration = registration.type(functionType);
             return registration;
-        }
-
-        private boolean isValidF2Function(Type functionType) {
-            return isTypeRepresentedByRawClass(functionType, f2.dsl.fnc.F2Function.class);
-        }
-
-        private boolean isValidF2Supplier(Type functionType) {
-            return isTypeRepresentedByRawClass(functionType, f2.dsl.fnc.F2Supplier.class);
-        }
-
-        private boolean isTypeRepresentedByRawClass(Type type, Class<?> clazz) {
-            Type rawType = type instanceof ParameterizedType ? ((ParameterizedType) type).getRawType() : type;
-            return rawType instanceof Class && clazz.isAssignableFrom((Class<?>) rawType);
         }
 
         private boolean isValidKotlinSupplier(Type functionType) {
