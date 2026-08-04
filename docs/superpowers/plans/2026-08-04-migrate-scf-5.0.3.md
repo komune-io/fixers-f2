@@ -16,7 +16,7 @@
 - **Only file with content churn:** `spring-cloud-function-context/src/main/java/org/springframework/cloud/function/context/catalog/SimpleFunctionRegistry.java`. Confirmed via `diff -w -B` between the two tags for every vendored file — all others show 0 changed lines.
 - **Only other churn:** `spring-cloud-function-context/pom.xml` and `spring-cloud-function-web/pom.xml` — trivial `<parent><version>` bumps (5.0.1→5.0.3, automatic when branching off the new tag) and one unrelated dependency version bump (2.2.0→2.2.1). Neither touches the `spring-web` `<optional>` KOMUNE edit (verified: that edit is at a different `<dependency>` block).
 - **Zero conflict, verified two ways:** (1) line-range comparison — KOMUNE markers sit at lines 898-909 and 1553-1608 in the current file; every upstream hunk lands at 27-145 or 486-515 or 689-722, none overlapping; (2) method identification — the upstream `equals`/`hashCode` addition and recursive-guard addition land inside `andThen()`, a method KOMUNE never touches.
-- **F2's SCF version is BOM-derived, not hardcoded.** `gradle/libs.versions.toml:5` sets `spring-cloud = "2025.1.1"`, consumed by `f2-gradle/f2-gradle-bom/build.gradle.kts:18` as `platform("org.springframework.cloud:spring-cloud-dependencies:${...}")`. Confirmed via direct POM inspection: Spring Cloud BOM `2025.1.2` pins `spring-cloud-function.version` to `5.0.3`, and **it is the only version that changed** in that BOM release (diffed every `*.version` property between the 2025.1.1 and 2025.1.2 POMs — identical except this one). So the F2-side migration is a one-line version bump plus re-porting the one changed vendored file.
+- **F2's SCF version is BOM-derived, not hardcoded.** `gradle/libs.versions.toml:5` sets `spring-cloud = "2025.1.1"`, consumed by `f2-gradle/f2-gradle-bom/build.gradle.kts:18` as `platform("org.springframework.cloud:spring-cloud-dependencies:${...}")`. Confirmed via direct POM inspection: Spring Cloud BOM `2025.1.2` pins `spring-cloud-function.version` to `5.0.3`. **Correction (post-migration):** Spring Cloud BOM 2025.1.2 changes 17 version properties versus 2025.1.1, not just spring-cloud-function (verified via direct file diff of both release POMs — an earlier `diff <(curl ...) <(curl ...)` process-substitution check falsely reported the files as identical, which is why this was initially missed; always diff to real files in this environment, not process substitution). The other 16 are: spring-boot (4.0.2→4.0.7), spring-cloud-config (5.0.1→5.0.4), spring-cloud-contract (5.0.2→5.0.3), and 13 other spring-cloud-* modules F2 doesn't use directly (5.0.1→5.0.2). None of the 16 besides spring-boot are on F2's actual classpath (F2 only pulls spring-cloud-function + spring-cloud-dependencies' platform constraints), so this migration's practical blast radius beyond spring-cloud-function itself is: Spring Boot 4.0.6→4.0.7 (now correctly pinned to match, see `gradle/libs.versions.toml`), and transitively Spring Framework 7.0.7→7.0.8, Jackson 3.1.2→3.1.4, Reactor 3.8.5→3.8.6, reactor-netty 1.3.5→1.3.6, Netty 4.2.12→4.2.15.Final, Micrometer 1.16.5→1.16.6, Logback 1.5.32→1.5.34, slf4j 2.0.17→2.0.18 (all verified via resolved compileClasspath diff, all patch/minor bumps, no test regressions observed). So the F2-side migration is a one-line `spring-cloud` version bump plus re-porting the one changed vendored file, plus keeping the `spring-boot` pin honest.
 - **Maven build environment:** `repo.spring.io/release` returns 401 Unauthorized for some artifacts (e.g. `reactor-core:3.8.2`) in this environment. Use a Central-only mirror for all `mvnw` invocations in this plan (Task 1, Step 5 sets this up once).
 - Run F2 tests with: `./gradlew test detekt` from `/Users/adrien/Dev/komune/fixers/fixers-f2`.
 - Run fork tests with: `./mvnw -s /tmp/settings-central.xml -B -pl <module> test` from `/Users/adrien/Dev/komune/fixers/spring-cloud-function`.
@@ -433,6 +433,17 @@ The only property that changed between the 2025.1.1 and 2025.1.2 BOM
 releases is spring-cloud-function.version (5.0.1 -> 5.0.3) - confirmed
 by diffing every *.version property in both release POMs."
 ```
+
+**Correction (post-migration):** the commit message above (and this
+plan) understated the BOM diff. Spring Cloud BOM 2025.1.2 actually
+changes 17 version properties versus 2025.1.1, not just
+spring-cloud-function — see the corrected Global Constraints entry
+above for the full list and F2's practical blast radius (Spring Boot
+4.0.6→4.0.7, now correctly pinned in `gradle/libs.versions.toml`, plus
+patch bumps to Spring Framework, Jackson, Reactor, Netty, Micrometer,
+Logback, and slf4j). The false "only property that changed" claim was
+caught in final review and corrected in a follow-up commit; commit
+`937da6a` itself was left unamended.
 
 ---
 
