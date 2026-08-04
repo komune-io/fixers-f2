@@ -73,7 +73,13 @@ class F2ErrorWebExceptionHandler(
 
     override fun renderErrorResponse(request: ServerRequest): Mono<ServerResponse> {
         val error = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL))
-        val status: Int = error[F2Error::code.name] as Int? ?: INTERNAL_ERROR
+        // "code" is only present for F2Exception (set by F2ErrorAttributes). For any other
+        // exception type, fall back to "status", which DefaultErrorAttributes already
+        // resolves correctly from the throwable (e.g. ResponseStatusException,
+        // ErrorResponse) before defaulting to 500 itself if truly unclassified.
+        val status: Int = error[F2Error::code.name] as Int?
+            ?: error["status"] as Int?
+            ?: INTERNAL_ERROR
         return ServerResponse.status(status).contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(error.filterValues { it != null }))
     }
