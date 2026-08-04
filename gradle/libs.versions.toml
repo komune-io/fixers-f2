@@ -2,7 +2,7 @@
 fixers = "0.43.0-SNAPSHOT"
 kotlin = "2.3.21"
 spring-boot = "4.0.6"
-spring-cloud = "2025.1.1"
+spring-cloud = "2025.1.2"
 ktor = "3.4.1"
 coroutines = "1.10.2"
 serialization = "1.10.0"
