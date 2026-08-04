@@ -43,10 +43,6 @@ class RawHttpSteps : F2SpringStep(), En {
             assertThat(current().statusCode()).isEqualTo(expected)
         }
 
-        Then("Raw: The response status is below {int}") { bound: Int ->
-            assertThat(current().statusCode()).isLessThan(bound)
-        }
-
         Then("Raw: The response body contains {string}") { expected: String ->
             assertThat(current().body()).contains(expected)
         }
