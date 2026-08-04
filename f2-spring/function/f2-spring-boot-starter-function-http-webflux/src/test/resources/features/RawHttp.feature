@@ -17,3 +17,8 @@ Feature: Raw HTTP behaviour of the vendored spring-cloud-function fixes
   Scenario: Raw: OPTIONS falls through instead of failing with "not supported"
     When Raw: I send "OPTIONS" to "/rawEchoFunction"
     Then Raw: The response body does not contain "is not supported"
+
+  Scenario: Raw: an error mid-stream is propagated rather than silently truncated
+    When Raw: I send "GET" to "/rawBangSupplier"
+    Then Raw: The response status is 500
+    And Raw: The response body does not contain "foo"

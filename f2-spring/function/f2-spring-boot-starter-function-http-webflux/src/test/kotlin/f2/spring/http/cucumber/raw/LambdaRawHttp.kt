@@ -1,13 +1,12 @@
 package f2.spring.http.cucumber.raw
 
 import f2.dsl.fnc.F2Function
-import f2.dsl.fnc.F2Supplier
 import f2.dsl.fnc.f2Function
-import f2.dsl.fnc.f2Supplier
-import kotlinx.coroutines.flow.flow
+import java.util.function.Supplier
 import kotlinx.serialization.Serializable
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import reactor.core.publisher.Flux
 
 @Configuration
 open class LambdaRawHttp {
@@ -16,12 +15,21 @@ open class LambdaRawHttp {
     @Bean
     open fun rawEchoFunction(): F2Function<RawPayload, RawPayload> = f2Function { it }
 
-    /** Emits one element then fails, to prove errors are propagated and not swallowed. */
+    /**
+     * A plain reactive (non-Kotlin-Flow) supplier whose `map` throws on the second
+     * element. This mirrors upstream's own `bang()` test fixture, which is the shape
+     * `onErrorContinue` actually intercepts (a per-element failure raised inside an
+     * operator) — a Kotlin `Flow` that throws from its builder instead produces a
+     * terminal source error, which `onErrorContinue` cannot resume from at all, so it
+     * would not exercise this fix.
+     */
     @Bean
-    open fun rawBangSupplier(): F2Supplier<String> = f2Supplier {
-        flow {
-            emit("foo")
-            throw IllegalStateException("Bang")
+    open fun rawBangSupplier(): Supplier<Flux<String>> = Supplier {
+        Flux.fromArray(arrayOf("foo", "bar")).map { value ->
+            if (value == "bar") {
+                throw IllegalStateException("Bang")
+            }
+            value
         }
     }
 }
