@@ -19,6 +19,7 @@ package org.springframework.cloud.function.context.config;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import org.springframework.cloud.function.cloudevent.CloudEventMessageUtils;
 import org.springframework.cloud.function.json.JsonMapper;
 import org.springframework.core.GenericTypeResolver;
@@ -116,7 +117,7 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 				}
 				// KOMUNE Modification
 				// force message conversion error propagation
-				else if ("application/json".equals(message.getHeaders().get("Content-Type")) && e.getCause() instanceof DatabindException) {
+				else if (isJsonContentType(message.getHeaders()) && e.getCause() instanceof DatabindException) {
 					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error parsing json", e.getCause());
 				}
 				// KOMUNE End Of Modification
@@ -141,6 +142,20 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 		}
 		return jsonMapper.toJson(payload);
 	}
+
+	// KOMUNE Modification
+	private static boolean isJsonContentType(MessageHeaders headers) {
+		Object contentType = headers.get(MessageHeaders.CONTENT_TYPE);
+		if (contentType == null) {
+			contentType = headers.get("Content-Type");
+		}
+		if (contentType == null) {
+			contentType = headers.get("content-type");
+		}
+		return contentType != null
+				&& String.valueOf(contentType).toLowerCase(Locale.ROOT).contains("application/json");
+	}
+	// KOMUNE End Of Modification
 
 	private Type getResolvedType(Class<?> targetClass, @Nullable Object conversionHint) {
 		if (conversionHint instanceof MethodParameter param) {
