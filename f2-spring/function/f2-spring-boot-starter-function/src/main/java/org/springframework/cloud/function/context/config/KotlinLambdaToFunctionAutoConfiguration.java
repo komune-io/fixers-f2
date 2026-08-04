@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
@@ -31,6 +32,8 @@ import kotlin.jvm.functions.Function3;
 import kotlin.jvm.functions.Function4;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Flux;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -40,7 +43,6 @@ import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ObjectUtils;
-import reactor.core.publisher.Flux;
 
 /**
  * Configuration class which defines the required infrastructure to bootstrap Kotlin
@@ -62,6 +64,8 @@ public class KotlinLambdaToFunctionAutoConfiguration {
     public static final class KotlinFunctionWrapper implements Function<Object, Object>, Supplier<Object>, Consumer<Object>,
             Function0<Object>, Function1<Object, Object>, Function2<Object, Object, Object>,
             Function3<Object, Object, Object, Object>, Function4<Object, Object, Object, Object, Object> {
+
+
         private final Object kotlinLambdaTarget;
 
         private String name;
@@ -70,6 +74,10 @@ public class KotlinLambdaToFunctionAutoConfiguration {
 
         public KotlinFunctionWrapper(Object kotlinLambdaTarget) {
             this.kotlinLambdaTarget = kotlinLambdaTarget;
+        }
+
+        public Object getKotlinLambdaTarget() {
+            return kotlinLambdaTarget;
         }
 
         @Override
@@ -139,45 +147,45 @@ public class KotlinLambdaToFunctionAutoConfiguration {
 
         public FunctionRegistration getFunctionRegistration() {
             String name = this.name.endsWith(FunctionRegistration.REGISTRATION_NAME_SUFFIX)
-                    ? this.name.replace(FunctionRegistration.REGISTRATION_NAME_SUFFIX, "")
-                    : this.name;
+                ? this.name.replace(FunctionRegistration.REGISTRATION_NAME_SUFFIX, "")
+                : this.name;
             Type functionType = FunctionContextUtils.findType(name, this.beanFactory);
             FunctionRegistration<?> registration = new FunctionRegistration<>(this, name);
             Type[] types = ((ParameterizedType) functionType).getActualTypeArguments();
 
             if (isValidKotlinSupplier(functionType)) {
                 functionType = ResolvableType.forClassWithGenerics(Supplier.class, ResolvableType.forType(types[0]))
-                        .getType();
+                    .getType();
             }
             else if (isValidKotlinConsumer(functionType, types)) {
                 functionType = ResolvableType.forClassWithGenerics(Consumer.class, ResolvableType.forType(types[0]))
-                        .getType();
+                    .getType();
             }
             else if (isValidKotlinFunction(functionType, types)) {
                 functionType = ResolvableType.forClassWithGenerics(Function.class, ResolvableType.forType(types[0]),
-                        ResolvableType.forType(types[1])).getType();
+                    ResolvableType.forType(types[1])).getType();
             }
             else if (isValidKotlinSuspendSupplier(functionType, types)) {
                 Type continuationReturnType = CoroutinesUtils.getSuspendingFunctionReturnType(types[0]);
                 functionType = ResolvableType.forClassWithGenerics(
-                        Supplier.class,
-                        ResolvableType.forClassWithGenerics(Flux.class, ResolvableType.forType(continuationReturnType))
+                    Supplier.class,
+                    ResolvableType.forClassWithGenerics(Flux.class, ResolvableType.forType(continuationReturnType))
                 ).getType();
             }
             else if (isValidKotlinSuspendFunction(functionType, types)) {
                 Type continuationArgType = CoroutinesUtils.getSuspendingFunctionArgType(types[0]);
                 Type continuationReturnType = CoroutinesUtils.getSuspendingFunctionReturnType(types[1]);
                 functionType = ResolvableType.forClassWithGenerics(
-                        Function.class,
-                        ResolvableType.forClassWithGenerics(Flux.class, ResolvableType.forType(continuationArgType)),
-                        ResolvableType.forClassWithGenerics(Flux.class, ResolvableType.forType(continuationReturnType))
+                    Function.class,
+                    ResolvableType.forClassWithGenerics(Flux.class, ResolvableType.forType(continuationArgType)),
+                    ResolvableType.forClassWithGenerics(Flux.class, ResolvableType.forType(continuationReturnType))
                 ).getType();
             }
             else if (isValidKotlinSuspendConsumer(functionType, types)) {
                 Type continuationArgType = CoroutinesUtils.getSuspendingFunctionArgType(types[0]);
                 functionType = ResolvableType.forClassWithGenerics(
-                        Consumer.class,
-                        ResolvableType.forClassWithGenerics(Flux.class, ResolvableType.forType(continuationArgType))
+                    Consumer.class,
+                    ResolvableType.forClassWithGenerics(Flux.class, ResolvableType.forType(continuationArgType))
                 ).getType();
             }
             else if (!FunctionTypeUtils.isFunction(functionType)
@@ -195,47 +203,45 @@ public class KotlinLambdaToFunctionAutoConfiguration {
 
         private boolean isValidKotlinConsumer(Type functionType, Type[] type) {
             return isTypeRepresentedByClass(functionType, Function1.class) &&
-                    type.length == 2 &&
-                    !CoroutinesUtils.isContinuationType(type[0]) &&
-                    isTypeRepresentedByClass(type[1], Unit.class);
+                type.length == 2 &&
+                !CoroutinesUtils.isContinuationType(type[0]) &&
+                isTypeRepresentedByClass(type[1], Unit.class);
         }
 
         private boolean isValidKotlinFunction(Type functionType, Type[] type) {
             return isTypeRepresentedByClass(functionType, Function1.class) &&
-                    type.length == 2 &&
-                    !CoroutinesUtils.isContinuationType(type[0]) &&
-                    !isTypeRepresentedByClass(type[1], Unit.class);
+                type.length == 2 &&
+                !CoroutinesUtils.isContinuationType(type[0]) &&
+                !isTypeRepresentedByClass(type[1], Unit.class);
         }
+
         // KOMUNE Modification
         private boolean isValidKotlinSuspendSupplier(Type functionType, Type[] type) {
             return isTypeRepresentedByClass(functionType, Function1.class) &&
-                    (type.length == 1 || (type.length == 2 && CoroutinesUtils.isContinuationFlowType(type[0])));
+                (type.length == 1 || (type.length == 2 && CoroutinesUtils.isContinuationFlowType(type[0])));
         }
 
         private boolean isValidKotlinSuspendConsumer(Type functionType, Type[] type) {
             return isTypeRepresentedByClass(functionType, Function2.class) &&
-                    (
-                            type.length == 1 ||
-                                    (type.length == 3 && CoroutinesUtils.isContinuationUnitType(type[1]) && CoroutinesUtils.isFlowType(type[0]))
-                    );
+                (
+                    type.length == 1 ||
+                        (type.length == 3 && CoroutinesUtils.isContinuationUnitType(type[1]) && CoroutinesUtils.isFlowType(type[0]))
+                );
         }
 
         private boolean isValidKotlinSuspendFunction(Type functionType, Type[] type) {
             return isTypeRepresentedByClass(functionType, Function2.class) &&
-                    ((type.length == 3 && CoroutinesUtils.isContinuationFlowType(type[1]))
-                            ||  type.length == 2);
-
+                ((type.length == 3 && CoroutinesUtils.isContinuationFlowType(type[1]))
+                    || type.length == 2);
         }
 
         private boolean isTypeRepresentedByClass(Type type, Class<?> clazz) {
             return concatWithSuperTypes(type)
-                    .stream()
-                    .map(Type::getTypeName)
-                    .map(s ->
-                            s.contains(clazz.getName())
-                    )
-                    .reduce((a, b) -> a || b)
-                    .orElse(false);
+                .stream()
+                .map(Type::getTypeName)
+                .map(s -> s.contains(clazz.getName()))
+                .reduce((a, b) -> a || b)
+                .orElse(false);
         }
 
         private List<Type> concatWithSuperTypes(Type type) {
@@ -248,6 +254,12 @@ public class KotlinLambdaToFunctionAutoConfiguration {
             return all;
         }
         // KOMUNE End Of Modification
+
+        public Class<?> getObjectType() {
+            return FunctionRegistration.class;
+        }
+
+
         public void setName(String name) {
             this.name = name;
         }
