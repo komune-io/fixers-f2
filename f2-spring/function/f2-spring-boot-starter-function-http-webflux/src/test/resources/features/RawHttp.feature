@@ -22,3 +22,16 @@ Feature: Raw HTTP behaviour of the vendored spring-cloud-function fixes
     When Raw: I send "GET" to "/rawBangSupplier"
     Then Raw: The response status is 500
     And Raw: The response body does not contain "foo"
+
+  # F2's own webflux error handler (F2ErrorWebExceptionHandler.renderErrorResponse) currently
+  # maps any exception that is not an F2Exception to a hardcoded 500 on the wire, discarding
+  # the exception's real status. This is a separate, pre-existing bug in f2's own exception
+  # module, unrelated to the vendored fixes under test here, so the wire status cannot be
+  # asserted as 400. The response BODY still correctly carries the resolved status and message
+  # produced by the fix chain (JsonMessageConverter -> SmartCompositeMessageConverter ->
+  # SimpleFunctionRegistry), so assert on that instead.
+  @jacksonOnly
+  Scenario: Raw: a type-mismatched JSON body is rejected with 400 (in the response body)
+    When Raw: I send "POST" to "/rawEchoFunction" with body "{\"name\":\"a\",\"count\":[]}" and content type "application/json"
+    Then Raw: The response body contains "\"status\":400"
+    And Raw: The response body contains "Error parsing json"
