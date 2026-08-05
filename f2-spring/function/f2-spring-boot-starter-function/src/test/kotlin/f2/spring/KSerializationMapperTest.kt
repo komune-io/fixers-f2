@@ -91,6 +91,7 @@ class KSerializationMapperTest {
         }
     }
 
+
     @Test
     fun `doFromJson throws F2Exception instead of silently returning the wrong type when no serializer is found`() {
         val json = """{"name":"test","value":42}"""
@@ -110,7 +111,7 @@ class KSerializationMapperTest {
         val result = mapper.toJson(data)
 
         assertNotNull(result)
-        val jsonString = String(result)
+        val jsonString = String(result!!)
         assertTrue(jsonString.contains("serialize"))
         assertTrue(jsonString.contains("500"))
     }
@@ -123,8 +124,23 @@ class KSerializationMapperTest {
         val result = mapper.toJson(data)
 
         assertNotNull(result)
-        val jsonString = String(result)
+        val jsonString = String(result!!)
         assertTrue(jsonString.contains("fallback"))
+    }
+
+    @Test
+    fun `toJson returns null when both kotlinx and the raw Jackson fallback fail`() {
+        // Not @Serializable (kotlinx encode fails) and self-referential (the raw
+        // Jackson ObjectMapper fallback fails too, by default, on a direct cycle) -
+        // exercises the innermost catch, where every conversion path has been exhausted.
+        class SelfReferencing {
+            var self: SelfReferencing? = null
+        }
+        val data = SelfReferencing().apply { self = this }
+
+        val result = mapper.toJson(data)
+
+        assertEquals(null, result)
     }
 
     @Test

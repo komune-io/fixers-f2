@@ -80,7 +80,7 @@ class KSerializationMapper(
     }
 
     @Suppress("TooGenericExceptionCaught")
-    override fun toJson(value: Any): ByteArray {
+    override fun toJson(value: Any): ByteArray? {
         var jsonBytes = super.toJson(value)
         if (jsonBytes == null) {
             try {
