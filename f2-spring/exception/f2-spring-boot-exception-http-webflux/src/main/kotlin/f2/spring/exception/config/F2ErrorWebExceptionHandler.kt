@@ -53,13 +53,17 @@ class F2ErrorWebExceptionHandler(
 
     private fun resolveException(throwable: Throwable): Throwable {
         val f2Cause = throwable.takeIf { it is F2HttpException }
-            ?: throwable.cause.takeIf { it is F2HttpException }
+            ?: throwable.causeChain().firstOrNull { it is F2HttpException }
         if (f2Cause is F2HttpException) {
             return ResponseStatusException(f2Cause.status, f2Cause.message, f2Cause)
         }
 
-        val cause = throwable.cause
-        return when (cause) {
+        // WebFlux wraps body-decoding failures multiple levels deep, e.g.
+        // ServerWebInputException -> DecodingException -> KotlinInvalidNullException -
+        // a single `.cause` check misses it. Search the whole chain instead.
+        val classifiedCause = throwable.causeChain()
+            .firstOrNull { it is F2Exception || it is KotlinInvalidNullException }
+        return when (val cause = classifiedCause) {
             is F2Exception -> cause
             is KotlinInvalidNullException -> F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
@@ -71,9 +75,17 @@ class F2ErrorWebExceptionHandler(
         }
     }
 
+    private fun Throwable.causeChain(): Sequence<Throwable> = generateSequence(cause) { it.cause }
+
     override fun renderErrorResponse(request: ServerRequest): Mono<ServerResponse> {
         val error = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL))
-        val status: Int = error[F2Error::code.name] as Int? ?: INTERNAL_ERROR
+        // "code" is only present for F2Exception (set by F2ErrorAttributes). For any other
+        // exception type, fall back to "status", which DefaultErrorAttributes already
+        // resolves correctly from the throwable (e.g. ResponseStatusException,
+        // ErrorResponse) before defaulting to 500 itself if truly unclassified.
+        val status: Int = error[F2Error::code.name] as Int?
+            ?: error["status"] as Int?
+            ?: INTERNAL_ERROR
         return ServerResponse.status(status).contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(error.filterValues { it != null }))
     }

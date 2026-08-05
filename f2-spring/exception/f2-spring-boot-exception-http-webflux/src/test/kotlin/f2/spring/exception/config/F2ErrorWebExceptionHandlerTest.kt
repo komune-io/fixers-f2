@@ -10,10 +10,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Bean
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.server.RouterFunction
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.router
+import org.springframework.web.server.ResponseStatusException
+
+data class RequiredNameBody(val name: String)
 
 @SpringBootApplication
 class TestApp {
@@ -34,6 +39,15 @@ class TestApp {
 		}
 		GET("/generic-error") {
 			throw IllegalStateException("unexpected")
+		}
+		GET("/raw-status-exception") {
+			throw ResponseStatusException(HttpStatus.BAD_REQUEST, "raw bad request")
+		}
+		GET("/raw-status-exception-404") {
+			throw ResponseStatusException(HttpStatus.NOT_FOUND, "raw not found")
+		}
+		POST("/kotlin-null-field") { request ->
+			request.bodyToMono(RequiredNameBody::class.java).flatMap { ServerResponse.ok().build() }
 		}
 	}
 }
@@ -96,6 +110,36 @@ class F2ErrorWebExceptionHandlerTest {
 		webTestClient.get().uri("/generic-error")
 			.exchange()
 			.expectStatus().is5xxServerError
+	}
+
+	@Test
+	fun `should return 400 for a raw ResponseStatusException that is not an F2Exception`() {
+		webTestClient.get().uri("/raw-status-exception")
+			.exchange()
+			.expectStatus().isBadRequest
+			.expectBody()
+			.jsonPath("$.status").isEqualTo(400)
+	}
+
+	@Test
+	fun `should return 404 for a raw ResponseStatusException carrying a different status`() {
+		webTestClient.get().uri("/raw-status-exception-404")
+			.exchange()
+			.expectStatus().isNotFound
+			.expectBody()
+			.jsonPath("$.status").isEqualTo(404)
+	}
+
+	@Test
+	fun `should return 400 for a KotlinInvalidNullException`() {
+		webTestClient.post().uri("/kotlin-null-field")
+			.contentType(MediaType.APPLICATION_JSON)
+			.bodyValue("""{"name":null}""")
+			.exchange()
+			.expectStatus().isBadRequest
+			.expectBody()
+			.jsonPath("$.code").isEqualTo(400)
+			.jsonPath("$.message").isEqualTo("Missing parameter `name`")
 	}
 
 	@Test

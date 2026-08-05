@@ -4,10 +4,12 @@ import f2.dsl.cqrs.exception.F2Exception
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.web.error.ErrorAttributeOptions
+import org.springframework.http.HttpStatus
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest
 import org.springframework.mock.web.server.MockServerWebExchange
 import org.springframework.web.reactive.function.server.HandlerStrategies
 import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.server.ResponseStatusException
 
 class F2ErrorAttributesTest {
 
@@ -59,5 +61,18 @@ class F2ErrorAttributesTest {
         assertThat(attributes["code"]).isNull()
         assertThat(attributes["id"]).isNull()
         assertThat(attributes["status"]).isEqualTo(500)
+    }
+
+    @Test
+    fun `should resolve status from a raw ResponseStatusException that is not an F2Exception`() {
+        val exception = ResponseStatusException(HttpStatus.BAD_REQUEST, "raw bad request")
+
+        val attributes = errorAttributes.getErrorAttributes(
+            serverRequest(exception),
+            ErrorAttributeOptions.defaults()
+        )
+
+        assertThat(attributes["code"]).isNull()
+        assertThat(attributes["status"]).isEqualTo(400)
     }
 }

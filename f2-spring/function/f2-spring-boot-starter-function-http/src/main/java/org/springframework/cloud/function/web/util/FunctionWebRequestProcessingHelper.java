@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionProperties;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
@@ -38,8 +42,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  * !INTERNAL USE ONLY!
@@ -56,12 +58,14 @@ public final class FunctionWebRequestProcessingHelper {
     }
 
     public static FunctionInvocationWrapper findFunction(FunctionProperties functionProperties, HttpMethod method, FunctionCatalog functionCatalog,
-            Map<String, Object> attributes, String path) {
-        // FIX KOMUNE - For web browser we need to answer empty OPTIONS REQUEST -
+                                            Map<String, Object> attributes, String path) {
+        // KOMUNE Modification
+        // For web browser we need to answer empty OPTIONS REQUEST
         // TODO Try to replace it with OptionFunctionController
         if (method.equals(HttpMethod.OPTIONS)) {
             return null;
         }
+        // KOMUNE End Of Modification
         if (method.equals(HttpMethod.GET) || method.equals(HttpMethod.POST) || method.equals(HttpMethod.PUT) || method.equals(HttpMethod.DELETE)) {
             return doFindFunction(functionProperties.getDefinition(), method, functionCatalog, attributes, path);
         }
@@ -78,20 +82,20 @@ public final class FunctionWebRequestProcessingHelper {
     public static boolean isFunctionValidForMethod(String httpMethod, String functionDefinition, FunctionHttpProperties functionHttpProperties) {
         String functionDefinitions = null;
         switch (httpMethod) {
-        case "GET":
-            functionDefinitions = functionHttpProperties.getGet();
-            break;
-        case "POST":
-            functionDefinitions = functionHttpProperties.getPost();
-            break;
-        case "PUT":
-            functionDefinitions = functionHttpProperties.getPut();
-            break;
-        case "DELETE":
-            functionDefinitions = functionHttpProperties.getDelete();
-            break;
-        default:
-            return false;
+            case "GET":
+                functionDefinitions = functionHttpProperties.getGet();
+                break;
+            case "POST":
+                functionDefinitions = functionHttpProperties.getPost();
+                break;
+            case "PUT":
+                functionDefinitions = functionHttpProperties.getPut();
+                break;
+            case "DELETE":
+                functionDefinitions = functionHttpProperties.getDelete();
+                break;
+            default:
+                return false;
         }
         if (StringUtils.hasText(functionDefinitions)) {
             return Arrays.asList(functionDefinitions.split(";")).contains(functionDefinition);
@@ -135,7 +139,7 @@ public final class FunctionWebRequestProcessingHelper {
 
         Object result = function.apply(inputMessage);
         if (function.isConsumer()) {
-            if (result instanceof Publisher) {
+            if (result instanceof Publisher && !function.isComposed()) {
                 Mono.from((Publisher) result).subscribe();
             }
             return "DELETE".equals(wrapper.getMethod()) ?
@@ -152,11 +156,10 @@ public final class FunctionWebRequestProcessingHelper {
             }
 
             if (pResult instanceof Flux) {
-                // FIX KOMUNE force message conversion error propagation
+                // KOMUNE Modification
+                // force message conversion error propagation (no onErrorContinue)
                 pResult = ((Flux) pResult).collectList();
-//                pResult = ((Flux) pResult).onErrorContinue((e, v) -> {
-//                    logger.error("Failed to process value: " + v, (Throwable) e);
-//                }).collectList();
+                // KOMUNE End Of Modification
             }
             pResult = Mono.from(pResult);
         }
@@ -186,7 +189,7 @@ public final class FunctionWebRequestProcessingHelper {
     }
 
     private static FunctionInvocationWrapper doFindFunction(String functionDefinition, HttpMethod method, FunctionCatalog functionCatalog,
-            Map<String, Object> attributes, String path) {
+                                            Map<String, Object> attributes, String path) {
 
         path = path.startsWith("/") ? path.substring(1) : path;
         if (method.equals(HttpMethod.GET)) {

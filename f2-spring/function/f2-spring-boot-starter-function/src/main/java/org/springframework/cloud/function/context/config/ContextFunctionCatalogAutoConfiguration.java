@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 the original author or authors.
+ * Copyright 2016-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.function.context.config;
 
-import com.google.gson.Gson;
-import f2.spring.KSerializationMapper;
-import io.cloudevents.spring.messaging.CloudEventMessageConverter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +23,24 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import com.google.gson.Gson;
+import f2.spring.KSerializationMapper;
+import io.cloudevents.spring.messaging.CloudEventMessageConverter;
 import kotlinx.serialization.json.Json;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTimeZone;
+import org.joda.time.tz.UTCProvider;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.datatype.joda.JodaModule;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -56,6 +68,7 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.expression.BeanFactoryResolver;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.convert.support.ConfigurableConversionService;
@@ -69,15 +82,13 @@ import org.springframework.messaging.converter.ContentTypeResolver;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
-import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.SerializationFeature;
-import tools.jackson.datatype.joda.JodaModule;
+
 
 /**
  * @author Dave Syer
@@ -101,7 +112,7 @@ public class ContextFunctionCatalogAutoConfiguration {
 
     @Bean
     public FunctionRegistry functionCatalog(List<MessageConverter> messageConverters, JsonMapper jsonMapper,
-            ConfigurableApplicationContext context, @Nullable FunctionInvocationHelper<Message<?>> functionInvocationHelper) {
+                                            ConfigurableApplicationContext context, @Nullable FunctionInvocationHelper<Message<?>> functionInvocationHelper) {
         ConfigurableConversionService conversionService = (ConfigurableConversionService) context.getBeanFactory().getConversionService();
         if (conversionService == null) {
             conversionService = new DefaultConversionService();
@@ -127,8 +138,8 @@ public class ContextFunctionCatalogAutoConfiguration {
         }
 
         mcList = mcList.stream()
-                .filter(this::isConverterEligible)
-                .collect(Collectors.toList());
+            .filter(this::isConverterEligible)
+            .collect(Collectors.toList());
 
         mcList.add(new JsonMessageConverter(jsonMapper));
         mcList.add(new ByteArrayMessageConverter());
@@ -163,8 +174,8 @@ public class ContextFunctionCatalogAutoConfiguration {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Bean(RoutingFunction.FUNCTION_NAME)
     public RoutingFunction functionRouter(FunctionCatalog functionCatalog, FunctionProperties functionProperties,
-            BeanFactory beanFactory, @Nullable MessageRoutingCallback routingCallback,
-            @Nullable DefaultMessageRoutingHandler defaultMessageRoutingHandler) {
+                                BeanFactory beanFactory, @Nullable MessageRoutingCallback routingCallback,
+                                @Nullable DefaultMessageRoutingHandler defaultMessageRoutingHandler) {
         if (defaultMessageRoutingHandler != null) {
             FunctionRegistration functionRegistration = new FunctionRegistration(defaultMessageRoutingHandler, RoutingFunction.DEFAULT_ROUTE_HANDLER);
             functionRegistration.type(FunctionTypeUtils.consumerType(ResolvableType.forClassWithGenerics(Message.class, Object.class).getType()));
@@ -209,14 +220,15 @@ public class ContextFunctionCatalogAutoConfiguration {
             String preferredMapper = context.getEnvironment().getProperty(JSON_MAPPER_PROPERTY);
             if (StringUtils.hasText(preferredMapper)) {
                 // KOMUNE Modification
-				if ("kSerialization".equals(preferredMapper) && ClassUtils.isPresent("kotlinx.serialization.json.Json", null)) {
-					return kSerialization(context);
-				} else
+                if ("kSerialization".equals(preferredMapper) && ClassUtils.isPresent("kotlinx.serialization.json.Json", null)) {
+                    return kSerialization(context);
+                }
+                else
                 // KOMUNE End Of Modification
-                if ("gson".equals(preferredMapper) && ClassUtils.isPresent("com.google.gson.Gson", null)) {
+                if ("gson".equals(preferredMapper)) {
                     return gson(context);
                 }
-                else if ("jackson".equals(preferredMapper) && ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", null)) {
+                else if ("jackson".equals(preferredMapper)) {
                     return jackson(context);
                 }
             }
@@ -232,6 +244,8 @@ public class ContextFunctionCatalogAutoConfiguration {
         }
 
         private JsonMapper gson(ApplicationContext context) {
+            Assert.state(ClassUtils.isPresent("com.google.gson.Gson", ClassUtils.getDefaultClassLoader()),
+                "Can not bootstrap Gson mapper since Gson is not on the classpath");
             Gson gson;
             try {
                 gson = context.getBean(Gson.class);
@@ -241,35 +255,52 @@ public class ContextFunctionCatalogAutoConfiguration {
             }
             return new GsonMapper(gson);
         }
+
         // KOMUNE Modification
-		private JsonMapper kSerialization(ApplicationContext context) {
-			Json json;
-			try {
-				json = context.getBean(Json.class);
-			}
-			catch (Exception e) {
-				json =  KSerializationMapper.Companion.getDefaultJson();
-			}
-			return new KSerializationMapper(json);
-		}
+        private JsonMapper kSerialization(ApplicationContext context) {
+            Json json;
+            try {
+                json = context.getBean(Json.class);
+            }
+            catch (Exception e) {
+                json = KSerializationMapper.Companion.getDefaultJson();
+            }
+            return new KSerializationMapper(json);
+        }
         // KOMUNE End Of Modification
 
         @SuppressWarnings("unchecked")
-        private org.springframework.cloud.function.json.JsonMapper jackson(ApplicationContext context) {
-            ObjectMapper mapper;
+        private JsonMapper jackson(ApplicationContext context) {
+            Assert.state(ClassUtils.isPresent("tools.jackson.databind.ObjectMapper", ClassUtils.getDefaultClassLoader()),
+                "Can not bootstrap Jackson mapper since Jackson is not on the classpath");
+            ObjectMapper mapper = null;
+            MapperBuilder builder = tools.jackson.databind.json.JsonMapper.builder();
             try {
-                mapper = context.getBean(ObjectMapper.class).rebuild().build();
+                builder = context.getBean(ObjectMapper.class).rebuild();
             }
             catch (Exception e) {
-                mapper = tools.jackson.databind.json.JsonMapper.builder()
-                        .addModule(new JodaModule())
-                        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-                        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                        .build();
+                builder = tools.jackson.databind.json.JsonMapper.builder();
+                DateTimeZone.setProvider(new UTCProvider());
             }
-            if (logger.isDebugEnabled()) {
-                logger.debug("ObjectMapper configuration initialized");
+            builder = builder.addModule(new JodaModule());
+
+            if (KotlinDetector.isKotlinPresent()) {
+                try {
+                    Class<? extends JacksonModule> kotlinModuleClass = (Class<? extends JacksonModule>)
+                            ClassUtils.forName("tools.jackson.module.kotlin.KotlinModule", ClassUtils.getDefaultClassLoader());
+                    JacksonModule kotlinModule = BeanUtils.instantiateClass(kotlinModuleClass);
+                    builder = builder.addModule(kotlinModule);
+                }
+                catch (ClassNotFoundException ex) {
+                    // jackson-module-kotlin not available
+                }
             }
+            builder = builder.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            builder = builder.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            builder = builder.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
+            builder = builder.configure(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION, false);
+
+            mapper = builder.build();
             return new JacksonMapper(mapper);
         }
     }
