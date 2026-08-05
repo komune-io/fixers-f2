@@ -92,6 +92,18 @@ class KSerializationMapperTest {
     }
 
     @Test
+    fun `doFromJson throws F2Exception instead of silently returning the wrong type when no serializer is found`() {
+        val json = """{"name":"test","value":42}"""
+
+        val exception = assertThrows<F2Exception> {
+            mapper.fromJson(json, NonAnnotatedData::class.java)
+        }
+
+        assertNotNull(exception.error)
+        assertEquals(400, exception.error.code)
+    }
+
+    @Test
     fun `toJson serializes object to ByteArray`() {
         val data = TestData("serialize", 500)
 

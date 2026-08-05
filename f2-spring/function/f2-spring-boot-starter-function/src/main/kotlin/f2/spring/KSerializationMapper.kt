@@ -81,11 +81,11 @@ class KSerializationMapper(
 
     @Suppress("TooGenericExceptionCaught")
     override fun toJson(value: Any): ByteArray {
-        val type = ResolvableType.forClass(value::class.java)
-        val ser = serializer(type.type)
         var jsonBytes = super.toJson(value)
         if (jsonBytes == null) {
             try {
+                val type = ResolvableType.forClass(value::class.java)
+                val ser = serializer(type.type)
                 jsonBytes = mapper.encodeToString(ser, value).toByteArray()
             } catch (e: Exception) {
                 logger.debug(LOG_SERIALIZATION_ERROR, value, e)
@@ -110,15 +110,9 @@ class KSerializationMapper(
         }
     }
 
-    @Suppress("TooGenericExceptionCaught", "UNCHECKED_CAST")
     private fun serializer(type: Type): KSerializer<Any> {
         return serializerCache.getOrPut(type) {
-            try {
-                kotlinx.serialization.serializer(type)
-            } catch (e: Exception) {
-                logger.debug(LOG_SERIALIZATION_ERROR, type, e)
-                JsonElement.serializer() as KSerializer<Any>
-            }
+            kotlinx.serialization.serializer(type)
         }
     }
 
