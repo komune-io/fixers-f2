@@ -25,7 +25,6 @@ import org.springframework.cloud.function.json.JsonMapper;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -33,7 +32,6 @@ import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
-import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.DatabindException;
 
 /**
@@ -118,7 +116,7 @@ public class JsonMessageConverter extends AbstractMessageConverter {
 				// KOMUNE Modification
 				// force message conversion error propagation
 				else if (isJsonContentType(message.getHeaders()) && e.getCause() instanceof DatabindException) {
-					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error parsing json", e.getCause());
+					throw new NonRecoverableConversionException("Error parsing json", e.getCause());
 				}
 				// KOMUNE End Of Modification
 				else if (logger.isDebugEnabled()) {

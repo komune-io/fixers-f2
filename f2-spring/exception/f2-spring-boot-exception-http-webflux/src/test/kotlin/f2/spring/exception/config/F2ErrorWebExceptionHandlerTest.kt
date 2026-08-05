@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpStatus
+import org.springframework.messaging.converter.MessageConversionException
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.server.RouterFunction
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -42,6 +43,9 @@ class TestApp {
 		}
 		GET("/raw-status-exception-404") {
 			throw ResponseStatusException(HttpStatus.NOT_FOUND, "raw not found")
+		}
+		GET("/message-conversion-exception") {
+			throw MessageConversionException("Error parsing json", RuntimeException("bad json"))
 		}
 	}
 }
@@ -122,6 +126,16 @@ class F2ErrorWebExceptionHandlerTest {
 			.expectStatus().isNotFound
 			.expectBody()
 			.jsonPath("$.status").isEqualTo(404)
+	}
+
+	@Test
+	fun `should return 400 for a MessageConversionException`() {
+		webTestClient.get().uri("/message-conversion-exception")
+			.exchange()
+			.expectStatus().isBadRequest
+			.expectBody()
+			.jsonPath("$.code").isEqualTo(400)
+			.jsonPath("$.message").isEqualTo("Error parsing json")
 	}
 
 	@Test

@@ -5,6 +5,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import org.springframework.messaging.converter.MessageConversionException
 import tools.jackson.module.kotlin.KotlinInvalidNullException
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import tools.jackson.module.kotlin.readValue
@@ -46,6 +47,19 @@ class F2ExceptionHandlerTest {
         assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
         assertThat(response.body!!["code"]).isEqualTo(400)
         assertThat(response.body!!["message"]).isEqualTo("Missing parameter `name`")
+        assertThat(response.body!!["id"]).isNotNull
+        assertThat(response.body!!["timestamp"]).isNotNull
+    }
+
+    @Test
+    fun `handleMessageConversionException should return bad request with parsed message`() {
+        val exception = MessageConversionException("Error parsing json", RuntimeException("bad json"))
+
+        val response = handler.handleMessageConversionException(exception)
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        assertThat(response.body!!["code"]).isEqualTo(400)
+        assertThat(response.body!!["message"]).isEqualTo("Error parsing json")
         assertThat(response.body!!["id"]).isNotNull
         assertThat(response.body!!["timestamp"]).isNotNull
     }

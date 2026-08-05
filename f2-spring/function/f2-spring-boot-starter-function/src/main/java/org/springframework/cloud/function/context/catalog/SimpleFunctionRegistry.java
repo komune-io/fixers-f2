@@ -58,6 +58,7 @@ import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.FunctionRegistry;
 import org.springframework.cloud.function.context.PostProcessingFunction;
 import org.springframework.cloud.function.context.config.KotlinLambdaToFunctionAutoConfiguration;
+import org.springframework.cloud.function.context.config.NonRecoverableConversionException;
 import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.function.core.FunctionInvocationHelper;
 import org.springframework.cloud.function.json.JsonMapper;
@@ -79,7 +80,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.server.ResponseStatusException;
 
 
 
@@ -1585,7 +1585,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                         }
                         // KOMUNE Modification
                         // force message conversion error propagation
-                        catch (ResponseStatusException e) {
+                        catch (NonRecoverableConversionException e) {
                             throw e;
                         }
                         // KOMUNE End Of Modification
@@ -1599,7 +1599,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                         }
                         // KOMUNE Modification
                         // force message conversion error propagation
-                        catch (ResponseStatusException e) {
+                        catch (NonRecoverableConversionException e) {
                             throw e;
                         }
                         // KOMUNE End Of Modification
@@ -1619,12 +1619,6 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                         try {
                             return this.convertOutputIfNecessary(v, type, expectedOutputContentType);
                         }
-                        // KOMUNE Modification
-                        // force message conversion error propagation
-                        catch (ResponseStatusException e) {
-                            throw e;
-                        }
-                        // KOMUNE End Of Modification
                         catch (Exception e) {
                             throw new IllegalStateException("Failed to convert output", e);
                         }
@@ -1633,12 +1627,6 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                         try {
                             return this.convertOutputIfNecessary(v, type, expectedOutputContentType);
                         }
-                        // KOMUNE Modification
-                        // force message conversion error propagation
-                        catch (ResponseStatusException e) {
-                            throw e;
-                        }
-                        // KOMUNE End Of Modification
                         catch (Exception e) {
                             throw new IllegalStateException("Failed to convert output", e);
                         }

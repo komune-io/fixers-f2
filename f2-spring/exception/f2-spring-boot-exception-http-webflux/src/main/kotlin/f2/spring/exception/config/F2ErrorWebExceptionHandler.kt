@@ -15,6 +15,7 @@ import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.messaging.converter.MessageConversionException
 import org.springframework.web.reactive.result.view.ViewResolver
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
@@ -56,6 +57,17 @@ class F2ErrorWebExceptionHandler(
             ?: throwable.cause.takeIf { it is F2HttpException }
         if (f2Cause is F2HttpException) {
             return ResponseStatusException(f2Cause.status, f2Cause.message, f2Cause)
+        }
+
+        val conversionCause = throwable.takeIf { it is MessageConversionException }
+            ?: throwable.cause.takeIf { it is MessageConversionException }
+        if (conversionCause is MessageConversionException) {
+            return F2Exception(error = F2Error(
+                id = UUID.randomUUID().toString(),
+                timestamp = System.currentTimeMillis().toString(),
+                message = conversionCause.message ?: "Failed to convert request body",
+                code = 400,
+            ))
         }
 
         val cause = throwable.cause

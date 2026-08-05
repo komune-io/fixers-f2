@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.messaging.converter.MessageConversionException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import tools.jackson.module.kotlin.KotlinInvalidNullException
@@ -36,6 +37,23 @@ class F2ExceptionHandler {
             id = UUID.randomUUID().toString(),
             timestamp = System.currentTimeMillis().toString(),
             message = "Missing parameter `${ex.kotlinPropertyName}`",
+            code = 400,
+        )
+        val body = mapOf<String, Any?>(
+            F2Error::id.name to error.id,
+            F2Error::code.name to error.code,
+            F2Error::message.name to error.message,
+            F2Error::timestamp.name to error.timestamp,
+        )
+        return ResponseEntity.badRequest().body(body)
+    }
+
+    @ExceptionHandler(MessageConversionException::class)
+    fun handleMessageConversionException(ex: MessageConversionException): ResponseEntity<Map<String, Any?>> {
+        val error = F2Error(
+            id = UUID.randomUUID().toString(),
+            timestamp = System.currentTimeMillis().toString(),
+            message = ex.message ?: "Failed to convert request body",
             code = 400,
         )
         val body = mapOf<String, Any?>(

@@ -38,7 +38,6 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * FIX KOMUNE - https://github.com/spring-cloud/spring-cloud-function/issues/901.
@@ -79,7 +78,7 @@ public class SmartCompositeMessageConverter extends CompositeMessageConverter {
             }
             // KOMUNE Modification
             // force message conversion error propagation
-            catch (ResponseStatusException e) {
+            catch (NonRecoverableConversionException e) {
                 throw e;
             }
             // KOMUNE End Of Modification
