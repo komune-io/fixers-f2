@@ -1578,17 +1578,18 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             Type actualType = type != null && FunctionTypeUtils.isPublisher(type)
                     ? FunctionTypeUtils.getImmediateGenericType(type, 0)
                     : type;
+            // Not a KOMUNE patch anymore - upstream rethrows NonRecoverableConversionException
+            // natively from this exact method as of komune-io/spring-cloud-function#6 (merged).
+            // Left unmarked because this content is now identical to a fresh upstream extract,
+            // not something F2 is patching in.
             return publisher instanceof Mono
                     ? Mono.from(publisher).map(v -> {
                         try {
                             return this.convertInputIfNecessary(v, actualType == null ? type : actualType);
                         }
-                        // KOMUNE Modification
-                        // force message conversion error propagation
                         catch (NonRecoverableConversionException e) {
                             throw e;
                         }
-                        // KOMUNE End Of Modification
                         catch (Exception e) {
                             throw new IllegalStateException("Failed to convert input", e);
                         }
@@ -1597,12 +1598,9 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                         try {
                             return this.convertInputIfNecessary(v, actualType == null ? type : actualType);
                         }
-                        // KOMUNE Modification
-                        // force message conversion error propagation
                         catch (NonRecoverableConversionException e) {
                             throw e;
                         }
-                        // KOMUNE End Of Modification
                         catch (Exception e) {
                             throw new IllegalStateException("Failed to convert input", e);
                         }
