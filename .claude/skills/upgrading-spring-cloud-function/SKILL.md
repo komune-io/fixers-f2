@@ -51,20 +51,21 @@ Confirm F2's *actual resolved* version first — don't trust the declared proper
 F2 imports `spring-cloud-dependencies` (Spring Cloud's release-train BOM) in `f2-gradle/f2-gradle-bom/build.gradle.kts`, version pinned at `gradle/libs.versions.toml`'s `spring-cloud` property. Check each candidate BOM release's POM directly:
 
 ```bash
-curl -s "https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dependencies/<BOM-VERSION>/spring-cloud-dependencies-<BOM-VERSION>.pom" -o /tmp/scd-a.pom
-curl -s "https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dependencies/<OTHER-BOM-VERSION>/spring-cloud-dependencies-<OTHER-BOM-VERSION>.pom" -o /tmp/scd-b.pom
+curl -fsSL "https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dependencies/<BOM-VERSION>/spring-cloud-dependencies-<BOM-VERSION>.pom" -o /tmp/scd-a.pom
+curl -fsSL "https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dependencies/<OTHER-BOM-VERSION>/spring-cloud-dependencies-<OTHER-BOM-VERSION>.pom" -o /tmp/scd-b.pom
 grep spring-cloud-function.version /tmp/scd-a.pom /tmp/scd-b.pom
-diff /tmp/scd-a.pom /tmp/scd-b.pom
+/usr/bin/diff /tmp/scd-a.pom /tmp/scd-b.pom
 ```
+`-f` makes a 4xx/5xx response fail the command instead of silently writing an error page into the `.pom` file.
 
 **Always `diff` real files on disk, never `diff <(curl ...) <(curl ...)`.** In this sandboxed environment, process-substitution diffs — and separately, `diff` itself if shadowed by an `rtk` hook — have both produced false "files are identical" results on genuinely different inputs, twice, in the same session. This isn't a style preference; trusting it once already shipped a wrong claim into a commit message. If you must use `diff`, verify with `/usr/bin/diff` explicitly or by checking file sizes/specific properties with `grep` too.
 
-Don't assume only `spring-cloud-function.version` moves — check every `*.version` property in the diff, and specifically `spring-boot.version`: if the BOM's Spring Boot version is higher than F2's own declared `spring-boot` in `libs.versions.toml`, Gradle's constraint resolution silently picks the BOM's (highest wins), leaving the declared pin dishonest. Verify with the `:dependencies` command from step 1, looking for a `X -> Y (c)` override arrow, and bump the declared pin to match if so.
+Don't assume only `spring-cloud-function.version` moves — check every `*.version` property in the diff, and specifically `spring-boot.version`: if the BOM's Spring Boot version is higher than F2's own declared `spring-boot` in `libs.versions.toml`, Gradle's constraint resolution silently picks the BOM's (highest wins), leaving the declared pin dishonest. Verify with the `:dependencies` command from step 1, looking for a `X -> Y (c)` override arrow, and bump the declared pin to match if so. This only affects the `spring-boot` *library* version (a dependency constraint); the `org.springframework.boot` Gradle *plugin* version is a separate catalog entry resolved independently — bump it too, but don't assume moving one moves the other.
 
 ### 3. Diff every vendored file, current base tag → target tag
 
 ```bash
-git -C "$SPRING_CLOUD_FUNCTION_REPO" fetch origin --tags
+git -C "$SPRING_CLOUD_FUNCTION_REPO" fetch origin --tags 'refs/heads/fixers/*:refs/remotes/origin/fixers/*'
 FILES=(
   "spring-cloud-function-context/src/main/java/org/springframework/cloud/function/context/catalog/SimpleFunctionRegistry.java"
   "spring-cloud-function-context/src/main/java/org/springframework/cloud/function/context/config/ContextFunctionCatalogAutoConfiguration.java"
@@ -74,7 +75,7 @@ FILES=(
   "spring-cloud-function-web/src/main/java/org/springframework/cloud/function/web/util/FunctionWebRequestProcessingHelper.java"
 )
 for f in "${FILES[@]}"; do
-  n=$(diff -w -B <(git -C "$SPRING_CLOUD_FUNCTION_REPO" show <OLD-TAG>:"$f") \
+  n=$(/usr/bin/diff -w -B <(git -C "$SPRING_CLOUD_FUNCTION_REPO" show <OLD-TAG>:"$f") \
                   <(git -C "$SPRING_CLOUD_FUNCTION_REPO" show <NEW-TAG>:"$f") | grep -cE '^[<>]')
   echo "$(basename "$f") churn=$n"
 done
@@ -95,13 +96,13 @@ git -C "$SPRING_CLOUD_FUNCTION_REPO" show <NEW-TAG>:"$f" > /tmp/fresh.java
 ```
 Then apply each hunk from the table above (or from the file's current KOMUNE-marked regions) as a find-and-replace against `/tmp/fresh.java`, verify the result's content-only diff against the *old* KOMUNE-patched version shows exactly the upstream hunks and nothing else, then commit.
 
-For a file with zero churn: just carry the existing KOMUNE-patched content forward unchanged (`git show <old-branch>:"$f" > "$f"`) — safe *only* because you already confirmed zero upstream drift in step 3, not merely "it should be fine."
+For a file with zero churn: just carry the existing KOMUNE-patched content forward unchanged (`git show origin/fixers/<old-version>:"$f" > "$f"`, using the remote-tracking ref fetched in step 3 — a plain `<old-branch>` name isn't guaranteed to exist locally) — safe *only* because you already confirmed zero upstream drift in step 3, not merely "it should be fine."
 
 Fork uses tabs; F2 uses 4-space indentation. When porting the fork's finished file into F2, `expand -t4`.
 
 ### 5. Re-verify necessity, don't just assume prior conclusions still hold
 
-For at least the file(s) that had real upstream churn, removal-proof each KOMUNE hunk against the new base: temporarily strip it, run the affected test suite, confirm something fails, restore, confirm green again. A prior "necessary" conclusion from an older base doesn't automatically transfer — this session found one previously-necessary hunk (`SimpleFunctionRegistry`'s output-side rethrow) had quietly become dead code, invisible from a static line-overlap argument alone, only caught by actually removing it and getting `BUILD SUCCESSFUL`.
+For at least the file(s) that had real upstream churn, removal-proof each KOMUNE hunk against the new base: temporarily strip it, run the affected test suite, and record the result. If something fails, restore the hunk and confirm green again — still necessary. If tests stay green, the hunk is dead code against this base (as already happened once, see below) — remove it rather than restoring it. A prior "necessary" conclusion from an older base doesn't automatically transfer — this session found one previously-necessary hunk (`SimpleFunctionRegistry`'s output-side rethrow) had quietly become dead code, invisible from a static line-overlap argument alone, only caught by actually removing it and getting `BUILD SUCCESSFUL`.
 
 ### 6. Build/test both repos
 
@@ -122,7 +123,7 @@ F2 (Gradle), run from this repo's root: `./gradlew test detekt`.
 ### 7. Confirm the two repos are still in sync — with the right expectation
 
 ```bash
-diff -w -B "<f2-path>" <(git -C "$SPRING_CLOUD_FUNCTION_REPO" show fixers/<version>:"<fork-path>" | expand -t4)
+/usr/bin/diff -w -B "<f2-path>" <(git -C "$SPRING_CLOUD_FUNCTION_REPO" show origin/fixers/<version>:"<fork-path>" | expand -t4)
 ```
 Expect **0** for `SimpleFunctionRegistry.java` and `FunctionWebRequestProcessingHelper.java`. The other four (`ContextFunctionCatalogAutoConfiguration.java`, `KotlinLambdaToFunctionAutoConfiguration.java`, `JsonMessageConverter.java`, `SmartCompositeMessageConverter.java`) legitimately show small nonzero diffs even when fully in sync — copyright-header years, one import's position, and F2's own `kSerialization` feature that the fork can't have. Don't treat those as a failure signal; confirm they're *pre-existing* by diffing the same files against the *previous* fork branch too — if the counts match, nothing regressed.
 
