@@ -501,10 +501,12 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             }
         }
 
+        @Override
         public int hashCode() {
             return this.functionDefinition.hashCode();
         }
 
+        @Override
         public boolean equals(Object obj) {
             if (obj instanceof FunctionInvocationWrapper functionWrapper) {
                 if (functionWrapper.getFunctionDefinition().equals(this.getFunctionDefinition())) {
