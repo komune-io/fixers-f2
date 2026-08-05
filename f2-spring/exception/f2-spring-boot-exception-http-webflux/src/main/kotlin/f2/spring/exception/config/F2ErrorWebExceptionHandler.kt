@@ -61,7 +61,9 @@ class F2ErrorWebExceptionHandler(
         // WebFlux wraps body-decoding failures multiple levels deep, e.g.
         // ServerWebInputException -> DecodingException -> KotlinInvalidNullException -
         // a single `.cause` check misses it. Search the whole chain instead.
-        return when (val cause = throwable.causeChain().firstOrNull { it is F2Exception || it is KotlinInvalidNullException }) {
+        val classifiedCause = throwable.causeChain()
+            .firstOrNull { it is F2Exception || it is KotlinInvalidNullException }
+        return when (val cause = classifiedCause) {
             is F2Exception -> cause
             is KotlinInvalidNullException -> F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
