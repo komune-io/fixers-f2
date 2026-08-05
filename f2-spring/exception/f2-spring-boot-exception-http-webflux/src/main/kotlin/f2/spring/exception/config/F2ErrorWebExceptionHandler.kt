@@ -53,13 +53,15 @@ class F2ErrorWebExceptionHandler(
 
     private fun resolveException(throwable: Throwable): Throwable {
         val f2Cause = throwable.takeIf { it is F2HttpException }
-            ?: throwable.cause.takeIf { it is F2HttpException }
+            ?: throwable.causeChain().firstOrNull { it is F2HttpException }
         if (f2Cause is F2HttpException) {
             return ResponseStatusException(f2Cause.status, f2Cause.message, f2Cause)
         }
 
-        val cause = throwable.cause
-        return when (cause) {
+        // WebFlux wraps body-decoding failures multiple levels deep, e.g.
+        // ServerWebInputException -> DecodingException -> KotlinInvalidNullException -
+        // a single `.cause` check misses it. Search the whole chain instead.
+        return when (val cause = throwable.causeChain().firstOrNull { it is F2Exception || it is KotlinInvalidNullException }) {
             is F2Exception -> cause
             is KotlinInvalidNullException -> F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
@@ -70,6 +72,8 @@ class F2ErrorWebExceptionHandler(
             else -> throwable
         }
     }
+
+    private fun Throwable.causeChain(): Sequence<Throwable> = generateSequence(cause) { it.cause }
 
     override fun renderErrorResponse(request: ServerRequest): Mono<ServerResponse> {
         val error = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL))
