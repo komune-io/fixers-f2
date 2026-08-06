@@ -18,6 +18,9 @@ dependencies {
 	api(platform("org.springframework.cloud:spring-cloud-dependencies:${catalogue.versions.spring.cloud.get()}"))
 	api(platform("org.springdoc:springdoc-openapi-bom:${catalogue.versions.springdoc.get()}"))
 	api(platform("org.testcontainers:testcontainers-bom:${catalogue.versions.testcontainers.get()}"))
+	// Newer than what spring-boot-dependencies/spring-cloud-dependencies currently manage —
+	// pulls in Dependabot-flagged Netty CVE fixes.
+	api(platform("io.netty:netty-bom:${catalogue.versions.netty.get()}"))
 
 	constraints {
 		// ═══════════════════════════════════════════
@@ -82,5 +85,9 @@ dependencies {
 
 		// Cloud Events
 		api("io.cloudevents:cloudevents-spring:$cloudeventsVersion")
+
+		// Jackson 3 (tools.jackson) — spring-cloud-dependencies currently manages a version
+		// still inside the vulnerable range of a Dependabot-flagged CVE.
+		api("tools.jackson.core:jackson-databind:${catalogue.versions.jackson3.databind.get()}")
 	}
 }
