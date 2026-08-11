@@ -19,9 +19,6 @@ jobs:
       packages: write
     with:
       make-file: 'infra/make/libs.mk'
-      # infra/make/libs.mk's `check` target runs `./gradlew sonar`, which needs
-      # FIXERS_SONAR_TOKEN. Dependabot-triggered PRs never get repo secrets, so
-      # skip it there via the reusable workflow's generic skip-tasks input.
       skip-tasks: ${{ github.actor == 'dependabot[bot]' && 'check' || '' }}
     secrets:
       FIXERS_PUBLISH_SIGNING_GPG_KEY: ${{ secrets.FIXERS_PUBLISH_SIGNING_GPG_KEY }}
