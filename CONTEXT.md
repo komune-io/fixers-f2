@@ -26,7 +26,7 @@ Lives in `f2-dsl-cqrs` (`f2.dsl.cqrs`); all three are marker interfaces extendin
 
 The module also ships the standard paged-read contract: `PageQuery` (a `Query` carrying an `OffsetPagination`) paired with `PageQueryResult<T>` (an `Event` that is also a `PageDTO` — `total` + `items`).
 
-_Avoid_: `Cmd`, `Qry`, `Evt` — the markers are spelled out in full in the code.
+*Avoid*: `Cmd`, `Qry`, `Evt` — the markers are spelled out in full in the code.
 
 ### Envelope
 
