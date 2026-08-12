@@ -16,6 +16,9 @@ class TrustedIssuerJwtAuthenticationManagerResolverTest {
     companion object {
         private const val TENANT_PATH = "/auth/realms/tenant-1"
 
+        /** Base URI of issuers that are never dereferenced: only the trust decision is asserted. */
+        private const val AUTH_BASE_URI = "https://auth.example.org/auth"
+
         private lateinit var server: HttpServer
         private lateinit var issuerBaseUri: String
         private lateinit var trustedIssuer: String
@@ -75,6 +78,77 @@ class TrustedIssuerJwtAuthenticationManagerResolverTest {
         val second = resolver.resolve(trustedIssuer)
         assertThat(second).isSameAs(first)
     }
+
+    @Test
+    fun `resolve should return empty mono for a sibling issuer merely sharing the base uri prefix`() {
+        val singleTenantResolver = resolverWithBaseUri(trustedIssuer)
+
+        assertThat(singleTenantResolver.resolve("$trustedIssuer-other").block()).isNull()
+        assertThat(singleTenantResolver.resolve(trustedIssuer).block()).isNotNull
+    }
+
+    @Test
+    fun `a tenant base uri should only trust that tenant and its sub paths`() {
+        val singleTenantResolver = resolverWithBaseUri("$AUTH_BASE_URI/realms/tenant-1")
+
+        assertThat(singleTenantResolver.isTrustedIssuer("$AUTH_BASE_URI/realms/tenant-1")).isTrue()
+        assertThat(singleTenantResolver.isTrustedIssuer("$AUTH_BASE_URI/realms/tenant-1/")).isTrue()
+        assertThat(singleTenantResolver.isTrustedIssuer("$AUTH_BASE_URI/realms/tenant-1/sub")).isTrue()
+
+        assertThat(singleTenantResolver.isTrustedIssuer("$AUTH_BASE_URI/realms/tenant-1-other")).isFalse()
+        assertThat(singleTenantResolver.isTrustedIssuer("$AUTH_BASE_URI/realms/tenant-10")).isFalse()
+        assertThat(singleTenantResolver.isTrustedIssuer("$AUTH_BASE_URI/realms/tenant-2")).isFalse()
+    }
+
+    @Test
+    fun `a trailing slash on the base uri should not change the trust set`() {
+        val withSlash = resolverWithBaseUri("$AUTH_BASE_URI/realms/tenant-1/")
+        val withoutSlash = resolverWithBaseUri("$AUTH_BASE_URI/realms/tenant-1")
+
+        listOf(
+            "$AUTH_BASE_URI/realms/tenant-1",
+            "$AUTH_BASE_URI/realms/tenant-1/",
+            "$AUTH_BASE_URI/realms/tenant-1-other",
+            "$AUTH_BASE_URI/realms/tenant-2"
+        ).forEach { issuer ->
+            assertThat(withSlash.isTrustedIssuer(issuer))
+                .describedAs(issuer)
+                .isEqualTo(withoutSlash.isTrustedIssuer(issuer))
+        }
+    }
+
+    @Test
+    fun `a realms base uri should trust every realm under it but nothing beside it`() {
+        val multiTenantResolver = resolverWithBaseUri("$AUTH_BASE_URI/realms")
+
+        assertThat(multiTenantResolver.isTrustedIssuer("$AUTH_BASE_URI/realms/tenant-1")).isTrue()
+        assertThat(multiTenantResolver.isTrustedIssuer("$AUTH_BASE_URI/realms/tenant-2")).isTrue()
+
+        assertThat(multiTenantResolver.isTrustedIssuer("$AUTH_BASE_URI/realms-other/tenant-1")).isFalse()
+    }
+
+    @Test
+    fun `a host level base uri should not trust a look-alike host`() {
+        val hostResolver = resolverWithBaseUri("https://auth.example.org")
+
+        assertThat(hostResolver.isTrustedIssuer("https://auth.example.org/auth/realms/tenant-1")).isTrue()
+        assertThat(hostResolver.isTrustedIssuer("https://auth.example.org")).isTrue()
+
+        assertThat(hostResolver.isTrustedIssuer("https://auth.example.org.evil.tld/auth/realms/tenant-1")).isFalse()
+        assertThat(hostResolver.isTrustedIssuer("https://auth.example.org.evil.tld")).isFalse()
+    }
+
+    @Test
+    fun `an empty base uri should trust nothing`() {
+        val emptyResolver = resolverWithBaseUri("")
+
+        assertThat(emptyResolver.isTrustedIssuer("https://auth.example.org/auth/realms/tenant-1")).isFalse()
+        assertThat(emptyResolver.resolve("https://auth.example.org/auth/realms/tenant-1").block()).isNull()
+    }
+
+    private fun resolverWithBaseUri(baseUri: String) = TrustedIssuerJwtAuthenticationManagerResolver(
+        trustedIssuersConfig = F2TrustedIssuersConfig(issuerBaseUri = baseUri)
+    )
 
     @Test
     fun `jwtAuthoritiesConverter should map realm_access roles to prefixed authorities`() {

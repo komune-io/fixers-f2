@@ -22,8 +22,10 @@ class TrustedIssuerJwtAuthenticationManagerResolver(
 
     private val authenticationManagers: MutableMap<String, Mono<ReactiveAuthenticationManager>> = ConcurrentHashMap()
 
+    private val issuerBaseUri = trustedIssuersConfig.issuerBaseUri.trimEnd('/')
+
     override fun resolve(issuer: String): Mono<ReactiveAuthenticationManager> {
-        if (!issuer.startsWith(trustedIssuersConfig.issuerBaseUri)) return Mono.empty()
+        if (!isTrustedIssuer(issuer)) return Mono.empty()
         return this.authenticationManagers.computeIfAbsent(issuer) {
             buildAuthenticationManager(issuer).subscribeOn(Schedulers.boundedElastic())
                 .cache(
@@ -32,6 +34,21 @@ class TrustedIssuerJwtAuthenticationManagerResolver(
                     /* ttlForEmpty = */ { Duration.ZERO }
                 )
         }
+    }
+
+    /**
+     * An issuer is trusted only when it is the configured `f2.tenant.issuer-base-uri` itself, or one
+     * of its descendants: the base URI must be followed by a path separator, so a sibling merely
+     * sharing the prefix (`.../realms/tenant-1-other` for base `.../realms/tenant-1`) is not trusted.
+     *
+     * Trailing slashes are ignored on both sides, so `.../realms` and `.../realms/` describe the same
+     * trust set. An empty base URI trusts nothing (the tenant filter chain is not active in that case
+     * anyway, see `AUTHENTICATION_REQUIRED_EXPRESSION`).
+     */
+    fun isTrustedIssuer(issuer: String): Boolean {
+        if (issuerBaseUri.isEmpty()) return false
+        val candidate = issuer.trimEnd('/')
+        return candidate == issuerBaseUri || candidate.startsWith("$issuerBaseUri/")
     }
 
     private fun buildAuthenticationManager(issuer: String) = Mono.fromCallable<ReactiveAuthenticationManager> {
