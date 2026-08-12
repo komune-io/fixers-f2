@@ -1,0 +1,72 @@
+package f2.dsl.fnc.operators
+
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.runTest
+
+class ChunkTest {
+
+    @Test
+    fun `test chunk with transformation`() = runTest {
+        val flow = flowOf(1, 2, 3, 4, 5, 6)
+        val chunkSize = 2
+        val result = flow.chunk(chunkSize) { chunk -> chunk.map { it * 2 } }.toList()
+        assertEquals(listOf(listOf(2, 4), listOf(6, 8), listOf(10, 12)), result)
+    }
+
+    @Test
+    fun `test chunk without transformation`() = runTest {
+        val flow = flowOf(1, 2, 3, 4, 5, 6)
+        val chunkSize = 3
+        val result = flow.chunk(chunkSize).toList()
+        assertEquals(listOf(listOf(1, 2, 3), listOf(4, 5, 6)), result)
+    }
+
+    @Test
+    fun `test chunk with remaining elements`() = runTest {
+        val flow = flowOf(1, 2, 3, 4, 5)
+        val chunkSize = 2
+        val result = flow.chunk(chunkSize).toList()
+        assertEquals(listOf(listOf(1, 2), listOf(3, 4), listOf(5)), result)
+    }
+
+    @Test
+    fun `test chunk with empty flow`() = runTest {
+        val flow = flowOf<Int>()
+        val result = flow.chunk(3).toList()
+        assertTrue((result).isEmpty())
+    }
+
+    @Test
+    fun `test chunkFlow transforms chunks to flows`() = runTest {
+        val flow = flowOf(1, 2, 3, 4)
+        val result = flow.chunkFlow(2) { chunk ->
+            flowOf(*chunk.map { it * 10 }.toTypedArray())
+        }.toList().map { it.toList() }
+        assertEquals(listOf(listOf(10, 20), listOf(30, 40)), result)
+    }
+
+    @Test
+    fun `test chunkFlow with remaining elements`() = runTest {
+        val flow = flowOf(1, 2, 3, 4, 5)
+        val result = flow.chunkFlow(2) { chunk ->
+            flowOf(*chunk.toTypedArray())
+        }.toList().map { it.toList() }
+        assertEquals(listOf(listOf(1, 2), listOf(3, 4), listOf(5)), result)
+    }
+
+    @Test
+    fun `test chunkFlow with empty flow`() = runTest {
+        val flow = flowOf<Int>()
+        val result = flow.chunkFlow(3) { flowOf(*it.toTypedArray()) }.toList()
+        assertTrue((result).isEmpty())
+    }
+
+    @Test
+    fun `test CHUNK_DEFAULT_SIZE constant`() {
+        assertEquals(128, CHUNK_DEFAULT_SIZE)
+    }
+}
