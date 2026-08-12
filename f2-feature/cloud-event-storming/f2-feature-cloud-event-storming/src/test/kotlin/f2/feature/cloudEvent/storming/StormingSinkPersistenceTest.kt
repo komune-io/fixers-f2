@@ -3,8 +3,11 @@ package f2.feature.cloudEvent.storming
 import f2.dsl.cqrs.Command
 import f2.dsl.event.CloudEvent
 import f2.feature.cloudEvent.storming.entity.CloudEventEntity
+import java.time.Duration
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.assertj.core.api.Assertions.assertThatCode
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean
@@ -18,17 +21,30 @@ data class RegisterUserCommand(val name: String) : Command
 
 /**
  * The sinks must write through the reactive repository by themselves: `save` returns a cold `Mono`,
- * so the write only happens if the sink subscribes to it. These tests exercise both the direct call
- * and the `@EventListener` path, and check that nothing else is published as a side effect.
+ * so the write only happens if the sink subscribes to it. The sinks are suspending `@EventListener`
+ * methods, which Spring invokes through `CoroutinesUtils.invokeSuspendingFunction`: the write is
+ * asynchronous fire-and-forget from the point of view of the publisher.
+ *
+ * These tests exercise both the direct (suspending) call and the `@EventListener` path, and check
+ * that nothing else is published as a side effect.
  */
 class StormingSinkPersistenceTest {
 
     companion object {
-        val contextRepository = InMemoryCloudEventEntityRepository()
+        /** Repository handed to the sink bean of [SinkConfig], reset before each test. */
+        lateinit var contextRepository: InMemoryCloudEventEntityRepository
+
+        /** Everything the catch-all [EventSpy] listener saw, reset before each test. */
         val observedEvents = mutableListOf<Any>()
     }
 
     private val objectMapper = JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
+
+    @BeforeEach
+    fun resetContextState() {
+        contextRepository = InMemoryCloudEventEntityRepository()
+        observedEvents.clear()
+    }
 
     private fun cloudEvent(id: String) = CloudEvent(
         eventType = "UserCreated",
@@ -40,7 +56,7 @@ class StormingSinkPersistenceTest {
     )
 
     @Test
-    fun `cloud event sink should write the event without any external subscriber`() {
+    fun `cloud event sink should write the event without any external subscriber`() = runTest {
         val repository = InMemoryCloudEventEntityRepository()
         val event = cloudEvent("event-1")
 
@@ -51,7 +67,7 @@ class StormingSinkPersistenceTest {
     }
 
     @Test
-    fun `command sink should write the serialised command without any external subscriber`() {
+    fun `command sink should write the serialised command without any external subscriber`() = runTest {
         val repository = InMemoryCloudEventEntityRepository()
 
         StormingCommandSink(repo = repository, objectMapper = objectMapper)
@@ -64,7 +80,7 @@ class StormingSinkPersistenceTest {
     }
 
     @Test
-    fun `each stored event should get its own entity id`() {
+    fun `each stored event should get its own entity id`() = runTest {
         val repository = InMemoryCloudEventEntityRepository()
         val sink = StormingCloudEventSink(repo = repository)
 
@@ -76,13 +92,12 @@ class StormingSinkPersistenceTest {
     }
 
     @Test
-    fun `a repository failure should propagate to the publisher of the event`() {
-        val failing = object : InMemoryCloudEventEntityRepository() {
-            override fun <S : CloudEventEntity> save(entity: S): Mono<S> =
-                Mono.error(IllegalStateException("write failed"))
-        }
+    fun `a repository failure should propagate to a direct caller of the suspending sink`() = runTest {
+        val sink = StormingCloudEventSink(repo = FailingCloudEventEntityRepository())
 
-        assertThatThrownBy { StormingCloudEventSink(repo = failing).storeCommand(cloudEvent("event-1")) }
+        val thrown = runCatching { sink.storeCommand(cloudEvent("event-1")) }.exceptionOrNull()
+
+        assertThat(thrown)
             .isInstanceOf(IllegalStateException::class.java)
             .hasMessage("write failed")
     }
@@ -92,11 +107,50 @@ class StormingSinkPersistenceTest {
         AnnotationConfigApplicationContext(SinkConfig::class.java).use { context ->
             context.publishEvent(cloudEvent("event-1"))
 
-            assertThat(contextRepository.saved.map { it.event.eventID }).containsExactly("event-1")
+            // the listener suspends: Spring subscribes to the returned Mono, so the write is only
+            // guaranteed to have happened eventually, not by the time publishEvent returns
+            eventually {
+                assertThat(contextRepository.saved.map { it.event.eventID }).containsExactly("event-1")
+            }
             assertThat(contextRepository.saveInvocations).isEqualTo(1)
             // the sink returns Unit: no entity is re-published as a follow-up application event
             assertThat(observedEvents.map { it::class.simpleName }).doesNotContain("CloudEventEntity")
         }
+    }
+
+    @Test
+    fun `a repository failure should not propagate to the publisher of the event`() {
+        contextRepository = FailingCloudEventEntityRepository()
+
+        AnnotationConfigApplicationContext(SinkConfig::class.java).use { context ->
+            // the failure surfaces through Spring's asynchronous listener error path (logged by
+            // ApplicationListenerMethodAdapter), never to the caller of publishEvent
+            assertThatCode { context.publishEvent(cloudEvent("event-1")) }.doesNotThrowAnyException()
+
+            assertThat(contextRepository.saved).isEmpty()
+            assertThat(observedEvents.map { it::class.simpleName }).doesNotContain("CloudEventEntity")
+        }
+    }
+
+    /** Retries [assertion] until it holds or [timeout] elapses, so an async write can be awaited. */
+    private fun eventually(timeout: Duration = Duration.ofSeconds(5), assertion: () -> Unit) {
+        val deadline = System.nanoTime() + timeout.toNanos()
+        while (true) {
+            try {
+                assertion()
+                return
+            } catch (failure: AssertionError) {
+                if (System.nanoTime() >= deadline) {
+                    throw failure
+                }
+                Thread.sleep(10)
+            }
+        }
+    }
+
+    private class FailingCloudEventEntityRepository : InMemoryCloudEventEntityRepository() {
+        override fun <S : CloudEventEntity> save(entity: S): Mono<S> =
+            Mono.error(IllegalStateException("write failed"))
     }
 
     @Configuration

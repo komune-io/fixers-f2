@@ -10,6 +10,8 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.reactive)
+    // required by Spring's CoroutinesUtils to invoke the suspending @EventListener methods
+    implementation(libs.kotlinx.coroutines.reactor)
 
     implementation(libs.spring.boot.starter.webflux)
     implementation(libs.spring.boot.autoconfigure)
