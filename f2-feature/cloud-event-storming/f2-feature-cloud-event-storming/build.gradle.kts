@@ -15,4 +15,7 @@ dependencies {
 
     implementation(libs.bundles.spring.data.commons)
     implementation(libs.jackson.module.kotlin)
+
+    testImplementation(libs.bundles.spring.test)
+    testImplementation(libs.spring.tx)
 }

@@ -102,6 +102,7 @@ spring-boot-starter-web = { group = "org.springframework.boot", name = "spring-b
 # Spring Framework
 spring-context = { group = "org.springframework", name = "spring-context" }
 spring-web = { group = "org.springframework", name = "spring-web" }
+spring-tx = { group = "org.springframework", name = "spring-tx" }
 spring-data-commons = { group = "org.springframework.data", name = "spring-data-commons" }
 
 # Spring Security
