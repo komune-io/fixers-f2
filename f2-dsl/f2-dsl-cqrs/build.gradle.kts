@@ -10,6 +10,9 @@ dependencies {
 
     jvmMainImplementation(libs.bundles.spring.data.commons)
 
+    commonTestImplementation(kotlin("test"))
+    commonTestImplementation(libs.kotlinx.coroutines.test)
+
     jvmTestImplementation(libs.bundles.test.junit)
 }
 

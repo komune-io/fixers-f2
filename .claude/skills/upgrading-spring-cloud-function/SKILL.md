@@ -33,6 +33,32 @@ The other checkout, the local clone of `komune-io/spring-cloud-function`, is mac
 
 Also: `spring-cloud-function-context/pom.xml` (fork only) comments out `spring-web`'s `<optional>true</optional>` — needed because `ResponseStatusException` lives in `spring-web`.
 
+## Accepted version skew: Boot 4.1.0 on a Cloud train built for 4.0.7 (recheck every upgrade)
+
+F2 declares `spring-boot = "4.1.0"` and `spring-cloud = "2025.1.2"` in `gradle/libs.versions.toml`, but the `spring-cloud-dependencies:2025.1.2` POM declares `<spring-boot.version>4.0.7</spring-boot.version>`. Gradle's "highest wins" constraint resolution means F2 actually resolves Boot **4.1.0**, so `spring-cloud-function:5.0.3` runs on a Boot minor the Spring Cloud team never tested it against.
+
+The skew is narrower than it looks: Boot 4.0.7 and 4.1.0 both pin **Spring Framework 7.0.8**, and that is what F2 resolves. So the vendored files compile against exactly the Framework version the release train targeted — only the Boot layer differs. (An earlier write-up claimed Framework 7.1; that is wrong, check `spring-framework.version` in both `spring-boot-dependencies` POMs before repeating it.)
+
+Verify the current state rather than trusting this paragraph:
+
+```bash
+curl -fsSL "https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dependencies/<BOM-VERSION>/spring-cloud-dependencies-<BOM-VERSION>.pom" -o /tmp/scd.pom
+grep -E 'spring-boot.version|spring-cloud-function.version' /tmp/scd.pom
+./gradlew :f2-spring:function:f2-spring-boot-starter-function:dependencies --configuration compileClasspath \
+  | grep -E 'org.springframework.boot:spring-boot:|org.springframework:spring-core:'
+```
+
+**Why it is accepted.** There is no Spring Cloud release train built on Boot 4.1 yet; the alternative is holding F2 back on Boot 4.0.7, which means shipping without the 4.1 fixes (including Dependabot-flagged transitive CVEs) that motivated the bump. The vendored spring-cloud-function files are the actual risk surface, and they are covered by tests in `f2-spring/function/*` — a Framework-internal signature change would fail compilation or those tests rather than fail silently.
+
+**What to re-verify when the next train lands** (Spring Cloud 2026.0, or any release whose POM declares a Boot 4.1+ `spring-boot.version`):
+
+1. Whether the skew is gone — realign `spring-cloud` and drop the exception rather than carrying it forward by inertia.
+2. Every vendored file against the new spring-cloud-function tag (steps 3-5 below) — a Boot/Framework minor is exactly when the upstream code these patches sit in gets reworked.
+3. That each patch is still load-bearing (step 5); the table above already has one entry that went dead at v5.0.3.
+4. Both `spring-boot` entries in `libs.versions.toml`: the library pin *and* the `spring-boot` Gradle plugin, which resolve independently.
+
+Symptoms that the skew has become a real problem, rather than a theoretical one: `NoSuchMethodError`/`NoClassDefFoundError` from `org.springframework.cloud.function.*` at runtime, or a vendored file failing to compile against a Framework class it does not itself patch.
+
 ## Procedure
 
 ### 1. Find the target
@@ -61,6 +87,8 @@ grep spring-cloud-function.version /tmp/scd-a.pom /tmp/scd-b.pom
 **Always `diff` real files on disk, never `diff <(curl ...) <(curl ...)`.** In this sandboxed environment, process-substitution diffs — and separately, `diff` itself if shadowed by an `rtk` hook — have both produced false "files are identical" results on genuinely different inputs, twice, in the same session. This isn't a style preference; trusting it once already shipped a wrong claim into a commit message. If you must use `diff`, verify with `/usr/bin/diff` explicitly or by checking file sizes/specific properties with `grep` too.
 
 Don't assume only `spring-cloud-function.version` moves — check every `*.version` property in the diff, and specifically `spring-boot.version`: if the BOM's Spring Boot version is higher than F2's own declared `spring-boot` in `libs.versions.toml`, Gradle's constraint resolution silently picks the BOM's (highest wins), leaving the declared pin dishonest. Verify with the `:dependencies` command from step 1, looking for a `X -> Y (c)` override arrow, and bump the declared pin to match if so. This only affects the `spring-boot` *library* version (a dependency constraint); the `org.springframework.boot` Gradle *plugin* version is a separate catalog entry resolved independently — bump it too, but don't assume moving one moves the other.
+
+The reverse case — F2's declared `spring-boot` being *higher* than the BOM's, which is the situation today — is covered above under "Accepted version skew"; re-read it before changing either pin.
 
 ### 3. Diff every vendored file, current base tag → target tag
 

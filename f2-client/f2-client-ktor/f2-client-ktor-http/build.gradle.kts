@@ -20,6 +20,8 @@ dependencies {
     jvmMainApi(libs.ktor.client.java)
     jsMainApi(libs.ktor.client.js)
 
+    commonTestImplementation(kotlin("test"))
+
     jvmTestImplementation(libs.bundles.test.junit)
     jvmTestImplementation(libs.ktor.client.mock)
 
