@@ -11,7 +11,8 @@ dependencies {
     commonMainApi(libs.kotlinx.coroutines.core)
     commonMainApi(libs.kotlinx.serialization.core)
 
-    jvmTestImplementation(libs.bundles.test.junit)
+    commonTestImplementation(kotlin("test"))
+    commonTestImplementation(libs.kotlinx.coroutines.test)
 
 }
 

@@ -17,9 +17,7 @@ dependencies {
     jvmMainApi(libs.ktor.client.java)
     jsMainApi(libs.ktor.client.js)
 
-    jvmTestImplementation(libs.bundles.test.junit)
-
-    jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http-webflux"))
+    commonTestImplementation(kotlin("test"))
 
 }
 
