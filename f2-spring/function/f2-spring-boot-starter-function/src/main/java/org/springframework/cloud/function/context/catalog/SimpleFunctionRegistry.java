@@ -96,6 +96,19 @@ import org.springframework.web.server.ResponseStatusException;
  * @author Chris Bono
  */
 public class SimpleFunctionRegistry implements FunctionRegistry {
+
+    // KOMUNE Modification
+    /**
+     * Marker proving that this class is F2's vendored (KOMUNE-patched) copy and not the one shipped
+     * inside {@code spring-cloud-function-context}. Both jars declare this exact FQCN, so which copy
+     * the JVM loads depends purely on classpath ordering. F2 asserts the presence of this field at
+     * startup. Read reflectively - do not rename, remove or inline it.
+     *
+     * See {@code f2.spring.VendoredPatchVerifier}.
+     */
+    public static final String KOMUNE_PATCH_MARKER = "f2-spring-boot-starter-function";
+    // KOMUNE End Of Modification
+
     protected Log logger = LogFactory.getLog(this.getClass());
     /*
      * - do we care about FunctionRegistration after it's been registered? What additional value does it bring?
