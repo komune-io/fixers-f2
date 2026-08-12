@@ -1,6 +1,11 @@
 [versions]
 fixers = "0.43.0-SNAPSHOT"
 kotlin = "2.4.10"
+# Known, accepted skew: spring-cloud-dependencies 2025.1.2 declares spring-boot 4.0.7, so
+# spring-cloud-function 5.0.3 runs on a Boot minor its release train never targeted (Gradle
+# resolves the higher pin below). Rationale and the re-verification checklist for the next
+# Spring Cloud train live in .claude/skills/upgrading-spring-cloud-function/SKILL.md
+# ("Accepted version skew"). Do not realign one of these two without reading it.
 spring-boot = "4.1.0"
 spring-cloud = "2025.1.2"
 ktor = "3.4.3"
