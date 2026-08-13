@@ -10,7 +10,9 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.reactive)
-    // required by Spring's CoroutinesUtils to invoke the suspending @EventListener methods
+    // no module code imports reactor anymore, but this must stay: Spring's CoroutinesUtils needs
+    // MonoKt at runtime to invoke the suspending @EventListener methods, and Spring Data uses the
+    // same bridge to back the CoroutineCrudRepository with the host's reactive infrastructure
     implementation(libs.kotlinx.coroutines.reactor)
 
     implementation(libs.spring.boot.starter.webflux)

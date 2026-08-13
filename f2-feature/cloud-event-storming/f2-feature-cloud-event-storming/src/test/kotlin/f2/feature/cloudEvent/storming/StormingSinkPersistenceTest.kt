@@ -13,17 +13,16 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.EventListener
-import reactor.core.publisher.Mono
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule
 
 data class RegisterUserCommand(val name: String) : Command
 
 /**
- * The sinks must write through the reactive repository by themselves: `save` returns a cold `Mono`,
- * so the write only happens if the sink subscribes to it. The sinks are suspending `@EventListener`
- * methods, which Spring invokes through `CoroutinesUtils.invokeSuspendingFunction`: the write is
- * asynchronous fire-and-forget from the point of view of the publisher.
+ * The sinks write through the coroutine repository: `save` is a suspending call, so the write is
+ * complete when the sink returns. The sinks are suspending `@EventListener` methods, which Spring
+ * invokes through `CoroutinesUtils.invokeSuspendingFunction`: the write is asynchronous
+ * fire-and-forget from the point of view of the publisher.
  *
  * These tests exercise both the direct (suspending) call and the `@EventListener` path, and check
  * that nothing else is published as a side effect.
@@ -56,18 +55,17 @@ class StormingSinkPersistenceTest {
     )
 
     @Test
-    fun `cloud event sink should write the event without any external subscriber`() = runTest {
+    fun `cloud event sink should have written the event when the suspending call returns`() = runTest {
         val repository = InMemoryCloudEventEntityRepository()
         val event = cloudEvent("event-1")
 
         StormingCloudEventSink(repo = repository).storeCommand(event)
 
         assertThat(repository.saved.single().event).isSameAs(event)
-        assertThat(repository.saveInvocations).isEqualTo(repository.saved.size)
     }
 
     @Test
-    fun `command sink should write the serialised command without any external subscriber`() = runTest {
+    fun `command sink should have written the serialised command when the suspending call returns`() = runTest {
         val repository = InMemoryCloudEventEntityRepository()
 
         StormingCommandSink(repo = repository, objectMapper = objectMapper)
@@ -76,7 +74,6 @@ class StormingSinkPersistenceTest {
         val stored = repository.saved.single().event
         assertThat(stored.eventType).isEqualTo("RegisterUserCommand")
         assertThat(stored.data).isEqualTo("""{"name":"john"}""")
-        assertThat(repository.saveInvocations).isEqualTo(repository.saved.size)
     }
 
     @Test
@@ -112,7 +109,6 @@ class StormingSinkPersistenceTest {
             eventually {
                 assertThat(contextRepository.saved.map { it.event.eventID }).containsExactly("event-1")
             }
-            assertThat(contextRepository.saveInvocations).isEqualTo(1)
             // the sink returns Unit: no entity is re-published as a follow-up application event
             assertThat(observedEvents.map { it::class.simpleName }).doesNotContain("CloudEventEntity")
         }
@@ -149,8 +145,8 @@ class StormingSinkPersistenceTest {
     }
 
     private class FailingCloudEventEntityRepository : InMemoryCloudEventEntityRepository() {
-        override fun <S : CloudEventEntity> save(entity: S): Mono<S> =
-            Mono.error(IllegalStateException("write failed"))
+        override suspend fun <S : CloudEventEntity> save(entity: S): CloudEventEntity =
+            throw IllegalStateException("write failed")
     }
 
     @Configuration

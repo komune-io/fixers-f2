@@ -4,7 +4,6 @@ import f2.dsl.event.CloudEvent
 import f2.feature.cloudEvent.storming.entity.CloudEventEntity
 import f2.feature.cloudEvent.storming.entity.CloudEventEntityRepository
 import java.util.UUID
-import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.context.event.EventListener
 
 class StormingCloudEventSink(
@@ -12,8 +11,7 @@ class StormingCloudEventSink(
 ) {
 
 	/**
-	 * `repo.save` returns a cold [reactor.core.publisher.Mono]: it is awaited here, so the event is
-	 * actually written instead of the listener merely building a publisher nobody subscribes to.
+	 * `repo.save` is a suspending call: the event is written by the time it returns.
 	 *
 	 * Spring invokes a suspending `@EventListener` through `CoroutinesUtils.invokeSuspendingFunction`,
 	 * which wraps the call in a `Mono` and subscribes to it. Persistence is therefore asynchronous
@@ -30,6 +28,6 @@ class StormingCloudEventSink(
 			id = UUID.randomUUID(),
 			event = event
 		)
-		repo.save(entity).awaitSingle()
+		repo.save(entity)
 	}
 }

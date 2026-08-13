@@ -1,7 +1,8 @@
 package f2.feature.cloudEvent.storming.entity
 
-import org.springframework.data.repository.reactive.ReactiveCrudRepository
+import java.util.UUID
+import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface CloudEventEntityRepository : ReactiveCrudRepository<CloudEventEntity, String>
+interface CloudEventEntityRepository : CoroutineCrudRepository<CloudEventEntity, UUID>

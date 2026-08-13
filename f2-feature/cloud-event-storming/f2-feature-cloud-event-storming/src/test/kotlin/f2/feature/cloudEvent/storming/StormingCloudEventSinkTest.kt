@@ -35,12 +35,4 @@ class StormingCloudEventSinkTest {
         assertThat(repository.saved).hasSize(2)
         assertThat(repository.saved.map { it.id }).doesNotHaveDuplicates()
     }
-
-    @Test
-    suspend fun `storeCommand awaits the save instead of returning a cold Mono`() {
-        sink.storeCommand(cloudEvent("event-1"))
-
-        assertThat(repository.saveInvocations).isEqualTo(1)
-        assertThat(repository.saved).hasSize(1)
-    }
 }

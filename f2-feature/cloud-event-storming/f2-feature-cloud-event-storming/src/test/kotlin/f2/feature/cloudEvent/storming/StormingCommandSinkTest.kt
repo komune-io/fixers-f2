@@ -67,14 +67,6 @@ class StormingCommandSinkTest {
     }
 
     @Test
-    suspend fun `storeCommand awaits the save instead of returning a cold Mono`() {
-        sink.storeCommand(CreateUserCommand(name = "john", age = 42))
-
-        assertThat(repository.saveInvocations).isEqualTo(1)
-        assertThat(repository.saved).hasSize(1)
-    }
-
-    @Test
     suspend fun `storeCommand should timestamp the event with an RFC 3339 instant`() {
         val before = Instant.now().minusSeconds(1)
 
