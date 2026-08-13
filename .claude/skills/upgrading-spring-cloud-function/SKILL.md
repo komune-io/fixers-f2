@@ -1,13 +1,13 @@
 ---
 name: upgrading-spring-cloud-function
-description: Use when bumping F2's spring-cloud-function version, when a KOMUNE-patched vendored file (SimpleFunctionRegistry, JsonMessageConverter, SmartCompositeMessageConverter, FunctionWebRequestProcessingHelper, ContextFunctionCatalogAutoConfiguration, KotlinLambdaToFunctionAutoConfiguration) needs updating, or when syncing komune-io/spring-cloud-function fork branches (fixers/<version>) with upstream spring-cloud/spring-cloud-function releases.
+description: Use when bumping F2's spring-cloud-function version, when a KOMUNE-patched vendored file (SimpleFunctionRegistry, JsonMessageConverter, SmartCompositeMessageConverter, FunctionWebRequestProcessingHelper, ContextFunctionCatalogAutoConfiguration, KotlinLambdaToFunctionAutoConfiguration, CoroutinesUtils) needs updating, or when syncing komune-io/spring-cloud-function fork branches (fixers/<version>) with upstream spring-cloud/spring-cloud-function releases.
 ---
 
 # Upgrading spring-cloud-function
 
 ## Overview
 
-F2 vendors (shadows by package/path) 6 Java files from `spring-cloud-function`, each carrying small custom patches marked `// KOMUNE Modification` … `// KOMUNE End Of Modification`. A sibling repo, `komune-io/spring-cloud-function`, carries the identical patch on branches named `fixers/<version>` (e.g. `fixers/5.0.3`) off the matching upstream tag — this is the fork PR upstream would see, kept in sync with F2's vendored copies.
+F2 vendors (shadows by package/path) 7 files from `spring-cloud-function` — 6 Java files plus `CoroutinesUtils.kt` — each carrying custom patches marked `// KOMUNE Modification` … `// KOMUNE End Of Modification` (`CoroutinesUtils.kt` uses `//KOMUNE Changes Start` … `//KOMUNE Changes End`). A sibling repo, `komune-io/spring-cloud-function`, carries the identical patch on branches named `fixers/<version>` (e.g. `fixers/5.0.3`) off the matching upstream tag — this is the fork PR upstream would see, kept in sync with F2's vendored copies.
 
 Upgrading means: find the new tag, check which vendored files actually changed upstream, reapply only the KOMUNE hunks that survive (not a wholesale merge), and verify the patches are still load-bearing — in both repos, kept in sync.
 
@@ -31,6 +31,9 @@ The other checkout, the local clone of `komune-io/spring-cloud-function`, is mac
 | `FunctionWebRequestProcessingHelper.java` | Drop `onErrorContinue` on the result stream | Necessary — but only reproduces with a fixture that fails *inside* an operator (e.g. `.map()`); a source that throws directly doesn't exercise it at all, `onErrorContinue` can't intercept a source-terminal error |
 | `KotlinLambdaToFunctionAutoConfiguration.java` | Relaxed suspend supplier/consumer/function arity detection + supertype-aware matching | Necessary — F2's DSL types erase to fewer Java arities than upstream's detector expects |
 | `ContextFunctionCatalogAutoConfiguration.java` | `kSerialization` JsonMapper branch | F2-specific; the fork keeps it commented out (can't depend on F2's `f2.spring.KSerializationMapper`) — never try to make this identical between the two repos |
+| `CoroutinesUtils.kt` | `invokeSuspendingSupplier` accepts a supplier returning a plain value, not only a `Flow` (wraps it with `flowOf`) | Necessary — `F2Supplier<T>` erases to a lambda returning the value itself; upstream's `suspendCoroutineUninterceptedOrReturn<Flow<Any>>` blows up on it |
+| `CoroutinesUtils.kt` | `require(...)` argument checks in `invokeSuspendingFunction`/`Consumer`/`Supplier` instead of upstream's blind casts | Defensive — turns a bare `ClassCastException` from a mis-wired bean into a readable message |
+| `CoroutinesUtils.kt` | `typealias` made public (upstream: `private typealias`) + `@Suppress("TooManyFunctions")`/`@Suppress("ReturnCount")` | Build-only — detekt runs over F2's copy, upstream's build doesn't |
 
 Also: `spring-cloud-function-context/pom.xml` (fork only) comments out `spring-web`'s `<optional>true</optional>` — needed because `ResponseStatusException` lives in `spring-web`.
 
@@ -101,6 +104,7 @@ FILES=(
   "spring-cloud-function-context/src/main/java/org/springframework/cloud/function/context/config/JsonMessageConverter.java"
   "spring-cloud-function-context/src/main/java/org/springframework/cloud/function/context/config/KotlinLambdaToFunctionAutoConfiguration.java"
   "spring-cloud-function-context/src/main/java/org/springframework/cloud/function/context/config/SmartCompositeMessageConverter.java"
+  "spring-cloud-function-context/src/main/kotlin/org/springframework/cloud/function/context/config/CoroutinesUtils.kt"
   "spring-cloud-function-web/src/main/java/org/springframework/cloud/function/web/util/FunctionWebRequestProcessingHelper.java"
 )
 for f in "${FILES[@]}"; do
@@ -154,7 +158,7 @@ F2 (Gradle), run from this repo's root: `./gradlew test detekt`.
 ```bash
 /usr/bin/diff -w -B "<f2-path>" <(git -C "$SPRING_CLOUD_FUNCTION_REPO" show origin/fixers/<version>:"<fork-path>" | expand -t4)
 ```
-Expect **0** for `SimpleFunctionRegistry.java` and `FunctionWebRequestProcessingHelper.java`. The other four (`ContextFunctionCatalogAutoConfiguration.java`, `KotlinLambdaToFunctionAutoConfiguration.java`, `JsonMessageConverter.java`, `SmartCompositeMessageConverter.java`) legitimately show small nonzero diffs even when fully in sync — copyright-header years, one import's position, and F2's own `kSerialization` feature that the fork can't have. Don't treat those as a failure signal; confirm they're *pre-existing* by diffing the same files against the *previous* fork branch too — if the counts match, nothing regressed.
+Expect **0** for `SimpleFunctionRegistry.java` and `FunctionWebRequestProcessingHelper.java`. `CoroutinesUtils.kt` is out of scope for this check entirely: as of `fixers/5.0.3` the fork carries upstream's copy verbatim (no KOMUNE markers), so F2's version diverges heavily *by design* — diff it against **upstream** rather than the fork. The other four (`ContextFunctionCatalogAutoConfiguration.java`, `KotlinLambdaToFunctionAutoConfiguration.java`, `JsonMessageConverter.java`, `SmartCompositeMessageConverter.java`) legitimately show small nonzero diffs even when fully in sync — copyright-header years, one import's position, and F2's own `kSerialization` feature that the fork can't have. Don't treat those as a failure signal; confirm they're *pre-existing* by diffing the same files against the *previous* fork branch too — if the counts match, nothing regressed.
 
 ### 8. Branch, commit, push — only on explicit confirmation
 
@@ -164,6 +168,7 @@ Fork: `git checkout -b fixers/<new-version> v<new-version>`, commit the patch. F
 
 - **Trusting a network-fetched `diff <(...) <(...)`** — verified false-negative twice in one session (once during initial BOM investigation, once during "independent" re-verification of the same claim). Save to real files and diff those.
 - **Assuming a hunk's necessity carries over** from the last time it was checked — re-verify by removal-proof against the new base, don't just cite the old table.
-- **Treating the fork/F2 sync-check's expected nonzero files as a regression** — 4 of 6 vendored files have permanent, harmless cosmetic drift; only `SimpleFunctionRegistry.java` and `FunctionWebRequestProcessingHelper.java` should ever be byte-identical.
+- **Treating the fork/F2 sync-check's expected nonzero files as a regression** — 4 of the 6 Java files have permanent, harmless cosmetic drift; only `SimpleFunctionRegistry.java` and `FunctionWebRequestProcessingHelper.java` should ever be byte-identical, and `CoroutinesUtils.kt` isn't mirrored in the fork at all.
+- **Forgetting `CoroutinesUtils.kt` is vendored** — it's Kotlin, it lives under `src/main/kotlin`, it has no fork counterpart, and it uses a different marker style (`//KOMUNE Changes Start`/`End`), so every "the 6 Java files" shortcut silently skips it.
 - **zsh array indexing** — a paired-array verification loop written assuming 0-indexed arrays can misbehave under zsh's default 1-indexed arrays. Prefer a single array of `"a::b"` pairs split with `${x%%::*}`/`${x##*::}` over two parallel indexed arrays, or just run under `bash` explicitly.
 - **Forgetting the `spring-web` pom.xml hunk** on the fork side — it's easy to miss since it's not a `.java` file and doesn't show up in a vendored-file-only diff sweep.

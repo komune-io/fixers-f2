@@ -15,7 +15,10 @@
  */
 
 @file:JvmName("CoroutinesUtils")
+//KOMUNE Changes Start
+// detekt runs over this vendored file, upstream's build does not
 @file:Suppress("TooManyFunctions")
+//KOMUNE Changes End
 package org.springframework.cloud.function.context.config
 
 import java.lang.reflect.ParameterizedType
@@ -40,7 +43,10 @@ fun getSuspendingFunctionArgType(type: Type): Type {
 	return getFlowTypeArguments(type)
 }
 
+//KOMUNE Changes Start
+// detekt runs over this vendored file, upstream's build does not
 @Suppress("ReturnCount")
+//KOMUNE Changes End
 fun getFlowTypeArguments(type: Type): Type {
 	if(!isFlowType(type)) {
 		return type
@@ -89,6 +95,11 @@ private fun getContinuationTypeArguments(type: Type): Type {
 	return wildcardType.lowerBounds[0]
 }
 
+//KOMUNE Changes Start
+// Upstream blind-casts its arguments; F2 checks them first so a wrongly wired bean fails with a
+// readable message instead of a bare ClassCastException.
+// invokeSuspendingSupplier additionally accepts a supplier that returns a plain value rather than a
+// Flow (F2Supplier<T> erases to that) and wraps it with flowOf; upstream assumes a Flow and blows up.
 @Suppress("UNCHECKED_CAST")
 fun invokeSuspendingFunction(kotlinLambdaTarget: Any, arg0: Any): Flux<Any> {
 	require(kotlinLambdaTarget is Function2<*, *, *>) {
@@ -131,6 +142,9 @@ fun invokeSuspendingSupplier(kotlinLambdaTarget: Any): Flux<Any> {
 }
 //KOMUNE Changes End
 
+//KOMUNE Changes Start
+// Same argument checking as above; `arg0.asFlow()` relies on the smart cast from the require, where
+// upstream casts arg0 to Flux<Any> unchecked.
 @Suppress("UNCHECKED_CAST")
 fun invokeSuspendingConsumer(kotlinLambdaTarget: Any, arg0: Any) {
 	require(kotlinLambdaTarget is Function2<*, *, *>) {
@@ -146,6 +160,7 @@ fun invokeSuspendingConsumer(kotlinLambdaTarget: Any, arg0: Any) {
 		}
 	}.subscribe()
 }
+//KOMUNE Changes End
 
 fun isValidSuspendingFunction(kotlinLambdaTarget: Any, arg0: Any): Boolean {
 	return arg0 is Flux<*> && kotlinLambdaTarget is Function2<*, *, *>
@@ -155,6 +170,9 @@ fun isValidSuspendingSupplier(kotlinLambdaTarget: Any): Boolean {
 	return kotlinLambdaTarget is Function1<*, *>
 }
 
+//KOMUNE Changes Start
+// Upstream declares these `private typealias`; F2 keeps them public.
 typealias SuspendFunction = (Any?, Any?) -> Any?
 typealias SuspendConsumer = (Any?, Any?) -> Unit?
 typealias SuspendSupplier = (Any?) -> Any?
+//KOMUNE Changes End
