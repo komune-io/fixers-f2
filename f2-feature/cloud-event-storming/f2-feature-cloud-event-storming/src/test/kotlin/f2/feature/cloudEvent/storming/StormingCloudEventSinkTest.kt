@@ -19,30 +19,20 @@ class StormingCloudEventSinkTest {
     )
 
     @Test
-    fun `storeCommand should persist the incoming cloud event as is`() {
+    suspend fun `storeCommand should persist the incoming cloud event as is`() {
         val event = cloudEvent("event-1")
 
-        sink.storeCommand(event).block()
+        sink.storeCommand(event)
 
         assertThat(repository.saved.single().event).isSameAs(event)
     }
 
     @Test
-    fun `storeCommand should assign a distinct entity id to each event`() {
-        sink.storeCommand(cloudEvent("event-1")).block()
-        sink.storeCommand(cloudEvent("event-2")).block()
+    suspend fun `storeCommand should assign a distinct entity id to each event`() {
+        sink.storeCommand(cloudEvent("event-1"))
+        sink.storeCommand(cloudEvent("event-2"))
 
         assertThat(repository.saved).hasSize(2)
         assertThat(repository.saved.map { it.id }).doesNotHaveDuplicates()
-    }
-
-    @Test
-    fun `storeCommand currently returns a cold Mono and persists nothing until it is subscribed`() {
-        // same defect as StormingCommandSink: the Mono returned by `repo.save` is never subscribed
-        // when Spring invokes the @EventListener. Documented as-is, see issue #130.
-        sink.storeCommand(cloudEvent("event-1"))
-
-        assertThat(repository.saveInvocations).isEqualTo(1)
-        assertThat(repository.saved).isEmpty()
     }
 }

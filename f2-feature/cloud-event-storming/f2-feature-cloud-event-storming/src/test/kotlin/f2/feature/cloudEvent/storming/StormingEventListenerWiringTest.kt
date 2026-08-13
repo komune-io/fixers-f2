@@ -52,7 +52,7 @@ class StormingEventListenerWiringTest {
     fun `publishing a command should reach the command sink`() {
         context.publishEvent(CreateUserCommand(name = "john", age = 42))
 
-        assertThat(repository.saveInvocations).isEqualTo(1)
+        assertThat(repository.saved).hasSize(1)
     }
 
     @Test
@@ -67,13 +67,13 @@ class StormingEventListenerWiringTest {
             )
         )
 
-        assertThat(repository.saveInvocations).isEqualTo(1)
+        assertThat(repository.saved).hasSize(1)
     }
 
     @Test
     fun `publishing an unrelated event should reach no sink`() {
         context.publishEvent("some-unrelated-payload")
 
-        assertThat(repository.saveInvocations).isZero()
+        assertThat(repository.saved).isEmpty()
     }
 }

@@ -18,30 +18,30 @@ class StormingCommandSinkTest {
     private val sink = StormingCommandSink(repo = repository, objectMapper = objectMapper)
 
     @Test
-    fun `storeCommand should persist one cloud event per command`() {
-        sink.storeCommand(CreateUserCommand(name = "john", age = 42)).block()
+    suspend fun `storeCommand should persist one cloud event per command`() {
+        sink.storeCommand(CreateUserCommand(name = "john", age = 42))
 
         assertThat(repository.saved).hasSize(1)
     }
 
     @Test
-    fun `storeCommand should use the command class simple name as event type`() {
-        sink.storeCommand(CreateUserCommand(name = "john", age = 42)).block()
+    suspend fun `storeCommand should use the command class simple name as event type`() {
+        sink.storeCommand(CreateUserCommand(name = "john", age = 42))
 
         assertThat(repository.saved.single().event.eventType).isEqualTo("CreateUserCommand")
     }
 
     @Test
-    fun `storeCommand should serialize the command as json payload`() {
-        sink.storeCommand(CreateUserCommand(name = "john", age = 42)).block()
+    suspend fun `storeCommand should serialize the command as json payload`() {
+        sink.storeCommand(CreateUserCommand(name = "john", age = 42))
 
         assertThat(repository.saved.single().event.data)
             .isEqualTo("""{"name":"john","age":42}""")
     }
 
     @Test
-    fun `storeCommand should fill the cloud event envelope`() {
-        sink.storeCommand(DeleteUserCommand(id = "user-1")).block()
+    suspend fun `storeCommand should fill the cloud event envelope`() {
+        sink.storeCommand(DeleteUserCommand(id = "user-1"))
 
         val event = repository.saved.single().event
         assertThat(event.source).isEqualTo("S2")
@@ -53,9 +53,9 @@ class StormingCommandSinkTest {
     }
 
     @Test
-    fun `storeCommand should generate a unique id for the event and the entity`() {
-        sink.storeCommand(CreateUserCommand(name = "john", age = 42)).block()
-        sink.storeCommand(CreateUserCommand(name = "jane", age = 24)).block()
+    suspend fun `storeCommand should generate a unique id for the event and the entity`() {
+        sink.storeCommand(CreateUserCommand(name = "john", age = 42))
+        sink.storeCommand(CreateUserCommand(name = "jane", age = 24))
 
         val entities = repository.saved
         assertThat(entities).hasSize(2)
@@ -67,22 +67,10 @@ class StormingCommandSinkTest {
     }
 
     @Test
-    fun `storeCommand currently returns a cold Mono and persists nothing until it is subscribed`() {
-        // `storeCommand` ends with `repo.save(entity)` inside `runBlocking`, which only *builds* the
-        // Mono: nothing is awaited nor subscribed. Spring's event multicaster discards the returned
-        // value, so with a real reactive repository no row is ever written.
-        // Documented as-is, see issue #130.
-        sink.storeCommand(CreateUserCommand(name = "john", age = 42))
-
-        assertThat(repository.saveInvocations).isEqualTo(1)
-        assertThat(repository.saved).isEmpty()
-    }
-
-    @Test
-    fun `storeCommand should timestamp the event with an RFC 3339 instant`() {
+    suspend fun `storeCommand should timestamp the event with an RFC 3339 instant`() {
         val before = Instant.now().minusSeconds(1)
 
-        sink.storeCommand(CreateUserCommand(name = "john", age = 42)).block()
+        sink.storeCommand(CreateUserCommand(name = "john", age = 42))
 
         val eventTime = Instant.parse(repository.saved.single().event.eventTime)
         assertThat(eventTime).isAfterOrEqualTo(before)

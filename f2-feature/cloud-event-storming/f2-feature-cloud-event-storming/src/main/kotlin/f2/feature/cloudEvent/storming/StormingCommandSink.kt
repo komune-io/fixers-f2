@@ -6,7 +6,6 @@ import f2.feature.cloudEvent.storming.entity.CloudEventEntity
 import f2.feature.cloudEvent.storming.entity.CloudEventEntityRepository
 import java.time.Instant
 import java.util.UUID
-import kotlinx.coroutines.runBlocking
 import org.springframework.context.event.EventListener
 import tools.jackson.databind.ObjectMapper
 
@@ -15,8 +14,20 @@ class StormingCommandSink(
     private val objectMapper: ObjectMapper,
 ) {
 
+	/**
+	 * `repo.save` is a suspending call: the command is written by the time it returns.
+	 *
+	 * Spring invokes a suspending `@EventListener` through `CoroutinesUtils.invokeSuspendingFunction`,
+	 * which wraps the call in a `Mono` and subscribes to it. Persistence is therefore asynchronous
+	 * fire-and-forget: the write is not guaranteed to be complete when `publishEvent` returns, and a
+	 * repository failure is not propagated to the publisher — it is reported by Spring's asynchronous
+	 * listener error path instead.
+	 *
+	 * The return type must stay [Unit]: Spring re-publishes any other returned value as a new
+	 * application event.
+	 */
 	@EventListener
-	fun storeCommand(command: Command) = runBlocking {
+	suspend fun storeCommand(command: Command) {
 		val cloudEvent = CloudEvent(
 			eventType = command::class.simpleName!!,
 			eventTypeVersion = "1",

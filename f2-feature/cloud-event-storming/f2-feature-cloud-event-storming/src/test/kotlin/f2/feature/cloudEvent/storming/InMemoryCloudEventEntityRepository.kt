@@ -2,76 +2,66 @@ package f2.feature.cloudEvent.storming
 
 import f2.feature.cloudEvent.storming.entity.CloudEventEntity
 import f2.feature.cloudEvent.storming.entity.CloudEventEntityRepository
-import org.reactivestreams.Publisher
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
+import java.util.UUID
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
 
 /**
- * In-memory stand-in for the reactive repository, so the sinks and the supplier can be exercised
+ * In-memory stand-in for the coroutine repository, so the sinks and the supplier can be exercised
  * without a database. The module declares no R2DBC driver: the repository is built at runtime from
  * the host application's [org.springframework.data.repository.core.support.ReactiveRepositoryFactorySupport].
+ *
+ * `save` is a plain suspending call: the entity is written by the time it returns. The former
+ * reactive interface returned a cold `Mono`, which forced this stub to distinguish "save invoked"
+ * from "save subscribed" — that distinction no longer exists, so [saved] is the whole story.
  */
-class InMemoryCloudEventEntityRepository : CloudEventEntityRepository {
+open class InMemoryCloudEventEntityRepository : CloudEventEntityRepository {
 
-    /** Entities actually written, i.e. for which the returned [Mono] has been subscribed. */
+    /** Entities written by [save]. */
     val saved = mutableListOf<CloudEventEntity>()
 
-    /** Number of `save` calls, whether or not the returned [Mono] has been subscribed. */
-    var saveInvocations = 0
-
-    override fun <S : CloudEventEntity> save(entity: S): Mono<S> {
-        saveInvocations++
-        return Mono.fromCallable {
-            saved.add(entity)
-            entity
-        }
+    override suspend fun <S : CloudEventEntity> save(entity: S): CloudEventEntity {
+        saved.add(entity)
+        return entity
     }
 
-    override fun <S : CloudEventEntity> saveAll(entities: MutableIterable<S>): Flux<S> =
-        Flux.fromIterable(entities).flatMap { save(it) }
+    override fun <S : CloudEventEntity> saveAll(entities: Iterable<S>): Flow<S> =
+        entities.asFlow().onEach { save(it) }
 
-    override fun <S : CloudEventEntity> saveAll(entityStream: Publisher<S>): Flux<S> =
-        Flux.from(entityStream).flatMap { save(it) }
+    override fun <S : CloudEventEntity> saveAll(entityStream: Flow<S>): Flow<S> =
+        entityStream.onEach { save(it) }
 
-    override fun findAll(): Flux<CloudEventEntity> = Flux.fromIterable(saved.toList())
+    override fun findAll(): Flow<CloudEventEntity> = saved.toList().asFlow()
 
-    override fun findById(id: String): Mono<CloudEventEntity> =
-        Mono.justOrEmpty(saved.firstOrNull { it.id.toString() == id })
+    override suspend fun findById(id: UUID): CloudEventEntity? =
+        saved.firstOrNull { it.id == id }
 
-    override fun findById(id: Publisher<String>): Mono<CloudEventEntity> =
-        Mono.from(id).flatMap(::findById)
+    override suspend fun existsById(id: UUID): Boolean = findById(id) != null
 
-    override fun existsById(id: String): Mono<Boolean> = findById(id).hasElement()
+    override fun findAllById(ids: Iterable<UUID>): Flow<CloudEventEntity> =
+        ids.asFlow().mapNotNull { findById(it) }
 
-    override fun existsById(id: Publisher<String>): Mono<Boolean> = findById(id).hasElement()
+    override fun findAllById(ids: Flow<UUID>): Flow<CloudEventEntity> =
+        ids.mapNotNull { findById(it) }
 
-    override fun findAllById(ids: MutableIterable<String>): Flux<CloudEventEntity> =
-        Flux.fromIterable(ids).flatMap(::findById)
+    override suspend fun count(): Long = saved.size.toLong()
 
-    override fun findAllById(idStream: Publisher<String>): Flux<CloudEventEntity> =
-        Flux.from(idStream).flatMap(::findById)
-
-    override fun count(): Mono<Long> = Mono.fromCallable { saved.size.toLong() }
-
-    override fun deleteById(id: String): Mono<Void> = Mono.fromRunnable {
-        saved.removeIf { it.id.toString() == id }
+    override suspend fun deleteById(id: UUID) {
+        saved.removeIf { it.id == id }
     }
 
-    override fun deleteById(id: Publisher<String>): Mono<Void> =
-        Mono.from(id).flatMap(::deleteById).then()
-
-    override fun delete(entity: CloudEventEntity): Mono<Void> = Mono.fromRunnable {
+    override suspend fun delete(entity: CloudEventEntity) {
         saved.remove(entity)
     }
 
-    override fun deleteAllById(ids: MutableIterable<String>): Mono<Void> =
-        Flux.fromIterable(ids).flatMap(::deleteById).then()
+    override suspend fun deleteAllById(ids: Iterable<UUID>) = ids.forEach { deleteById(it) }
 
-    override fun deleteAll(entities: MutableIterable<CloudEventEntity>): Mono<Void> =
-        Flux.fromIterable(entities).flatMap(::delete).then()
+    override suspend fun deleteAll(entities: Iterable<CloudEventEntity>) = entities.forEach { delete(it) }
 
-    override fun deleteAll(entityStream: Publisher<out CloudEventEntity>): Mono<Void> =
-        Flux.from(entityStream).flatMap(::delete).then()
+    override suspend fun <S : CloudEventEntity> deleteAll(entityStream: Flow<S>) =
+        entityStream.collect { delete(it) }
 
-    override fun deleteAll(): Mono<Void> = Mono.fromRunnable { saved.clear() }
+    override suspend fun deleteAll() = saved.clear()
 }

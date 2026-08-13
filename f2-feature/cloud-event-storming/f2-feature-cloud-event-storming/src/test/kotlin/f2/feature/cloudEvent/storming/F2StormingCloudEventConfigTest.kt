@@ -1,6 +1,8 @@
 package f2.feature.cloudEvent.storming
 
-import f2.feature.cloudEvent.storming.entity.CloudEventEntityRepository
+import f2.feature.cloudEvent.storming.entity.CloudEventEntity
+import java.util.UUID
+import kotlinx.coroutines.flow.toList
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.core.EntityInformation
@@ -16,18 +18,12 @@ class F2StormingCloudEventConfigTest {
 
     /**
      * The module does not bring a Spring Data module of its own: the repository is materialised from
-     * whatever [ReactiveRepositoryFactorySupport] the host application exposes. This stub only has to
-     * hand back a repository proxy for the requested interface.
+     * whatever [ReactiveRepositoryFactorySupport] the host application exposes. This stub only fills
+     * in the storage-specific hooks and leaves `getRepository` to the real factory machinery, so the
+     * test proves that the reactive factory can build a proxy for a
+     * [org.springframework.data.repository.kotlin.CoroutineCrudRepository]-based interface.
      */
     private val repositoryFactory = object : ReactiveRepositoryFactorySupport() {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : Any> getRepository(repositoryInterface: Class<T>): T {
-            check(repositoryInterface == CloudEventEntityRepository::class.java) {
-                "unexpected repository interface $repositoryInterface"
-            }
-            return repository as T
-        }
-
         override fun getRepositoryBaseClass(metadata: RepositoryMetadata): Class<*> =
             InMemoryCloudEventEntityRepository::class.java
 
@@ -35,39 +31,56 @@ class F2StormingCloudEventConfigTest {
 
         override fun getEntityInformation(
             metadata: RepositoryMetadata
-        ): EntityInformation<*, *> = throw UnsupportedOperationException("not needed by the test")
+        ): EntityInformation<*, *> = object : EntityInformation<CloudEventEntity, UUID> {
+            override fun isNew(entity: CloudEventEntity): Boolean = true
+            override fun getId(entity: CloudEventEntity): UUID = entity.id
+            override fun getIdType(): Class<UUID> = UUID::class.java
+            override fun getJavaType(): Class<CloudEventEntity> = CloudEventEntity::class.java
+        }
     }
 
     private val config = F2StormingCloudEventConfig()
 
     @Test
-    fun `cloudEventEntityRepository should be built from the reactive repository factory`() {
-        assertThat(config.cloudEventEntityRepository(repositoryFactory)).isSameAs(repository)
+    suspend fun `cloudEventEntityRepository should be materialised by the reactive repository factory`() {
+        val proxied = config.cloudEventEntityRepository(repositoryFactory)
+
+        // a real proxy is built around the target, not the target itself handed back
+        assertThat(proxied).isNotSameAs(repository)
+
+        // the suspending and Flow-returning methods round-trip through the proxy
+        val entity = CloudEventEntity(id = UUID.randomUUID(), event = cloudEvent("event-1"))
+        proxied.save(entity)
+
+        assertThat(repository.saved).containsExactly(entity)
+        assertThat(proxied.findAll().toList()).containsExactly(entity)
+        assertThat(proxied.findById(entity.id)).isSameAs(entity)
     }
 
     @Test
-    fun `stormingCommandSink should be wired with the repository`() {
+    suspend fun `stormingCommandSink should be wired with the repository`() {
         val objectMapper = JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
 
         config.stormingCommandSink(repository, objectMapper)
             .storeCommand(CreateUserCommand(name = "john", age = 42))
-            .block()
 
         assertThat(repository.saved).hasSize(1)
     }
 
     @Test
-    fun `stormingCloudEventSink should be wired with the repository`() {
-        val event = f2.dsl.event.CloudEvent(
-            eventType = "UserCreated",
-            cloudEventsVersion = "1",
-            source = "S2",
-            eventID = "event-1",
-            data = """{"name":"john"}"""
-        )
+    suspend fun `stormingCloudEventSink should be wired with the repository`() {
+        val event = cloudEvent("event-1")
 
-        config.stormingCloudEventSink(repository).storeCommand(event).block()
+        config.stormingCloudEventSink(repository).storeCommand(event)
 
         assertThat(repository.saved.single().event).isSameAs(event)
     }
+
+    private fun cloudEvent(id: String) = f2.dsl.event.CloudEvent(
+        eventType = "UserCreated",
+        cloudEventsVersion = "1",
+        source = "S2",
+        eventID = id,
+        data = """{"name":"john"}"""
+    )
 }
