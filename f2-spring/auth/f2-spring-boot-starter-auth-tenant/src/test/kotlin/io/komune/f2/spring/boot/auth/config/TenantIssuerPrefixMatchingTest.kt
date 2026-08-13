@@ -10,14 +10,11 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 
 /**
- * Documents the current behaviour of [TrustedIssuerJwtAuthenticationManagerResolver], which trusts
- * any issuer whose URI *starts with* `f2.tenant.issuer-base-uri` — no path-segment boundary is
- * enforced.
- *
- * With a base URI that does not end with a separator (`.../realms/tenant-1`), a sibling issuer whose
- * name merely shares that prefix (`.../realms/tenant-1-other`) is therefore accepted as trusted.
- * This test asserts the behaviour as it is today so any change is deliberate; see the discussion on
- * issue #123.
+ * End-to-end check of [TrustedIssuerJwtAuthenticationManagerResolver]'s issuer trust boundary
+ * (fixed in #140, tracked by #139): an issuer is trusted only when it equals
+ * `f2.tenant.issuer-base-uri` or continues with a `/` after it. A sibling realm that merely shares
+ * the base as a string prefix (`.../realms/tenant-1-other` for base `.../realms/tenant-1`) must be
+ * rejected.
  */
 @SpringBootTest(
     classes = [TenantAuthTestApp::class],
@@ -34,7 +31,7 @@ class TenantIssuerPrefixMatchingTest {
         @JvmStatic
         @DynamicPropertySource
         fun issuerBaseUri(registry: DynamicPropertyRegistry) {
-            // note the missing trailing separator, which is what makes the prefix match too wide
+            // no trailing separator on purpose: the resolver must still enforce a segment boundary
             registry.add("f2.tenant.issuer-base-uri") { "${oidc.authUrl}/realms/$TENANT" }
         }
 
@@ -61,10 +58,10 @@ class TenantIssuerPrefixMatchingTest {
     }
 
     @Test
-    fun `token of a sibling issuer sharing the base uri prefix is currently accepted`() {
-        // current behaviour: prefix matching has no segment boundary, so `tenant-1-other` passes the
-        // trust check even though only `tenant-1` was configured
-        getAdmin(oidc.mintToken(SIBLING_TENANT, roles = listOf("admin"))).expectStatus().isOk
+    fun `token of a sibling issuer sharing the base uri prefix should be rejected with 401`() {
+        // `tenant-1-other` shares the configured base as a string prefix but is a different realm:
+        // since #140 the resolver requires a path-segment boundary, so it must not be trusted
+        getAdmin(oidc.mintToken(SIBLING_TENANT, roles = listOf("admin"))).expectStatus().isUnauthorized
     }
 
     @Test
