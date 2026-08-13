@@ -3,7 +3,6 @@ package f2.feature.cloudEvent.storming
 import f2.feature.cloudEvent.storming.entity.CloudEventEntity
 import java.util.UUID
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.core.EntityInformation
@@ -43,7 +42,7 @@ class F2StormingCloudEventConfigTest {
     private val config = F2StormingCloudEventConfig()
 
     @Test
-    fun `cloudEventEntityRepository should be materialised by the reactive repository factory`() = runTest {
+    suspend fun `cloudEventEntityRepository should be materialised by the reactive repository factory`() {
         val proxied = config.cloudEventEntityRepository(repositoryFactory)
 
         // a real proxy is built around the target, not the target itself handed back

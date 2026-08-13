@@ -4,7 +4,6 @@ import f2.dsl.cqrs.Command
 import f2.dsl.event.CloudEvent
 import f2.feature.cloudEvent.storming.entity.CloudEventEntity
 import java.time.Duration
-import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeEach
@@ -55,7 +54,7 @@ class StormingSinkPersistenceTest {
     )
 
     @Test
-    fun `cloud event sink should have written the event when the suspending call returns`() = runTest {
+    suspend fun `cloud event sink should have written the event when the suspending call returns`() {
         val repository = InMemoryCloudEventEntityRepository()
         val event = cloudEvent("event-1")
 
@@ -65,7 +64,7 @@ class StormingSinkPersistenceTest {
     }
 
     @Test
-    fun `command sink should have written the serialised command when the suspending call returns`() = runTest {
+    suspend fun `command sink should have written the serialised command when the suspending call returns`() {
         val repository = InMemoryCloudEventEntityRepository()
 
         StormingCommandSink(repo = repository, objectMapper = objectMapper)
@@ -77,7 +76,7 @@ class StormingSinkPersistenceTest {
     }
 
     @Test
-    fun `each stored event should get its own entity id`() = runTest {
+    suspend fun `each stored event should get its own entity id`() {
         val repository = InMemoryCloudEventEntityRepository()
         val sink = StormingCloudEventSink(repo = repository)
 
@@ -89,7 +88,7 @@ class StormingSinkPersistenceTest {
     }
 
     @Test
-    fun `a repository failure should propagate to a direct caller of the suspending sink`() = runTest {
+    suspend fun `a repository failure should propagate to a direct caller of the suspending sink`() {
         val sink = StormingCloudEventSink(repo = FailingCloudEventEntityRepository())
 
         val thrown = runCatching { sink.storeCommand(cloudEvent("event-1")) }.exceptionOrNull()
