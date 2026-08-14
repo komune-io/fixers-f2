@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   libs:
-    uses: komune-io/fixers-gradle/.github/workflows/make-jvm-workflow.yml@main
+    uses: komune-io/fixers-gradle/.github/workflows/make-jvm-workflow.yml@main # NOSONAR(githubactions:S7637) org-internal reusable, tracked @main by convention
     permissions:
       contents: read
       packages: write
