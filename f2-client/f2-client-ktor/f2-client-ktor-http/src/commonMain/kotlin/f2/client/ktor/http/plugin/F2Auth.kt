@@ -9,7 +9,6 @@ import f2.client.ktor.common.F2DefaultJson
 import f2.client.ktor.http.httpClientBuilderGenerics
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.error.asException
-import f2.dsl.cqrs.exception.F2Exception
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpClientPlugin
@@ -31,7 +30,7 @@ import kotlinx.serialization.json.Json
 typealias OnTokenRequestSentAction = HttpRequestBuilder.() -> Unit
 
 class F2Auth(
-    protected var json: Json = F2DefaultJson,
+    private var json: Json = F2DefaultJson,
     private val debug: Boolean = true
 ) {
 
@@ -57,25 +56,15 @@ class F2Auth(
         }
 
         private fun F2Auth.prepareAuth(): ClientPluginInstance<AuthConfig> = Auth.prepare {
-            try {
-                bearer {
-                    loadTokens {
-                        genOAuthToken(lastBearerTokens)
-                    }
-                    refreshTokens {
-                        genOAuthToken(oldTokens) {
-                            markAsRefreshTokenRequest()
-                        }
+            bearer {
+                loadTokens {
+                    genOAuthToken(lastBearerTokens)
+                }
+                refreshTokens {
+                    genOAuthToken(oldTokens) {
+                        markAsRefreshTokenRequest()
                     }
                 }
-
-            } catch (e: F2Exception) {
-                throw e
-            } catch (e: Throwable) {
-                throw F2Error(
-                    message = "Unknown error occurred."
-                ).asException(e)
-
             }
         }
 

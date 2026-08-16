@@ -4,11 +4,6 @@ plugins {
     alias(catalogue.plugins.kotlin.spring)
 }
 
-repositories {
-    mavenCentral()
-    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
-}
-
 dependencies {
     implementation(project(":f2-spring:function:f2-spring-boot-starter-function-http-mvc"))
     implementation(project(":f2-spring:openapi:f2-spring-boot-openapi-mvc"))

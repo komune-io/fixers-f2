@@ -15,7 +15,6 @@ open class F2SpringStep {
 
     lateinit var bag: F2SpringContextBag
 
-    @Suppress("LongMethod")
     fun En.prepareSteps() {
         Before { scenario: Scenario ->
             bag = F2SpringContextBag.init(scenario)
