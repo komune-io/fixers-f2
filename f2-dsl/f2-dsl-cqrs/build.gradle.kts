@@ -15,7 +15,3 @@ dependencies {
 
     jvmTestImplementation(libs.bundles.test.junit)
 }
-
-tasks.withType<Test> {
-    useJUnitPlatform()
-}

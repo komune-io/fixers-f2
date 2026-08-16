@@ -20,7 +20,3 @@ dependencies {
     commonTestImplementation(kotlin("test"))
 
 }
-
-tasks.withType<Test> {
-    useJUnitPlatform()
-}

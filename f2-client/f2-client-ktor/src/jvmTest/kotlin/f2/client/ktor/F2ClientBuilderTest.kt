@@ -45,6 +45,13 @@ class F2ClientBuilderTest {
     }
 
     @Test
+    suspend fun `get with config defaults to no configuration`() {
+        val client = F2ClientBuilder.get(urlBase = "http://localhost:8080")
+
+        assertThat(client.type).isEqualTo(F2ClientType.HTTP)
+    }
+
+    @Test
     suspend fun `get with config rejects unsupported protocols`() {
         val thrown = runCatching { F2ClientBuilder.get("ftp://localhost") { } }.exceptionOrNull()
 

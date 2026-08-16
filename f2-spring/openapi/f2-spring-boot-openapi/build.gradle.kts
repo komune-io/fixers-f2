@@ -13,7 +13,3 @@ dependencies {
     testImplementation(libs.springdoc.openapi.ui)
     testImplementation(libs.bundles.spring.test)
 }
-
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
