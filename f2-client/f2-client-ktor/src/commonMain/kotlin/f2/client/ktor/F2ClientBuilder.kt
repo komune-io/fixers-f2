@@ -21,9 +21,7 @@ object F2ClientBuilder {
     }
 
     private fun requireHttpUrl(url: String) {
-        if (!isHttpUrl(url)) {
-            throw IllegalArgumentException("Invalid Url[${url}] must start with one of http:, https:")
-        }
+        require(isHttpUrl(url)) { "Invalid Url[${url}] must start with one of http:, https:" }
     }
 
     /**
