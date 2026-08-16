@@ -3,7 +3,7 @@ package f2.spring.exception.config
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.exception.F2Exception
 import f2.spring.exception.F2HttpException
-import java.util.UUID
+import f2.spring.exception.missingParameterError
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.web.WebProperties
 import org.springframework.boot.webflux.autoconfigure.error.DefaultErrorWebExceptionHandler
@@ -52,10 +52,11 @@ class F2ErrorWebExceptionHandler(
     }
 
     private fun resolveException(throwable: Throwable): Throwable {
-        val f2Cause = throwable.takeIf { it is F2HttpException }
-            ?: throwable.causeChain().firstOrNull { it is F2HttpException }
-        if (f2Cause is F2HttpException) {
-            return ResponseStatusException(f2Cause.status, f2Cause.message, f2Cause)
+        val f2Http = generateSequence(throwable) { it.cause }
+            .filterIsInstance<F2HttpException>()
+            .firstOrNull()
+        if (f2Http != null) {
+            return ResponseStatusException(f2Http.status, f2Http.message, f2Http)
         }
 
         // WebFlux wraps body-decoding failures multiple levels deep, e.g.
@@ -65,12 +66,7 @@ class F2ErrorWebExceptionHandler(
             .firstOrNull { it is F2Exception || it is KotlinInvalidNullException }
         return when (val cause = classifiedCause) {
             is F2Exception -> cause
-            is KotlinInvalidNullException -> F2Exception(error = F2Error(
-                id = UUID.randomUUID().toString(),
-                timestamp = System.currentTimeMillis().toString(),
-                message = "Missing parameter `${cause.kotlinPropertyName}`",
-                code = 400,
-            ))
+            is KotlinInvalidNullException -> F2Exception(error = missingParameterError(cause.kotlinPropertyName))
             else -> throwable
         }
     }

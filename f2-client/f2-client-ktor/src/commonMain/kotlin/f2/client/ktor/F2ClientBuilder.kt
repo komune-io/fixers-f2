@@ -16,6 +16,16 @@ object F2ClientBuilder {
     private const val HTTP_PREFIX = "http:"
     private const val HTTPS_PREFIX = "https:"
 
+    internal fun isHttpUrl(url: String): Boolean {
+        return url.startsWith(HTTP_PREFIX) || url.startsWith(HTTPS_PREFIX)
+    }
+
+    private fun requireHttpUrl(url: String) {
+        if (!isHttpUrl(url)) {
+            throw IllegalArgumentException("Invalid Url[${url}] must start with one of http:, https:")
+        }
+    }
+
     /**
      * Creates an [F2Client] for HTTP or HTTPS communication.
      *
@@ -26,19 +36,14 @@ object F2ClientBuilder {
     fun getHttp(
         url: String,
     ): F2Client {
-        return when {
-            url.startsWith(HTTP_PREFIX) -> httpClientBuilderDefault().build(url)
-            url.startsWith(HTTPS_PREFIX) -> httpClientBuilderDefault().build(url)
-            else -> throw IllegalArgumentException(
-                "Invalid Url[${url}] must start by one of http:, https:, tcp:, ws:, wss:"
-            )
-        }
+        requireHttpUrl(url)
+        return httpClientBuilderDefault().build(url)
     }
 
     /**
-     * Creates an [F2Client] for various protocols including HTTP, HTTPS, TCP, WS, and WSS.
+     * Creates an [F2Client] for HTTP or HTTPS communication, with optional configuration.
      *
-     * @param urlBase The base URL to connect to. Must start with "http:", "https:", "tcp:", "ws:", or "wss:".
+     * @param urlBase The base URL to connect to. Must start with "http:" or "https:".
      * @param config Additional configuration for the client. Defaults to null.
      * @return An instance of [F2Client].
      * @throws InvalidUrlException if the URL does not start with a valid protocol.
@@ -48,29 +53,23 @@ object F2ClientBuilder {
         urlBase: String,
         config: F2ClientConfigLambda<*>? = null
     ): F2Client {
-        return when {
-            urlBase.startsWith(HTTP_PREFIX) -> httpClientBuilderGenerics(config).build(urlBase)
-            urlBase.startsWith(HTTPS_PREFIX) -> httpClientBuilderGenerics(config).build(urlBase)
-            else -> throw InvalidUrlException(urlBase)
+        if (!isHttpUrl(urlBase)) {
+            throw InvalidUrlException(urlBase)
         }
+        return httpClientBuilderGenerics(config).build(urlBase)
     }
 
     /**
-     * Creates an [F2Client] for various protocols including HTTP, HTTPS, TCP, WS, and WSS.
+     * Creates an [F2Client] for HTTP or HTTPS communication.
      *
-     * @param url The URL to connect to. Must start with "http:", "https:", "tcp:", "ws:", or "wss:".
+     * @param url The URL to connect to. Must start with "http:" or "https:".
      * @return An instance of [F2Client].
-     * @throws IllegalArgumentException if the URL does not start with a valid protocol.
+     * @throws IllegalArgumentException if the URL does not start with "http:" or "https:".
      */
     suspend fun get(
         url: String,
     ): F2Client {
-        return when {
-            url.startsWith(HTTP_PREFIX) -> httpClientBuilderDefault().build(url)
-            url.startsWith(HTTPS_PREFIX) -> httpClientBuilderDefault().build(url)
-            else -> throw IllegalArgumentException(
-                "Invalid Url[${url}] must start by one of http:, https:, tcp:, ws:, wss:"
-            )
-        }
+        requireHttpUrl(url)
+        return httpClientBuilderDefault().build(url)
     }
 }

@@ -11,7 +11,3 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     testImplementation(libs.bundles.spring.test)
 }
-
-tasks.withType<Test> {
-    useJUnitPlatform()
-}

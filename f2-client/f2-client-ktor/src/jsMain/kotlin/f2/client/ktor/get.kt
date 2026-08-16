@@ -9,9 +9,8 @@ suspend fun F2ClientBuilder.get(
     urlBase: String,
     config: F2ClientConfigLambda<JsClientEngineConfig>? = {}
 ): F2Client {
-	return when {
-		urlBase.startsWith("http:") -> httpClientBuilder(config).build(urlBase)
-		urlBase.startsWith("https:") -> httpClientBuilder(config).build(urlBase)
-		else -> throw InvalidUrlException(urlBase)
-	}
+    if (!isHttpUrl(urlBase)) {
+        throw InvalidUrlException(urlBase)
+    }
+    return httpClientBuilder(config).build(urlBase)
 }

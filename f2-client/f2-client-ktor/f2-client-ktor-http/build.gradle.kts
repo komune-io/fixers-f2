@@ -28,7 +28,3 @@ dependencies {
     jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http-webflux"))
 
 }
-
-tasks.withType<Test> {
-    useJUnitPlatform()
-}

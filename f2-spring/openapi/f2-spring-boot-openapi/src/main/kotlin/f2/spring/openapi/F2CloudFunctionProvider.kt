@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.oas.models.parameters.RequestBody
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
+import java.lang.reflect.Type
 import org.springdoc.core.fn.RouterOperation
 import org.springdoc.core.properties.SpringDocConfigProperties
 import org.springdoc.core.providers.CloudFunctionProvider
@@ -33,58 +34,35 @@ class F2CloudFunctionProvider(
     }
 
     override fun getRouterOperations(openAPI: OpenAPI): List<RouterOperation> {
-        val operations = mutableListOf<RouterOperation>()
+        return collectOperations(
+            openAPI, F2Function::class.java, "function", RequestMethod.POST, inputIndex = 0, outputIndex = 1
+        ) + collectOperations(
+            openAPI, F2Supplier::class.java, "supplier", RequestMethod.GET, inputIndex = null, outputIndex = 0
+        ) + collectOperations(
+            openAPI, F2SupplierSingle::class.java, "supplier", RequestMethod.GET, inputIndex = null, outputIndex = 0
+        ) + collectOperations(
+            openAPI, F2Consumer::class.java, "consumer", RequestMethod.POST, inputIndex = 0, outputIndex = null
+        )
+    }
 
-        discoverBeans<F2Function<*, *>>().forEach { (name, _) ->
-            val resolvable = ResolvableType.forClass(F2Function::class.java, getBeanClass(name))
-            val inputType = resolvable.getGeneric(0).type
-            val outputType = resolvable.getGeneric(1).type
-            operations.add(
-                buildRouterOperation(
-                    openAPI, name, "function", RequestMethod.POST, inputType, outputType
-                )
-            )
+    private fun <T : Any> collectOperations(
+        openAPI: OpenAPI,
+        rawType: Class<T>,
+        kind: String,
+        method: RequestMethod,
+        inputIndex: Int?,
+        outputIndex: Int?,
+    ): List<RouterOperation> {
+        return applicationContext.getBeansOfType(rawType).map { (name, _) ->
+            val resolvable = ResolvableType.forClass(rawType, getBeanClass(name))
+            val inputType = inputIndex?.let { resolvable.getGeneric(it).type }
+            val outputType = outputIndex?.let { resolvable.getGeneric(it).type }
+            buildRouterOperation(openAPI, name, kind, method, inputType, outputType)
         }
-
-        discoverBeans<F2Supplier<*>>().forEach { (name, _) ->
-            val resolvable = ResolvableType.forClass(F2Supplier::class.java, getBeanClass(name))
-            val outputType = resolvable.getGeneric(0).type
-            operations.add(
-                buildRouterOperation(
-                    openAPI, name, "supplier", RequestMethod.GET, null, outputType
-                )
-            )
-        }
-
-        discoverBeans<F2SupplierSingle<*>>().forEach { (name, _) ->
-            val resolvable = ResolvableType.forClass(F2SupplierSingle::class.java, getBeanClass(name))
-            val outputType = resolvable.getGeneric(0).type
-            operations.add(
-                buildRouterOperation(
-                    openAPI, name, "supplier", RequestMethod.GET, null, outputType
-                )
-            )
-        }
-
-        discoverBeans<F2Consumer<*>>().forEach { (name, _) ->
-            val resolvable = ResolvableType.forClass(F2Consumer::class.java, getBeanClass(name))
-            val inputType = resolvable.getGeneric(0).type
-            operations.add(
-                buildRouterOperation(
-                    openAPI, name, "consumer", RequestMethod.POST, inputType, null
-                )
-            )
-        }
-
-        return operations
     }
 
     private fun getBeanClass(beanName: String): Class<*> {
         return applicationContext.getType(beanName) ?: Any::class.java
-    }
-
-    private inline fun <reified T : Any> discoverBeans(): Map<String, T> {
-        return applicationContext.getBeansOfType(T::class.java)
     }
 
     private fun buildRouterOperation(
@@ -92,55 +70,65 @@ class F2CloudFunctionProvider(
         name: String,
         type: String,
         method: RequestMethod,
-        inputType: java.lang.reflect.Type?,
-        outputType: java.lang.reflect.Type?,
+        inputType: Type?,
+        outputType: Type?,
     ): RouterOperation {
         val operation = Operation()
             .operationId("${name}_$method")
             .description("$name $type")
 
         if (inputType != null && method == RequestMethod.POST) {
-            val schema = SpringDocAnnotationsUtils.extractSchema(
-                openAPI.components, inputType, null, null, openAPI.specVersion
-            )
-            val content = Content()
-            DEFAULT_MEDIA_TYPES.forEach { mediaType ->
-                content.addMediaType(mediaType, MediaType().schema(schema))
-            }
-            operation.requestBody(RequestBody().content(content))
+            operation.requestBody(requestBody(openAPI, inputType))
         }
-
-        val apiResponses = ApiResponses()
-        if (outputType != null) {
-            val responseSchema = SpringDocAnnotationsUtils.extractSchema(
-                openAPI.components, outputType, null, null, openAPI.specVersion
-            )
-            val responseContent = Content()
-            val producesMediaType = springDocConfigProperties.defaultProducesMediaType
-                ?: org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-            responseContent.addMediaType(producesMediaType, MediaType().schema(responseSchema))
-            apiResponses.addApiResponse(
-                HttpStatus.OK.value().toString(),
-                ApiResponse().description(HttpStatus.OK.reasonPhrase).content(responseContent)
-            )
-        } else {
-            apiResponses.addApiResponse(
-                HttpStatus.ACCEPTED.value().toString(),
-                ApiResponse().description(HttpStatus.ACCEPTED.reasonPhrase).content(Content())
-            )
-        }
-        operation.responses(apiResponses)
-
-        val normalizedPrefix = prefix.trimEnd('/')
-        val path = if (normalizedPrefix.isEmpty()) "/$name" else "/$normalizedPrefix/$name".replace("//", "/")
+        operation.responses(apiResponses(openAPI, outputType))
 
         return RouterOperation().apply {
-            setPath(path)
+            setPath(routePath(name))
             setMethods(arrayOf(method))
             setConsumes(DEFAULT_MEDIA_TYPES)
             setProduces(DEFAULT_MEDIA_TYPES)
             operationModel = operation
         }
+    }
+
+    private fun requestBody(openAPI: OpenAPI, inputType: Type): RequestBody {
+        val schema = SpringDocAnnotationsUtils.extractSchema(
+            openAPI.components, inputType, null, null, openAPI.specVersion
+        )
+        val content = Content()
+        DEFAULT_MEDIA_TYPES.forEach { mediaType ->
+            content.addMediaType(mediaType, MediaType().schema(schema))
+        }
+        return RequestBody().content(content)
+    }
+
+    private fun apiResponses(openAPI: OpenAPI, outputType: Type?): ApiResponses {
+        val apiResponses = ApiResponses()
+        if (outputType == null) {
+            apiResponses.addApiResponse(
+                HttpStatus.ACCEPTED.value().toString(),
+                ApiResponse().description(HttpStatus.ACCEPTED.reasonPhrase).content(Content())
+            )
+            return apiResponses
+        }
+
+        val responseSchema = SpringDocAnnotationsUtils.extractSchema(
+            openAPI.components, outputType, null, null, openAPI.specVersion
+        )
+        val responseContent = Content()
+        val producesMediaType = springDocConfigProperties.defaultProducesMediaType
+            ?: org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+        responseContent.addMediaType(producesMediaType, MediaType().schema(responseSchema))
+        apiResponses.addApiResponse(
+            HttpStatus.OK.value().toString(),
+            ApiResponse().description(HttpStatus.OK.reasonPhrase).content(responseContent)
+        )
+        return apiResponses
+    }
+
+    private fun routePath(name: String): String {
+        val normalizedPrefix = prefix.trimEnd('/')
+        return if (normalizedPrefix.isEmpty()) "/$name" else "/$normalizedPrefix/$name".replace("//", "/")
     }
 
     companion object {
