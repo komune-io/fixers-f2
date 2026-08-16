@@ -53,16 +53,16 @@ class F2CloudFunctionProvider(
         inputIndex: Int?,
         outputIndex: Int?,
     ): List<RouterOperation> {
-        return applicationContext.getBeansOfType(rawType).map { (name, _) ->
-            val resolvable = ResolvableType.forClass(rawType, getBeanClass(name))
+        return applicationContext.getBeansOfType(rawType).map { (name, bean) ->
+            val resolvable = ResolvableType.forClass(rawType, getBeanClass(name, bean))
             val inputType = inputIndex?.let { resolvable.getGeneric(it).type }
             val outputType = outputIndex?.let { resolvable.getGeneric(it).type }
             buildRouterOperation(openAPI, name, kind, method, inputType, outputType)
         }
     }
 
-    private fun getBeanClass(beanName: String): Class<*> {
-        return applicationContext.getType(beanName) ?: Any::class.java
+    private fun getBeanClass(beanName: String, bean: Any): Class<*> {
+        return applicationContext.getType(beanName) ?: bean.javaClass
     }
 
     private fun buildRouterOperation(
