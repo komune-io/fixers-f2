@@ -9,6 +9,5 @@ dependencies {
     api(project(":f2-spring:exception:f2-spring-boot-exception-http-mvc"))
     api(libs.spring.cloud.starter.function.web)
 
-    testImplementation(project(":f2-bdd:f2-bdd-spring-lambda"))
-    testImplementation(project(":f2-client:f2-client-ktor"))
+    testImplementation(project(":f2-bdd:f2-bdd-spring-http"))
 }

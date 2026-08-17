@@ -1,5 +1,6 @@
 package f2.bdd.spring.autoconfigure.steps
 
+import f2.bdd.spring.autoconfigure.utils.ConsumerReceiver
 import f2.dsl.fnc.F2Consumer
 import f2.dsl.fnc.F2Function
 import f2.dsl.fnc.F2Supplier
@@ -63,5 +64,10 @@ open class F2SpringStep {
     @Suppress("UNCHECKED_CAST")
     fun <P> KFunction<*>.consumerF2Bean(): F2Consumer<P> {
         return bag.applicationContext!!.getBean(name) as F2Consumer<P>
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    protected fun <T> KFunction<*>.consumerReceiverBean(): ConsumerReceiver<T> {
+        return bag.applicationContext!!.getBean(name) as ConsumerReceiver<T>
     }
 }

@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.reactor.core)
     implementation(libs.spring.boot.autoconfigure)
 
+    testImplementation(testFixtures(project(":f2-spring:auth:f2-spring-boot-starter-auth-commons")))
     testImplementation(libs.bundles.spring.test)
     testImplementation(libs.spring.boot.starter.webflux)
 }

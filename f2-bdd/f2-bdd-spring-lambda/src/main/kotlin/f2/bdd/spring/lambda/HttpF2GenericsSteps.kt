@@ -8,6 +8,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import org.assertj.core.api.Assertions
 import org.springframework.cloud.function.context.FunctionCatalog
 
@@ -43,9 +44,10 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 
 		When("${prefix}Execute consumer {string} with") { consumerName: String, table: DataTable ->
 			step(consumerName) {
-				val json = transform(table).asFlow()
-				consumer(consumerName, json)
-				delay(timeMillis = 500L)
+				val items = transform(table)
+				val expectedCount = consumerReceiver().size + items.size
+				consumer(consumerName, items.asFlow())
+				awaitConsumerReceiverCount(expectedCount)
 				bag.result[consumerName] = consumerReceiver()
 			}
 		}
@@ -72,6 +74,19 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 		}
 	}
 
+	/**
+	 * The consumer endpoint acks before the items reach the receiver bean, so poll until the
+	 * expected count arrives instead of sleeping a fixed amount. On timeout the snapshot is
+	 * taken as-is and the subsequent assertion reports the mismatch.
+	 */
+	private suspend fun awaitConsumerReceiverCount(expectedCount: Int) {
+		withTimeoutOrNull(CONSUMER_RECEIVER_TIMEOUT_MILLIS) {
+			while (consumerReceiver().size < expectedCount) {
+				delay(CONSUMER_RECEIVER_POLL_MILLIS)
+			}
+		}
+	}
+
 	@Suppress("TooGenericExceptionCaught")
 	private fun step(name: String, block: suspend () -> Unit) = runBlocking {
 		try {
@@ -87,4 +102,8 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 	abstract fun transform(dataTable: DataTable): List<REQUEST>
 	abstract fun consumerReceiver(): List<RESPONSE>
 
+	companion object {
+		private const val CONSUMER_RECEIVER_TIMEOUT_MILLIS = 10_000L
+		private const val CONSUMER_RECEIVER_POLL_MILLIS = 50L
+	}
 }
