@@ -1,6 +1,5 @@
 package f2.client.ktor.http
 
-import f2.client.F2ClientType
 import f2.client.ktor.http.model.F2UploadCommand
 import f2.client.ktor.http.model.F2UploadSingleCommand
 import io.ktor.client.HttpClient
@@ -44,7 +43,6 @@ class HttpF2ClientExtensionTest {
         assertThat(client.urlBase).isEqualTo("http://example.com")
         assertThat(client.httpClient).isEqualTo(httpClient)
         assertThat(client.json).isEqualTo(json)
-        assertThat(client.type).isEqualTo(F2ClientType.HTTP)
     }
 
     @Test

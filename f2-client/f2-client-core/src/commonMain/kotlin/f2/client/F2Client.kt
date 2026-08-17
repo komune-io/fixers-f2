@@ -7,13 +7,8 @@ import io.ktor.util.reflect.TypeInfo
 import io.ktor.util.reflect.typeInfo
 import kotlin.js.JsExport
 
-enum class F2ClientType {
-	HTTP
-}
-
 @JsExport
 interface F2Client {
-	val type: F2ClientType
 	fun <RESPONSE> supplier(route: String, responseTypeInfo: TypeInfo): F2Supplier<RESPONSE>
 	fun <QUERY, RESPONSE> function(
 		route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo
@@ -48,9 +43,5 @@ inline fun <reified QUERY> F2Client.consumerSingle(route: String): F2Consumer<QU
 }
 
 inline fun <reified DATA> F2Client.getTypeInfo(): TypeInfo {
-	return if (type == F2ClientType.HTTP) {
-		typeInfo<List<DATA>>()
-	} else {
-		typeInfo<DATA>()
-	}
+	return typeInfo<List<DATA>>()
 }
