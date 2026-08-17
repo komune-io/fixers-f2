@@ -6,16 +6,16 @@ import kotlin.js.JsName
 @JsExport
 @JsName("SnapEvent")
 open class SnapEvent<T> (
-	override val eventType: String,
-	override val eventTypeVersion: String? = null,
-	override val cloudEventsVersion: String,
-	override val source: String, // RFC 3986
-	override val eventID: String,
-	override val eventTime: String? = null, // RFC 3339
-	override val schemaURL: String? = null,  // RFC 3986
-	override val contentType: String? = null, // RFC 2046
-	override val extensions: Map<String, Any>? = null,
-	override val data: T,
+	eventType: String,
+	eventTypeVersion: String? = null,
+	cloudEventsVersion: String,
+	source: String, // RFC 3986
+	eventID: String,
+	eventTime: String? = null, // RFC 3339
+	schemaURL: String? = null,  // RFC 3986
+	contentType: String? = null, // RFC 2046
+	extensions: Map<String, Any>? = null,
+	data: T,
 ) : CloudEvent<T>(
 	eventType = eventType,
 	eventTypeVersion = eventTypeVersion,
