@@ -1636,6 +1636,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                         }
                         // KOMUNE Modification
                         // force message conversion error propagation
+                        // KOMUNE: retained defensively, dead as of 5.0.3 (see upgrading-spring-cloud-function skill)
                         catch (ResponseStatusException e) {
                             throw e;
                         }
@@ -1650,6 +1651,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                         }
                         // KOMUNE Modification
                         // force message conversion error propagation
+                        // KOMUNE: retained defensively, dead as of 5.0.3 (see upgrading-spring-cloud-function skill)
                         catch (ResponseStatusException e) {
                             throw e;
                         }
