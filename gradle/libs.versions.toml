@@ -24,6 +24,15 @@ netty = "4.2.17.Final"
 jackson3-databind = "3.1.5"
 
 [libraries]
+# NOTE (2026-08 simplification audit): this catalog is PUBLISHED via f2-gradle-catalog, so
+# aliases are consumer-facing API even when this build never references them. Aliases that are
+# currently unreferenced inside this repo (do NOT delete without a consumer deprecation cycle):
+#   - every io.komune.f2 first-party alias below (bom, dsl-*, client-*, spring-boot-*, bdd-*,
+#     feature-*) — the repo wires modules with project(...) refs; these exist for consumers.
+#   - testcontainers-bom (f2-gradle-bom pins the coordinates directly via the version ref).
+#   - [plugins]: f2-bom, fixers-gradle-npm, kotlin-jpa, ksp.
+# All other third-party aliases are referenced from build scripts (directly or via [bundles]).
+
 # BOM (version required — consumers use platform(f2.bom))
 bom = { group = "io.komune.f2", name = "f2-gradle-bom", version.ref = "fixers" }
 
