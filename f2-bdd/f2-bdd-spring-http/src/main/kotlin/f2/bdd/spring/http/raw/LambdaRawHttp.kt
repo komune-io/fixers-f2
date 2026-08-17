@@ -26,9 +26,7 @@ open class LambdaRawHttp {
     @Bean
     open fun rawBangSupplier(): Supplier<Flux<String>> = Supplier {
         Flux.fromArray(arrayOf("foo", "bar")).map { value ->
-            if (value == "bar") {
-                throw IllegalStateException("Bang")
-            }
+            check(value != "bar") { "Bang" }
             value
         }
     }

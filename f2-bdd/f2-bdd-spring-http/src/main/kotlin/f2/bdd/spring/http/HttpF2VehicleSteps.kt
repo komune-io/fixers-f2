@@ -22,8 +22,8 @@ class HttpF2VehicleSteps : HttpF2GenericsSteps<Vehicle, Vehicle>("Vehicle: "), E
 	override fun transform(dataTable: DataTable): List<Vehicle> {
 		return dataTable.asMaps().map {
 			Vehicle(
-				name = it[Vehicle::name.name]!!,
-				broken = it[Vehicle::broken.name]!!.toBoolean()
+				name = it.getValue(Vehicle::name.name),
+				broken = it.getValue(Vehicle::broken.name).toBoolean()
 			)
 		}
 	}
