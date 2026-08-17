@@ -3,6 +3,7 @@ package f2.client.ktor.http
 import f2.dsl.cqrs.exception.F2Exception
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.MockRequestHandler
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.respondError
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -36,9 +37,18 @@ class HttpF2ClientMockTest {
         encodeDefaults = true
     }
 
+    private fun f2Client(urlBase: String = "http://localhost", handler: MockRequestHandler): HttpF2Client {
+        val mockClient = HttpClient(MockEngine(handler)) {
+            install(ContentNegotiation) {
+                json(json)
+            }
+        }
+        return HttpF2Client(mockClient, urlBase, json)
+    }
+
     @Test
     suspend fun `supplier returns single response from GET request`() {
-        val mockClient = HttpClient(MockEngine { request ->
+        val client = f2Client { request ->
             assertThat(request.method).isEqualTo(HttpMethod.Get)
             assertThat(request.url.encodedPath).isEqualTo("/test-route")
             respond(
@@ -46,13 +56,7 @@ class HttpF2ClientMockTest {
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             )
-        }) {
-            install(ContentNegotiation) {
-                json(json)
-            }
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
         val supplier = client.supplier<TestResponse>(
             route = "test-route",
             responseTypeInfo = TypeInfo(TestResponse::class, typeOf<TestResponse>())
@@ -67,19 +71,13 @@ class HttpF2ClientMockTest {
 
     @Test
     suspend fun `supplier returns collection items individually in flow`() {
-        val mockClient = HttpClient(MockEngine { request ->
+        val client = f2Client { request ->
             respond(
                 content = """[{"result": "first", "count": 1}, {"result": "second", "count": 2}]""",
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             )
-        }) {
-            install(ContentNegotiation) {
-                json(json)
-            }
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
         // When response type is List, items are emitted individually to the flow
         val supplier = client.supplier<List<TestResponse>>(
             route = "test-list",
@@ -94,7 +92,7 @@ class HttpF2ClientMockTest {
 
     @Test
     suspend fun `function posts JSON and returns response`() {
-        val mockClient = HttpClient(MockEngine { request ->
+        val client = f2Client { request ->
             assertThat(request.method).isEqualTo(HttpMethod.Post)
             assertThat(request.url.encodedPath).isEqualTo("/process")
             respond(
@@ -102,13 +100,7 @@ class HttpF2ClientMockTest {
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             )
-        }) {
-            install(ContentNegotiation) {
-                json(json)
-            }
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
         val function = client.function<TestRequest, TestResponse>(
             route = "process",
             queryTypeInfo = TypeInfo(TestRequest::class, typeOf<TestRequest>()),
@@ -127,20 +119,14 @@ class HttpF2ClientMockTest {
     suspend fun `function handles multiple inputs`() {
         var requestCount = 0
 
-        val mockClient = HttpClient(MockEngine { request ->
+        val client = f2Client { request ->
             requestCount++
             respond(
                 content = """{"result": "item-$requestCount", "count": $requestCount}""",
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             )
-        }) {
-            install(ContentNegotiation) {
-                json(json)
-            }
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
         val function = client.function<TestRequest, TestResponse>(
             route = "multi",
             queryTypeInfo = TypeInfo(TestRequest::class, typeOf<TestRequest>()),
@@ -160,19 +146,13 @@ class HttpF2ClientMockTest {
 
     @Test
     suspend fun `function returns collection items as flow`() {
-        val mockClient = HttpClient(MockEngine { request ->
+        val client = f2Client { request ->
             respond(
                 content = """[{"result": "a", "count": 1}, {"result": "b", "count": 2}]""",
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             )
-        }) {
-            install(ContentNegotiation) {
-                json(json)
-            }
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
         val function = client.function<TestRequest, List<TestResponse>>(
             route = "batch",
             queryTypeInfo = TypeInfo(TestRequest::class, typeOf<TestRequest>()),
@@ -188,7 +168,7 @@ class HttpF2ClientMockTest {
     suspend fun `consumer posts data without expecting response body`() {
         var receivedRequest = false
 
-        val mockClient = HttpClient(MockEngine { request ->
+        val client = f2Client { request ->
             assertThat(request.method).isEqualTo(HttpMethod.Post)
             receivedRequest = true
             respond(
@@ -196,13 +176,7 @@ class HttpF2ClientMockTest {
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             )
-        }) {
-            install(ContentNegotiation) {
-                json(json)
-            }
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
         val consumer = client.consumer<TestRequest>(
             route = "consume",
             queryTypeInfo = TypeInfo(TestRequest::class, typeOf<TestRequest>())
@@ -215,18 +189,12 @@ class HttpF2ClientMockTest {
 
     @Test
     suspend fun `supplier throws F2Exception on error response`() {
-        val mockClient = HttpClient(MockEngine { request ->
+        val client = f2Client { request ->
             respondError(
                 status = HttpStatusCode.InternalServerError,
                 content = "Server error occurred"
             )
-        }) {
-            install(ContentNegotiation) {
-                json(json)
-            }
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
         val supplier = client.supplier<TestResponse>(
             route = "error-route",
             responseTypeInfo = TypeInfo(TestResponse::class, typeOf<TestResponse>())
@@ -241,18 +209,12 @@ class HttpF2ClientMockTest {
 
     @Test
     suspend fun `function throws F2Exception on error response`() {
-        val mockClient = HttpClient(MockEngine { request ->
+        val client = f2Client { request ->
             respondError(
                 status = HttpStatusCode.BadRequest,
                 content = "Invalid request"
             )
-        }) {
-            install(ContentNegotiation) {
-                json(json)
-            }
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
         val function = client.function<TestRequest, TestResponse>(
             route = "bad-request",
             queryTypeInfo = TypeInfo(TestRequest::class, typeOf<TestRequest>()),
@@ -275,19 +237,13 @@ class HttpF2ClientMockTest {
             "message": "Not found"
         }"""
 
-        val mockClient = HttpClient(MockEngine { request ->
+        val client = f2Client { request ->
             respond(
                 content = errorJson,
                 status = HttpStatusCode.NotFound,
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             )
-        }) {
-            install(ContentNegotiation) {
-                json(json)
-            }
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
         val supplier = client.supplier<TestResponse>(
             route = "not-found",
             responseTypeInfo = TypeInfo(TestResponse::class, typeOf<TestResponse>())
@@ -305,20 +261,14 @@ class HttpF2ClientMockTest {
     suspend fun `function posts List type content in single request`() {
         var requestCount = 0
 
-        val mockClient = HttpClient(MockEngine { request ->
+        val client = f2Client { request ->
             requestCount++
             respond(
                 content = """{"result": "batch-processed", "count": 10}""",
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             )
-        }) {
-            install(ContentNegotiation) {
-                json(json)
-            }
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
         // When queryTypeInfo is List, all items in the flow are collected and sent as one array
         val function = client.function<TestRequest, TestResponse>(
             route = "batch-endpoint",
@@ -342,20 +292,14 @@ class HttpF2ClientMockTest {
     suspend fun `client builds correct URL with base and route`() {
         var capturedUrl: String? = null
 
-        val mockClient = HttpClient(MockEngine { request ->
+        val client = f2Client("http://api.example.com/v1") { request ->
             capturedUrl = request.url.toString()
             respond(
                 content = """{"result": "ok", "count": 0}""",
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             )
-        }) {
-            install(ContentNegotiation) {
-                json(json)
-            }
         }
-
-        val client = HttpF2Client(mockClient, "http://api.example.com/v1", json)
         val supplier = client.supplier<TestResponse>(
             route = "resource/action",
             responseTypeInfo = TypeInfo(TestResponse::class, typeOf<TestResponse>())
@@ -370,20 +314,14 @@ class HttpF2ClientMockTest {
     suspend fun `function handles empty flow input`() {
         var requestCount = 0
 
-        val mockClient = HttpClient(MockEngine { request ->
+        val client = f2Client { request ->
             requestCount++
             respond(
                 content = """{"result": "ok", "count": 0}""",
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             )
-        }) {
-            install(ContentNegotiation) {
-                json(json)
-            }
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
         val function = client.function<TestRequest, TestResponse>(
             route = "empty",
             queryTypeInfo = TypeInfo(TestRequest::class, typeOf<TestRequest>()),

@@ -20,8 +20,7 @@ abstract class LambdaFlowSteps : LambdaListStepsBase<String, String>() {
 		return dataTable.asList()
 	}
 
-	@Suppress("UNCHECKED_CAST")
 	override fun receiver(): ConsumerReceiver<String> {
-		return bag.applicationContext!!.getBean(LambdaSimple::lambdaSingleReceiver.name) as ConsumerReceiver<String>
+		return LambdaSimple::lambdaSingleReceiver.consumerReceiverBean()
 	}
 }
