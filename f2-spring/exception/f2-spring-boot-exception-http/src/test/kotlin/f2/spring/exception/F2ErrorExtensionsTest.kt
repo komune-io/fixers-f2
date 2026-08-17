@@ -1,6 +1,7 @@
 package f2.spring.exception
 
 import f2.dsl.cqrs.error.F2Error
+import f2.dsl.cqrs.exception.F2Exception
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -40,6 +41,30 @@ class F2ErrorExtensionsTest {
 
 		assertThat(attributes).containsEntry("id", null)
 		assertThat(attributes.filterValues { it != null }).doesNotContainKey("id")
+	}
+
+	@Test
+	fun `findF2Exception should return the exception itself`() {
+		val exception = F2Exception(message = "boom", id = "self", code = 500)
+
+		assertThat(exception.findF2Exception()).isSameAs(exception)
+	}
+
+	@Test
+	fun `findF2Exception should unwrap a direct cause`() {
+		val cause = F2Exception(message = "boom", id = "cause", code = 409)
+
+		assertThat(IllegalStateException("wrapper", cause).findF2Exception()).isSameAs(cause)
+	}
+
+	@Test
+	fun `findF2Exception should ignore deeper causes and unrelated throwables`() {
+		val deep = F2Exception(message = "boom", id = "deep", code = 409)
+		val wrapped = IllegalStateException("inner", deep)
+
+		assertThat(IllegalStateException("outer", wrapped).findF2Exception()).isNull()
+		assertThat(IllegalStateException("alone").findF2Exception()).isNull()
+		assertThat((null as Throwable?).findF2Exception()).isNull()
 	}
 
 	@Test
