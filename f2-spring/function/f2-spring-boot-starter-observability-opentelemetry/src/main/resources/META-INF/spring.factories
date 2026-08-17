@@ -1,3 +1,4 @@
-# Spring Boot 4.x uses META-INF/spring/org.springframework.boot.EnvironmentPostProcessor.imports
-# This file is kept for backward compatibility and test support
+# EnvironmentPostProcessor implementations are loaded via SpringFactoriesLoader from
+# META-INF/spring.factories (all Spring Boot versions incl. 4.x); there is no .imports
+# file support for this contract.
 org.springframework.boot.EnvironmentPostProcessor=f2.spring.observability.opentelemetry.OtelPropertiesListener
