@@ -40,22 +40,15 @@ class HttpF2ClientTest {
 			}
 		}.build("http://localhost:8090")
 
-		HttpClientBuilder.builder{
+		httpClientBuilder {
 			install(Logging) {
 				logger = Logger.DEFAULT
 				level = LogLevel.ALL
 			}
 		}.build("http://localhost:8090")
 
-		HttpClientBuilder{
-			install(Logging) {
-				logger = Logger.DEFAULT
-				level = LogLevel.ALL
-			}
-		}.build("http://localhost:8090")
-
-		HttpClientBuilder.default()
-		HttpClientBuilder.generics {
+		httpClientBuilderDefault()
+		httpClientBuilderGenerics {
 			install(Logging) {
 				logger = Logger.DEFAULT
 				level = LogLevel.ALL

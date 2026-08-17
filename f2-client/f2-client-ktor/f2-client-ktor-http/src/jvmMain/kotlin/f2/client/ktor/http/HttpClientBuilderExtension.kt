@@ -32,13 +32,3 @@ actual fun httpClientBuilderGenerics(
 fun httpClientBuilder(
     config: F2ClientConfigLambda<JavaHttpConfig>? = {  }
 ) = HttpClientBuilder(config)
-
-/**
- * Provides an instance of [HttpClientBuilder] using the builder function.
- *
- * @param config Additional configuration for the HTTP client. Defaults to an empty lambda.
- * @return An instance of [HttpClientBuilder] with the specified configuration.
- */
-fun HttpClientBuilder.Companion.builder(
-    config: F2ClientConfigLambda<JavaHttpConfig>? = { }
-) = HttpClientBuilder(config)
