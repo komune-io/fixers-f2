@@ -11,6 +11,7 @@ import kotlin.test.assertNull
 import kotlinx.coroutines.flow.emptyFlow
 
 private class RecordingF2Client : F2Client {
+	override val type: F2ClientType = F2ClientType.HTTP
 	var route: String? = null
 	var queryTypeInfo: TypeInfo? = null
 	var responseTypeInfo: TypeInfo? = null

@@ -1,6 +1,7 @@
 package f2.client.ktor.http
 
 import f2.client.F2Client
+import f2.client.F2ClientType
 import f2.client.ktor.common.F2DefaultJson
 import f2.client.ktor.http.model.F2UploadCommand
 import f2.dsl.cqrs.error.F2Error
@@ -48,6 +49,8 @@ open class HttpF2Client(
 	val urlBase: String,
 	val json: Json = F2DefaultJson
 ) : F2Client {
+
+	override val type: F2ClientType = F2ClientType.HTTP
 
 	@OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
 	@Suppress("SwallowedException")
