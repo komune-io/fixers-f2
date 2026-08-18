@@ -37,6 +37,21 @@ class F2ErrorAttributesTest {
     }
 
     @Test
+    fun `should enrich attributes when F2Exception is the cause`() {
+        val cause = F2Exception(message = "Nested failure", id = "cause-id", code = 409)
+        val exception = IllegalStateException("wrapper", cause)
+
+        val attributes = errorAttributes.getErrorAttributes(
+            webRequest(exception),
+            ErrorAttributeOptions.defaults()
+        )
+
+        assertThat(attributes["id"]).isEqualTo("cause-id")
+        assertThat(attributes["code"]).isEqualTo(409)
+        assertThat(attributes["message"]).isEqualTo("Nested failure")
+    }
+
+    @Test
     fun `should keep default attributes for non f2 exceptions`() {
         val attributes = errorAttributes.getErrorAttributes(
             webRequest(IllegalStateException("unexpected")),

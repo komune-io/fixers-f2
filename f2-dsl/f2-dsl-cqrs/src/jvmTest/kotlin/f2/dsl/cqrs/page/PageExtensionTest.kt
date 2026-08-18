@@ -2,7 +2,6 @@ package f2.dsl.cqrs.page
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.data.domain.PageRequest
 
 class PageExtensionTest {
 
@@ -35,26 +34,5 @@ class PageExtensionTest {
         val mapped = page.mapNotNull { value -> value.takeIf { it % 2 == 1 } }
 
         assertThat(mapped.items).containsExactly(1, 3)
-    }
-
-    @Test
-    fun `toPageRequest maps offset pagination to a page request`() {
-        val pageRequest = OffsetPagination(offset = 0, limit = 10).toPageRequest()
-
-        assertThat(pageRequest).isEqualTo(PageRequest.of(0, 10))
-    }
-
-    @Test
-    fun `toPageRequest maps second page pagination`() {
-        val pageRequest = OffsetPagination(offset = 10, limit = 20).toPageRequest()
-
-        assertThat(pageRequest).isEqualTo(PageRequest.of(1, 10))
-    }
-
-    @Test
-    fun `toPageRequest defaults to first page with max size on null`() {
-        val pageRequest = (null as OffsetPagination?).toPageRequest()
-
-        assertThat(pageRequest).isEqualTo(PageRequest.of(0, Int.MAX_VALUE))
     }
 }

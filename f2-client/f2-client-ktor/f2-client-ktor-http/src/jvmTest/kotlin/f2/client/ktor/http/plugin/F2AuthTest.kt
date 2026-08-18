@@ -63,6 +63,7 @@ class F2AuthTest {
         realm: AuthRealm,
         acceptedTokens: Set<String>,
         authHeaders: MutableList<String?> = mutableListOf(),
+        configure: F2Auth.() -> Unit = {},
     ): HttpClient = HttpClient(MockEngine { request ->
         val auth = request.headers[HttpHeaders.Authorization]
         authHeaders.add(auth)
@@ -82,6 +83,7 @@ class F2AuthTest {
     }) {
         install(F2Auth) {
             getAuth = { realm }
+            configure()
         }
     }
 
@@ -169,5 +171,75 @@ class F2AuthTest {
             assertThat(f2Exception!!.error.message).contains("Unable to decode response")
             client.close()
         }
+    }
+
+    @Test
+    suspend fun `does not echo the auth provider response by default`() {
+        TokenServer("""{"secret-payload":"not-a-token-response"}""").use { server ->
+            val client = protectedClient(
+                realm = clientSecretRealm(server.url),
+                acceptedTokens = setOf("any")
+            )
+
+            val message = decodingFailureMessage(client)
+
+            assertThat(message).doesNotContain("secret-payload")
+            client.close()
+        }
+    }
+
+    @Test
+    suspend fun `echoes the auth provider response when debug is enabled`() {
+        TokenServer("""{"secret-payload":"not-a-token-response"}""").use { server ->
+            val client = protectedClient(
+                realm = clientSecretRealm(server.url),
+                acceptedTokens = setOf("any")
+            ) { debug = true }
+
+            val message = decodingFailureMessage(client)
+
+            assertThat(message).contains("secret-payload")
+            client.close()
+        }
+    }
+
+    @Test
+    suspend fun `keeps tokens per client instead of sharing them statically`() {
+        TokenServer(tokenJson("token-a", refreshToken = "refresh-a")).use { serverA ->
+            val clientA = protectedClient(
+                realm = clientSecretRealm(serverA.url),
+                acceptedTokens = setOf("token-a")
+            )
+            assertThat(clientA.get("http://protected/api").status).isEqualTo(HttpStatusCode.OK)
+            clientA.close()
+
+            TokenServer(tokenJson("token-b")).use { serverB ->
+                val authHeadersB = mutableListOf<String?>()
+                val clientB = protectedClient(
+                    realm = clientSecretRealm(serverB.url),
+                    acceptedTokens = setOf("token-b"),
+                    authHeaders = authHeadersB
+                )
+
+                assertThat(clientB.get("http://protected/api").status).isEqualTo(HttpStatusCode.OK)
+
+                // A second plugin instance must start from scratch: it asks for a brand new token
+                // instead of replaying the first client's refresh token.
+                assertThat(serverB.requestBodies.first())
+                    .contains("grant_type=client_credentials")
+                    .doesNotContain("refresh-a")
+                assertThat(authHeadersB.first()).isEqualTo("Bearer token-b")
+                clientB.close()
+            }
+        }
+    }
+
+    private suspend fun decodingFailureMessage(client: HttpClient): String {
+        val thrown = runCatching { client.get("http://protected/api") }.exceptionOrNull()
+        val f2Exception = generateSequence(thrown) { it.cause }
+            .filterIsInstance<F2Exception>()
+            .firstOrNull()
+        assertThat(f2Exception).isNotNull()
+        return f2Exception!!.error.message
     }
 }
