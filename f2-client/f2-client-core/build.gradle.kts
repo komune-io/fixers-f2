@@ -7,4 +7,7 @@ plugins {
 dependencies {
     commonMainApi(libs.ktor.utils)
     commonMainApi(project(":f2-dsl:f2-dsl-function"))
+
+    commonTestImplementation(kotlin("test"))
+    commonTestImplementation(libs.kotlinx.coroutines.test)
 }
