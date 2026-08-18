@@ -39,6 +39,4 @@ actual class HttpClientBuilder(
 			applyConfig(config)
 		}
 	}
-
-	actual companion object
 }

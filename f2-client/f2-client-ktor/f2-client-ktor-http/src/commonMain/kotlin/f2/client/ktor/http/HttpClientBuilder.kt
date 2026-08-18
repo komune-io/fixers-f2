@@ -9,8 +9,6 @@ import f2.client.ktor.common.F2ClientConfigLambda
  * @constructor Creates an instance of [HttpClientBuilder].
  */
 expect class HttpClientBuilder {
-    companion object
-
     /**
      * Builds an [HttpF2Client] with the specified base URL.
      *

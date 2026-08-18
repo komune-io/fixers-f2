@@ -441,7 +441,7 @@ fun main(args: Array<String>) {
 
 * Function Client implementation
 ```kotlin
-expect fun didClient(protocol: Protocol, host: String, port: Int, path: String? = null): F2Supplier<DIDFunctionClient>
+expect fun didClient(url: String): F2Supplier<DIDFunctionClient>
 
 @JsName("DIDFunctionClient")
 @JsExport
