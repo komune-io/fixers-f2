@@ -30,7 +30,6 @@ subprojects {
 
 fixers {
     bundle {
-        id = "f2"
         group = "io.komune.f2"
         name = "F2"
         description = "Wrapper around Spring Cloud Function"
