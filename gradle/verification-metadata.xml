@@ -92,6 +92,11 @@
             <pgp value="1A55F091AD28C07F831FA44D7905DE25C78AD456"/>
          </artifact>
       </component>
+      <component group="com.gradle.publish" name="plugin" version="2.2.0">
+         <artifact name="plugin-2.2.0.jar">
+            <pgp value="F3FF33E96F18AA62DD580F9651FBF517CE6D6B80"/>
+         </artifact>
+      </component>
       <component group="com.gradle.publish" name="plugin-publish-plugin" version="2.1.1">
          <artifact name="plugin-publish-plugin-2.1.1.jar">
             <pgp value="1BD97A6A154E7810EE0BC832E2F38302C8075E3D"/>
@@ -225,6 +230,11 @@
       <component group="org.checkerframework" name="checker-qual" version="3.19.0">
          <artifact name="checker-qual-3.19.0.jar">
             <pgp value="19BEAB2D799C020F17C69126B16698A4ADF4D638"/>
+         </artifact>
+      </component>
+      <component group="org.gradle.plugin" name="compatibility-plugin" version="1.1.0">
+         <artifact name="compatibility-plugin-1.1.0.jar">
+            <pgp value="F3FF33E96F18AA62DD580F9651FBF517CE6D6B80"/>
          </artifact>
       </component>
       <component group="org.hamcrest" name="hamcrest" version="3.0">
