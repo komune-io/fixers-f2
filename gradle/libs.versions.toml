@@ -19,7 +19,7 @@ springdoc = "3.1.0"
 testcontainers = "2.0.5"
 arrow = "2.2.3"
 ksp = "2.3.11"
-gradle-plugin-publish = "2.1.1"
+gradle-plugin-publish = "2.2.0"
 netty = "4.2.17.Final"
 jackson3-databind = "3.1.5"
 
