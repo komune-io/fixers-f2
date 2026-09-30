@@ -9,7 +9,7 @@ lint:
 	./gradlew check
 
 build:
-	VERSION=$(VERSION) ./gradlew clean build publishToMavenLocal -x test
+	VERSION=$(VERSION) ./gradlew clean build publishToMavenLocal -x test -x jvmTest -x jsTest -x jsBrowserTest
 
 # `test` is a JVM-only Gradle task: Kotlin Multiplatform modules (f2-dsl, f2-client) do not
 # register one, their tests live behind `allTests` (jvmTest + jsTest).
