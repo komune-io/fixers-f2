@@ -21,7 +21,7 @@ abstract class StringHttpF2Steps(prefix: String) : HttpF2GenericsSteps<String, S
 	protected fun urlBase() = F2SpringHttpCucumberConfig.urlBase(bag)
 
 	override fun transform(dataTable: DataTable): List<String> {
-		return dataTable.asList()
+		return dataTable.asList().map { requireNotNull(it) }
 	}
 
 	override fun consumerReceiver(): List<String> {

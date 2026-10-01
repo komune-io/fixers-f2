@@ -19,7 +19,9 @@ class ExceptionsHttpF2ExceptionSteps: HttpF2GenericsSteps<MutableMap<String, Str
 		prepareFunctionCatalogSteps()
 	}
 	override fun transform(dataTable: DataTable): List<MutableMap<String, String>> {
-		return dataTable.asMaps()
+		return dataTable.asMaps().map { row ->
+			row.entries.associateTo(mutableMapOf()) { (key, value) -> requireNotNull(key) to requireNotNull(value) }
+		}
 	}
 
 	override fun consumerReceiver(): List<String> {

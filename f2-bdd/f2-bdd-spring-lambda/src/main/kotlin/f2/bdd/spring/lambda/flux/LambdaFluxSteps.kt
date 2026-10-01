@@ -17,7 +17,7 @@ abstract class LambdaFluxSteps: LambdaListStepsBase<String, String>() {
 	}
 
 	override fun transform(dataTable: DataTable): List<String> {
-		return dataTable.asList()
+		return dataTable.asList().map { requireNotNull(it) }
 	}
 
 	override fun receiver(): ConsumerReceiver<String> {

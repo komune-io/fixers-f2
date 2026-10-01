@@ -13,7 +13,7 @@ class FunctionCatalogSteps : FunctionCatalogStepsBase<String, String>(""), En {
 	}
 
 	override fun transform(dataTable: DataTable): List<String> {
-		return dataTable.asList()
+		return dataTable.asList().map { requireNotNull(it) }
 	}
 
 	override fun consumerReceiver(): List<String> {
