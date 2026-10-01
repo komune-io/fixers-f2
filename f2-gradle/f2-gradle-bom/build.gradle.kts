@@ -8,19 +8,19 @@ javaPlatform {
 }
 
 dependencies {
-	api(platform("org.springframework.boot:spring-boot-dependencies:${catalogue.versions.spring.boot.get()}"))
-	api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:${catalogue.versions.coroutines.get()}"))
-	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:${catalogue.versions.serialization.get()}"))
-	api(platform("io.ktor:ktor-bom:${catalogue.versions.ktor.get()}"))
-	api(platform("io.opentelemetry:opentelemetry-bom:${catalogue.versions.opentelemetry.get()}"))
-	api(platform("io.cucumber:cucumber-bom:${catalogue.versions.cucumber.get()}"))
-	api(platform("io.arrow-kt:arrow-stack:${catalogue.versions.arrow.get()}"))
-	api(platform("org.springframework.cloud:spring-cloud-dependencies:${catalogue.versions.spring.cloud.get()}"))
-	api(platform("org.springdoc:springdoc-openapi-bom:${catalogue.versions.springdoc.get()}"))
-	api(platform("org.testcontainers:testcontainers-bom:${catalogue.versions.testcontainers.get()}"))
+	api(platform(catalogue.spring.boot.dependencies)) { endorseStrictVersions() }
+	api(platform(catalogue.kotlinx.coroutines.bom)) { endorseStrictVersions() }
+	api(platform(catalogue.kotlinx.serialization.bom)) { endorseStrictVersions() }
+	api(platform(catalogue.ktor.bom)) { endorseStrictVersions() }
+	api(platform(catalogue.opentelemetry.bom)) { endorseStrictVersions() }
+	api(platform(catalogue.cucumber.bom)) { endorseStrictVersions() }
+	api(platform(catalogue.arrow.stack)) { endorseStrictVersions() }
+	api(platform(catalogue.spring.cloud.dependencies)) { endorseStrictVersions() }
+	api(platform(catalogue.springdoc.openapi.bom)) { endorseStrictVersions() }
+	api(platform(catalogue.testcontainers.bom)) { endorseStrictVersions() }
 	// Newer than what spring-boot-dependencies/spring-cloud-dependencies currently manage —
 	// pulls in Dependabot-flagged Netty CVE fixes.
-	api(platform("io.netty:netty-bom:${catalogue.versions.netty.get()}"))
+	api(platform(catalogue.netty.bom)) { endorseStrictVersions() }
 
 	constraints {
 		// ═══════════════════════════════════════════
@@ -71,24 +71,20 @@ dependencies {
 		// Third-party deps (not managed by Spring Boot BOM)
 		// ═══════════════════════════════════════════
 
-		val datetimeVersion = catalogue.versions.datetime.get()
-		val cloudeventsVersion = catalogue.versions.cloudevents.get()
-		val kspVersion = catalogue.versions.ksp.get()
-
 		// Kotlin
-		api("org.jetbrains.kotlinx:kotlinx-datetime:$datetimeVersion")
+		api(catalogue.kotlinx.datetime)
 
 		// KSP
-		api("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
+		api(catalogue.ksp.symbol.processing.api)
 
 		// Arrow KSP (not included in arrow-stack BOM)
-		api("io.arrow-kt:arrow-optics-ksp-plugin:${catalogue.versions.arrow.get()}")
+		api(catalogue.arrow.optics.ksp.plugin)
 
 		// Cloud Events
-		api("io.cloudevents:cloudevents-spring:$cloudeventsVersion")
+		api(catalogue.cloudevents.spring)
 
 		// Jackson 3 (tools.jackson) — spring-cloud-dependencies currently manages a version
 		// still inside the vulnerable range of a Dependabot-flagged CVE.
-		api("tools.jackson.core:jackson-databind:${catalogue.versions.jackson3.databind.get()}")
+		api(catalogue.jackson3.databind)
 	}
 }
