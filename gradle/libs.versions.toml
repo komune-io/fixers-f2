@@ -74,6 +74,22 @@ feature-version = { group = "io.komune.f2", name = "f2-feature-version" }
 
 # Testcontainers
 testcontainers-bom = { group = "org.testcontainers", name = "testcontainers-bom", version.ref = "testcontainers" }
+# BOMs and constraints published by f2-gradle-bom. Declared here (instead of interpolated
+# strings in its build script) so Dependabot can track the versions above.
+spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
+kotlinx-coroutines-bom = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-bom", version.ref = "coroutines" }
+kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-serialization-bom", version.ref = "serialization" }
+ktor-bom = { module = "io.ktor:ktor-bom", version.ref = "ktor" }
+opentelemetry-bom = { module = "io.opentelemetry:opentelemetry-bom", version.ref = "opentelemetry" }
+cucumber-bom = { module = "io.cucumber:cucumber-bom", version.ref = "cucumber" }
+arrow-stack = { module = "io.arrow-kt:arrow-stack", version.ref = "arrow" }
+arrow-optics-ksp-plugin = { module = "io.arrow-kt:arrow-optics-ksp-plugin", version.ref = "arrow" }
+spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "spring-cloud" }
+springdoc-openapi-bom = { module = "org.springdoc:springdoc-openapi-bom", version.ref = "springdoc" }
+netty-bom = { module = "io.netty:netty-bom", version.ref = "netty" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
+ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+jackson3-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson3-databind" }
 
 # Ktor
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core" }
@@ -146,7 +162,7 @@ cucumber-java8 = { group = "io.cucumber", name = "cucumber-java8" }
 cucumber-junit-platform-engine = { group = "io.cucumber", name = "cucumber-junit-platform-engine" }
 
 # Cloud Events
-cloudevents-spring = { group = "io.cloudevents", name = "cloudevents-spring" }
+cloudevents-spring = { group = "io.cloudevents", name = "cloudevents-spring", version.ref = "cloudevents" }
 
 # Observability
 micrometer-registry-otlp = { group = "io.micrometer", name = "micrometer-registry-otlp" }

@@ -4,6 +4,19 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    # Every BOM in f2-gradle-bom is now a catalog entry Dependabot can track; the default
+    # limit of 5 open PRs would otherwise silently stop version updates.
+    open-pull-requests-limit: 10
+    groups:
+      kotlinx:
+        patterns:
+          - "org.jetbrains.kotlinx:*"
+    ignore:
+      # spring-cloud-function sources are vendored in f2-spring/function. A new release train
+      # changes the spring-cloud-function version, so it must go through
+      # .claude/skills/upgrading-spring-cloud-function/SKILL.md, not a plain version bump.
+      # Security updates are not affected by this ignore.
+      - dependency-name: "org.springframework.cloud:spring-cloud-dependencies"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
