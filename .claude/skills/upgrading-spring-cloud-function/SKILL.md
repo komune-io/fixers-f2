@@ -7,7 +7,7 @@ description: Use when bumping F2's spring-cloud-function version, when a KOMUNE-
 
 ## Overview
 
-F2 vendors (shadows by package/path) 7 files from `spring-cloud-function` — 6 Java files plus `CoroutinesUtils.kt` — each carrying custom patches marked `// KOMUNE Modification` … `// KOMUNE End Of Modification` (`CoroutinesUtils.kt` uses `//KOMUNE Changes Start` … `//KOMUNE Changes End`). A sibling repo, `komune-io/spring-cloud-function`, carries the identical patch on branches named `fixers/<version>` (e.g. `fixers/5.0.3`) off the matching upstream tag — this is the fork PR upstream would see, kept in sync with F2's vendored copies.
+F2 vendors (shadows by package/path) 7 files from `spring-cloud-function` — 6 Java files plus `CoroutinesUtils.kt` — each carrying custom patches marked `// KOMUNE Modification` … `// KOMUNE End Of Modification` (`CoroutinesUtils.kt` uses `//KOMUNE Changes Start` … `//KOMUNE Changes End`). A sibling repo, `komune-io/spring-cloud-function`, carries the identical patch on branches named `fixers/<version>` (e.g. `fixers/5.0.4`) off the matching upstream tag — this is the fork PR upstream would see, kept in sync with F2's vendored copies.
 
 Upgrading means: find the new tag, check which vendored files actually changed upstream, reapply only the KOMUNE hunks that survive (not a wholesale merge), and verify the patches are still load-bearing — in both repos, kept in sync.
 
@@ -19,13 +19,13 @@ The other checkout, the local clone of `komune-io/spring-cloud-function`, is mac
 
 ## The patches (current state — recheck after any upgrade, this drifts)
 
-| File | Patch | Necessity (last verified) |
+| File | Patch | Necessity (last verified against v5.0.4) |
 |---|---|---|
-| `SimpleFunctionRegistry.java` | Typed `List<T>` collection deserialization (kotlinx.serialization needs the element type) | Necessary — 22+ test failures if removed |
-| `SimpleFunctionRegistry.java` | Rethrow `ResponseStatusException` unwrapped on **input** conversion | Necessary — the only way a malformed body surfaces as 400 |
-| `SimpleFunctionRegistry.java` | Same rethrow on **output** conversion | **Dead code as of v5.0.3** — nothing constructs `ResponseStatusException` on the output path anymore. Recheck each upgrade; don't assume it stays dead. |
+| `SimpleFunctionRegistry.java` | Typed `List<T>` collection deserialization (kotlinx.serialization needs the element type) | Necessary — 23 test failures if removed (webflux 12, mvc 11) |
+| `SimpleFunctionRegistry.java` | Rethrow `ResponseStatusException` unwrapped on **input** conversion | Necessary — the only way a malformed body surfaces as 400. v5.0.4 added its own JSON error propagation (`failOnJsonError`, upstream #1429), but without this hunk `RawHttp.feature` "a type-mismatched JSON body is rejected with 400" still gets a 500. |
+| `SimpleFunctionRegistry.java` | Same rethrow on **output** conversion | **Dead code as of v5.0.3, still dead in v5.0.4** — nothing constructs `ResponseStatusException` on the output path anymore. Recheck each upgrade; don't assume it stays dead. |
 | `SimpleFunctionRegistry.java` | `public static final String KOMUNE_PATCH_MARKER` field, read reflectively by `f2.spring.VendoredPatchVerifier` | Necessary — F2-specific (keep it out of the fork). It is the only way to assert at startup that F2's vendored copy, not upstream's, won the classpath. Never rename or drop it: `VendoredPatchVerifierTest` fails if you do. |
-| `JsonMessageConverter.java` | `DatabindException` → `ResponseStatusException(400)` when Content-Type is JSON | Necessary. Content-Type match is case-insensitive across `MessageHeaders.CONTENT_TYPE`/`Content-Type`/`content-type` — matches `SimpleFunctionRegistry.contentTypeHeaderValue`'s pattern. Don't regress to a single-key exact-match check. |
+| `JsonMessageConverter.java` | `DatabindException` → `ResponseStatusException(400)` when Content-Type is JSON | Necessary — without it `RawHttp.feature` "a type-mismatched JSON body is rejected with 400" gets a 500 (v5.0.4). Content-Type match is case-insensitive across `MessageHeaders.CONTENT_TYPE`/`Content-Type`/`content-type` — matches `SimpleFunctionRegistry.contentTypeHeaderValue`'s pattern. Don't regress to a single-key exact-match check. |
 | `SmartCompositeMessageConverter.java` | Rethrow `ResponseStatusException` instead of swallow-and-try-next-converter | Necessary (upstream issue #901) — part of the chain above |
 | `FunctionWebRequestProcessingHelper.java` | `OPTIONS` → `null` (falls through to normal routing instead of a 500) | Necessary |
 | `FunctionWebRequestProcessingHelper.java` | Drop `onErrorContinue` on the result stream | Necessary — but only reproduces with a fixture that fails *inside* an operator (e.g. `.map()`); a source that throws directly doesn't exercise it at all, `onErrorContinue` can't intercept a source-terminal error |
@@ -37,11 +37,13 @@ The other checkout, the local clone of `komune-io/spring-cloud-function`, is mac
 
 Also: `spring-cloud-function-context/pom.xml` (fork only) comments out `spring-web`'s `<optional>true</optional>` — needed because `ResponseStatusException` lives in `spring-web`.
 
-## Accepted version skew: Boot 4.1.0 on a Cloud train built for 4.0.7 (recheck every upgrade)
+The fork also carries KOMUNE edits in **test** files, where upstream tests assert behavior the patches intentionally change: `HttpGetIntegrationTests.errorJson` (expects `onErrorContinue` to yield a partial body) and, since v5.0.4, `PojoFunctionIntegrationTests.testMalformedJsonRejectsWithJacksonError` / `testScalarStringRejectsWithJacksonError` (expect a logged 500; KOMUNE returns 400). All three are `@Disabled` with a KOMUNE reason. List test changes with `git diff --stat v<old> origin/fixers/<old>` before step 3; they are not in the vendored-file list.
 
-F2 declares `spring-boot = "4.1.0"` and `spring-cloud = "2025.1.2"` in `gradle/libs.versions.toml`, but the `spring-cloud-dependencies:2025.1.2` POM declares `<spring-boot.version>4.0.7</spring-boot.version>`. Gradle's "highest wins" constraint resolution means F2 actually resolves Boot **4.1.0**, so `spring-cloud-function:5.0.3` runs on a Boot minor the Spring Cloud team never tested it against.
+## Accepted version skew: Boot 4.1.1 on a Cloud train built for 4.0.8 (recheck every upgrade)
 
-The skew is narrower than it looks: Boot 4.0.7 and 4.1.0 both pin **Spring Framework 7.0.8**, and that is what F2 resolves. So the vendored files compile against exactly the Framework version the release train targeted — only the Boot layer differs. (An earlier write-up claimed Framework 7.1; that is wrong, check `spring-framework.version` in both `spring-boot-dependencies` POMs before repeating it.)
+F2 declares `spring-boot = "4.1.1"` and `spring-cloud = "2025.1.3"` in `gradle/libs.versions.toml`, but the `spring-cloud-dependencies:2025.1.3` POM declares `<spring-boot.version>4.0.8</spring-boot.version>`. Gradle's "highest wins" constraint resolution means F2 actually resolves Boot **4.1.1**, so `spring-cloud-function:5.0.4` runs on a Boot minor the Spring Cloud team never tested it against.
+
+The skew is narrower than it looks: Boot 4.0.8 and 4.1.1 both pin **Spring Framework 7.0.9**, and that is what F2 resolves. So the vendored files compile against exactly the Framework version the release train targeted — only the Boot layer differs. (An earlier write-up claimed Framework 7.1; that is wrong, check `spring-framework.version` in both `spring-boot-dependencies` POMs before repeating it.)
 
 Verify the current state rather than trusting this paragraph:
 
@@ -52,13 +54,13 @@ grep -E 'spring-boot.version|spring-cloud-function.version' /tmp/scd.pom
   | grep -E 'org.springframework.boot:spring-boot:|org.springframework:spring-core:'
 ```
 
-**Why it is accepted.** There is no Spring Cloud release train built on Boot 4.1 yet; the alternative is holding F2 back on Boot 4.0.7, which means shipping without the 4.1 fixes (including Dependabot-flagged transitive CVEs) that motivated the bump. The vendored spring-cloud-function files are the actual risk surface, and they are covered by tests in `f2-spring/function/*` — a Framework-internal signature change would fail compilation or those tests rather than fail silently.
+**Why it is accepted.** There is no Spring Cloud release train built on Boot 4.1 yet; the alternative is holding F2 back on Boot 4.0.8, which means shipping without the 4.1 fixes (including Dependabot-flagged transitive CVEs) that motivated the bump. The vendored spring-cloud-function files are the actual risk surface, and they are covered by tests in `f2-spring/function/*` — a Framework-internal signature change would fail compilation or those tests rather than fail silently.
 
 **What to re-verify when the next train lands** (Spring Cloud 2026.0, or any release whose POM declares a Boot 4.1+ `spring-boot.version`):
 
 1. Whether the skew is gone — realign `spring-cloud` and drop the exception rather than carrying it forward by inertia.
 2. Every vendored file against the new spring-cloud-function tag (steps 3-5 below) — a Boot/Framework minor is exactly when the upstream code these patches sit in gets reworked.
-3. That each patch is still load-bearing (step 5); the table above already has one entry that went dead at v5.0.3.
+3. That each patch is still load-bearing (step 5); the table above already has one entry that went dead at v5.0.3 (still dead at v5.0.4).
 4. Both `spring-boot` entries in `libs.versions.toml`: the library pin *and* the `spring-boot` Gradle plugin, which resolve independently.
 
 Symptoms that the skew has become a real problem, rather than a theoretical one: `NoSuchMethodError`/`NoClassDefFoundError` from `org.springframework.cloud.function.*` at runtime, or a vendored file failing to compile against a Framework class it does not itself patch.
@@ -158,7 +160,7 @@ F2 (Gradle), run from this repo's root: `./gradlew test detekt`.
 ```bash
 /usr/bin/diff -w -B "<f2-path>" <(git -C "$SPRING_CLOUD_FUNCTION_REPO" show origin/fixers/<version>:"<fork-path>" | expand -t4)
 ```
-Expect **0** for `SimpleFunctionRegistry.java` and `FunctionWebRequestProcessingHelper.java`. `CoroutinesUtils.kt` is out of scope for this check entirely: as of `fixers/5.0.3` the fork carries upstream's copy verbatim (no KOMUNE markers), so F2's version diverges heavily *by design* — diff it against **upstream** rather than the fork. The other four (`ContextFunctionCatalogAutoConfiguration.java`, `KotlinLambdaToFunctionAutoConfiguration.java`, `JsonMessageConverter.java`, `SmartCompositeMessageConverter.java`) legitimately show small nonzero diffs even when fully in sync — copyright-header years, one import's position, and F2's own `kSerialization` feature that the fork can't have. Don't treat those as a failure signal; confirm they're *pre-existing* by diffing the same files against the *previous* fork branch too — if the counts match, nothing regressed.
+Expect **0** for `FunctionWebRequestProcessingHelper.java`. `SimpleFunctionRegistry.java` differs by F2-only lines (`KOMUNE_PATCH_MARKER` and the "retained defensively" notes on the output rethrow): 17 lines at both 5.0.3 and 5.0.4. `CoroutinesUtils.kt` is out of scope for this check entirely: as of `fixers/5.0.4` the fork carries upstream's copy verbatim (no KOMUNE markers), so F2's version diverges heavily *by design* — diff it against **upstream** rather than the fork. The other four (`ContextFunctionCatalogAutoConfiguration.java`, `KotlinLambdaToFunctionAutoConfiguration.java`, `JsonMessageConverter.java`, `SmartCompositeMessageConverter.java`) legitimately show small nonzero diffs even when fully in sync — copyright-header years, one import's position, and F2's own `kSerialization` feature that the fork can't have. Don't treat those as a failure signal; confirm they're *pre-existing* by diffing the same files against the *previous* fork branch too — if the counts match, nothing regressed.
 
 ### 8. Branch, commit, push — only on explicit confirmation
 
