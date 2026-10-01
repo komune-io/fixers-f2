@@ -40,6 +40,9 @@ fixers {
         projectKey = "komune-io_fixers-f2"
         properties {
             property("sonar.coverage.exclusions", "f2-bdd/**/*")
+            property("sonar.issue.ignore.multicriteria", "vendored")
+            property("sonar.issue.ignore.multicriteria.vendored.ruleKey", "*")
+            property("sonar.issue.ignore.multicriteria.vendored.resourceKey", "**/org/springframework/**")
         }
     }
     repositories {
