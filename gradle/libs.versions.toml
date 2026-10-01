@@ -74,8 +74,6 @@ feature-version = { group = "io.komune.f2", name = "f2-feature-version" }
 
 # Testcontainers
 testcontainers-bom = { group = "org.testcontainers", name = "testcontainers-bom", version.ref = "testcontainers" }
-# BOMs and constraints published by f2-gradle-bom. Declared here (instead of interpolated
-# strings in its build script) so Dependabot can track the versions above.
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 kotlinx-coroutines-bom = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-bom", version.ref = "coroutines" }
 kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-serialization-bom", version.ref = "serialization" }

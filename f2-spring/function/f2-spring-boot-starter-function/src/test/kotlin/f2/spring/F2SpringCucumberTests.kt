@@ -13,7 +13,5 @@ import org.junit.platform.suite.api.Suite
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "${F2SpringStep.GLUE}, f2.spring, ${Jackson.GLUE}")
-// Cucumber 8 glue hints call Class.getDeclaringClass() on every glue class, which throws
-// IncompatibleClassChangeError on Kotlin coroutine-inlined classes.
 @ConfigurationParameter(key = GLUE_HINT_ENABLED_PROPERTY_NAME, value = "false")
 class F2SpringCucumberTests

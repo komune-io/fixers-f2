@@ -4,8 +4,6 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    # Every BOM in f2-gradle-bom is now a catalog entry Dependabot can track; the default
-    # limit of 5 open PRs would otherwise silently stop version updates.
     open-pull-requests-limit: 10
     groups:
       kotlinx:
