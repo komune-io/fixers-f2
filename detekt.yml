@@ -2,3 +2,11 @@ naming:
   PackageNaming:
     # Allow digits in first segment for f2.* packages (default pattern only allows [a-z]+)
     packagePattern: '[a-z0-9]+(\.[a-z][A-Za-z0-9]*)*'
+
+complexity:
+  TooManyFunctions:
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**', '**/org/springframework/**']
+
+style:
+  ReturnCount:
+    excludes: ['**/org/springframework/**']

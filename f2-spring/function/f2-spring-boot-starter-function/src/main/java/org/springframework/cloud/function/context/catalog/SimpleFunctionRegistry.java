@@ -526,12 +526,10 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             }
         }
 
-        @Override
         public int hashCode() {
             return this.functionDefinition.hashCode();
         }
 
-        @Override
         public boolean equals(Object obj) {
             if (obj instanceof FunctionInvocationWrapper functionWrapper) {
                 if (functionWrapper.getFunctionDefinition().equals(this.getFunctionDefinition())) {
@@ -1662,13 +1660,6 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                         try {
                             return this.convertOutputIfNecessary(v, type, expectedOutputContentType);
                         }
-                        // KOMUNE Modification
-                        // force message conversion error propagation
-                        // KOMUNE: retained defensively, dead as of 5.0.3 (see upgrading-spring-cloud-function skill)
-                        catch (ResponseStatusException e) {
-                            throw e;
-                        }
-                        // KOMUNE End Of Modification
                         catch (Exception e) {
                             throw new IllegalStateException("Failed to convert output", e);
                         }
@@ -1677,13 +1668,6 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                         try {
                             return this.convertOutputIfNecessary(v, type, expectedOutputContentType);
                         }
-                        // KOMUNE Modification
-                        // force message conversion error propagation
-                        // KOMUNE: retained defensively, dead as of 5.0.3 (see upgrading-spring-cloud-function skill)
-                        catch (ResponseStatusException e) {
-                            throw e;
-                        }
-                        // KOMUNE End Of Modification
                         catch (Exception e) {
                             throw new IllegalStateException("Failed to convert output", e);
                         }
