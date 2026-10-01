@@ -145,60 +145,6 @@ class CoroutinesUtilsTest {
     }
 
     @Test
-    fun `invokeSuspendingFunction throws for invalid kotlinLambdaTarget`() {
-        val invalidTarget = "not a function"
-        val flux = Flux.just("test")
-
-        val exception = assertThrows<IllegalArgumentException> {
-            invokeSuspendingFunction(invalidTarget, flux)
-        }
-        assertTrue(exception.message?.contains("must be a Function2") == true)
-    }
-
-    @Test
-    fun `invokeSuspendingFunction throws for invalid arg0`() {
-        val function: (Any?, Any?) -> Any? = { _, _ -> null }
-        val invalidArg = "not a flux"
-
-        val exception = assertThrows<IllegalArgumentException> {
-            invokeSuspendingFunction(function, invalidArg)
-        }
-        assertTrue(exception.message?.contains("must be a Flux") == true)
-    }
-
-    @Test
-    fun `invokeSuspendingSupplier throws for invalid kotlinLambdaTarget`() {
-        val invalidTarget = "not a function"
-
-        val exception = assertThrows<IllegalArgumentException> {
-            invokeSuspendingSupplier(invalidTarget)
-        }
-        assertTrue(exception.message?.contains("must be a Function1") == true)
-    }
-
-    @Test
-    fun `invokeSuspendingConsumer throws for invalid kotlinLambdaTarget`() {
-        val invalidTarget = "not a function"
-        val flux = Flux.just("test")
-
-        val exception = assertThrows<IllegalArgumentException> {
-            invokeSuspendingConsumer(invalidTarget, flux)
-        }
-        assertTrue(exception.message?.contains("must be a Function2") == true)
-    }
-
-    @Test
-    fun `invokeSuspendingConsumer throws for invalid arg0`() {
-        val function: (Any?, Any?) -> Unit? = { _, _ -> null }
-        val invalidArg = "not a flux"
-
-        val exception = assertThrows<IllegalArgumentException> {
-            invokeSuspendingConsumer(function, invalidArg)
-        }
-        assertTrue(exception.message?.contains("must be a Flux") == true)
-    }
-
-    @Test
     fun `invokeSuspendingSupplier works with Flow result`() {
         val supplier: suspend () -> Flow<String> = {
             flowOf("a", "b", "c")

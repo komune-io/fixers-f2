@@ -81,9 +81,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-
-
-
 /**
  * Implementation of {@link FunctionCatalog} and {@link FunctionRegistry} which
  * does not depend on Spring's {@link BeanFactory}.
@@ -94,6 +91,7 @@ import org.springframework.web.server.ResponseStatusException;
  * @author Roman Samarev
  * @author Soby Chacko
  * @author Chris Bono
+ * @author Roman Akentev
  */
 public class SimpleFunctionRegistry implements FunctionRegistry {
 
@@ -129,7 +127,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
 
     private final FunctionProperties functionProperties;
 
-    private int wrappedFunctionDefinitionsCacheSize = 1000;
+    private final Object cacheLock = new Object();
 
     @Autowired(required = false)
     private FunctionAroundWrapper functionAroundWrapper;
@@ -137,6 +135,13 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
     public SimpleFunctionRegistry(ConversionService conversionService, CompositeMessageConverter messageConverter, JsonMapper jsonMapper,
             @Nullable FunctionProperties functionProperties,
             @Nullable FunctionInvocationHelper<Message<?>> functionInvocationHelper) {
+        this(conversionService, messageConverter, jsonMapper, functionProperties, functionInvocationHelper, 1000);
+    }
+
+    public SimpleFunctionRegistry(ConversionService conversionService, CompositeMessageConverter messageConverter, JsonMapper jsonMapper,
+            @Nullable FunctionProperties functionProperties,
+            @Nullable FunctionInvocationHelper<Message<?>> functionInvocationHelper,
+            int wrappedFunctionDefinitionsCacheSize) {
         Assert.notNull(messageConverter, "'messageConverter' must not be null");
         Assert.notNull(jsonMapper, "'jsonMapper' must not be null");
         this.conversionService = conversionService;
@@ -219,7 +224,6 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
 
     boolean isFunctionDefinitionEligible(String functionDefinition) {
         if (this.functionProperties != null) {
-            this.functionProperties.getIneligibleDefinitions().contains(functionDefinition);
             boolean matchFoundInBoth = !Collections.disjoint(Arrays.asList(functionDefinition.split("\\|")),
                     this.functionProperties.getIneligibleDefinitions());
             return !matchFoundInBoth;
@@ -251,11 +255,13 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
      */
     @SuppressWarnings("unchecked")
     <T> T doLookup(Class<?> type, String functionDefinition, String[] expectedOutputMimeTypes) {
-        FunctionInvocationWrapper function = this.wrappedFunctionDefinitions.get(functionDefinition);
+        FunctionInvocationWrapper function;
+        synchronized (cacheLock) {
+            function = this.wrappedFunctionDefinitions.get(functionDefinition);
+        }
         if (function == null) {
             function = this.compose(type, functionDefinition);
         }
-
         if (function != null) {
             if (!ObjectUtils.isEmpty(expectedOutputMimeTypes)) {
                 function.expectedOutputContentType = expectedOutputMimeTypes;
@@ -281,7 +287,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                 : System.getProperty(FunctionProperties.FUNCTION_DEFINITION, "");
 
         Set<String> names = this.getNames(null);
-        if (!names.contains(functionDefinition)) {
+        if (this.isSingleFunctionFallbackEnabled() && !names.contains(functionDefinition)) {
             List<String> eligibleFunction = names.stream()
                     .filter(name -> !RoutingFunction.FUNCTION_NAME.equals(name))
                     .filter(name -> !RoutingFunction.DEFAULT_ROUTE_HANDLER.equals(name))
@@ -294,6 +300,10 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             }
         }
         return functionDefinition;
+    }
+
+    private boolean isSingleFunctionFallbackEnabled() {
+        return this.functionProperties == null || this.functionProperties.isSingleFunctionFallbackEnabled();
     }
 
     /*
@@ -362,9 +372,11 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                 }
                 composedFunction = this.enrichInputIfNecessary(composedFunction);
                 composedFunction = this.enrichOutputIfNecessary(composedFunction);
-                if (composedFunction.isSingleton) {
-                    this.wrappedFunctionDefinitions.put(composedFunction.functionDefinition, composedFunction);
-                }
+            }
+        }
+        if (composedFunction != null && composedFunction.isSingleton) {
+            synchronized (cacheLock) {
+                this.wrappedFunctionDefinitions.put(composedFunction.functionDefinition, composedFunction);
             }
         }
         if (logger.isDebugEnabled()) {
@@ -454,7 +466,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
 
         private boolean composed;
 
-        private boolean message;
+        private final boolean message;
 
         private String[] expectedOutputContentType;
 
@@ -514,12 +526,10 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
             }
         }
 
-        @Override
         public int hashCode() {
             return this.functionDefinition.hashCode();
         }
 
-        @Override
         public boolean equals(Object obj) {
             if (obj instanceof FunctionInvocationWrapper functionWrapper) {
                 if (functionWrapper.getFunctionDefinition().equals(this.getFunctionDefinition())) {
@@ -1240,7 +1250,10 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
 
                 convertedInput = this.convertInputMessageIfNecessary((Message) input, type);
                 if (convertedInput == null) { // give ConversionService a chance
-                    convertedInput = this.convertNonMessageInputIfNecessary(type, ((Message) input).getPayload(), false);
+                    boolean failOnJsonError = JsonMapper.isJsonContentType(contentTypeHeaderValue((Message<?>) input));
+                    Object payload = ((Message) input).getPayload();
+                    boolean maybeJson = failOnJsonError || JsonMapper.isJsonString(payload);
+                    convertedInput = this.convertNonMessageInputIfNecessary(type, payload, maybeJson, failOnJsonError);
                 }
                 if (convertedInput != null && !FunctionTypeUtils.isMultipleArgumentType(this.inputType)) {
                     convertedInput = !convertedInput.equals(input)
@@ -1253,7 +1266,8 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                 }
             }
             else {
-                convertedInput = this.convertNonMessageInputIfNecessary(type, input, JsonMapper.isJsonString(input));
+                // Non-Message input — no Content-Type headers to evaluate
+                convertedInput = this.convertNonMessageInputIfNecessary(type, input, JsonMapper.isJsonString(input), false);
                 if (convertedInput != null && logger.isDebugEnabled()) {
                     logger.debug("Converted input: " + input + " to: " + convertedInput);
                 }
@@ -1405,7 +1419,8 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
         /*
          *
          */
-        private Object convertNonMessageInputIfNecessary(Type inputType, Object input, boolean maybeJson) {
+        private Object convertNonMessageInputIfNecessary(Type inputType, Object input,
+                boolean maybeJson, boolean failOnJsonError) {
             Object convertedInput = null;
             Class<?> rawInputType = this.isTypePublisher(inputType) || this.isInputTypeMessage()
                     ? FunctionTypeUtils.getRawType(FunctionTypeUtils.getGenericType(inputType))
@@ -1416,10 +1431,21 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                     inputType = FunctionTypeUtils.getGenericType(inputType);
                 }
                 if (Object.class != inputType) {
-                    convertedInput = SimpleFunctionRegistry.this.jsonMapper.fromJson(input, inputType);
+                    try {
+                        convertedInput = SimpleFunctionRegistry.this.jsonMapper.fromJson(input, inputType);
+                    }
+                    catch (Exception e) {
+                        if (failOnJsonError) {
+                            throw e;
+                        }
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("JSON conversion failed for '" + input + "' to " + inputType
+                                    + ". Falling back to ConversionService.", e);
+                        }
+                    }
                 }
             }
-            else if (SimpleFunctionRegistry.this.conversionService != null
+            if (convertedInput == null && SimpleFunctionRegistry.this.conversionService != null
                     && !rawInputType.equals(input.getClass())
                     && SimpleFunctionRegistry.this.conversionService.canConvert(input.getClass(), rawInputType)) {
                 convertedInput = SimpleFunctionRegistry.this.conversionService.convert(input, rawInputType);
@@ -1489,7 +1515,7 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                     : SimpleFunctionRegistry.this.messageConverter.fromMessage(message, rawType);
 
             if (convertedInput != null && !rawType.isAssignableFrom(convertedInput.getClass())) {
-                logger.warn("Failed to convert input to " + rawType + ". Will attempt to invoke function with raw type");
+                logger.trace("Failed to convert input to " + rawType + ". Will attempt to invoke function with raw type");
             }
 
             if (FunctionTypeUtils.isMessage(type)) {
@@ -1634,13 +1660,6 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                         try {
                             return this.convertOutputIfNecessary(v, type, expectedOutputContentType);
                         }
-                        // KOMUNE Modification
-                        // force message conversion error propagation
-                        // KOMUNE: retained defensively, dead as of 5.0.3 (see upgrading-spring-cloud-function skill)
-                        catch (ResponseStatusException e) {
-                            throw e;
-                        }
-                        // KOMUNE End Of Modification
                         catch (Exception e) {
                             throw new IllegalStateException("Failed to convert output", e);
                         }
@@ -1649,13 +1668,6 @@ public class SimpleFunctionRegistry implements FunctionRegistry {
                         try {
                             return this.convertOutputIfNecessary(v, type, expectedOutputContentType);
                         }
-                        // KOMUNE Modification
-                        // force message conversion error propagation
-                        // KOMUNE: retained defensively, dead as of 5.0.3 (see upgrading-spring-cloud-function skill)
-                        catch (ResponseStatusException e) {
-                            throw e;
-                        }
-                        // KOMUNE End Of Modification
                         catch (Exception e) {
                             throw new IllegalStateException("Failed to convert output", e);
                         }

@@ -7,7 +7,7 @@ kotlin = "2.4.20"
 # Spring Cloud train live in .claude/skills/upgrading-spring-cloud-function/SKILL.md
 # ("Accepted version skew"). Do not realign one of these two without reading it.
 spring-boot = "4.1.1"
-spring-cloud = "2025.1.2"
+spring-cloud = "2025.1.3"
 ktor = "3.6.0"
 coroutines = "1.11.0"
 serialization = "1.11.0"

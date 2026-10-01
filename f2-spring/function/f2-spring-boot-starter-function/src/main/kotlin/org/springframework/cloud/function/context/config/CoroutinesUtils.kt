@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2021 the original author or authors.
+ * Copyright 2021-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,8 @@
  */
 
 @file:JvmName("CoroutinesUtils")
-//KOMUNE Changes Start
-// detekt runs over this vendored file, upstream's build does not
-@file:Suppress("TooManyFunctions")
-//KOMUNE Changes End
 package org.springframework.cloud.function.context.config
 
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
-import java.lang.reflect.WildcardType
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -33,6 +24,11 @@ import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.mono
 import reactor.core.publisher.Flux
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
+import java.lang.reflect.WildcardType
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
 
 /**
  * @author Adrien Poupard
@@ -43,10 +39,6 @@ fun getSuspendingFunctionArgType(type: Type): Type {
 	return getFlowTypeArguments(type)
 }
 
-//KOMUNE Changes Start
-// detekt runs over this vendored file, upstream's build does not
-@Suppress("ReturnCount")
-//KOMUNE Changes End
 fun getFlowTypeArguments(type: Type): Type {
 	if(!isFlowType(type)) {
 		return type
@@ -95,19 +87,7 @@ private fun getContinuationTypeArguments(type: Type): Type {
 	return wildcardType.lowerBounds[0]
 }
 
-//KOMUNE Changes Start
-// Upstream blind-casts its arguments; F2 checks them first so a wrongly wired bean fails with a
-// readable message instead of a bare ClassCastException.
-// invokeSuspendingSupplier additionally accepts a supplier that returns a plain value rather than a
-// Flow (F2Supplier<T> erases to that) and wraps it with flowOf; upstream assumes a Flow and blows up.
-@Suppress("UNCHECKED_CAST")
 fun invokeSuspendingFunction(kotlinLambdaTarget: Any, arg0: Any): Flux<Any> {
-	require(kotlinLambdaTarget is Function2<*, *, *>) {
-		"kotlinLambdaTarget must be a Function2, but was ${kotlinLambdaTarget::class.qualifiedName}"
-	}
-	require(arg0 is Flux<*>) {
-		"arg0 must be a Flux, but was ${arg0::class.qualifiedName}"
-	}
 	val function = kotlinLambdaTarget as SuspendFunction
 	val flux = arg0 as Flux<Any>
 	return mono(Dispatchers.Unconfined) {
@@ -119,48 +99,27 @@ fun invokeSuspendingFunction(kotlinLambdaTarget: Any, arg0: Any): Flux<Any> {
 	}
 }
 
-@Suppress("UNCHECKED_CAST")
 fun invokeSuspendingSupplier(kotlinLambdaTarget: Any): Flux<Any> {
-	require(kotlinLambdaTarget is Function1<*, *>) {
-		"kotlinLambdaTarget must be a Function1, but was ${kotlinLambdaTarget::class.qualifiedName}"
-	}
 	val supplier = kotlinLambdaTarget as SuspendSupplier
 	return mono(Dispatchers.Unconfined) {
 		val result = suspendCoroutineUninterceptedOrReturn<Any> {
-			val result = supplier.invoke(it)
-			result
+			supplier.invoke(it)
 		}
-		val resultFlow: Flow<Any> = if(result is Flow<*>) {
-			result as Flow<Any>
-		} else {
-			flowOf(result)
-		}
-		resultFlow
+		if (result is Flow<*>) result as Flow<Any> else flowOf(result)
 	}.flatMapMany {
 		it.asFlux()
 	}
 }
-//KOMUNE Changes End
 
-//KOMUNE Changes Start
-// Same argument checking as above; `arg0.asFlow()` relies on the smart cast from the require, where
-// upstream casts arg0 to Flux<Any> unchecked.
-@Suppress("UNCHECKED_CAST")
 fun invokeSuspendingConsumer(kotlinLambdaTarget: Any, arg0: Any) {
-	require(kotlinLambdaTarget is Function2<*, *, *>) {
-		"kotlinLambdaTarget must be a Function2, but was ${kotlinLambdaTarget::class.qualifiedName}"
-	}
-	require(arg0 is Flux<*>) {
-		"arg0 must be a Flux, but was ${arg0::class.qualifiedName}"
-	}
 	val consumer = kotlinLambdaTarget as SuspendConsumer
+	val flux = arg0 as Flux<Any>
 	mono(Dispatchers.Unconfined) {
 		suspendCoroutineUninterceptedOrReturn<Unit> {
-			consumer.invoke(arg0.asFlow(), it)
+			consumer.invoke(flux.asFlow(), it)
 		}
 	}.subscribe()
 }
-//KOMUNE Changes End
 
 fun isValidSuspendingFunction(kotlinLambdaTarget: Any, arg0: Any): Boolean {
 	return arg0 is Flux<*> && kotlinLambdaTarget is Function2<*, *, *>
@@ -170,9 +129,6 @@ fun isValidSuspendingSupplier(kotlinLambdaTarget: Any): Boolean {
 	return kotlinLambdaTarget is Function1<*, *>
 }
 
-//KOMUNE Changes Start
-// Upstream declares these `private typealias`; F2 keeps them public.
-typealias SuspendFunction = (Any?, Any?) -> Any?
-typealias SuspendConsumer = (Any?, Any?) -> Unit?
-typealias SuspendSupplier = (Any?) -> Any?
-//KOMUNE Changes End
+private typealias SuspendFunction = (Any?, Any?) -> Any?
+private typealias SuspendConsumer = (Any?, Any?) -> Unit?
+private typealias SuspendSupplier = (Any?) -> Any?

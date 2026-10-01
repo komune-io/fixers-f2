@@ -49,7 +49,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 public class SmartCompositeMessageConverter extends CompositeMessageConverter {
 
-    private Log logger = LogFactory.getLog(this.getClass());
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     private final Supplier<Collection<MessageConverterHelper>> messageConverterHelpersSupplier;
 
