@@ -22,7 +22,7 @@ abstract class LambdaSimpleSteps: LambdaSingleStepsBase<String, String>() {
 	}
 
 	override fun transform(dataTable: DataTable): String {
-		return dataTable.asList().first()
+		return requireNotNull(dataTable.asList().first())
 	}
 
 	override fun receiver(): ConsumerReceiver<String> {

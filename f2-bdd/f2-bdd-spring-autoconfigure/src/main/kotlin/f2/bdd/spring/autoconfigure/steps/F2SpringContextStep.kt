@@ -19,6 +19,9 @@ open class F2SpringContextStep: F2SpringStep(), En {
 
 		Given("The application parameters") { table: DataTable ->
 			bag.applicationParameters = table.asMap(String::class.java, String::class.java)
+				.entries.associate { (key, value) ->
+					requireNotNull(key) to requireNotNull(value) { "Missing value for application parameter '$key'" }
+				}
 		}
 
 		When("I start a valid spring application context") {
@@ -66,7 +69,9 @@ open class F2SpringContextStep: F2SpringStep(), En {
 	private fun DataTable.asCucumberF2SpringDeclaration(): List<CucumberF2SpringDeclaration> {
 		return asMaps().map { columns ->
 			CucumberF2SpringDeclaration(
-				name = columns.getValue(CucumberF2SpringDeclaration::name.name),
+				name = requireNotNull(columns[CucumberF2SpringDeclaration::name.name]) {
+					"Missing '${CucumberF2SpringDeclaration::name.name}' column"
+				},
 			)
 		}
 	}

@@ -22,7 +22,7 @@ class HttpF2VehicleSteps : HttpF2GenericsSteps<Vehicle, Vehicle>("Vehicle: "), E
 	override fun transform(dataTable: DataTable): List<Vehicle> {
 		return dataTable.asMaps().map {
 			Vehicle(
-				name = it.getValue(Vehicle::name.name),
+				name = requireNotNull(it.getValue(Vehicle::name.name)),
 				broken = it.getValue(Vehicle::broken.name).toBoolean()
 			)
 		}

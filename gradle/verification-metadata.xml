@@ -10,6 +10,7 @@
          <trust group="org\.nodejs" name="node" regex="true" reason="Kotlin/JS toolchain downloads an OS-specific node distribution; checksums differ per platform."/>
       </trusted-artifacts>
       <ignored-keys>
+         <ignored-key id="1646B01B86E50310" reason="Key couldn't be downloaded from any key server"/>
          <ignored-key id="6F29F72839B3A8E7" reason="Key couldn't be downloaded from any key server"/>
       </ignored-keys>
       <trusted-keys>
@@ -36,6 +37,7 @@
             <trusting group="^io[.]projectreactor($|([.].*))" regex="true"/>
             <trusting group="^org[.]springframework($|([.].*))" regex="true"/>
          </trusted-key>
+         <trusted-key id="5DD80B0DDCCBE005F0A47FD66751E1A6E2001B8D" group="^com[.]squareup($|([.].*))" regex="true"/>
          <trusted-key id="5F6C2148AD4911FE308110E5F0D0AE433308B042" group="dev.detekt"/>
          <trusted-key id="60200AC4AE761F1614D6C46766D68DAA073BE985">
             <trusting group="ch.qos.logback"/>
@@ -66,6 +68,11 @@
       <component group="biz.aQute.bnd" name="biz.aQute.bnd.annotation" version="7.1.0">
          <artifact name="biz.aQute.bnd.annotation-7.1.0.jar">
             <pgp value="C668130C58722C9DC1C0FC633F1EB974E7AB9B37"/>
+         </artifact>
+      </component>
+      <component group="com.charleskorn.kaml" name="kaml-jvm" version="0.79.0">
+         <artifact name="kaml-jvm-0.79.0.jar">
+            <pgp value="E01ED293981AE484403B65D7DA70BCBA6D76AD03"/>
          </artifact>
       </component>
       <component group="com.github.ben-manes.caffeine" name="caffeine" version="2.9.3">
@@ -178,6 +185,11 @@
             <pgp value="48B086A7D843CFA258E83286928FBF39003C0425"/>
          </artifact>
       </component>
+      <component group="it.krzeminski" name="snakeyaml-engine-kmp-jvm" version="3.1.1">
+         <artifact name="snakeyaml-engine-kmp-jvm-3.1.1.jar">
+            <pgp value="8247F88933C2D56F830AF73436AB7ACFFF2027B1"/>
+         </artifact>
+      </component>
       <component group="jakarta.activation" name="jakarta.activation-api" version="2.1.4">
          <artifact name="jakarta.activation-api-2.1.4.jar">
             <pgp value="6DD3B8C64EF75253BEB2C53AD908A43FB7EC07AC"/>
@@ -208,9 +220,19 @@
             <pgp value="B41089A2DA79B0FA5810252872385FF0AF338D52"/>
          </artifact>
       </component>
+      <component group="joda-time" name="joda-time" version="2.14.1">
+         <artifact name="joda-time-2.14.1.jar">
+            <pgp value="B41089A2DA79B0FA5810252872385FF0AF338D52"/>
+         </artifact>
+      </component>
       <component group="net.jodah" name="typetools" version="0.6.3">
          <artifact name="typetools-0.6.3.jar">
             <pgp value="16FFFF8AD10219BC78B42B18243FBB4D5814C621"/>
+         </artifact>
+      </component>
+      <component group="net.thauvin.erik.urlencoder" name="urlencoder-lib-jvm" version="1.6.0">
+         <artifact name="urlencoder-lib-jvm-1.6.0.jar">
+            <pgp value="217BFC8CA98788CB33198A8E7FAC222BF1FC0C12"/>
          </artifact>
       </component>
       <component group="org.antlr" name="antlr4-runtime" version="4.7.2">
@@ -341,6 +363,11 @@
       </component>
       <component group="org.webjars" name="swagger-ui" version="5.32.11">
          <artifact name="swagger-ui-5.32.11.jar">
+            <pgp value="FA1703B1D287CAEA3A60F931E0130A3ED5A2079E"/>
+         </artifact>
+      </component>
+      <component group="org.webjars" name="swagger-ui" version="5.32.14">
+         <artifact name="swagger-ui-5.32.14.jar">
             <pgp value="FA1703B1D287CAEA3A60F931E0130A3ED5A2079E"/>
          </artifact>
       </component>

@@ -10,7 +10,7 @@ class HttpF2ListSteps : StringHttpF2Steps("List: "), En {
 	}
 
 	override fun transform(dataTable: DataTable): List<String> {
-		return dataTable.asList()
+		return dataTable.asList().map { requireNotNull(it) }
 			.flatMap { it.split(",") }
 			.map { it.trim() }
 			.filter { it.isNotEmpty() }
