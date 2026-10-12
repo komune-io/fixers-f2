@@ -21,7 +21,7 @@ arrow = "2.2.3"
 ksp = "2.3.12"
 gradle-plugin-publish = "2.2.1"
 netty = "4.2.19.Final"
-jackson3-databind = "3.2.3"
+jackson3 = "3.2.3"
 
 [libraries]
 # BOM (version required — consumers use platform(f2.bom))
@@ -85,9 +85,11 @@ arrow-optics-ksp-plugin = { module = "io.arrow-kt:arrow-optics-ksp-plugin", vers
 spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "spring-cloud" }
 springdoc-openapi-bom = { module = "org.springdoc:springdoc-openapi-bom", version.ref = "springdoc" }
 netty-bom = { module = "io.netty:netty-bom", version.ref = "netty" }
+jackson3-bom = { module = "tools.jackson:jackson-bom", version.ref = "jackson3" }
+cloudevents-bom = { module = "io.cloudevents:cloudevents-bom", version.ref = "cloudevents" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
-jackson3-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson3-databind" }
+jackson3-databind = { module = "tools.jackson.core:jackson-databind" }
 
 # Ktor
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core" }
@@ -160,7 +162,7 @@ cucumber-java8 = { group = "io.cucumber", name = "cucumber-java8" }
 cucumber-junit-platform-engine = { group = "io.cucumber", name = "cucumber-junit-platform-engine" }
 
 # Cloud Events
-cloudevents-spring = { group = "io.cloudevents", name = "cloudevents-spring", version.ref = "cloudevents" }
+cloudevents-spring = { group = "io.cloudevents", name = "cloudevents-spring" }
 
 # Observability
 micrometer-registry-otlp = { group = "io.micrometer", name = "micrometer-registry-otlp" }

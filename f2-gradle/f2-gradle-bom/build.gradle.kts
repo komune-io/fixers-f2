@@ -18,9 +18,9 @@ dependencies {
 	api(platform(catalogue.spring.cloud.dependencies)) { endorseStrictVersions() }
 	api(platform(catalogue.springdoc.openapi.bom)) { endorseStrictVersions() }
 	api(platform(catalogue.testcontainers.bom)) { endorseStrictVersions() }
-	// Newer than what spring-boot-dependencies/spring-cloud-dependencies currently manage —
-	// pulls in Dependabot-flagged Netty CVE fixes.
+	api(platform(catalogue.cloudevents.bom)) { endorseStrictVersions() }
 	api(platform(catalogue.netty.bom)) { endorseStrictVersions() }
+	api(platform(catalogue.jackson3.bom)) { endorseStrictVersions() }
 
 	constraints {
 		// ═══════════════════════════════════════════
@@ -68,7 +68,7 @@ dependencies {
 		api("io.komune.f2:f2-feature-version:${project.version}")
 
 		// ═══════════════════════════════════════════
-		// Third-party deps (not managed by Spring Boot BOM)
+		// Third-party deps
 		// ═══════════════════════════════════════════
 
 		// Kotlin
@@ -76,15 +76,6 @@ dependencies {
 
 		// KSP
 		api(catalogue.ksp.symbol.processing.api)
-
-		// Arrow KSP (not included in arrow-stack BOM)
 		api(catalogue.arrow.optics.ksp.plugin)
-
-		// Cloud Events
-		api(catalogue.cloudevents.spring)
-
-		// Jackson 3 (tools.jackson) — spring-cloud-dependencies currently manages a version
-		// still inside the vulnerable range of a Dependabot-flagged CVE.
-		api(catalogue.jackson3.databind)
 	}
 }
