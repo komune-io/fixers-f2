@@ -68,7 +68,7 @@ dependencies {
 		api("io.komune.f2:f2-feature-version:${project.version}")
 
 		// ═══════════════════════════════════════════
-		// Third-party deps (not managed by Spring Boot BOM)
+		// Third-party deps
 		// ═══════════════════════════════════════════
 
 		// Kotlin
@@ -76,8 +76,6 @@ dependencies {
 
 		// KSP
 		api(catalogue.ksp.symbol.processing.api)
-
-		// Arrow KSP (not included in arrow-stack BOM)
 		api(catalogue.arrow.optics.ksp.plugin)
 	}
 }
