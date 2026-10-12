@@ -19,11 +19,7 @@ dependencies {
 	api(platform(catalogue.springdoc.openapi.bom)) { endorseStrictVersions() }
 	api(platform(catalogue.testcontainers.bom)) { endorseStrictVersions() }
 	api(platform(catalogue.cloudevents.bom)) { endorseStrictVersions() }
-	// Newer than what spring-boot-dependencies/spring-cloud-dependencies currently manage —
-	// pulls in Dependabot-flagged Netty CVE fixes.
 	api(platform(catalogue.netty.bom)) { endorseStrictVersions() }
-	// Newer than the jackson-bom spring-boot-dependencies currently manages — pulls in
-	// Dependabot-flagged Jackson 3 CVE fixes, aligned across every tools.jackson module.
 	api(platform(catalogue.jackson3.bom)) { endorseStrictVersions() }
 
 	constraints {
