@@ -74,4 +74,20 @@ class KeycloakConfigResolverTest {
             KeycloakConfig(realm = "master", authServerUrl = "http://localhost:8080/auth", resource = "web-client")
         )
     }
+
+    @Test
+    fun `keycloak endpoint function should resolve on the calling thread, without a coroutine`() {
+        assertThat(runBlocking { Thread.currentThread().name }).contains("@coroutine")
+        var resolvingThread: String? = null
+        val recordingResolver = object : KeycloakConfigResolver(f2KeycloakConfig) {
+            override fun resolve(name: String?): KeycloakConfig {
+                resolvingThread = Thread.currentThread().name
+                return super.resolve(name)
+            }
+        }
+
+        KeycloakConfigEndpoint(recordingResolver).keycloak()("first")
+
+        assertThat(resolvingThread).isEqualTo(Thread.currentThread().name)
+    }
 }

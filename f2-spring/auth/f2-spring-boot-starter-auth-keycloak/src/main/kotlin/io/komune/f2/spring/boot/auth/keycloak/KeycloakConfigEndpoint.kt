@@ -1,7 +1,6 @@
 package io.komune.f2.spring.boot.auth.keycloak
 
 import jakarta.annotation.security.PermitAll
-import kotlinx.coroutines.runBlocking
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -15,14 +14,6 @@ class KeycloakConfigEndpoint(
     @PermitAll
     @Bean
     fun keycloak(): (name: String) -> KeycloakConfig = { name ->
-        runBlocking {
-            val keycloakConfig = keycloakConfigResolver.getKeycloakConfig(name)
-
-            KeycloakConfig(
-                realm = keycloakConfig.realm,
-                authServerUrl = keycloakConfig.authServerUrl,
-                resource = keycloakConfig.resource,
-            )
-        }
+        keycloakConfigResolver.resolve(name)
     }
 }

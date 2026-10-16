@@ -7,9 +7,8 @@ plugins {
 dependencies {
     api(project(":f2-spring:auth:f2-spring-boot-starter-auth"))
 
-    implementation(libs.kotlinx.coroutines.core)
-
     testImplementation(libs.bundles.spring.test)
+    testImplementation(libs.kotlinx.coroutines.core)
     testImplementation(libs.spring.boot.starter.webflux)
     testImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http-webflux"))
 }
