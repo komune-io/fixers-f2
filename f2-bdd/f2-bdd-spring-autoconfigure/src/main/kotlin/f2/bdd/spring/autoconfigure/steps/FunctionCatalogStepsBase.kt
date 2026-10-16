@@ -2,7 +2,9 @@ package f2.bdd.spring.autoconfigure.steps
 
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
+import java.time.Duration
 import org.assertj.core.api.Assertions
+import org.awaitility.Awaitility
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry
 import reactor.core.publisher.Flux
 
@@ -37,7 +39,10 @@ abstract class FunctionCatalogStepsBase<P, R>(
 
 		@Suppress("UNCHECKED_CAST")
 		Then("${prefix}The function catalog result for {string} is") { value: String, dataTable: DataTable ->
-			Assertions.assertThat(bag.result[value] as List<Any>?).isEqualTo(transform(dataTable))
+			// A consumer invoked through the catalog completes asynchronously.
+			Awaitility.await().atMost(CONSUMER_TIMEOUT).untilAsserted {
+				Assertions.assertThat(bag.result[value] as List<Any>?).isEqualTo(transform(dataTable))
+			}
 		}
 	}
 
@@ -56,3 +61,5 @@ abstract class FunctionCatalogStepsBase<P, R>(
 	abstract fun transform(dataTable: DataTable): List<P>
 	abstract fun consumerReceiver(): List<R>
 }
+
+private val CONSUMER_TIMEOUT: Duration = Duration.ofSeconds(5)

@@ -453,6 +453,19 @@ open class DIDFunctionClient constructor(private val client: F2Client) : DidAggr
 }
 ```
 
+## Dispatcher
+
+Suspending functions, suppliers and consumers start on `Dispatchers.IO`, and the flow they return is
+collected there too, so the body never resumes on the I/O thread of the client that woke it. The
+caller's Reactor context, the security identity included, stays readable through `ReactorContext`.
+
+```properties
+# io (default), default or unconfined
+f2.function.dispatcher=io
+```
+
+A consumer invoked by the catalog completes asynchronously; a failure is logged.
+
 ## Openapi
 
 Integration with Springdoc to generate open api documentation.

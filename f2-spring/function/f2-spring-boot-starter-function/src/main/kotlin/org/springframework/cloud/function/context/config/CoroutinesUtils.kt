@@ -17,12 +17,13 @@
 @file:JvmName("CoroutinesUtils")
 package org.springframework.cloud.function.context.config
 
-import kotlinx.coroutines.Dispatchers
+import f2.spring.F2FunctionDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.mono
+import org.slf4j.LoggerFactory
 import reactor.core.publisher.Flux
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -90,35 +91,45 @@ private fun getContinuationTypeArguments(type: Type): Type {
 fun invokeSuspendingFunction(kotlinLambdaTarget: Any, arg0: Any): Flux<Any> {
 	val function = kotlinLambdaTarget as SuspendFunction
 	val flux = arg0 as Flux<Any>
-	return mono(Dispatchers.Unconfined) {
+	// KOMUNE Modification
+	val dispatcher = F2FunctionDispatcher.current
+	return mono(dispatcher) {
 		suspendCoroutineUninterceptedOrReturn<Flow<Any>> {
 			function.invoke(flux.asFlow(), it)
 		}
 	}.flatMapMany {
-		it.asFlux()
+		it.asFlux(dispatcher)
 	}
+	// KOMUNE End Of Modification
 }
 
 fun invokeSuspendingSupplier(kotlinLambdaTarget: Any): Flux<Any> {
 	val supplier = kotlinLambdaTarget as SuspendSupplier
-	return mono(Dispatchers.Unconfined) {
+	// KOMUNE Modification
+	val dispatcher = F2FunctionDispatcher.current
+	return mono(dispatcher) {
 		val result = suspendCoroutineUninterceptedOrReturn<Any> {
 			supplier.invoke(it)
 		}
 		if (result is Flow<*>) result as Flow<Any> else flowOf(result)
 	}.flatMapMany {
-		it.asFlux()
+		it.asFlux(dispatcher)
 	}
+	// KOMUNE End Of Modification
 }
 
 fun invokeSuspendingConsumer(kotlinLambdaTarget: Any, arg0: Any) {
 	val consumer = kotlinLambdaTarget as SuspendConsumer
 	val flux = arg0 as Flux<Any>
-	mono(Dispatchers.Unconfined) {
+	// KOMUNE Modification
+	mono(F2FunctionDispatcher.current) {
 		suspendCoroutineUninterceptedOrReturn<Unit> {
 			consumer.invoke(flux.asFlow(), it)
 		}
-	}.subscribe()
+	}.subscribe(null) { error ->
+		logger.error("Suspending consumer failed", error)
+	}
+	// KOMUNE End Of Modification
 }
 
 fun isValidSuspendingFunction(kotlinLambdaTarget: Any, arg0: Any): Boolean {
@@ -128,6 +139,10 @@ fun isValidSuspendingFunction(kotlinLambdaTarget: Any, arg0: Any): Boolean {
 fun isValidSuspendingSupplier(kotlinLambdaTarget: Any): Boolean {
 	return kotlinLambdaTarget is Function1<*, *>
 }
+
+// KOMUNE Modification
+private val logger = LoggerFactory.getLogger("org.springframework.cloud.function.context.config.CoroutinesUtils")
+// KOMUNE End Of Modification
 
 private typealias SuspendFunction = (Any?, Any?) -> Any?
 private typealias SuspendConsumer = (Any?, Any?) -> Unit?
