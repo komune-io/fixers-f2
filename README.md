@@ -456,15 +456,19 @@ open class DIDFunctionClient constructor(private val client: F2Client) : DidAggr
 ## Dispatcher
 
 Suspending functions, suppliers and consumers start on `Dispatchers.IO`, and the flow they return is
-collected there too, so the body never resumes on the I/O thread of the client that woke it. The
-caller's Reactor context, the security identity included, stays readable through `ReactorContext`.
+collected there too, so the body never resumes on the I/O thread of the client that woke it.
+
+For functions and suppliers, the subscriber's Reactor context, and the reactive security context it
+carries, stays readable through `ReactorContext`. Thread-locals do not follow the dispatcher: the MDC,
+Micrometer's thread-local context and a servlet `SecurityContextHolder` are not visible in the body.
 
 ```properties
 # io (default), default or unconfined
 f2.function.dispatcher=io
 ```
 
-A consumer invoked by the catalog completes asynchronously; a failure is logged.
+A consumer invoked by the catalog completes asynchronously, and it has no subscriber context: pass
+the identity it needs in its input. A failure is logged.
 
 ## Openapi
 

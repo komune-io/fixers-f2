@@ -7,7 +7,7 @@ description: Use when bumping F2's spring-cloud-function version, when a KOMUNE-
 
 ## Overview
 
-F2 vendors (shadows by package/path) 7 files from `spring-cloud-function` — 6 Java files plus `CoroutinesUtils.kt` — each carrying custom patches marked `// KOMUNE Modification` … `// KOMUNE End Of Modification`. A sibling repo, `komune-io/spring-cloud-function`, carries the identical patch on branches named `fixers/<version>` (e.g. `fixers/5.0.4`) off the matching upstream tag — this is the fork PR upstream would see, kept in sync with F2's vendored copies.
+F2 vendors (shadows by package/path) 7 files from `spring-cloud-function` — 6 Java files plus `CoroutinesUtils.kt` — each carrying custom patches marked `// KOMUNE Modification` … `// KOMUNE End Of Modification`. A sibling repo, `komune-io/spring-cloud-function`, carries the identical patch for the six Java files on branches named `fixers/<version>` (e.g. `fixers/5.0.4`) off the matching upstream tag — this is the fork PR upstream would see, kept in sync with F2's vendored copies. The fork's `CoroutinesUtils.kt` is upstream's, without F2's patches.
 
 Upgrading means: find the new tag, check which vendored files actually changed upstream, reapply only the KOMUNE hunks that survive (not a wholesale merge), and verify the patches are still load-bearing — in both repos, kept in sync.
 
@@ -172,6 +172,6 @@ Fork: `git checkout -b fixers/<new-version> v<new-version>`, commit the patch. F
 - **Trusting a network-fetched `diff <(...) <(...)`** — verified false-negative twice in one session (once during initial BOM investigation, once during "independent" re-verification of the same claim). Save to real files and diff those.
 - **Assuming a hunk's necessity carries over** from the last time it was checked — re-verify by removal-proof against the new base, don't just cite the old table.
 - **Treating the fork/F2 sync-check's expected nonzero files as a regression** — 4 of the 6 Java files have permanent, harmless cosmetic drift; only `SimpleFunctionRegistry.java` and `FunctionWebRequestProcessingHelper.java` should ever be byte-identical, and `CoroutinesUtils.kt` isn't mirrored in the fork at all.
-- **Forgetting `CoroutinesUtils.kt` is vendored** — it's Kotlin, it lives under `src/main/kotlin`, and it has no fork counterpart, so every "the 6 Java files" shortcut silently skips it.
+- **Forgetting `CoroutinesUtils.kt` is vendored** — it's Kotlin, it lives under `src/main/kotlin`, and the fork carries it unpatched (upstream's copy), so every "the 6 Java files" shortcut silently skips it.
 - **zsh array indexing** — a paired-array verification loop written assuming 0-indexed arrays can misbehave under zsh's default 1-indexed arrays. Prefer a single array of `"a::b"` pairs split with `${x%%::*}`/`${x##*::}` over two parallel indexed arrays, or just run under `bash` explicitly.
 - **Forgetting the `spring-web` pom.xml hunk** on the fork side — it's easy to miss since it's not a `.java` file and doesn't show up in a vendored-file-only diff sweep.
