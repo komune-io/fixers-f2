@@ -6,13 +6,17 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.reactive.server.WebTestClient
 
 /**
  * Covers the Keycloak starter inside a running application: `f2.issuers[*]` binding into both
  * [F2KeycloakConfig] and [F2TrustedIssuersConfig], and the fact that the `keycloak` configuration
  * endpoint is reachable anonymously (it is annotated `@PermitAll`) while the rest of the
- * application requires a token.
+ * application requires a token. The `keycloak route` tests pin its HTTP contract as served by the
+ * F2 function routes.
  */
 @SpringBootTest(
     classes = [KeycloakAuthTestApp::class],
@@ -40,6 +44,11 @@ class KeycloakConfigEndpointIntegrationTest {
 
     @Autowired
     private lateinit var keycloakEndpoint: KeycloakConfigEndpoint
+
+    private companion object {
+        const val SECOND_CONFIG_JSON =
+            """{"realm":"tenant","authServerUrl":"http://localhost:8081/auth","resource":null}"""
+    }
 
     private val webTestClient: WebTestClient by lazy {
         WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()
@@ -73,10 +82,46 @@ class KeycloakConfigEndpointIntegrationTest {
     }
 
     @Test
-    fun `keycloak config endpoint should be reachable without a token`() {
-        webTestClient.get().uri("/keycloak").exchange()
+    fun `keycloak route should answer a plain issuer name with one config object, without a token`() {
+        webTestClient.post().uri("/keycloak")
+            .contentType(MediaType.TEXT_PLAIN)
+            .bodyValue("second")
+            .exchange()
             .expectStatus().isOk
-            .expectBody(String::class.java).isEqualTo("keycloak-config")
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody().json(SECOND_CONFIG_JSON, JsonCompareMode.STRICT)
+    }
+
+    @Test
+    fun `keycloak route should answer a json array of names with an array of configs`() {
+        webTestClient.post().uri("/keycloak")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("""["second"]""")
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody().json("[$SECOND_CONFIG_JSON]", JsonCompareMode.STRICT)
+    }
+
+    @Test
+    fun `keycloak route should fail with 500 for an unknown issuer name`() {
+        webTestClient.post().uri("/keycloak")
+            .contentType(MediaType.TEXT_PLAIN)
+            .bodyValue("unknown")
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    @Test
+    fun `keycloak route should fail with 500 without a body`() {
+        webTestClient.post().uri("/keycloak").exchange()
+            .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    @Test
+    fun `keycloak route should not be anonymous under a path variable`() {
+        webTestClient.get().uri("/keycloak/second").exchange()
+            .expectStatus().isUnauthorized
     }
 
     @Test
