@@ -381,6 +381,11 @@
             <pgp value="FA1703B1D287CAEA3A60F931E0130A3ED5A2079E"/>
          </artifact>
       </component>
+      <component group="org.webjars" name="swagger-ui" version="5.34.0">
+         <artifact name="swagger-ui-5.34.0.jar">
+            <pgp value="FA1703B1D287CAEA3A60F931E0130A3ED5A2079E"/>
+         </artifact>
+      </component>
       <component group="org.webjars" name="webjars-locator-lite" version="1.1.3">
          <artifact name="webjars-locator-lite-1.1.3.jar">
             <pgp value="82F94BBDF95C247BBD21396B9A0B94DEC0FFA7EE"/>
