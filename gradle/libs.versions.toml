@@ -20,7 +20,7 @@ testcontainers = "2.0.5"
 arrow = "2.3.0.1"
 ksp = "2.3.13"
 gradle-plugin-publish = "2.2.1"
-netty = "4.2.19.Final"
+netty = "4.2.20.Final"
 jackson3 = "3.2.4"
 
 [libraries]
