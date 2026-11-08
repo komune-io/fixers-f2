@@ -29,22 +29,25 @@ class JsonMessageConverterTest {
         .setHeader(MessageHeaders.CONTENT_TYPE, "application/json")
         .build()
 
-    private fun assertStatus(payload: Any, status: HttpStatus, cause: Class<out Throwable>) {
+    private fun assertStatus(payload: Any, status: HttpStatus, reason: String, cause: Class<out Throwable>) {
         assertThatThrownBy { converter.fromMessage(json(payload), Echo::class.java) }
             .isInstanceOfSatisfying(ResponseStatusException::class.java) { error ->
                 assertThat(error.statusCode).isEqualTo(status)
+                assertThat(error.reason).isEqualTo(reason)
             }
             .cause().isInstanceOf(cause)
     }
 
     @Test
     fun `a truncated body is unreadable content and answers 400`() {
-        assertStatus("""{"name":"a","count":1""".toByteArray(), HttpStatus.BAD_REQUEST, StreamReadException::class.java)
+        val truncated = """{"name":"a","count":1""".toByteArray()
+        assertStatus(truncated, HttpStatus.BAD_REQUEST, "Error parsing json", StreamReadException::class.java)
     }
 
     @Test
     fun `a body of the wrong shape is unreadable content and answers 400`() {
-        assertStatus("""{"name":"a","count":[]}""".toByteArray(), HttpStatus.BAD_REQUEST, DatabindException::class.java)
+        val wrongShape = """{"name":"a","count":[]}""".toByteArray()
+        assertStatus(wrongShape, HttpStatus.BAD_REQUEST, "Error parsing json", DatabindException::class.java)
     }
 
     @Test
@@ -53,6 +56,8 @@ class JsonMessageConverterTest {
             override fun read(buffer: CharArray, offset: Int, length: Int): Int = throw IOException("read failed")
             override fun close() = Unit
         }
-        assertStatus(failingReader, HttpStatus.INTERNAL_SERVER_ERROR, JacksonIOException::class.java)
+        assertStatus(
+            failingReader, HttpStatus.INTERNAL_SERVER_ERROR, "Error reading json", JacksonIOException::class.java
+        )
     }
 }
