@@ -16,7 +16,7 @@ const val ROLE_PREFIX = "ROLE_"
 object AuthenticationProvider {
     suspend fun getSecurityContext(): SecurityContext? {
         return coroutineContext[ReactorContext.Key]
-            ?.context?.get<Mono<SecurityContext>>(SecurityContext::class.java)
+            ?.context?.getOrDefault<Mono<SecurityContext>>(SecurityContext::class.java, null)
             ?.awaitSingleOrNull()
     }
 

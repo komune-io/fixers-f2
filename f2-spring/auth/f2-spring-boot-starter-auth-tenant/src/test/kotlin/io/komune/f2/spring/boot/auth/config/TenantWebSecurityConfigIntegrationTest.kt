@@ -76,6 +76,15 @@ class TenantWebSecurityConfigIntegrationTest {
     }
 
     @Test
+    fun `CORS preflight on a PermitAll path should be answered without any token`() {
+        webTestClient.options().uri("/openFunction")
+            .header("Origin", "http://example.com")
+            .header("Access-Control-Request-Method", "POST")
+            .exchange()
+            .expectStatus().isOk
+    }
+
+    @Test
     fun `authenticated request with an insufficient role should be rejected with 403`() {
         val token = oidc.mintToken(TENANT_1, roles = listOf("user"))
         get("/adminFunction", token).expectStatus().isForbidden

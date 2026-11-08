@@ -16,6 +16,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
+import org.springframework.http.HttpMethod
 import org.springframework.security.authorization.AuthorizationDecision
 import org.springframework.security.authorization.AuthorizationResult
 import org.springframework.security.config.web.server.ServerHttpSecurity
@@ -35,6 +36,9 @@ class WebSecurityConfig {
 
     companion object {
         const val SPRING_SECURITY_FILTER_CHAIN = "springSecurityFilterChain"
+
+        // A function bean answers GET as a supplier and POST as a function, HEAD beside GET.
+        private val PERMIT_ALL_METHODS = listOf(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST)
     }
 
     private val logger = LoggerFactory.getLogger(WebSecurityConfig::class.java)
@@ -160,7 +164,9 @@ class WebSecurityConfig {
         if (permitAllBeans.isNotEmpty()) {
             logger.trace("Setting up permitAll for beans: ${permitAllBeans.joinToString()}")
             http.authorizeExchange { exchange ->
-                exchange.pathMatchers(*permitAllBeans).permitAll()
+                PERMIT_ALL_METHODS.forEach { method ->
+                    exchange.pathMatchers(method, *permitAllBeans).permitAll()
+                }
             }
         }
     }

@@ -21,6 +21,7 @@ dependencies {
 	api(platform(catalogue.cloudevents.bom)) { endorseStrictVersions() }
 	api(platform(catalogue.netty.bom)) { endorseStrictVersions() }
 	api(platform(catalogue.jackson3.bom)) { endorseStrictVersions() }
+	api(platform(catalogue.jackson2.bom)) { endorseStrictVersions() }
 
 	constraints {
 		// ═══════════════════════════════════════════

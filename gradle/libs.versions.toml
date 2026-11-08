@@ -22,6 +22,8 @@ ksp = "2.3.13"
 gradle-plugin-publish = "2.2.1"
 netty = "4.2.20.Final"
 jackson3 = "3.3.0"
+# Raises the Jackson 2 that ktor-serialization-jackson and keycloak-core still bring to consumers.
+jackson2 = "2.22.4"
 
 [libraries]
 # BOM (version required — consumers use platform(f2.bom))
@@ -86,6 +88,7 @@ spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-d
 springdoc-openapi-bom = { module = "org.springdoc:springdoc-openapi-bom", version.ref = "springdoc" }
 netty-bom = { module = "io.netty:netty-bom", version.ref = "netty" }
 jackson3-bom = { module = "tools.jackson:jackson-bom", version.ref = "jackson3" }
+jackson2-bom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson2" }
 cloudevents-bom = { module = "io.cloudevents:cloudevents-bom", version.ref = "cloudevents" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }

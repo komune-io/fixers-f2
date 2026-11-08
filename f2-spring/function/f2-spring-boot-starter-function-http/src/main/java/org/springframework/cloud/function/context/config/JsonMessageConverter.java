@@ -43,7 +43,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
-import tools.jackson.databind.DatabindException;
+import tools.jackson.core.JacksonException;
 
 /**
  * Implementation of {@link MessageConverter} which uses Jackson or Gson libraries to do the
@@ -150,7 +150,7 @@ public class JsonMessageConverter extends AbstractMessageConverter {
                 }
                 // KOMUNE Modification
                 // force message conversion error propagation
-                else if (isJsonContentType(message.getHeaders()) && e.getCause() instanceof DatabindException) {
+                else if (isJsonContentType(message.getHeaders()) && e.getCause() instanceof JacksonException) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error parsing json", e.getCause());
                 }
                 // KOMUNE End Of Modification
