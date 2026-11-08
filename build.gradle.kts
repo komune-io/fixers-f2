@@ -1,6 +1,16 @@
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 
+buildscript {
+    dependencies {
+        constraints {
+            // GHSA-j288-q9x7-2f5v: spring-boot-gradle-plugin -> commons-compress 1.27.1 pulls commons-lang3 3.16.0
+            // onto the build classpath. Remove once the Spring Boot plugin brings >= 3.18.0 by itself.
+            classpath(catalogue.commons.lang3)
+        }
+    }
+}
+
 plugins {
     alias(catalogue.plugins.kotlin.kapt) apply false
     alias(catalogue.plugins.kotlin.spring) apply false
