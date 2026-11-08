@@ -1,6 +1,6 @@
 VERSION = $(shell cat VERSION)
 
-.PHONY: clean lint build test check publish promote version verify-metadata verify-metadata-dry
+.PHONY: clean lint build test check publish promote version verify-metadata verify-metadata-dry js-lock-refresh
 
 clean:
 	./gradlew clean
@@ -38,3 +38,9 @@ verify-metadata: verify-metadata-dry
 # Generates the same files with the .dryrun suffix, to inspect the delta without replacing anything.
 verify-metadata-dry:
 	./gradlew --write-verification-metadata pgp,sha256 --export-keys --dry-run build publishToMavenLocal
+
+# Regenerates kotlin-js-store/yarn.lock from scratch. kotlinUpgradeYarnLock alone keeps every
+# version already locked, so the old lock and build/js must be deleted first.
+js-lock-refresh:
+	rm -rf build/js kotlin-js-store/yarn.lock
+	./gradlew rootPackageJson --rerun kotlinUpgradeYarnLock
