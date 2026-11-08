@@ -57,12 +57,16 @@ fixers {
 // Every pin is path-scoped with `**/`: an unscoped glob breaks karma, and `mocha/x` without `**/` is ignored.
 // - ws: pinned to 8.20.1 by ktor-client-core, which KGP copies into every ktor-using package,
 //   so it needs `**/ws`. Remove once ktor's ws pin goes above 8.20.1.
-// - serialize-javascript, diff: from mocha 11. Remove once KGP ships mocha >= 12.
+// - serialize-javascript, diff, glob, minimatch: from mocha 11. Remove once KGP ships mocha >= 12.
+// - minimatch: also from karma-webpack 5. Remove once KGP ships a karma-webpack that allows minimatch >= 11.0.1.
 // Regenerate the lock after any change: `make -f infra/make/libs.mk js-lock-refresh`.
 plugins.withType<YarnPlugin> {
     the<YarnRootExtension>().apply {
         resolution("**/ws", "8.22.2")
         resolution("**/mocha/serialize-javascript", "7.1.4")
         resolution("**/mocha/diff", "8.0.4")
+        resolution("**/mocha/glob", "14.0.4")
+        resolution("**/mocha/minimatch", "11.0.5")
+        resolution("**/karma-webpack/minimatch", "11.0.5")
     }
 }
