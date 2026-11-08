@@ -18,7 +18,7 @@ gradlePlugin {
     }
 }
 
-val generateVersionProperties by tasks.registering {
+val generateVersionProperties = tasks.register("generateVersionProperties") {
     val outputDir = layout.buildDirectory.dir("generated/resources")
     val projectVersion = provider { project.version.toString() }
     inputs.property("version", projectVersion)
