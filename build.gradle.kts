@@ -16,7 +16,7 @@ plugins {
 
 subprojects {
     configurations.matching { it.name == "kapt" }.configureEach {
-        val bomDep = project.dependencies.platform(project(":f2-gradle:f2-gradle-bom"))
+        val bomDep = project.dependencies.platform(project.dependencies.project(":f2-gradle:f2-gradle-bom"))
         project.dependencies.add(name, bomDep)
     }
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
