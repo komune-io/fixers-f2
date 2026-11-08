@@ -24,6 +24,8 @@ netty = "4.2.20.Final"
 jackson3 = "3.3.0"
 # Raises the Jackson 2 that ktor-serialization-jackson and keycloak-core still bring to consumers.
 jackson2 = "2.22.4"
+# Raises the SCRAM client that r2dbc-postgresql, whose version Spring Boot sets, still declares below it.
+scram = "3.4"
 
 [libraries]
 # BOM (version required — consumers use platform(f2.bom))
@@ -93,6 +95,7 @@ cloudevents-bom = { module = "io.cloudevents:cloudevents-bom", version.ref = "cl
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 jackson3-databind = { module = "tools.jackson.core:jackson-databind" }
+scram-client = { module = "com.ongres.scram:scram-client", version.ref = "scram" }
 
 # Ktor
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core" }

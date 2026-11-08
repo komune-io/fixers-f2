@@ -75,6 +75,9 @@ dependencies {
 		// Kotlin
 		api(catalogue.kotlinx.datetime)
 
+		// PostgreSQL
+		api(catalogue.scram.client)
+
 		// KSP
 		api(catalogue.ksp.symbol.processing.api)
 		api(catalogue.arrow.optics.ksp.plugin)
