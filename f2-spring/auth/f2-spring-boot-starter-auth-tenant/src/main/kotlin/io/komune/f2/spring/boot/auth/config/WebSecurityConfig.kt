@@ -2,7 +2,6 @@ package io.komune.f2.spring.boot.auth.config
 
 import io.komune.f2.spring.boot.auth.ROLE_PREFIX
 import io.komune.f2.spring.boot.auth.security.TrustedIssuerJwtAuthenticationManagerResolver
-import jakarta.annotation.security.PermitAll
 import jakarta.annotation.security.RolesAllowed
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +15,6 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
-import org.springframework.http.HttpMethod
 import org.springframework.security.authorization.AuthorizationDecision
 import org.springframework.security.authorization.AuthorizationResult
 import org.springframework.security.config.web.server.ServerHttpSecurity
@@ -36,9 +34,6 @@ class WebSecurityConfig {
 
     companion object {
         const val SPRING_SECURITY_FILTER_CHAIN = "springSecurityFilterChain"
-
-        // A function bean answers GET as a supplier and POST as a function, HEAD beside GET.
-        private val PERMIT_ALL_METHODS = listOf(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST)
     }
 
     private val logger = LoggerFactory.getLogger(WebSecurityConfig::class.java)
@@ -156,19 +151,8 @@ class WebSecurityConfig {
 
     fun addPermitAllRules(http: ServerHttpSecurity) {
         logger.trace("Adding PermitAll rules")
-
-        val permitAllBeans = applicationContext.getBeanNamesForAnnotation(PermitAll::class.java)
-            .map { bean -> "$contextPath/$bean" }
-            .toTypedArray()
-
-        if (permitAllBeans.isNotEmpty()) {
-            logger.trace("Setting up permitAll for beans: ${permitAllBeans.joinToString()}")
-            http.authorizeExchange { exchange ->
-                PERMIT_ALL_METHODS.forEach { method ->
-                    exchange.pathMatchers(method, *permitAllBeans).permitAll()
-                }
-            }
-        }
+        val permitAllPaths = http.permitAllFunctionBeans(applicationContext, contextPath)
+        logger.trace("Set up permitAll for beans: ${permitAllPaths.joinToString()}")
     }
 
     fun addMandatoryAuthRules(http: ServerHttpSecurity) {

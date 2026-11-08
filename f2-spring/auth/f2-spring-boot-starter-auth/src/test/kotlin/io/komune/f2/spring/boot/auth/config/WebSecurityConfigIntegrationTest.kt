@@ -73,14 +73,7 @@ class WebSecurityConfigIntegrationTest {
     }
 
     @Test
-    fun `PermitAll path should be reachable without any token on the verbs a function answers`() {
-        listOf(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST).forEach { method ->
-            webTestClient.method(method).uri("/openFunction").exchange().expectStatus().isOk
-        }
-    }
-
-    @Test
-    fun `PermitAll path should still require a token on the other verbs`() {
+    fun `PermitAll path should still require a token on PUT and DELETE`() {
         listOf(HttpMethod.PUT, HttpMethod.DELETE).forEach { method ->
             webTestClient.method(method).uri("/openFunction").exchange().expectStatus().isUnauthorized
         }

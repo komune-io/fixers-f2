@@ -1,7 +1,6 @@
 package io.komune.f2.spring.boot.auth.config
 
 import io.komune.f2.spring.boot.auth.ROLE_PREFIX
-import jakarta.annotation.security.PermitAll
 import jakarta.annotation.security.RolesAllowed
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -12,7 +11,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpMethod
 import org.springframework.security.authorization.AuthorizationDecision
 import org.springframework.security.authorization.AuthorizationResult
 import org.springframework.security.config.web.server.ServerHttpSecurity
@@ -37,9 +35,6 @@ abstract class WebSecurityConfig {
 
     companion object {
         const val SPRING_SECURITY_FILTER_CHAIN = "springSecurityFilterChain"
-
-        // A function bean answers GET as a supplier and POST as a function, HEAD beside GET.
-        private val PERMIT_ALL_METHODS = listOf(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST)
     }
 
     @Value("\${spring.cloud.function.web.path:}")
@@ -132,17 +127,7 @@ abstract class WebSecurityConfig {
     }
 
     fun addPermitAllRules(http: ServerHttpSecurity) {
-        val permitAllBeans = applicationContext.getBeanNamesForAnnotation(PermitAll::class.java)
-            .map { bean -> "$contextPath/$bean" }
-            .toTypedArray()
-
-        if (permitAllBeans.isNotEmpty()) {
-            http.authorizeExchange { exchange ->
-                PERMIT_ALL_METHODS.forEach { method ->
-                    exchange.pathMatchers(method, *permitAllBeans).permitAll()
-                }
-            }
-        }
+        http.permitAllFunctionBeans(applicationContext, contextPath)
     }
 
     fun addMandatoryAuthRules(http: ServerHttpSecurity) {

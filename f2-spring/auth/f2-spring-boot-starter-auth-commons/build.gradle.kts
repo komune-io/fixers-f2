@@ -13,4 +13,6 @@ dependencies {
     api(libs.bundles.spring.oauth2)
 
     testImplementation(libs.bundles.spring.test)
+    testImplementation(libs.spring.boot.starter.webflux)
+    testImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http-webflux"))
 }

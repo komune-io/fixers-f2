@@ -43,7 +43,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
-import tools.jackson.core.JacksonException;
+import tools.jackson.core.exc.JacksonIOException;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.DatabindException;
 
 /**
  * Implementation of {@link MessageConverter} which uses Jackson or Gson libraries to do the
@@ -149,8 +151,13 @@ public class JsonMessageConverter extends AbstractMessageConverter {
                     return new String((byte[]) message.getPayload(), StandardCharsets.UTF_8);
                 }
                 // KOMUNE Modification
-                // force message conversion error propagation
-                else if (isJsonContentType(message.getHeaders()) && e.getCause() instanceof JacksonException) {
+                // force message conversion error propagation: unreadable content is the client's
+                // error, a failed read of the body is the server's
+                else if (isJsonContentType(message.getHeaders()) && e.getCause() instanceof JacksonIOException) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error reading json", e.getCause());
+                }
+                else if (isJsonContentType(message.getHeaders())
+                        && (e.getCause() instanceof StreamReadException || e.getCause() instanceof DatabindException)) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error parsing json", e.getCause());
                 }
                 // KOMUNE End Of Modification
