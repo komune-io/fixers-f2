@@ -28,6 +28,7 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.util.reflect.TypeInfo
 import io.ktor.utils.io.ByteReadChannel
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.js.JsExport
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.transform
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.intOrNull
@@ -53,27 +55,40 @@ open class HttpF2Client(
 
 	override val type: F2ClientType = F2ClientType.HTTP
 
+	@Suppress("TooGenericExceptionCaught")
 	private suspend fun handleError(response: HttpResponse): Nothing {
-		val body = response.bodyAsText()
-		throw F2Exception(error = decodeError(body, response.status.value))
+		val status = response.status.value
+		val body = try {
+			response.bodyAsText()
+		} catch (e: CancellationException) {
+			throw e
+		} catch (e: Throwable) {
+			throw F2Exception(error = F2Error(message = e.message ?: "", code = status), cause = e)
+		}
+		throw F2Exception(error = decodeError(body, status))
 	}
 
 	private fun decodeError(body: String, status: Int): F2Error {
-		val fields = try {
+		val structured = try {
 			json.parseToJsonElement(body) as? JsonObject
 		} catch (_: SerializationException) {
 			null
+		} ?: return F2Error(message = body, code = status)
+		val rawCode = (structured["code"] as? JsonPrimitive)?.takeUnless { it is JsonNull }
+		val code = rawCode?.intOrNull ?: status
+		val decoded = try {
+			json.decodeFromJsonElement(F2Error.serializer(), JsonObject(structured + ("code" to JsonPrimitive(code))))
+		} catch (_: SerializationException) {
+			return F2Error(message = body, code = code)
 		}
-		val decoded = fields?.let { structured ->
-			val code = (structured["code"] as? JsonPrimitive)?.intOrNull
-			val withCode = if (code == null) JsonObject(structured + ("code" to JsonPrimitive(status))) else structured
-			try {
-				json.decodeFromJsonElement(F2Error.serializer(), withCode)
-			} catch (_: SerializationException) {
-				null
-			}
-		}
-		return decoded ?: F2Error(message = body, code = status)
+		val unreadCode = rawCode?.takeIf { it.intOrNull == null }?.content?.takeIf { it.isNotBlank() }
+		return if (unreadCode == null) decoded else F2Error(
+			message = "${decoded.message} (code $unreadCode)",
+			id = decoded.id,
+			timestamp = decoded.timestamp,
+			code = decoded.code,
+			requestId = decoded.requestId,
+		)
 	}
 
 	private suspend fun send(request: suspend () -> HttpResponse): HttpResponse = try {
