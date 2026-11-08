@@ -109,6 +109,8 @@ open class HttpF2Client(
 		route: String, queryTypeInfo: TypeInfo
 	): F2Consumer<QUERY> = F2Consumer { messages ->
 		doPost(route, queryTypeInfo, messages)
+			.firstOrNull { !it.status.isSuccess() }
+			?.let { handleError(it) }
 	}
 
 	private suspend fun <MSG> doPost(route: String, queryTypeInfo: TypeInfo, messages: Flow<MSG>): List<HttpResponse> {

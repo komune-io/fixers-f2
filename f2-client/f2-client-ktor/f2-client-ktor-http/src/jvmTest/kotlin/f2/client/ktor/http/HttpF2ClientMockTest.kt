@@ -229,6 +229,51 @@ class HttpF2ClientMockTest {
     }
 
     @Test
+    suspend fun `consumer throws F2Exception on error response`() {
+        val client = f2Client { request ->
+            respondError(
+                status = HttpStatusCode.InternalServerError,
+                content = "Server error occurred"
+            )
+        }
+        val consumer = client.consumer<TestRequest>(
+            route = "consume",
+            queryTypeInfo = TypeInfo(TestRequest::class, typeOf<TestRequest>())
+        )
+
+        val exception = assertThrows<F2Exception> {
+            consumer.invoke(flowOf(TestRequest("consume-id", 99)))
+        }
+
+        assertThat(exception.error.code).isEqualTo(500)
+        assertThat(exception.error.message).isEqualTo("Server error occurred")
+    }
+
+    @Test
+    suspend fun `consumer throws F2Exception when a later response fails`() {
+        var requestCount = 0
+        val client = f2Client { request ->
+            requestCount++
+            if (requestCount == 1) {
+                respond(content = "", status = HttpStatusCode.OK)
+            } else {
+                respondError(status = HttpStatusCode.InternalServerError, content = "Server error occurred")
+            }
+        }
+        val consumer = client.consumer<TestRequest>(
+            route = "consume",
+            queryTypeInfo = TypeInfo(TestRequest::class, typeOf<TestRequest>())
+        )
+
+        val exception = assertThrows<F2Exception> {
+            consumer.invoke(flowOf(TestRequest("first", 1), TestRequest("second", 2)))
+        }
+
+        assertThat(exception.error.code).isEqualTo(500)
+        assertThat(requestCount).isEqualTo(2)
+    }
+
+    @Test
     suspend fun `supplier handles F2Error JSON response`() {
         val errorJson = """{
             "id": "error-123",
