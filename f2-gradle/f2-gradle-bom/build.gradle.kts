@@ -62,6 +62,7 @@ dependencies {
 		api("io.komune.f2:f2-bdd-spring-autoconfigure:${project.version}")
 		api("io.komune.f2:f2-bdd-spring-http:${project.version}")
 		api("io.komune.f2:f2-bdd-spring-lambda:${project.version}")
+		api("io.komune.f2:f2-bdd-blockhound:${project.version}")
 
 		// f2-feature
 		api("io.komune.f2:f2-feature-catalog:${project.version}")
