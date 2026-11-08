@@ -1,49 +1,43 @@
 package f2.client.ktor.http
 
 import f2.dsl.cqrs.exception.F2Exception
-import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
-import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.plugins.api.createClientPlugin
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.statement.HttpResponsePipeline
-import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.http.isSuccess
-import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.reflect.TypeInfo
+import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.reflect.typeOf
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
-import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class HttpF2ClientErrorTest {
 
-    private val json = Json {
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-    }
-
     private fun f2Client(
         status: HttpStatusCode,
         body: String,
-        config: HttpClientConfig<*>.() -> Unit = { install(ContentNegotiation) { json(json) } },
-    ): HttpF2Client {
-        val engine = MockEngine {
-            respond(
-                content = body,
-                status = status,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            )
-        }
-        return HttpF2Client(HttpClient(engine, config), "http://localhost", json)
+        config: HttpClientConfig<*>.() -> Unit = { mockContentNegotiation() },
+    ): HttpF2Client = f2Client(status, body.encodeToByteArray(), config)
+
+    private fun f2Client(
+        status: HttpStatusCode,
+        body: ByteArray,
+        config: HttpClientConfig<*>.() -> Unit = { mockContentNegotiation() },
+        contentType: String = "application/json; charset=UTF-8",
+    ): HttpF2Client = mockF2Client(config = config) {
+        respond(
+            content = body,
+            status = status,
+            headers = headersOf(HttpHeaders.ContentType, contentType)
+        )
     }
 
     private fun HttpF2Client.testConsumer() = consumer<TestRequest>(
@@ -62,24 +56,33 @@ class HttpF2ClientErrorTest {
         responseTypeInfo = TypeInfo(TestResponse::class, typeOf<TestResponse>())
     )
 
-    private val cancellingOnFirstErrorRead: HttpClientConfig<*>.() -> Unit = {
-        install(ContentNegotiation) { json(json) }
+    private fun failingOnFirstErrorRead(failure: () -> Throwable): HttpClientConfig<*>.() -> Unit = {
+        mockContentNegotiation()
         install(
-            createClientPlugin("CancelFirstErrorRead") {
-                var cancelled = false
+            createClientPlugin("FailFirstErrorRead") {
+                var failed = false
                 client.responsePipeline.intercept(HttpResponsePipeline.Receive) {
-                    if (!this.context.response.status.isSuccess() && !cancelled) {
-                        cancelled = true
-                        throw CancellationException("caller went away")
+                    if (!this.context.response.status.isSuccess() && !failed) {
+                        failed = true
+                        throw failure()
                     }
                 }
             }
         )
     }
 
+    private val expectingSuccess: HttpClientConfig<*>.() -> Unit = {
+        mockContentNegotiation()
+        expectSuccess = true
+    }
+
     @Test
     suspend fun `consumer propagates a cancellation raised while the error body is read`() {
-        val client = f2Client(HttpStatusCode.InternalServerError, """{"message":"boom"}""", cancellingOnFirstErrorRead)
+        val client = f2Client(
+            HttpStatusCode.InternalServerError,
+            """{"message":"boom"}""",
+            failingOnFirstErrorRead { CancellationException("caller went away") }
+        )
 
         val failure = runCatching { client.testConsumer().invoke(flowOf(TestRequest("id", 1))) }.exceptionOrNull()
 
@@ -89,11 +92,57 @@ class HttpF2ClientErrorTest {
 
     @Test
     suspend fun `supplier propagates a cancellation raised while the error body is read`() {
-        val client = f2Client(HttpStatusCode.InternalServerError, """{"message":"boom"}""", cancellingOnFirstErrorRead)
+        val client = f2Client(
+            HttpStatusCode.InternalServerError,
+            """{"message":"boom"}""",
+            failingOnFirstErrorRead { CancellationException("caller went away") }
+        )
 
         val failure = runCatching { client.testSupplier().invoke().toList() }.exceptionOrNull()
 
         assertThat(failure).isInstanceOf(CancellationException::class.java)
+    }
+
+    @Test
+    suspend fun `error body cut while read keeps the HTTP status`() {
+        val client = f2Client(
+            HttpStatusCode.BadGateway,
+            """{"message":"boom"}""",
+            failingOnFirstErrorRead { IOException("connection reset") }
+        )
+
+        val exception = assertThrows<F2Exception> {
+            client.testConsumer().invoke(flowOf(TestRequest("id", 1)))
+        }
+
+        assertThat(exception.error.code).isEqualTo(502)
+        assertThat(exception.error.message).isEqualTo("connection reset")
+    }
+
+    @Test
+    suspend fun `error body with malformed UTF-8 keeps the HTTP status`() {
+        val client = f2Client(HttpStatusCode.ServiceUnavailable, byteArrayOf(0xC3.toByte(), 0x28, 0xFF.toByte()))
+
+        val exception = assertThrows<F2Exception> {
+            client.testSupplier().invoke().toList()
+        }
+
+        assertThat(exception.error.code).isEqualTo(503)
+    }
+
+    @Test
+    suspend fun `error body in an unknown charset keeps the HTTP status`() {
+        val client = f2Client(
+            HttpStatusCode.ServiceUnavailable,
+            "down".encodeToByteArray(),
+            contentType = "application/json; charset=x-not-a-charset"
+        )
+
+        val exception = assertThrows<F2Exception> {
+            client.testSupplier().invoke().toList()
+        }
+
+        assertThat(exception.error.code).isEqualTo(503)
     }
 
     @Test
@@ -124,6 +173,18 @@ class HttpF2ClientErrorTest {
     }
 
     @Test
+    suspend fun `error body with a code that is not a number keeps it in the message`() {
+        val client = f2Client(HttpStatusCode.Forbidden, """{"message":"Forbidden","code":"ACCESS_DENIED"}""")
+
+        val exception = assertThrows<F2Exception> {
+            client.testSupplier().invoke().toList()
+        }
+
+        assertThat(exception.error.code).isEqualTo(403)
+        assertThat(exception.error.message).isEqualTo("Forbidden (code ACCESS_DENIED)")
+    }
+
+    @Test
     suspend fun `error body code is kept when the body carries one`() {
         val client = f2Client(HttpStatusCode.BadRequest, """{"message":"Conflict","code":409}""")
 
@@ -132,6 +193,19 @@ class HttpF2ClientErrorTest {
         }
 
         assertThat(exception.error.code).isEqualTo(409)
+    }
+
+    @Test
+    suspend fun `error body code is kept when the rest of the body cannot be decoded`() {
+        val body = """{"code":409,"detail":"no message field"}"""
+        val client = f2Client(HttpStatusCode.BadRequest, body)
+
+        val exception = assertThrows<F2Exception> {
+            client.testSupplier().invoke().toList()
+        }
+
+        assertThat(exception.error.code).isEqualTo(409)
+        assertThat(exception.error.message).isEqualTo(body)
     }
 
     @Test
@@ -149,10 +223,7 @@ class HttpF2ClientErrorTest {
 
     @Test
     suspend fun `consumer translates the response exception of a client expecting success`() {
-        val client = f2Client(HttpStatusCode.BadRequest, """{"message":"Invalid","code":400}""") {
-            install(ContentNegotiation) { json(json) }
-            expectSuccess = true
-        }
+        val client = f2Client(HttpStatusCode.BadRequest, """{"message":"Invalid","code":400}""", expectingSuccess)
 
         val exception = assertThrows<F2Exception> {
             client.testConsumer().invoke(flowOf(TestRequest("id", 1)))
@@ -163,11 +234,28 @@ class HttpF2ClientErrorTest {
     }
 
     @Test
-    suspend fun `function and supplier translate the response exception of a client expecting success`() {
-        val client = f2Client(HttpStatusCode.ServiceUnavailable, "down") {
-            install(ContentNegotiation) { json(json) }
-            expectSuccess = true
+    suspend fun `consumer of a client expecting success sends the remaining messages after a failure`() {
+        var requestCount = 0
+        val client = mockF2Client(config = expectingSuccess) {
+            requestCount++
+            if (requestCount == 1) {
+                respond(content = """{"message":"Invalid","code":400}""", status = HttpStatusCode.BadRequest)
+            } else {
+                respond(content = "", status = HttpStatusCode.OK)
+            }
         }
+
+        val exception = assertThrows<F2Exception> {
+            client.testConsumer().invoke(flowOf(TestRequest("first", 1), TestRequest("second", 2)))
+        }
+
+        assertThat(exception.error.code).isEqualTo(400)
+        assertThat(requestCount).isEqualTo(2)
+    }
+
+    @Test
+    suspend fun `function and supplier translate the response exception of a client expecting success`() {
+        val client = f2Client(HttpStatusCode.ServiceUnavailable, "down", expectingSuccess)
 
         val fromFunction = assertThrows<F2Exception> {
             client.testFunction().invoke(flowOf(TestRequest("id", 1))).toList()
