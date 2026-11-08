@@ -14,6 +14,7 @@ serialization = "1.12.0"
 datetime = "0.8.0"
 opentelemetry = "1.68.0"
 cucumber = "8.0.4"
+blockhound = "1.0.18.RELEASE"
 cloudevents = "5.1.0"
 springdoc = "3.2.0"
 testcontainers = "2.0.5"
@@ -66,6 +67,7 @@ spring-boot-starter-observability-opentelemetry = { group = "io.komune.f2", name
 bdd-config = { group = "io.komune.f2", name = "f2-bdd-config" }
 bdd-spring-autoconfigure = { group = "io.komune.f2", name = "f2-bdd-spring-autoconfigure" }
 bdd-spring-lambda = { group = "io.komune.f2", name = "f2-bdd-spring-lambda" }
+bdd-blockhound = { group = "io.komune.f2", name = "f2-bdd-blockhound" }
 
 # f2-feature
 feature-catalog = { group = "io.komune.f2", name = "f2-feature-catalog" }
@@ -107,6 +109,7 @@ kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 kotlinx-coroutines-reactor = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor" }
 kotlinx-coroutines-reactive = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactive" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test" }
+kotlinx-coroutines-debug = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-debug" }
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json" }
 
@@ -139,6 +142,7 @@ spring-cloud-starter-function-web = { group = "org.springframework.cloud", name 
 
 # Reactor
 reactor-core = { group = "io.projectreactor", name = "reactor-core" }
+blockhound = { group = "io.projectreactor.tools", name = "blockhound", version.ref = "blockhound" }
 
 # Jakarta
 jakarta-persistence-api = { group = "jakarta.persistence", name = "jakarta.persistence-api" }
@@ -154,6 +158,7 @@ slf4j-api = { group = "org.slf4j", name = "slf4j-api" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter" }
 junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api" }
 junit-platform-suite = { group = "org.junit.platform", name = "junit-platform-suite" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
 assertj-core = { group = "org.assertj", name = "assertj-core" }
 
 # Cucumber
