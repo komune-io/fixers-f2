@@ -53,21 +53,14 @@ fixers {
     }
 }
 
-// Patched transitive npm versions for kotlin-js-store/yarn.lock (Dependabot cannot update it: no package.json).
-// Every pin is path-scoped with `**/`: an unscoped glob breaks karma, and `mocha/x` without `**/` is ignored.
-// - ws: pinned to 8.20.1 by ktor-client-core, which KGP copies into every ktor-using package,
-//   so it needs `**/ws`.
-// - serialize-javascript, diff, glob, minimatch: from mocha 11; minimatch also from karma-webpack 5.
-// Upstream bumps do not make a pin safe to drop (mocha 12 still asks for minimatch ^10, which is vulnerable):
-// remove a pin only once `js-lock-refresh` without it still resolves patched versions for every advisory.
-// Regenerate the lock after any change: `make -f infra/make/libs.mk js-lock-refresh`.
+// Patched transitive npm versions for kotlin-js-store/yarn.lock: see the `npm-` block in gradle/libs.versions.toml.
 plugins.withType<YarnPlugin> {
     the<YarnRootExtension>().apply {
-        resolution("**/ws", "8.22.2")
-        resolution("**/mocha/serialize-javascript", "7.1.4")
-        resolution("**/mocha/diff", "8.0.4")
-        resolution("**/mocha/glob", "14.0.4")
-        resolution("**/mocha/minimatch", "11.0.5")
-        resolution("**/karma-webpack/minimatch", "11.0.5")
+        resolution("**/ws", catalogue.versions.npm.ws.get())
+        resolution("**/mocha/serialize-javascript", catalogue.versions.npm.mocha.serialize.javascript.get())
+        resolution("**/mocha/diff", catalogue.versions.npm.mocha.diff.get())
+        resolution("**/mocha/glob", catalogue.versions.npm.mocha.glob.get())
+        resolution("**/mocha/minimatch", catalogue.versions.npm.mocha.minimatch.get())
+        resolution("**/karma-webpack/minimatch", catalogue.versions.npm.karma.webpack.minimatch.get())
     }
 }
