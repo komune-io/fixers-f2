@@ -38,6 +38,7 @@ include(
 	"f2-bdd:f2-bdd-spring-autoconfigure",
 	"f2-bdd:f2-bdd-spring-http",
 	"f2-bdd:f2-bdd-spring-lambda",
+	"f2-bdd:f2-bdd-blockhound",
 )
 
 include(
