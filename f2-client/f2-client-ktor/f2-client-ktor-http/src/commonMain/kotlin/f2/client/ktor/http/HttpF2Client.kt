@@ -11,6 +11,7 @@ import f2.dsl.fnc.F2Function
 import f2.dsl.fnc.F2Supplier
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.forms.ChannelProvider
 import io.ktor.client.request.forms.FormPart
 import io.ktor.client.request.forms.formData
@@ -28,10 +29,6 @@ import io.ktor.http.isSuccess
 import io.ktor.util.reflect.TypeInfo
 import io.ktor.utils.io.ByteReadChannel
 import kotlin.js.JsExport
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.asFlow
@@ -40,7 +37,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transform
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.serializer
 
 @JsExport
@@ -52,20 +53,33 @@ open class HttpF2Client(
 
 	override val type: F2ClientType = F2ClientType.HTTP
 
-	@OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
-	@Suppress("SwallowedException")
-	private suspend fun handleError(response: HttpResponse) {
-		val error: F2Error = try {
-			response.body()
-		} catch (e: Throwable) {
-			F2Error(
-				id = Uuid.random().toString(),
-				timestamp = Clock.System.now().toString(),
-				code = response.status.value,
-				message = response.bodyAsText()
-			)
+	private suspend fun handleError(response: HttpResponse): Nothing {
+		val body = response.bodyAsText()
+		throw F2Exception(error = decodeError(body, response.status.value))
+	}
+
+	private fun decodeError(body: String, status: Int): F2Error {
+		val fields = try {
+			json.parseToJsonElement(body) as? JsonObject
+		} catch (_: SerializationException) {
+			null
 		}
-		throw F2Exception(error = error)
+		val decoded = fields?.let { structured ->
+			val code = (structured["code"] as? JsonPrimitive)?.intOrNull
+			val withCode = if (code == null) JsonObject(structured + ("code" to JsonPrimitive(status))) else structured
+			try {
+				json.decodeFromJsonElement(F2Error.serializer(), withCode)
+			} catch (_: SerializationException) {
+				null
+			}
+		}
+		return decoded ?: F2Error(message = body, code = status)
+	}
+
+	private suspend fun send(request: suspend () -> HttpResponse): HttpResponse = try {
+		request()
+	} catch (e: ResponseException) {
+		e.response
 	}
 
 	private suspend inline fun <T> handlePayloadResponse(response: HttpResponse, typeInfo: TypeInfo): Flow<T> {
@@ -89,7 +103,7 @@ open class HttpF2Client(
 	override fun <RESPONSE> supplier(
 		route: String, responseTypeInfo: TypeInfo
 	): F2Supplier<RESPONSE> = F2Supplier<RESPONSE> {
-		httpClient.get("$urlBase/${route}").let { response ->
+		send { httpClient.get(buildUrl(route)) }.let { response ->
 			handlePayloadResponse(response, responseTypeInfo)
 		}
 	}
@@ -130,33 +144,39 @@ open class HttpF2Client(
 	}
 
 	private suspend fun <MSG> postJson(route: String, queryTypeInfo: TypeInfo, message: MSG): HttpResponse {
-		return httpClient.post(buildUrl(route)) {
-			contentType(ContentType.Application.Json)
-			setBody(message, queryTypeInfo)
+		return send {
+			httpClient.post(buildUrl(route)) {
+				contentType(ContentType.Application.Json)
+				setBody(message, queryTypeInfo)
+			}
 		}
 	}
 
 	private suspend fun <MSG> postJson(route: String, queryTypeInfo: TypeInfo, messages: Flow<MSG>): HttpResponse {
-		return httpClient.post(buildUrl(route)) {
-			contentType(ContentType.Application.Json)
-			setBody(messages.toList(), queryTypeInfo)
+		return send {
+			httpClient.post(buildUrl(route)) {
+				contentType(ContentType.Application.Json)
+				setBody(messages.toList(), queryTypeInfo)
+			}
 		}
 	}
 
 	private suspend fun <MSG> postFormData(
 		route: String, queryTypeInfo: TypeInfo, message: F2UploadCommand<MSG>
 	): HttpResponse {
-		return httpClient.submitFormWithBinaryData(
-			url = buildUrl(route),
-			formData = FormDataBodyBuilder<MSG>(json, queryTypeInfo).apply {
-				param("command", message.command)
-				message.fileMap.forEach { (key, files) ->
-					files.forEach { file ->
-						file(key, file.content, file.name, file.contentType)
+		return send {
+			httpClient.submitFormWithBinaryData(
+				url = buildUrl(route),
+				formData = FormDataBodyBuilder<MSG>(json, queryTypeInfo).apply {
+					param("command", message.command)
+					message.fileMap.forEach { (key, files) ->
+						files.forEach { file ->
+							file(key, file.content, file.name, file.contentType)
+						}
 					}
-				}
-			}.toFormData()
-		)
+				}.toFormData()
+			)
+		}
 	}
 
 	private fun buildUrl(route: String) = "$urlBase/${route}"
