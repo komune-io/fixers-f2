@@ -29,6 +29,10 @@ class TenantAuthTestApp {
     @Bean
     fun routes(): RouterFunction<ServerResponse> = router {
         GET("/openFunction") { ServerResponse.ok().bodyValue("open") }
+        HEAD("/openFunction") { ServerResponse.ok().build() }
+        POST("/openFunction") { ServerResponse.ok().bodyValue("open") }
+        PUT("/openFunction") { ServerResponse.ok().bodyValue("open") }
+        DELETE("/openFunction") { ServerResponse.ok().bodyValue("open") }
         GET("/adminFunction") { ServerResponse.ok().bodyValue("admin") }
         GET("/securedFunction") { ServerResponse.ok().bodyValue("secured") }
     }
