@@ -56,9 +56,10 @@ fixers {
 // Patched transitive npm versions for kotlin-js-store/yarn.lock (Dependabot cannot update it: no package.json).
 // Every pin is path-scoped with `**/`: an unscoped glob breaks karma, and `mocha/x` without `**/` is ignored.
 // - ws: pinned to 8.20.1 by ktor-client-core, which KGP copies into every ktor-using package,
-//   so it needs `**/ws`. Remove once ktor's ws pin goes above 8.20.1.
-// - serialize-javascript, diff, glob, minimatch: from mocha 11. Remove once KGP ships mocha >= 12.
-// - minimatch: also from karma-webpack 5. Remove once KGP ships a karma-webpack that allows minimatch >= 11.0.1.
+//   so it needs `**/ws`.
+// - serialize-javascript, diff, glob, minimatch: from mocha 11; minimatch also from karma-webpack 5.
+// Upstream bumps do not make a pin safe to drop (mocha 12 still asks for minimatch ^10, which is vulnerable):
+// remove a pin only once `js-lock-refresh` without it still resolves patched versions for every advisory.
 // Regenerate the lock after any change: `make -f infra/make/libs.mk js-lock-refresh`.
 plugins.withType<YarnPlugin> {
     the<YarnRootExtension>().apply {
