@@ -4,7 +4,6 @@ import f2.bdd.spring.autoconfigure.steps.F2SpringStep
 import f2.dsl.cqrs.exception.F2Exception
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
-import io.cucumber.java8.Scenario
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -61,23 +60,15 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 		}
 
 		Then("${prefix}An exception with code {int} has been thrown for {string}") { code: Int, name: String ->
-			val exception = bag.exceptions.remove(name)
-			Assertions.assertThat(exception).isInstanceOf(F2Exception::class.java)
-			Assertions.assertThat((exception as F2Exception).error.code).isEqualTo(code)
+			val exception = checkNotNull(bag.exceptions.remove(name)) { "No F2Exception thrown for $name" }
+			Assertions.assertThat(exception.error.code).isEqualTo(code)
 		}
 
 		Then("${prefix}An exception with code {int} has been thrown for {string} with message {string}")
 		{ code: Int, name: String, message: String ->
-			val exception = bag.exceptions.remove(name)
-			Assertions.assertThat(exception).isInstanceOf(F2Exception::class.java)
-			Assertions.assertThat((exception as F2Exception).error.code).isEqualTo(code)
-			Assertions.assertThat((exception).message).isEqualTo(message)
-		}
-
-		After { _: Scenario ->
-			Assertions.assertThat(bag.exceptions)
-				.describedAs("F2 exceptions thrown and asserted by no step")
-				.isEmpty()
+			val exception = checkNotNull(bag.exceptions.remove(name)) { "No F2Exception thrown for $name" }
+			Assertions.assertThat(exception.error.code).isEqualTo(code)
+			Assertions.assertThat(exception.message).isEqualTo(message)
 		}
 	}
 

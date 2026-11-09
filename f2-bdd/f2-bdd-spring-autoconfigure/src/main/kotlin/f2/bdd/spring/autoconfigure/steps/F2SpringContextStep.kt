@@ -4,6 +4,7 @@ import f2.bdd.spring.autoconfigure.ApplicationContextBuilder
 import f2.bdd.spring.autoconfigure.ApplicationContextRunnerBuilder
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
+import io.cucumber.java8.Scenario
 import org.assertj.core.api.Assertions
 
 open class F2SpringContextStep: F2SpringStep(), En {
@@ -40,7 +41,13 @@ open class F2SpringContextStep: F2SpringStep(), En {
 				)
 			)
 			bag.applicationContext = context
-			context.environment.getProperty(LOCAL_SERVER_PORT_PROPERTY, Int::class.java)?.let { bag.httpPort = it }
+			bag.httpPort = context.environment.getProperty(LOCAL_SERVER_PORT_PROPERTY, Int::class.java)
+		}
+
+		After { _: Scenario ->
+			Assertions.assertThat(bag.exceptions)
+				.describedAs("F2 exceptions thrown and asserted by no step")
+				.isEmpty()
 		}
 
 		When("I build a valid spring application context") {
