@@ -46,7 +46,7 @@ object F2ClientBuilder {
      * @throws InvalidUrlException if the URL does not start with a valid protocol.
      */
     @JsExport.Ignore
-    suspend fun get(
+    fun get(
         urlBase: String,
         config: F2ClientConfigLambda<*>? = null
     ): F2Client {
@@ -64,7 +64,7 @@ object F2ClientBuilder {
      * @throws IllegalArgumentException if the URL does not start with "http:" or "https:".
      */
     @JsExport.Ignore
-    suspend fun get(
+    fun get(
         url: String,
     ): F2Client {
         requireHttpUrl(url)

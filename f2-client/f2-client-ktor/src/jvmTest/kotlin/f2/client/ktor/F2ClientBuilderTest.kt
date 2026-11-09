@@ -21,20 +21,20 @@ class F2ClientBuilderTest {
     }
 
     @Test
-    suspend fun `get builds a client for http and https urls`() {
+    fun `get builds a client for http and https urls`() {
         assertThat(F2ClientBuilder.get("http://localhost:8080").type).isEqualTo(F2ClientType.HTTP)
         assertThat(F2ClientBuilder.get("https://localhost:8080").type).isEqualTo(F2ClientType.HTTP)
     }
 
     @Test
-    suspend fun `get rejects unsupported protocols`() {
+    fun `get rejects unsupported protocols`() {
         val thrown = runCatching { F2ClientBuilder.get("ftp://localhost") }.exceptionOrNull()
 
         assertThat(thrown).isInstanceOf(IllegalArgumentException::class.java)
     }
 
     @Test
-    suspend fun `get with config builds a client for http and https urls`() {
+    fun `get with config builds a client for http and https urls`() {
         var configured = false
         val client = F2ClientBuilder.get("http://localhost:8080") { configured = true }
 
@@ -45,14 +45,14 @@ class F2ClientBuilderTest {
     }
 
     @Test
-    suspend fun `get with config defaults to no configuration`() {
+    fun `get with config defaults to no configuration`() {
         val client = F2ClientBuilder.get(urlBase = "http://localhost:8080")
 
         assertThat(client.type).isEqualTo(F2ClientType.HTTP)
     }
 
     @Test
-    suspend fun `get with config rejects unsupported protocols`() {
+    fun `get with config rejects unsupported protocols`() {
         val thrown = runCatching { F2ClientBuilder.get("ftp://localhost") { } }.exceptionOrNull()
 
         assertThat(thrown)

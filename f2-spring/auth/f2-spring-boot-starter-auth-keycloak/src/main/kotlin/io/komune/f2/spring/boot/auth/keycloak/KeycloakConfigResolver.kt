@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 class KeycloakConfigResolver(
     private val f2KeycloakConfig: F2KeycloakConfig
 ) {
-    suspend fun getKeycloakConfig(name: String?): KeycloakConfig = resolve(name)
+    fun getKeycloakConfig(name: String?): KeycloakConfig = resolve(name)
 
     fun resolve(name: String?): KeycloakConfig {
         if (name.isNullOrBlank()) {

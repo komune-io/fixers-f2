@@ -39,19 +39,19 @@ class KeycloakConfigResolverTest {
     }
 
     @Test
-    suspend fun `getKeycloakConfig should return first config for null name`() {
+    fun `getKeycloakConfig should return first config for null name`() {
         val config = resolver.getKeycloakConfig(null)
         assertThat(config.realm).isEqualTo("master")
     }
 
     @Test
-    suspend fun `getKeycloakConfig should return first config for blank name`() {
+    fun `getKeycloakConfig should return first config for blank name`() {
         val config = resolver.getKeycloakConfig("")
         assertThat(config.realm).isEqualTo("master")
     }
 
     @Test
-    suspend fun `getKeycloakConfig should return config matching the name`() {
+    fun `getKeycloakConfig should return config matching the name`() {
         val config = resolver.getKeycloakConfig("second")
         assertThat(config.realm).isEqualTo("tenant")
     }
@@ -59,7 +59,7 @@ class KeycloakConfigResolverTest {
     @Test
     fun `getKeycloakConfig should fail for unknown name`() {
         assertThatThrownBy {
-            runBlocking { resolver.getKeycloakConfig("unknown") }
+            resolver.getKeycloakConfig("unknown")
         }.isInstanceOf(NullPointerException::class.java)
             .hasMessageContaining("unknown")
     }
