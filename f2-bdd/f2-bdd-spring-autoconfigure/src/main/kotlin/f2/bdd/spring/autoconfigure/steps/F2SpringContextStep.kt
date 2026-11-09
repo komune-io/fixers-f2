@@ -4,7 +4,7 @@ import f2.bdd.spring.autoconfigure.ApplicationContextBuilder
 import f2.bdd.spring.autoconfigure.ApplicationContextRunnerBuilder
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
-import kotlin.random.Random
+import io.cucumber.java8.Scenario
 import org.assertj.core.api.Assertions
 
 open class F2SpringContextStep: F2SpringStep(), En {
@@ -12,6 +12,7 @@ open class F2SpringContextStep: F2SpringStep(), En {
 	companion object {
 		private const val SEPARATOR_LINE = "////////////////////////////////////////////////////////"
 		private const val PREFERRED_JSON_MAPPER_PROPERTY = "spring.cloud.function.preferred-json-mapper"
+		private const val LOCAL_SERVER_PORT_PROPERTY = "local.server.port"
 	}
 
 	init {
@@ -25,19 +26,28 @@ open class F2SpringContextStep: F2SpringStep(), En {
 		}
 
 		When("I start a valid spring application context") {
-			bag.httpPort = Random.nextInt(from = 6000, until = 6999)
 			println(SEPARATOR_LINE)
 			println(SEPARATOR_LINE)
 			println(System.getProperty(PREFERRED_JSON_MAPPER_PROPERTY))
 			println(SEPARATOR_LINE)
 			println(SEPARATOR_LINE)
-			bag.applicationContext = ApplicationContextBuilder().create(
+			// Port 0: a port drawn at random can be taken. The server then fails to start, or binds
+			// the IPv6 wildcard beside a listener on 127.0.0.1, which answers the client instead.
+			val context = ApplicationContextBuilder().create(
 				types = arrayOf(ApplicationContextBuilder.SimpleConfiguration::class.java),
 				config = mapOf(
-					"server.port" to "${bag.httpPort}",
+					"server.port" to "0",
 					PREFERRED_JSON_MAPPER_PROPERTY to System.getProperty(PREFERRED_JSON_MAPPER_PROPERTY)
 				)
 			)
+			bag.applicationContext = context
+			bag.httpPort = context.environment.getProperty(LOCAL_SERVER_PORT_PROPERTY, Int::class.java)
+		}
+
+		After { _: Scenario ->
+			Assertions.assertThat(bag.exceptions)
+				.describedAs("F2 exceptions thrown and asserted by no step")
+				.isEmpty()
 		}
 
 		When("I build a valid spring application context") {

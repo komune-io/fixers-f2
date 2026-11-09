@@ -8,8 +8,11 @@ clean:
 lint:
 	./gradlew check
 
+# `clean` runs alone: in one invocation the root `clean` deletes build/js while the subprojects'
+# Kotlin/JS tasks write their packages there (Unable to delete directory … New files were found).
 build:
-	VERSION=$(VERSION) ./gradlew clean build publishToMavenLocal -x test -x jvmTest -x jsTest -x jsBrowserTest -x kotlinStoreYarnLock
+	./gradlew clean
+	VERSION=$(VERSION) ./gradlew build publishToMavenLocal -x test -x jvmTest -x jsTest -x jsBrowserTest -x kotlinStoreYarnLock
 
 # `test` is a JVM-only Gradle task: Kotlin Multiplatform modules (f2-dsl, f2-client) do not
 # register one, their tests live behind `allTests` (jvmTest + jsTest).

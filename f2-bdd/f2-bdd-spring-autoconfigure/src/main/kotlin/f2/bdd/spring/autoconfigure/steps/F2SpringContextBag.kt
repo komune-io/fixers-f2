@@ -1,5 +1,6 @@
 package f2.bdd.spring.autoconfigure.steps
 
+import f2.dsl.cqrs.exception.F2Exception
 import io.cucumber.java8.Scenario
 import java.util.UUID
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner
@@ -24,13 +25,13 @@ class F2SpringContextBag {
         }
 	}
 
-	@SuppressWarnings("MagicNumber")
-	var httpPort: Int = 6001
+	/** The port the scenario's web server bound, or null when no web server started. */
+	var httpPort: Int? = null
 	lateinit var uuid: String
 
 	var applicationParameters: Map<String, String> = emptyMap()
 	val result: MutableMap<String, Any> = mutableMapOf()
-	val exceptions: MutableMap<String, Throwable> = mutableMapOf()
+	val exceptions: MutableMap<String, F2Exception> = mutableMapOf()
 	lateinit var contextBuilder: ReactiveWebApplicationContextRunner
     var applicationContext: GenericApplicationContext? = null
 

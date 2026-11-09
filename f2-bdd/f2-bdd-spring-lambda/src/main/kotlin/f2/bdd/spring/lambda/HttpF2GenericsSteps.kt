@@ -60,17 +60,15 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 		}
 
 		Then("${prefix}An exception with code {int} has been thrown for {string}") { code: Int, name: String ->
-			val exception = bag.exceptions[name]
-			Assertions.assertThat(exception).isInstanceOf(F2Exception::class.java)
-			Assertions.assertThat((exception as F2Exception).error.code).isEqualTo(code)
+			val exception = checkNotNull(bag.exceptions.remove(name)) { "No F2Exception thrown for $name" }
+			Assertions.assertThat(exception.error.code).isEqualTo(code)
 		}
 
 		Then("${prefix}An exception with code {int} has been thrown for {string} with message {string}")
 		{ code: Int, name: String, message: String ->
-			val exception = bag.exceptions[name]
-			Assertions.assertThat(exception).isInstanceOf(F2Exception::class.java)
-			Assertions.assertThat((exception as F2Exception).error.code).isEqualTo(code)
-			Assertions.assertThat((exception).message).isEqualTo(message)
+			val exception = checkNotNull(bag.exceptions.remove(name)) { "No F2Exception thrown for $name" }
+			Assertions.assertThat(exception.error.code).isEqualTo(code)
+			Assertions.assertThat(exception.message).isEqualTo(message)
 		}
 	}
 
@@ -87,11 +85,13 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 		}
 	}
 
-	@Suppress("TooGenericExceptionCaught")
+	/**
+	 * Keeps the [F2Exception] the exception steps assert on; any other failure fails the step.
+	 */
 	private fun step(name: String, block: suspend () -> Unit) = runBlocking {
 		try {
 			block()
-		} catch (e: Throwable) {
+		} catch (e: F2Exception) {
 			bag.exceptions[name] = e
 		}
 	}

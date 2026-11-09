@@ -2,6 +2,7 @@ package f2.bdd.spring.http.raw
 
 import f2.bdd.spring.autoconfigure.steps.F2SpringContextBag
 import f2.bdd.spring.autoconfigure.steps.F2SpringStep
+import f2.bdd.spring.http.F2SpringHttpCucumberConfig
 import io.cucumber.java8.En
 import io.cucumber.java8.Scenario
 import java.net.URI
@@ -62,7 +63,7 @@ class RawHttpSteps : F2SpringStep(), En {
         contentType: String?
     ): HttpResponse<String> {
         val builder = HttpRequest.newBuilder()
-            .uri(URI.create("http://localhost:${bag.httpPort}$path"))
+            .uri(URI.create(F2SpringHttpCucumberConfig.urlBase(bag) + path))
             .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
         val publisher = if (body == null) {
             HttpRequest.BodyPublishers.noBody()
