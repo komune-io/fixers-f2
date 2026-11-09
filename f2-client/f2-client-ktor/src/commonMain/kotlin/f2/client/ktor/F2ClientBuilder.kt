@@ -63,6 +63,7 @@ object F2ClientBuilder {
      * @return An instance of [F2Client].
      * @throws IllegalArgumentException if the URL does not start with "http:" or "https:".
      */
+    @JsExport.Ignore
     suspend fun get(
         url: String,
     ): F2Client {

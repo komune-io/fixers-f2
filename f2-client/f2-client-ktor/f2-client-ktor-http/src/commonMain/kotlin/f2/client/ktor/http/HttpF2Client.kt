@@ -47,7 +47,7 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.serializer
 
 @JsExport
-open class HttpF2Client @JsExport.Ignore constructor(
+class HttpF2Client @JsExport.Ignore constructor(
 	@property:JsExport.Ignore
 	val httpClient: HttpClient,
 	val urlBase: String,

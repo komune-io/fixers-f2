@@ -37,5 +37,6 @@ fun interface F2SupplierSingle<R> : F2LambdaSupplierSingle<R> {
      *
      * @return The single value of type R.
      */
+    @JsExport.Ignore
     override suspend operator fun invoke(): R
 }

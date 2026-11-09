@@ -29,8 +29,5 @@ class Envelope<T>(
     override val specversion: String? = null,
     override val source: String? = null,
     override val time: String? = null
-) : EnvelopeDTO<T> {
-    @JsExport.Ignore
-    companion object
-}
+) : EnvelopeDTO<T>
 
