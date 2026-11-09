@@ -94,6 +94,7 @@ open class HttpF2Client(
 	private suspend fun send(request: suspend () -> HttpResponse): HttpResponse = try {
 		request()
 	} catch (e: ResponseException) {
+		if (e.response.status.isSuccess()) throw e
 		e.response
 	}
 
