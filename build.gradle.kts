@@ -42,6 +42,9 @@ subprojects {
 }
 
 fixers {
+    kt2Ts {
+        outputDirectory = "ts"
+    }
     bundle {
         group = "io.komune.f2"
         name = "F2"
