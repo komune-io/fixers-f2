@@ -11,18 +11,18 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-open class LambdaF2Exceptions {
+class LambdaF2Exceptions {
 
 	@Bean
-	open fun basicFunction(): F2Function<BasicParams, BasicParams> = f2Function { it }
+	fun basicFunction(): F2Function<BasicParams, BasicParams> = f2Function { it }
 
 	@Bean
-	open fun notFoundFunction(): F2Supplier<BasicParams> = f2Supplier {
+	fun notFoundFunction(): F2Supplier<BasicParams> = f2Supplier {
 		throw NotFoundException("BasicParams", "Unknown")
 	}
 
 	@Bean
-	open fun forbiddenFunction(): F2Supplier<BasicParams> = f2Supplier {
+	fun forbiddenFunction(): F2Supplier<BasicParams> = f2Supplier {
 		throw ForbiddenAccessException("You are not authorized to call this function")
 	}
 }

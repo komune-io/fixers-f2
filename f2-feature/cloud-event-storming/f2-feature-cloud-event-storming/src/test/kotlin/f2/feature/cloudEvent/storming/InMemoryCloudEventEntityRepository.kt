@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.onEach
  * reactive interface returned a cold `Mono`, which forced this stub to distinguish "save invoked"
  * from "save subscribed" — that distinction no longer exists, so [saved] is the whole story.
  */
-open class InMemoryCloudEventEntityRepository : CloudEventEntityRepository {
+class InMemoryCloudEventEntityRepository : CloudEventEntityRepository {
 
     /** Entities written by [save]. */
     val saved = mutableListOf<CloudEventEntity>()

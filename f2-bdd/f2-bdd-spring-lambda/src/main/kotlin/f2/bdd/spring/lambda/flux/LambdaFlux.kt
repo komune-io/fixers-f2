@@ -6,15 +6,15 @@ import org.springframework.context.annotation.Configuration
 import reactor.core.publisher.Flux
 
 @Configuration
-open class LambdaFlux {
+class LambdaFlux {
 
 	@Bean
-	open fun functionFlux(functionSimple: (String) -> String): (Flux<String>) -> Flux<String> = { value ->
+	fun functionFlux(functionSimple: (String) -> String): (Flux<String>) -> Flux<String> = { value ->
 		value.map { functionSimple(it) }
 	}
 
 	@Bean
-	open fun supplierFlux(): () -> Flux<String> = {
+	fun supplierFlux(): () -> Flux<String> = {
 		Flux.just("supplierFlux")
 	}
 

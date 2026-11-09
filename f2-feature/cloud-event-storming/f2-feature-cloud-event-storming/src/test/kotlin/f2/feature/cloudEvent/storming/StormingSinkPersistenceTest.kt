@@ -149,12 +149,12 @@ class StormingSinkPersistenceTest {
     }
 
     @Configuration
-    open class SinkConfig {
+    class SinkConfig {
         @Bean
-        open fun sink(): StormingCloudEventSink = StormingCloudEventSink(repo = contextRepository)
+        fun sink(): StormingCloudEventSink = StormingCloudEventSink(repo = contextRepository)
 
         @Bean
-        open fun eventSpy(): EventSpy = EventSpy()
+        fun eventSpy(): EventSpy = EventSpy()
     }
 
     open class EventSpy {

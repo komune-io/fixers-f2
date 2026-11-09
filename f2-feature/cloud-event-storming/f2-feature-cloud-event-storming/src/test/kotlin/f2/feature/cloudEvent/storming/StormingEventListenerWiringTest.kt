@@ -18,21 +18,21 @@ import tools.jackson.module.kotlin.KotlinModule
 class StormingEventListenerWiringTest {
 
     @Configuration
-    open class SinksConfig {
+    class SinksConfig {
         @Bean
-        open fun repository() = InMemoryCloudEventEntityRepository()
+        fun repository() = InMemoryCloudEventEntityRepository()
 
         @Bean
-        open fun objectMapper() = JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
+        fun objectMapper() = JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
 
         @Bean
-        open fun stormingCommandSink(
+        fun stormingCommandSink(
             repository: InMemoryCloudEventEntityRepository,
             objectMapper: tools.jackson.databind.ObjectMapper
         ) = StormingCommandSink(repo = repository, objectMapper = objectMapper)
 
         @Bean
-        open fun stormingCloudEventSink(repository: InMemoryCloudEventEntityRepository) =
+        fun stormingCloudEventSink(repository: InMemoryCloudEventEntityRepository) =
             StormingCloudEventSink(repo = repository)
     }
 

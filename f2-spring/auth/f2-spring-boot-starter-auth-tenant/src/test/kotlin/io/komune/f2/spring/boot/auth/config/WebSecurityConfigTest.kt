@@ -20,14 +20,14 @@ import reactor.core.publisher.Mono
 class WebSecurityConfigTest {
 
     @Configuration
-    open class SecuredBeansConfig {
+    class SecuredBeansConfig {
         @Bean("securedFunction")
         @RolesAllowed("admin")
-        open fun securedFunction(): () -> String = { "secured" }
+        fun securedFunction(): () -> String = { "secured" }
 
         @Bean("openFunction")
         @PermitAll
-        open fun openFunction(): () -> String = { "open" }
+        fun openFunction(): () -> String = { "open" }
     }
 
     class TestServerHttpSecurity : ServerHttpSecurity() {
