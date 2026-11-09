@@ -5,6 +5,7 @@ import kotlin.js.JsName
 
 @JsExport
 @JsName("SnapEvent")
+@Suppress("LongParameterList") // mirrors the CloudEvents attributes
 open class SnapEvent<T> (
 	eventType: String,
 	eventTypeVersion: String? = null,

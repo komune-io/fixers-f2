@@ -16,6 +16,7 @@ import kotlin.uuid.Uuid
  * @return An Envelope containing the object.
  */
 @OptIn(ExperimentalUuidApi::class)
+@Suppress("LongParameterList") // one parameter per envelope attribute it can override
 inline fun <reified T> T.asEnvelope(
     from: Envelope<*>? = null,
     source: String? = from?.source,
@@ -41,6 +42,7 @@ inline fun <reified T> T.asEnvelope(
  * @return An Envelope containing the object.
  */
 @OptIn(ExperimentalUuidApi::class)
+@Suppress("LongParameterList") // one parameter per envelope attribute it can override
 fun <T> T.asEnvelopeWithType(
     type: String,
     from: Envelope<*>? = null,
