@@ -1,0 +1,11 @@
+{
+  "name": "fixers-f2-f2-client-f2-client-core",
+  "version": "0.47.0-SNAPSHOT",
+  "main": "kotlin/fixers-f2-f2-client-f2-client-core.mjs",
+  "types": "kotlin/fixers-f2-f2-client-f2-client-core.d.mts",
+  "devDependencies": {},
+  "dependencies": {},
+  "peerDependencies": {},
+  "optionalDependencies": {},
+  "bundledDependencies": []
+}
