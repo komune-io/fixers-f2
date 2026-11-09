@@ -26,3 +26,9 @@ Feature: Raw HTTP behaviour of the vendored spring-cloud-function fixes
     When Raw: I send "POST" to "/rawEchoFunction" with body "{\"name\":\"a\",\"count\":[]}" and content type "application/json"
     Then Raw: The response status is 400
     And Raw: The response body contains "Error parsing json"
+
+  @jacksonOnly
+  Scenario: Raw: a truncated JSON body is rejected with 400
+    When Raw: I send "POST" to "/rawEchoFunction" with body "{\"name\":\"a\",\"count\":1" and content type "application/json"
+    Then Raw: The response status is 400
+    And Raw: The response body contains "Error parsing json"

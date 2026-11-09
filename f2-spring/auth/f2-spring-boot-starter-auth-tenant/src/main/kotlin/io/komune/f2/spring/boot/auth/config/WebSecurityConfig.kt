@@ -2,7 +2,6 @@ package io.komune.f2.spring.boot.auth.config
 
 import io.komune.f2.spring.boot.auth.ROLE_PREFIX
 import io.komune.f2.spring.boot.auth.security.TrustedIssuerJwtAuthenticationManagerResolver
-import jakarta.annotation.security.PermitAll
 import jakarta.annotation.security.RolesAllowed
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -152,17 +151,8 @@ class WebSecurityConfig {
 
     fun addPermitAllRules(http: ServerHttpSecurity) {
         logger.trace("Adding PermitAll rules")
-
-        val permitAllBeans = applicationContext.getBeanNamesForAnnotation(PermitAll::class.java)
-            .map { bean -> "$contextPath/$bean" }
-            .toTypedArray()
-
-        if (permitAllBeans.isNotEmpty()) {
-            logger.trace("Setting up permitAll for beans: ${permitAllBeans.joinToString()}")
-            http.authorizeExchange { exchange ->
-                exchange.pathMatchers(*permitAllBeans).permitAll()
-            }
-        }
+        val permitAllPaths = http.permitAllFunctionBeans(applicationContext, contextPath)
+        logger.trace("Set up permitAll for beans: ${permitAllPaths.joinToString()}")
     }
 
     fun addMandatoryAuthRules(http: ServerHttpSecurity) {
