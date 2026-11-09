@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus
  * [message], [parameters] — the values the message names — and [citers] — the objects whose citing keeps the
  * refused one alive. Without one, it is a failure the caller learns only the status of.
  */
+@Suppress("LongParameterList") // the status, then one parameter per field of the error it raises
 open class F2HttpException(
     val status: HttpStatus,
     code: Int = status.value(),

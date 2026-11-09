@@ -70,7 +70,9 @@ fun Throwable?.findF2Exception(): F2Exception? = this as? F2Exception ?: this?.c
  */
 fun Throwable.unreadableBody(): JacksonException? =
 	takeIf { it is IllegalStateException && it.message == UNREADABLE_INPUT }
-		?.let { generateSequence(cause) { it.cause }.filterIsInstance<JacksonException>().firstOrNull() }
+		?.let { wrapper ->
+			generateSequence(wrapper.cause) { it.cause }.filterIsInstance<JacksonException>().firstOrNull()
+		}
 
 /**
  * Builds the refusal reported when a required request parameter is missing: `http.INVALID_PAYLOAD`, naming the

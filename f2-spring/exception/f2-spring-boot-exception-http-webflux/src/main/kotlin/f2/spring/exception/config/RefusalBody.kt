@@ -15,6 +15,8 @@ import tools.jackson.databind.json.JsonMapper
  * The body names [refusal], the meaning of [status] unless a rule of the application's own is given. [message] is
  * for a sentence written to be read by the caller, and for nothing else.
  */
+// The Mono<Void> of ServerHttpResponse.writeWith, and of the security handlers that return it.
+@Suppress("ForbiddenVoid")
 fun ServerWebExchange.writeRefusal(
     status: HttpStatus,
     message: String? = null,

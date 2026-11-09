@@ -42,6 +42,7 @@ interface F2ErrorDTO: Problem {
 @Serializable
 @JsExport
 @JsName("F2Error")
+@Suppress("LongParameterList") // one parameter per F2ErrorDTO field
 @OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
 open class F2Error(
     override val message: String,
