@@ -41,6 +41,7 @@ class KSerializationMapper(
     private val serializerCache: MutableMap<Type, KSerializer<Any>> =
         ConcurrentReferenceHashMap<Type, KSerializer<Any>>()
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Suppress("TooGenericExceptionCaught", "ThrowsCount", "UNCHECKED_CAST")
     override fun <T> doFromJson(json: Any, type: Type): T {
         try {
@@ -56,7 +57,7 @@ class KSerializationMapper(
             throw F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
                 timestamp = System.currentTimeMillis().toString(),
-                message = e.message!!,
+                message = e.message ?: "Invalid JSON",
                 code = 400,
             ), e)
         } catch (e: Exception) {

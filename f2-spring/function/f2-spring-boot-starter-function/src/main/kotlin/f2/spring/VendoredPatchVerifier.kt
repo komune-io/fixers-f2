@@ -44,7 +44,7 @@ object VendoredPatchVerifier {
         }
         val message = errorMessage()
         logger.error(message)
-        throw IllegalStateException(message)
+        error(message)
     }
 
     private fun loadedFrom(): String = runCatching {

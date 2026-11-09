@@ -53,21 +53,21 @@ open class F2SpringStep {
 
     @Suppress("UNCHECKED_CAST")
     fun <P, R> KFunction<*>.functionF2Bean(): F2Function<P, R> {
-        return bag.applicationContext!!.getBean(name) as F2Function<P, R>
+        return bag.requireApplicationContext().getBean(name) as F2Function<P, R>
     }
 
     @Suppress("UNCHECKED_CAST")
     fun <R> KFunction<*>.supplierF2Bean(): F2Supplier<R> {
-        return bag.applicationContext!!.getBean(name) as F2Supplier<R>
+        return bag.requireApplicationContext().getBean(name) as F2Supplier<R>
     }
 
     @Suppress("UNCHECKED_CAST")
     fun <P> KFunction<*>.consumerF2Bean(): F2Consumer<P> {
-        return bag.applicationContext!!.getBean(name) as F2Consumer<P>
+        return bag.requireApplicationContext().getBean(name) as F2Consumer<P>
     }
 
     @Suppress("UNCHECKED_CAST")
     protected fun <T> KFunction<*>.consumerReceiverBean(): ConsumerReceiver<T> {
-        return bag.applicationContext!!.getBean(name) as ConsumerReceiver<T>
+        return bag.requireApplicationContext().getBean(name) as ConsumerReceiver<T>
     }
 }

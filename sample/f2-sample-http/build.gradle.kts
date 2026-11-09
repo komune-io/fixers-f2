@@ -13,3 +13,4 @@ dependencies {
 
     testImplementation(libs.bundles.spring.test)
 }
+

@@ -21,6 +21,7 @@ interface EnvelopeDTO<T>: WithEnvelopeId, WithEnvelopeData<T>, Message {
 @Serializable
 @JsExport
 @JsName("Envelope")
+@Suppress("LongParameterList") // one parameter per CloudEvents envelope attribute
 class Envelope<T>(
     override val id: String,
     override val data: T,

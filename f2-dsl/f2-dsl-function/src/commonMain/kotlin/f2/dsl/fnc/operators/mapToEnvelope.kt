@@ -51,10 +51,11 @@ inline fun <reified T> Flow<T>.mapToEnvelopeWithRandomId(): Flow<Envelope<T>> =
     mapToEnvelope { Uuid.random().toString() }
 
 @OptIn(ExperimentalUuidApi::class)
-inline fun <T> Flow<T>.mapToEnvelopeWithRandomId(
+fun <T> Flow<T>.mapToEnvelopeWithRandomId(
     type: String,
 ): Flow<Envelope<T>> = mapToEnvelope(type) { Uuid.random().toString() }
 
+@Suppress("LongParameterList") // one parameter per envelope attribute it can override
 suspend inline fun <T, reified R> Envelope<T>.mapEnvelope(
     crossinline transform: suspend (value: T) -> R,
     source: String? = null,
@@ -67,6 +68,7 @@ suspend inline fun <T, reified R> Envelope<T>.mapEnvelope(
 }
 
 
+@Suppress("LongParameterList") // one parameter per envelope attribute it can override
 suspend fun <T, R> Envelope<T>.mapEnvelopeWithType(
     transform: suspend (value: T) -> R,
     type: String,

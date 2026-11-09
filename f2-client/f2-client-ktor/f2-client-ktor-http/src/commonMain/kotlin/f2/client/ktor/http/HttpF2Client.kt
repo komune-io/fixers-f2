@@ -57,64 +57,12 @@ class HttpF2Client @JsExport.Ignore constructor(
 
 	override val type: F2ClientType = F2ClientType.HTTP
 
-	@Suppress("TooGenericExceptionCaught")
-	private suspend fun handleError(response: HttpResponse): Nothing {
-		val status = response.status.value
-		val body = try {
-			response.bodyAsText()
-		} catch (e: CancellationException) {
-			throw e
-		} catch (e: Throwable) {
-			throw F2Exception(error = F2Error(message = e.message ?: "", code = status), cause = e)
-		}
-		throw F2Exception(error = decodeError(body, status))
-	}
-
-	private fun decodeError(body: String, status: Int): F2Error {
-		val structured = try {
-			json.parseToJsonElement(body) as? JsonObject
-		} catch (_: SerializationException) {
-			null
-		} ?: return F2Error(message = body, code = status)
-		val rawCode = (structured["code"] as? JsonPrimitive)?.takeUnless { it is JsonNull }
-		val code = rawCode?.intOrNull ?: status
-		val decoded = try {
-			json.decodeFromJsonElement(F2Error.serializer(), JsonObject(structured + ("code" to JsonPrimitive(code))))
-		} catch (_: SerializationException) {
-			return F2Error(message = body, code = code)
-		}
-		val unreadCode = rawCode?.takeIf { it.intOrNull == null }?.content?.takeIf { it.isNotBlank() }
-		return if (unreadCode == null) decoded else F2Error(
-			message = "${decoded.message} (code $unreadCode)",
-			id = decoded.id,
-			timestamp = decoded.timestamp,
-			code = decoded.code,
-			requestId = decoded.requestId,
-		)
-	}
-
-	private suspend fun send(request: suspend () -> HttpResponse): HttpResponse = try {
-		request()
-	} catch (e: ResponseException) {
-		if (e.response.status.isSuccess()) throw e
-		e.response
-	}
-
 	private suspend inline fun <T> handlePayloadResponse(response: HttpResponse, typeInfo: TypeInfo): Flow<T> {
 		return flow {
 			if (!response.status.isSuccess()) {
-				handleError(response)
+				throw json.responseError(response)
 			}
 			emitPayload(response.body<T>(typeInfo))
-		}
-	}
-
-	private suspend fun <T> FlowCollector<T>.emitPayload(result: T) {
-		if (result is Collection<*>) {
-			@Suppress("UNCHECKED_CAST")
-			(result as Collection<T>).forEach { emit(it) }
-		} else {
-			emit(result)
 		}
 	}
 
@@ -133,7 +81,7 @@ class HttpF2Client @JsExport.Ignore constructor(
 	) = F2Function<QUERY, RESPONSE> { messageFlow ->
 		doPost(route, queryTypeInfo, messageFlow).asFlow().transform { response ->
 			if (!response.status.isSuccess()) {
-				handleError(response)
+				throw json.responseError(response)
 			}
 			emitPayload(response.body<RESPONSE>(responseTypeInfo))
 		}
@@ -145,7 +93,7 @@ class HttpF2Client @JsExport.Ignore constructor(
 	): F2Consumer<QUERY> = F2Consumer { messages ->
 		doPost(route, queryTypeInfo, messages)
 			.firstOrNull { !it.status.isSuccess() }
-			?.let { handleError(it) }
+			?.let { throw json.responseError(it) }
 	}
 
 	private suspend fun <MSG> doPost(route: String, queryTypeInfo: TypeInfo, messages: Flow<MSG>): List<HttpResponse> {
@@ -203,6 +151,62 @@ class HttpF2Client @JsExport.Ignore constructor(
 	private fun buildUrl(route: String) = "$urlBase/${route}"
 }
 
+private suspend fun send(request: suspend () -> HttpResponse): HttpResponse = try {
+	request()
+} catch (e: ResponseException) {
+	if (e.response.status.isSuccess()) throw e
+	e.response
+}
+
+private suspend fun <T> FlowCollector<T>.emitPayload(result: T) {
+	if (result is Collection<*>) {
+		@Suppress("UNCHECKED_CAST")
+		(result as Collection<T>).forEach { emit(it) }
+	} else {
+		emit(result)
+	}
+}
+
+@Suppress("TooGenericExceptionCaught")
+private suspend fun Json.responseError(response: HttpResponse): F2Exception {
+	val status = response.status.value
+	val body = try {
+		response.bodyAsText()
+	} catch (e: CancellationException) {
+		throw e
+	} catch (e: Throwable) {
+		return F2Exception(error = F2Error(message = e.message.orEmpty(), code = status), cause = e)
+	}
+	return F2Exception(error = decodeError(body, status))
+}
+
+private fun Json.decodeError(body: String, status: Int): F2Error {
+	val structured = try {
+		parseToJsonElement(body) as? JsonObject
+	} catch (_: SerializationException) {
+		null
+	}
+	return if (structured == null) F2Error(message = body, code = status) else decodeError(structured, body, status)
+}
+
+private fun Json.decodeError(structured: JsonObject, body: String, status: Int): F2Error {
+	val rawCode = (structured["code"] as? JsonPrimitive)?.takeUnless { it is JsonNull }
+	val code = rawCode?.intOrNull ?: status
+	val decoded = try {
+		decodeFromJsonElement(F2Error.serializer(), JsonObject(structured + ("code" to JsonPrimitive(code))))
+	} catch (_: SerializationException) {
+		return F2Error(message = body, code = code)
+	}
+	val unreadCode = rawCode?.takeIf { it.intOrNull == null }?.content?.takeIf { it.isNotBlank() }
+	return if (unreadCode == null) decoded else F2Error(
+		message = "${decoded.message} (code $unreadCode)",
+		id = decoded.id,
+		timestamp = decoded.timestamp,
+		code = decoded.code,
+		requestId = decoded.requestId,
+	)
+}
+
 private class FormDataBodyBuilder<T>(
 	val json: Json = F2DefaultJson,
 	queryTypeInfo: TypeInfo
@@ -238,6 +242,7 @@ private class FormDataBodyBuilder<T>(
 		).let(formParts::add)
 	}
 
+	@Suppress("UNCHECKED_CAST") // T is erased: the serializer is looked up from its TypeInfo
 	private val querySerializer: KSerializer<T> =
 		queryTypeInfo.kotlinType?.let { serializer(it) } as KSerializer<T>
 

@@ -33,7 +33,7 @@ class HttpF2ClientTest {
 
 	@Test
     fun testBuilderExtensionFunctionApi() {
-		HttpClientBuilder{
+		httpClientBuilderGenerics {
 			install(Logging) {
 				logger = Logger.DEFAULT
 				level = LogLevel.ALL

@@ -56,11 +56,12 @@ class HttpF2ClientUploadTest {
         }
     }
 
-    private fun uploadFunction(client: HttpF2Client) = client.function<F2UploadCommand<UploadTestBody>, UploadTestEvent>(
-        route = "upload",
-        queryTypeInfo = TypeInfo(F2UploadCommand::class, typeOf<UploadTestBody>()),
-        responseTypeInfo = TypeInfo(UploadTestEvent::class, typeOf<UploadTestEvent>())
-    )
+    private fun uploadFunction(client: HttpF2Client) =
+        client.function<F2UploadCommand<UploadTestBody>, UploadTestEvent>(
+            route = "upload",
+            queryTypeInfo = TypeInfo(F2UploadCommand::class, typeOf<UploadTestBody>()),
+            responseTypeInfo = TypeInfo(UploadTestEvent::class, typeOf<UploadTestEvent>())
+        )
 
     @Test
     suspend fun `function posts single upload command as multipart form data`() {

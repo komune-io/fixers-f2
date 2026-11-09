@@ -182,7 +182,7 @@ class TrustedIssuerJwtAuthenticationManagerResolverTest {
             .claim("realm_access", mapOf("roles" to listOf("admin")))
             .build()
 
-        val authentication = resolver.jwtAuthenticationConverter().convert(jwt)!!.block()
+        val authentication = resolver.jwtAuthenticationConverter().convert(jwt).block()
 
         assertThat(authentication).isInstanceOf(JwtAuthenticationToken::class.java)
         assertThat(authentication!!.authorities.map { it.authority })

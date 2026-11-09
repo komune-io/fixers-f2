@@ -10,7 +10,17 @@ import reactor.blockhound.BlockingOperationError
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 
+// These tests block on purpose, on the dispatchers BlockHound watches.
+@Suppress("SleepInsteadOfDelay", "InjectDispatcher")
 class BlockHoundSessionTest {
+
+	private fun clearPendingCall() {
+		try {
+			BlockingCalls.requireNone()
+		} catch (_: IllegalStateException) {
+			// a call left by an earlier test
+		}
+	}
 
 	@Test
 	suspend fun `a blocking call on Dispatchers Default fails`() {
@@ -38,8 +48,9 @@ class BlockHoundSessionTest {
 
 	@Test
 	suspend fun `a blocking call fails the next check only, with the call as its cause`() {
-		runCatching { BlockingCalls.requireNone() }
-		runCatching { withContext(Dispatchers.Default) { Thread.sleep(1) } }
+		clearPendingCall()
+		assertThat(runCatching { withContext(Dispatchers.Default) { Thread.sleep(1) } }.exceptionOrNull())
+			.isInstanceOf(BlockingOperationError::class.java)
 		assertThatThrownBy { BlockingCalls.requireNone() }
 			.isInstanceOf(IllegalStateException::class.java)
 			.cause().isInstanceOf(BlockingOperationError::class.java)
@@ -48,7 +59,7 @@ class BlockHoundSessionTest {
 
 	@Test
 	suspend fun `in record-only mode a blocking call runs through, and the next check fails with it`() {
-		runCatching { BlockingCalls.requireNone() }
+		clearPendingCall()
 		System.setProperty(BlockingCalls.RECORD_ONLY, "true")
 		try {
 			assertThat(withContext(Dispatchers.Default) { Thread.sleep(1); "slept" }).isEqualTo("slept")

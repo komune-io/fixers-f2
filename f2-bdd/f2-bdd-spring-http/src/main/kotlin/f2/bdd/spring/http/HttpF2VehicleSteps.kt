@@ -29,7 +29,7 @@ class HttpF2VehicleSteps : HttpF2GenericsSteps<Vehicle, Vehicle>("Vehicle: "), E
 	}
 
 	override fun consumerReceiver(): List<Vehicle> {
-		val bean = bag.applicationContext!!.getBean(VehicleReceiver::class.java)
+		val bean = bag.requireApplicationContext().getBean(VehicleReceiver::class.java)
 		return bean.items
 	}
 

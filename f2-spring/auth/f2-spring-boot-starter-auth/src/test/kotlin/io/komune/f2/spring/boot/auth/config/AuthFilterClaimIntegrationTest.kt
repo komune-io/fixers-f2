@@ -16,7 +16,9 @@ import org.springframework.test.web.reactive.server.WebTestClient
     classes = [AuthTestApp::class],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-class AuthFilterClaimIntegrationTest {
+class AuthFilterClaimIntegrationTest(
+    @LocalServerPort private val port: Int,
+) {
 
     companion object {
         private const val REALM = "master"
@@ -35,9 +37,6 @@ class AuthFilterClaimIntegrationTest {
         @AfterAll
         fun stopOidcProviderStub() = oidc.stop()
     }
-
-    @LocalServerPort
-    private var port: Int = 0
 
     private val webTestClient: WebTestClient by lazy {
         WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()

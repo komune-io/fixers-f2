@@ -17,6 +17,6 @@ class FunctionCatalogSteps : FunctionCatalogStepsBase<String, String>(""), En {
 	}
 
 	override fun consumerReceiver(): List<String> {
-		return (bag.applicationContext!!.getBean(StringConsumerReceiver::class.java) as ConsumerReceiver<String>).items
+		return (bag.requireApplicationContext().getBean(StringConsumerReceiver::class.java) as ConsumerReceiver<String>).items
 	}
 }

@@ -10,3 +10,8 @@ complexity:
 style:
   ReturnCount:
     excludes: ['**/org/springframework/**']
+
+coroutines:
+  SuspendFunWithFlowReturnType:
+    # F2Function, F2Supplier and F2Consumer are `suspend fun …(): Flow` by design.
+    active: false

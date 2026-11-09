@@ -16,7 +16,7 @@ import kotlinx.coroutines.runBlocking
  * their step prefix (and, for Single, the consumer/supplier client calls), so the client plumbing
  * lives here once.
  */
-abstract class StringHttpF2Steps(prefix: String) : HttpF2GenericsSteps<String, String>(prefix) {
+open class StringHttpF2Steps(prefix: String) : HttpF2GenericsSteps<String, String>(prefix) {
 
 	protected fun urlBase() = F2SpringHttpCucumberConfig.urlBase(bag)
 
@@ -25,7 +25,7 @@ abstract class StringHttpF2Steps(prefix: String) : HttpF2GenericsSteps<String, S
 	}
 
 	override fun consumerReceiver(): List<String> {
-		val bean = bag.applicationContext!!.getBean(StringConsumerReceiver::class.java)
+		val bean = bag.requireApplicationContext().getBean(StringConsumerReceiver::class.java)
 		return bean.items
 	}
 

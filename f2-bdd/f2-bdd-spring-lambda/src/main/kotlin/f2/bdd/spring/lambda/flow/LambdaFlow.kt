@@ -9,20 +9,20 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-open class LambdaFlow {
+class LambdaFlow {
 
 	@Bean
-	open fun functionFlow(functionSimple: (String) -> String): suspend (Flow<String>) -> Flow<String> = { value ->
+	fun functionFlow(functionSimple: (String) -> String): suspend (Flow<String>) -> Flow<String> = { value ->
 		value.map { functionSimple(it) }
 	}
 
 	@Bean
-	open fun supplierFlow(): suspend () -> Flow<String> = {
+	fun supplierFlow(): suspend () -> Flow<String> = {
 		listOf("supplierFlow").asFlow()
 	}
 
 	@Bean
-	open fun consumerFlow(receiver: ConsumerReceiver<String>): suspend (Flow<String>) -> Unit = {
+	fun consumerFlow(receiver: ConsumerReceiver<String>): suspend (Flow<String>) -> Unit = {
 		it.map { value ->
 			receiver.items.add(value)
 		}.toList()

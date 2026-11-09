@@ -1,6 +1,7 @@
 package f2.dsl.fnc.operators
 
 import kotlin.js.JsExport
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.DEFAULT_CONCURRENCY
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
@@ -34,6 +35,7 @@ fun <T, R> Flow<T>.batchFlow(
 /**
  * Default concurrency level for batching.
  */
+@OptIn(FlowPreview::class)
 val BATCH_DEFAULT_CONCURRENCY: Int = DEFAULT_CONCURRENCY
 
 /**

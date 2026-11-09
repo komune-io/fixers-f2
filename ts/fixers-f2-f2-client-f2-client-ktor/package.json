@@ -1,0 +1,14 @@
+{
+  "name": "fixers-f2-f2-client-f2-client-ktor",
+  "version": "0.0.0",
+  "main": "kotlin/fixers-f2-f2-client-f2-client-ktor.mjs",
+  "types": "kotlin/fixers-f2-f2-client-f2-client-ktor.d.mts",
+  "devDependencies": {},
+  "dependencies": {
+    "ws": "8.20.1",
+    "@js-joda/core": "3.2.0"
+  },
+  "peerDependencies": {},
+  "optionalDependencies": {},
+  "bundledDependencies": []
+}

@@ -34,30 +34,22 @@ class F2CloudFunctionProvider(
     }
 
     override fun getRouterOperations(openAPI: OpenAPI): List<RouterOperation> {
-        return collectOperations(
-            openAPI, F2Function::class.java, "function", RequestMethod.POST, inputIndex = 0, outputIndex = 1
-        ) + collectOperations(
-            openAPI, F2Supplier::class.java, "supplier", RequestMethod.GET, inputIndex = null, outputIndex = 0
-        ) + collectOperations(
-            openAPI, F2SupplierSingle::class.java, "supplier", RequestMethod.GET, inputIndex = null, outputIndex = 0
-        ) + collectOperations(
-            openAPI, F2Consumer::class.java, "consumer", RequestMethod.POST, inputIndex = 0, outputIndex = null
-        )
+        return collectOperations(openAPI, F2Function::class.java, Kind.FUNCTION) +
+            collectOperations(openAPI, F2Supplier::class.java, Kind.SUPPLIER) +
+            collectOperations(openAPI, F2SupplierSingle::class.java, Kind.SUPPLIER) +
+            collectOperations(openAPI, F2Consumer::class.java, Kind.CONSUMER)
     }
 
     private fun <T : Any> collectOperations(
         openAPI: OpenAPI,
         rawType: Class<T>,
-        kind: String,
-        method: RequestMethod,
-        inputIndex: Int?,
-        outputIndex: Int?,
+        kind: Kind,
     ): List<RouterOperation> {
         return applicationContext.getBeansOfType(rawType).map { (name, bean) ->
             val resolvable = ResolvableType.forClass(rawType, getBeanClass(name, bean))
-            val inputType = inputIndex?.let { resolvable.getGeneric(it).type }
-            val outputType = outputIndex?.let { resolvable.getGeneric(it).type }
-            buildRouterOperation(openAPI, name, kind, method, inputType, outputType)
+            val inputType = kind.inputIndex?.let { resolvable.getGeneric(it).type }
+            val outputType = kind.outputIndex?.let { resolvable.getGeneric(it).type }
+            buildRouterOperation(openAPI, name, kind, inputType, outputType)
         }
     }
 
@@ -68,14 +60,14 @@ class F2CloudFunctionProvider(
     private fun buildRouterOperation(
         openAPI: OpenAPI,
         name: String,
-        type: String,
-        method: RequestMethod,
+        kind: Kind,
         inputType: Type?,
         outputType: Type?,
     ): RouterOperation {
+        val method = kind.method
         val operation = Operation()
             .operationId("${name}_$method")
-            .description("$name $type")
+            .description("$name ${kind.label}")
 
         if (inputType != null && method == RequestMethod.POST) {
             operation.requestBody(requestBody(openAPI, inputType))
@@ -129,6 +121,12 @@ class F2CloudFunctionProvider(
     private fun routePath(name: String): String {
         val normalizedPrefix = prefix.trimEnd('/')
         return if (normalizedPrefix.isEmpty()) "/$name" else "/$normalizedPrefix/$name".replace("//", "/")
+    }
+
+    private enum class Kind(val label: String, val method: RequestMethod, val inputIndex: Int?, val outputIndex: Int?) {
+        FUNCTION("function", RequestMethod.POST, inputIndex = 0, outputIndex = 1),
+        SUPPLIER("supplier", RequestMethod.GET, inputIndex = null, outputIndex = 0),
+        CONSUMER("consumer", RequestMethod.POST, inputIndex = 0, outputIndex = null),
     }
 
     companion object {

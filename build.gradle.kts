@@ -25,6 +25,17 @@ plugins {
 }
 
 subprojects {
+    pluginManager.withPlugin("org.springframework.boot") {
+        tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage>().configureEach {
+            builder = "docker.io/paketobuildpacks/builder-noble-java-tiny:" +
+                "${rootProject.libs.versions.paketo.builder.version.get()}" +
+                "@${rootProject.libs.versions.paketo.builder.digest.get()}"
+            buildpacks = listOf(
+                "urn:cnb:builder:paketo-buildpacks/java",
+                "docker.io/paketobuildpacks/health-checker:${rootProject.libs.versions.paketo.health.checker.get()}",
+            )
+        }
+    }
     configurations.matching { it.name == "kapt" }.configureEach {
         val bomDep = project.dependencies.platform(project.dependencies.project(":f2-gradle:f2-gradle-bom"))
         project.dependencies.add(name, bomDep)
@@ -38,14 +49,14 @@ subprojects {
         dependencies {
             "commonMainApi"(platform(project(":f2-gradle:f2-gradle-bom")))
         }
-        // A type the JS export cannot render becomes `any` in the TypeScript contract: fail the build instead.
-        tasks.withType<org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile>().configureEach {
-            compilerOptions.freeCompilerArgs.add("-Xwarning-level=NON_EXPORTABLE_TYPE:error")
-        }
     }
 }
 
 fixers {
+    kt2Ts {
+        outputDirectory = "ts"
+        committedFiles = io.komune.fixers.gradle.config.model.Kt2TsFiles.DECLARATIONS
+    }
     bundle {
         group = "io.komune.f2"
         name = "F2"
@@ -71,10 +82,5 @@ fixers {
 plugins.withType<YarnPlugin> {
     the<YarnRootExtension>().apply {
         resolution("**/ws", catalogue.versions.npm.ws.get())
-        resolution("**/mocha/serialize-javascript", catalogue.versions.npm.mocha.serialize.javascript.get())
-        resolution("**/mocha/diff", catalogue.versions.npm.mocha.diff.get())
-        resolution("**/mocha/glob", catalogue.versions.npm.mocha.glob.get())
-        resolution("**/mocha/minimatch", catalogue.versions.npm.mocha.minimatch.get())
-        resolution("**/karma-webpack/minimatch", catalogue.versions.npm.karma.webpack.minimatch.get())
     }
 }

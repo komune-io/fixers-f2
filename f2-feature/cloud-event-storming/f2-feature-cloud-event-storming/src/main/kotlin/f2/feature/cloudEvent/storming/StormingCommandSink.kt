@@ -28,8 +28,9 @@ class StormingCommandSink(
 	 */
 	@EventListener
 	suspend fun storeCommand(command: Command) {
+		val eventType = requireNotNull(command::class.simpleName) { "Anonymous command: ${command::class.java.name}" }
 		val cloudEvent = CloudEvent(
-			eventType = command::class.simpleName!!,
+			eventType = eventType,
 			eventTypeVersion = "1",
 			cloudEventsVersion = "1",
 			source = "S2",

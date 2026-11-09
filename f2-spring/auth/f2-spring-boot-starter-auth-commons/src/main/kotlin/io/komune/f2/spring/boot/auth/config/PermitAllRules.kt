@@ -23,7 +23,7 @@ fun ServerHttpSecurity.permitAllFunctionBeans(
     if (paths.isNotEmpty()) {
         authorizeExchange { exchange ->
             PERMIT_ALL_METHODS.forEach { method ->
-                exchange.pathMatchers(method, *paths.toTypedArray()).permitAll()
+                paths.forEach { path -> exchange.pathMatchers(method, path).permitAll() }
             }
         }
     }

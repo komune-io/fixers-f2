@@ -5,6 +5,7 @@ import kotlin.js.JsName
 
 @JsExport
 @JsName("CloudEvent")
+@Suppress("LongParameterList") // mirrors the CloudEvents attributes
 open class CloudEvent<T>(
 	open val eventType: String,
 	open val eventTypeVersion: String? = null,

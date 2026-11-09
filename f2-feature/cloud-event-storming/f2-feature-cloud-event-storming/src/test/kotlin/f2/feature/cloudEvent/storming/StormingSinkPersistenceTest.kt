@@ -145,16 +145,16 @@ class StormingSinkPersistenceTest {
 
     private class FailingCloudEventEntityRepository : InMemoryCloudEventEntityRepository() {
         override suspend fun <S : CloudEventEntity> save(entity: S): CloudEventEntity =
-            throw IllegalStateException("write failed")
+            error("write failed")
     }
 
     @Configuration
-    open class SinkConfig {
+    class SinkConfig {
         @Bean
-        open fun sink(): StormingCloudEventSink = StormingCloudEventSink(repo = contextRepository)
+        fun sink(): StormingCloudEventSink = StormingCloudEventSink(repo = contextRepository)
 
         @Bean
-        open fun eventSpy(): EventSpy = EventSpy()
+        fun eventSpy(): EventSpy = EventSpy()
     }
 
     open class EventSpy {

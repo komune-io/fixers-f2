@@ -55,7 +55,7 @@ class HttpF2ClientMockTest {
 
     @Test
     suspend fun `supplier returns collection items individually in flow`() {
-        val client = f2Client { request ->
+        val client = f2Client { _ ->
             respond(
                 content = """[{"result": "first", "count": 1}, {"result": "second", "count": 2}]""",
                 status = HttpStatusCode.OK,
@@ -103,7 +103,7 @@ class HttpF2ClientMockTest {
     suspend fun `function handles multiple inputs`() {
         var requestCount = 0
 
-        val client = f2Client { request ->
+        val client = f2Client { _ ->
             requestCount++
             respond(
                 content = """{"result": "item-$requestCount", "count": $requestCount}""",
@@ -130,7 +130,7 @@ class HttpF2ClientMockTest {
 
     @Test
     suspend fun `function returns collection items as flow`() {
-        val client = f2Client { request ->
+        val client = f2Client { _ ->
             respond(
                 content = """[{"result": "a", "count": 1}, {"result": "b", "count": 2}]""",
                 status = HttpStatusCode.OK,
@@ -173,7 +173,7 @@ class HttpF2ClientMockTest {
 
     @Test
     suspend fun `supplier throws F2Exception on error response`() {
-        val client = f2Client { request ->
+        val client = f2Client { _ ->
             respondError(
                 status = HttpStatusCode.InternalServerError,
                 content = "Server error occurred"
@@ -193,7 +193,7 @@ class HttpF2ClientMockTest {
 
     @Test
     suspend fun `function throws F2Exception on error response`() {
-        val client = f2Client { request ->
+        val client = f2Client { _ ->
             respondError(
                 status = HttpStatusCode.BadRequest,
                 content = "Invalid request"
@@ -214,7 +214,7 @@ class HttpF2ClientMockTest {
 
     @Test
     suspend fun `consumer throws F2Exception on error response`() {
-        val client = f2Client { request ->
+        val client = f2Client { _ ->
             respondError(
                 status = HttpStatusCode.InternalServerError,
                 content = "Server error occurred"
@@ -236,7 +236,7 @@ class HttpF2ClientMockTest {
     @Test
     suspend fun `consumer throws F2Exception when a later response fails`() {
         var requestCount = 0
-        val client = f2Client { request ->
+        val client = f2Client { _ ->
             requestCount++
             if (requestCount == 1) {
                 respond(content = "", status = HttpStatusCode.OK)
@@ -266,7 +266,7 @@ class HttpF2ClientMockTest {
             "message": "Not found"
         }"""
 
-        val client = f2Client { request ->
+        val client = f2Client { _ ->
             respond(
                 content = errorJson,
                 status = HttpStatusCode.NotFound,
@@ -290,7 +290,7 @@ class HttpF2ClientMockTest {
     suspend fun `function posts List type content in single request`() {
         var requestCount = 0
 
-        val client = f2Client { request ->
+        val client = f2Client { _ ->
             requestCount++
             respond(
                 content = """{"result": "batch-processed", "count": 10}""",
@@ -343,7 +343,7 @@ class HttpF2ClientMockTest {
     suspend fun `function handles empty flow input`() {
         var requestCount = 0
 
-        val client = f2Client { request ->
+        val client = f2Client { _ ->
             requestCount++
             respond(
                 content = """{"result": "ok", "count": 0}""",

@@ -57,6 +57,6 @@ class F2SampleHttpApp {
 /**
  * Main method to start Spring Boot Application
  */
-fun main(args: Array<String>) {
+fun main(vararg args: String) {
     runApplication<F2SampleHttpApp>(*args)
 }

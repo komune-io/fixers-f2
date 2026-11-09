@@ -58,7 +58,7 @@ fun getFlowTypeArguments(type: Type): Type {
 }
 
 fun isFlowType(type: Type): Boolean {
-	return type.typeName.startsWith(Flow::class.qualifiedName!!)
+	return type.typeName.startsWith(Flow::class.java.name)
 }
 
 fun getSuspendingFunctionReturnType(type: Type): Type {
@@ -67,15 +67,15 @@ fun getSuspendingFunctionReturnType(type: Type): Type {
 }
 
 fun isContinuationType(type: Type): Boolean {
-	return type.typeName.startsWith(Continuation::class.qualifiedName!!)
+	return type.typeName.startsWith(Continuation::class.java.name)
 }
 
 fun isContinuationUnitType(type: Type): Boolean {
-	return isContinuationType(type) && type.typeName.contains(Unit::class.qualifiedName!!)
+	return isContinuationType(type) && type.typeName.contains(Unit::class.java.name)
 }
 
 fun isContinuationFlowType(type: Type): Boolean {
-	return isContinuationType(type) && type.typeName.contains(Flow::class.qualifiedName!!)
+	return isContinuationType(type) && type.typeName.contains(Flow::class.java.name)
 }
 
 private fun getContinuationTypeArguments(type: Type): Type {
@@ -87,6 +87,8 @@ private fun getContinuationTypeArguments(type: Type): Type {
 	return wildcardType.lowerBounds[0]
 }
 
+// Spring hands the lambda and its Flux over as Any: the casts are erased; Unconfined is the upstream dispatcher.
+@Suppress("UNCHECKED_CAST", "InjectDispatcher")
 fun invokeSuspendingFunction(kotlinLambdaTarget: Any, arg0: Any): Flux<Any> {
 	val function = kotlinLambdaTarget as SuspendFunction
 	val flux = arg0 as Flux<Any>
@@ -99,6 +101,8 @@ fun invokeSuspendingFunction(kotlinLambdaTarget: Any, arg0: Any): Flux<Any> {
 	}
 }
 
+// Spring hands the lambda over as Any: the casts are erased; Unconfined is the upstream dispatcher.
+@Suppress("UNCHECKED_CAST", "InjectDispatcher")
 fun invokeSuspendingSupplier(kotlinLambdaTarget: Any): Flux<Any> {
 	val supplier = kotlinLambdaTarget as SuspendSupplier
 	return mono(Dispatchers.Unconfined) {
@@ -111,6 +115,8 @@ fun invokeSuspendingSupplier(kotlinLambdaTarget: Any): Flux<Any> {
 	}
 }
 
+// Spring hands the lambda and its Flux over as Any: the casts are erased; Unconfined is the upstream dispatcher.
+@Suppress("UNCHECKED_CAST", "InjectDispatcher")
 fun invokeSuspendingConsumer(kotlinLambdaTarget: Any, arg0: Any) {
 	val consumer = kotlinLambdaTarget as SuspendConsumer
 	val flux = arg0 as Flux<Any>

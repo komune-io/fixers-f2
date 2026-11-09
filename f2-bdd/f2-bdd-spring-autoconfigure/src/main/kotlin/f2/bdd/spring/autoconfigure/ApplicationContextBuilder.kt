@@ -14,18 +14,10 @@ class ApplicationContextBuilder {
 		profile: Array<String> = emptyArray(),
 		config: Map<String, String> = emptyMap()
 	): GenericApplicationContext {
-		return SpringApplicationBuilder(*types)
-			.profiles(*profile)
-			.withConfig(config)
+		val sources = types.fold(SpringApplicationBuilder()) { builder, type -> builder.sources(type) }
+		return profile.fold(sources) { builder, name -> builder.profiles(name) }
+			.properties(config)
 			.run() as GenericApplicationContext
-	}
-
-	private fun SpringApplicationBuilder.withConfig(config: Map<String, String>): SpringApplicationBuilder {
-		return properties(
-			*config.map { pair ->
-				"${pair.key}=${pair.value}"
-			}.toTypedArray()
-		)
 	}
 
 	@EnableAutoConfiguration

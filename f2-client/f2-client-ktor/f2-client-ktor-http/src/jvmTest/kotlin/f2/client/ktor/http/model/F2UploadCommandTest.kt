@@ -85,7 +85,11 @@ class F2UploadCommandTest {
 
     @Test
     fun `F2FilePart built from bytes reads them back from its channel`() = runTest {
-        val filePart = F2FilePart(name = "bytes.bin", bytes = byteArrayOf(1, 2, 3), contentType = "application/octet-stream")
+        val filePart = F2FilePart(
+            name = "bytes.bin",
+            bytes = byteArrayOf(1, 2, 3),
+            contentType = "application/octet-stream",
+        )
 
         assertThat(filePart.name).isEqualTo("bytes.bin")
         assertThat(filePart.contentType).isEqualTo("application/octet-stream")

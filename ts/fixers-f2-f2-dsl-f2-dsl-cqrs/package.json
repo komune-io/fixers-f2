@@ -1,0 +1,11 @@
+{
+  "name": "fixers-f2-f2-dsl-f2-dsl-cqrs",
+  "version": "0.0.0",
+  "main": "kotlin/fixers-f2-f2-dsl-f2-dsl-cqrs.mjs",
+  "types": "kotlin/fixers-f2-f2-dsl-f2-dsl-cqrs.d.mts",
+  "devDependencies": {},
+  "dependencies": {},
+  "peerDependencies": {},
+  "optionalDependencies": {},
+  "bundledDependencies": []
+}

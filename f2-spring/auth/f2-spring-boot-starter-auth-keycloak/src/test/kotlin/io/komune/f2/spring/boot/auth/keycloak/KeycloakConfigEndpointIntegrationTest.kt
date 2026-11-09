@@ -31,19 +31,12 @@ import org.springframework.test.web.reactive.server.WebTestClient
         "f2.issuers[1].realm=tenant"
     ]
 )
-class KeycloakConfigEndpointIntegrationTest {
-
-    @LocalServerPort
-    private var port: Int = 0
-
-    @Autowired
-    private lateinit var keycloakConfig: F2KeycloakConfig
-
-    @Autowired
-    private lateinit var trustedIssuersConfig: F2TrustedIssuersConfig
-
-    @Autowired
-    private lateinit var keycloakEndpoint: KeycloakConfigEndpoint
+class KeycloakConfigEndpointIntegrationTest @Autowired constructor(
+    @LocalServerPort private val port: Int,
+    private val keycloakConfig: F2KeycloakConfig,
+    private val trustedIssuersConfig: F2TrustedIssuersConfig,
+    private val keycloakEndpoint: KeycloakConfigEndpoint,
+) {
 
     private companion object {
         const val SECOND_CONFIG_JSON =

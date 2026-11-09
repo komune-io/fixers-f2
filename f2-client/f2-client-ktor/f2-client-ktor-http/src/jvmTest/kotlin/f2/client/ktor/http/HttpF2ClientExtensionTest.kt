@@ -71,7 +71,7 @@ class HttpF2ClientExtensionTest {
     suspend fun `function extension with regular type makes single batched request`() {
         var requestCount = 0
 
-        val mockClient = HttpClient(MockEngine { request ->
+        val mockClient = HttpClient(MockEngine { _ ->
             requestCount++
             respond(
                 content = """[{"result": "ok"}]""",
@@ -97,7 +97,7 @@ class HttpF2ClientExtensionTest {
 
     @Test
     suspend fun `function extension with regular type returns unwrapped list items`() {
-        val mockClient = HttpClient(MockEngine { request ->
+        val mockClient = HttpClient(MockEngine { _ ->
             respond(
                 content = """[{"result": "first"}, {"result": "second"}]""",
                 status = HttpStatusCode.OK,
@@ -124,7 +124,7 @@ class HttpF2ClientExtensionTest {
     suspend fun `function extension batches multiple flow items into single list request`() {
         var requestCount = 0
 
-        val mockClient = HttpClient(MockEngine { request ->
+        val mockClient = HttpClient(MockEngine { _ ->
             requestCount++
             // Return a list with 3 responses for the 3 input items
             respond(

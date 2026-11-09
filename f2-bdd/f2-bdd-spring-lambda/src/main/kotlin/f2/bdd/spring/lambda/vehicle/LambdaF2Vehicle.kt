@@ -12,27 +12,27 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-open class LambdaF2Vehicle {
+class LambdaF2Vehicle {
 
 	@Bean
-	open fun fixVehicle(): F2Function<Vehicle, Vehicle> = f2Function { value ->
+	fun fixVehicle(): F2Function<Vehicle, Vehicle> = f2Function { value ->
 		value.copy(broken = false)
 	}
 
 	@Bean
-	open fun supplierVehicle(): F2Supplier<Vehicle> = listOf(
+	fun supplierVehicle(): F2Supplier<Vehicle> = listOf(
 		Vehicle(name = "Car", broken = false),
 		Vehicle(name = "Moto", broken = true),
 		Vehicle(name = "Bike", broken = true),
 	).asF2Supplier()
 
 	@Bean
-	open fun consumerVehicle(receiver: VehicleReceiver): F2Consumer<Vehicle> = f2Consumer { value ->
+	fun consumerVehicle(receiver: VehicleReceiver): F2Consumer<Vehicle> = f2Consumer { value ->
 		receiver.items.add(value)
 	}
 
 	@Bean
-	open fun vehicleReceiver(): VehicleReceiver = VehicleReceiver()
+	fun vehicleReceiver(): VehicleReceiver = VehicleReceiver()
 
 }
 

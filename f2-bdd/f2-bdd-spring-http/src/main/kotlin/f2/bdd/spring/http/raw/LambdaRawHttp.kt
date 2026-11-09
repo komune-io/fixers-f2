@@ -9,11 +9,11 @@ import org.springframework.context.annotation.Configuration
 import reactor.core.publisher.Flux
 
 @Configuration
-open class LambdaRawHttp {
+class LambdaRawHttp {
 
     /** Echoes its input. Used to drive raw requests at a POJO-typed function. */
     @Bean
-    open fun rawEchoFunction(): F2Function<RawPayload, RawPayload> = f2Function { it }
+    fun rawEchoFunction(): F2Function<RawPayload, RawPayload> = f2Function { it }
 
     /**
      * A plain reactive (non-Kotlin-Flow) supplier whose `map` throws on the second
@@ -24,7 +24,7 @@ open class LambdaRawHttp {
      * would not exercise this fix.
      */
     @Bean
-    open fun rawBangSupplier(): Supplier<Flux<String>> = Supplier {
+    fun rawBangSupplier(): Supplier<Flux<String>> = Supplier {
         Flux.fromArray(arrayOf("foo", "bar")).map { value ->
             check(value != "bar") { "Bang" }
             value

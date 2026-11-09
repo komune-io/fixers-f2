@@ -5,8 +5,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Smoke coverage of the `HttpClientBuilder` expect/actual pair. Running in `commonTest` means the
- * JS actual (`jsMain/HttpClientBuilder.kt`, backed by the Ktor Js engine) is exercised too, not only
+ * Smoke coverage of the `HttpClientBuilder` factories. Running in `commonTest` means the
+ * JS builder (`jsMain/JsHttpClientBuilder.kt`, backed by the Ktor Js engine) is exercised too, not only
  * the JVM one.
  */
 class HttpClientBuilderTest {

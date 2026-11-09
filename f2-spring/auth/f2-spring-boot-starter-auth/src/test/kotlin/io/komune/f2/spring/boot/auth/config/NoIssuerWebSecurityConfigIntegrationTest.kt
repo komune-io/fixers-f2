@@ -13,10 +13,9 @@ import org.springframework.test.web.reactive.server.WebTestClient
     classes = [AuthTestApp::class],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-class NoIssuerWebSecurityConfigIntegrationTest {
-
-    @LocalServerPort
-    private var port: Int = 0
+class NoIssuerWebSecurityConfigIntegrationTest(
+    @LocalServerPort private val port: Int,
+) {
 
     private val webTestClient: WebTestClient by lazy {
         WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()

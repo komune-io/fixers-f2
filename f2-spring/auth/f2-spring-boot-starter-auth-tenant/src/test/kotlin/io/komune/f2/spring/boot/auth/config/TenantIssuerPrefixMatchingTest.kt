@@ -20,7 +20,9 @@ import org.springframework.test.web.reactive.server.WebTestClient
     classes = [TenantAuthTestApp::class],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-class TenantIssuerPrefixMatchingTest {
+class TenantIssuerPrefixMatchingTest(
+    @LocalServerPort private val port: Int,
+) {
 
     companion object {
         const val TENANT = "tenant-1"
@@ -39,9 +41,6 @@ class TenantIssuerPrefixMatchingTest {
         @AfterAll
         fun stopOidcProviderStub() = oidc.stop()
     }
-
-    @LocalServerPort
-    private var port: Int = 0
 
     private val webTestClient: WebTestClient by lazy {
         WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()
