@@ -21,6 +21,7 @@ dependencies {
 	api(platform(catalogue.cloudevents.bom)) { endorseStrictVersions() }
 	api(platform(catalogue.netty.bom)) { endorseStrictVersions() }
 	api(platform(catalogue.jackson3.bom)) { endorseStrictVersions() }
+	api(platform(catalogue.jackson2.bom)) { endorseStrictVersions() }
 
 	constraints {
 		// ═══════════════════════════════════════════
@@ -74,6 +75,9 @@ dependencies {
 
 		// Kotlin
 		api(catalogue.kotlinx.datetime)
+
+		// PostgreSQL
+		api(catalogue.scram.client)
 
 		// KSP
 		api(catalogue.ksp.symbol.processing.api)

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpMethod
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -58,6 +59,22 @@ class TenantWebSecurityConfigIntegrationTest {
         get("/openFunction")
             .expectStatus().isOk
             .expectBody(String::class.java).isEqualTo("open")
+    }
+
+    @Test
+    fun `PermitAll path should still require a token on PUT and DELETE`() {
+        listOf(HttpMethod.PUT, HttpMethod.DELETE).forEach { method ->
+            webTestClient.method(method).uri("/openFunction").exchange().expectStatus().isUnauthorized
+        }
+    }
+
+    @Test
+    fun `CORS preflight on a PermitAll path should be answered without any token`() {
+        webTestClient.options().uri("/openFunction")
+            .header("Origin", "http://example.com")
+            .header("Access-Control-Request-Method", "POST")
+            .exchange()
+            .expectStatus().isOk
     }
 
     @Test

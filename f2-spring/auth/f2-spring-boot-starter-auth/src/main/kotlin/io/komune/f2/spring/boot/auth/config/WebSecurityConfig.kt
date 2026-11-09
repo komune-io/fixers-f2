@@ -1,7 +1,6 @@
 package io.komune.f2.spring.boot.auth.config
 
 import io.komune.f2.spring.boot.auth.ROLE_PREFIX
-import jakarta.annotation.security.PermitAll
 import jakarta.annotation.security.RolesAllowed
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -128,15 +127,7 @@ abstract class WebSecurityConfig {
     }
 
     fun addPermitAllRules(http: ServerHttpSecurity) {
-        val permitAllBeans = applicationContext.getBeanNamesForAnnotation(PermitAll::class.java)
-            .map { bean -> "$contextPath/$bean" }
-            .toTypedArray()
-
-        if (permitAllBeans.isNotEmpty()) {
-            http.authorizeExchange { exchange ->
-                exchange.pathMatchers(*permitAllBeans).permitAll()
-            }
-        }
+        http.permitAllFunctionBeans(applicationContext, contextPath)
     }
 
     fun addMandatoryAuthRules(http: ServerHttpSecurity) {

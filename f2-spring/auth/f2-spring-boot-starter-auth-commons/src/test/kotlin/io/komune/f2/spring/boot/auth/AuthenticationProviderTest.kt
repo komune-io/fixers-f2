@@ -58,6 +58,14 @@ class AuthenticationProviderTest {
     }
 
     @Test
+    suspend fun `getSecurityContext should return null when the reactor context holds no security context`() {
+        val securityContext = withContext(Context.of("unrelated", "value").asCoroutineContext()) {
+            AuthenticationProvider.getSecurityContext()
+        }
+        assertThat(securityContext).isNull()
+    }
+
+    @Test
     suspend fun `getSecurityContext should return context from coroutine reactor context`() {
         val securityContext = withSecurityContext(authentication(jwt())) {
             AuthenticationProvider.getSecurityContext()
