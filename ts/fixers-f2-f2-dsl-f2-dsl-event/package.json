@@ -1,6 +1,6 @@
 {
   "name": "fixers-f2-f2-dsl-f2-dsl-event",
-  "version": "0.47.0-SNAPSHOT",
+  "version": "0.0.0",
   "main": "kotlin/fixers-f2-f2-dsl-f2-dsl-event.mjs",
   "types": "kotlin/fixers-f2-f2-dsl-f2-dsl-event.d.mts",
   "devDependencies": {},
