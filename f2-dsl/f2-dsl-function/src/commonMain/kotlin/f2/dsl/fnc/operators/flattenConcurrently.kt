@@ -1,6 +1,8 @@
 package f2.dsl.fnc.operators
 
 import kotlin.jvm.JvmName
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.DEFAULT_CONCURRENCY
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.flattenMerge
  * @param concurrency The maximum number of concurrent flows to be collected. Defaults to [DEFAULT_CONCURRENCY].
  * @return A Flow emitting elements from the inner flows.
  */
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 fun <R> Flow<Flow<R>>.flattenConcurrently(
     concurrency: Int = DEFAULT_CONCURRENCY
 ): Flow<R> = flattenMerge(concurrency)
@@ -23,6 +26,7 @@ fun <R> Flow<Flow<R>>.flattenConcurrently(
  * @param concurrency The maximum number of concurrent lists to be collected. Defaults to [DEFAULT_CONCURRENCY].
  * @return A Flow emitting elements from the inner lists.
  */
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @JvmName("flattenConcurrentlyList")
 fun <R> Flow<List<R>>.flattenConcurrently(
     concurrency: Int = DEFAULT_CONCURRENCY

@@ -86,8 +86,9 @@ class KeycloakConfigResolverTest {
             }
         }
 
-        KeycloakConfigEndpoint(recordingResolver).keycloak()("first")
+        val config = KeycloakConfigEndpoint(recordingResolver).keycloak()("first")
 
+        assertThat(config.realm).isEqualTo("master")
         assertThat(resolvingThread).isEqualTo(Thread.currentThread().name)
     }
 }

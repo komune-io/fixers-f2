@@ -27,11 +27,11 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-@Suppress("UnnecessaryAbstractClass", "TooManyFunctions")
+@Suppress("TooManyFunctions")
 @Configuration
 @ConditionalOnMissingBean(WebSecurityConfig::class)
 @EnableConfigurationProperties(F2TrustedIssuersConfig::class)
-abstract class WebSecurityConfig {
+class WebSecurityConfig {
 
     companion object {
         const val SPRING_SECURITY_FILTER_CHAIN = "springSecurityFilterChain"
@@ -90,7 +90,7 @@ abstract class WebSecurityConfig {
         authentication: Mono<Authentication>
     ): Mono<AuthorizationResult> {
         return authentication.map { auth ->
-            if (auth !is JwtAuthenticationToken || auth.token == null) {
+            if (auth !is JwtAuthenticationToken) {
                 return@map false
             }
 
@@ -113,10 +113,13 @@ abstract class WebSecurityConfig {
         }
     }
 
+    @Suppress("SpreadOperator") // RolesAllowed.value is an array and hasAnyRole only takes varargs
     fun addRolesAllowedRules(http: ServerHttpSecurity) {
         applicationContext.getBeanNamesForAnnotation(RolesAllowed::class.java)
             .associateWith { bean ->
-                applicationContext.findAnnotationOnBean(bean, RolesAllowed::class.java)!!.value
+                checkNotNull(applicationContext.findAnnotationOnBean(bean, RolesAllowed::class.java)) {
+                    "$bean is listed with @RolesAllowed but carries none"
+                }.value
             }
             .forEach { (name, roles) ->
                 http.authorizeExchange{ exchange ->

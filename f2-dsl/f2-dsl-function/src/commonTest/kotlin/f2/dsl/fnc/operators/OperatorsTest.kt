@@ -4,6 +4,7 @@ import f2.dsl.cqrs.envelope.Envelope
 import f2.dsl.fnc.F2Function
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOf
@@ -13,6 +14,7 @@ import kotlinx.coroutines.test.runTest
 
 class OperatorsTest {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `test chunk, flattenConcurrently, groupBy, mapToEnvelope, pairEnvelope integration`() = runTest {
         // Initial flow of integers
@@ -61,7 +63,7 @@ class OperatorsTest {
 
         // Assertions
         assertEquals(9, (result).count())
-        assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9).sortedBy { it.toString() }, (result.map { it.second.first }).sortedBy { it.toString() })
-        assertEquals(listOf("1", "2", "3", "4", "5", "6", "7", "8", "9").sortedBy { it.toString() }, (result.map { it.second.second }).sortedBy { it.toString() })
+        assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9), result.map { it.second.first }.sorted())
+        assertEquals(listOf("1", "2", "3", "4", "5", "6", "7", "8", "9"), result.map { it.second.second }.sorted())
     }
 }

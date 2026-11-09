@@ -51,7 +51,7 @@ inline fun <reified T> Flow<T>.mapToEnvelopeWithRandomId(): Flow<Envelope<T>> =
     mapToEnvelope { Uuid.random().toString() }
 
 @OptIn(ExperimentalUuidApi::class)
-inline fun <T> Flow<T>.mapToEnvelopeWithRandomId(
+fun <T> Flow<T>.mapToEnvelopeWithRandomId(
     type: String,
 ): Flow<Envelope<T>> = mapToEnvelope(type) { Uuid.random().toString() }
 

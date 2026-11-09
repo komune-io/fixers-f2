@@ -114,7 +114,7 @@ class WebSecurityConfigTest {
             .claim("realm_access", mapOf("roles" to listOf("admin")))
             .build()
 
-        val authentication = config.jwtAuthenticationConverter().convert(jwt)!!.block()
+        val authentication = config.jwtAuthenticationConverter().convert(jwt).block()
 
         assertThat(authentication).isInstanceOf(JwtAuthenticationToken::class.java)
         assertThat(authentication!!.authorities.map { it.authority })

@@ -101,7 +101,7 @@ class WebSecurityConfig {
         logger.trace("Authenticating using custom filter")
 
         return authentication.map { auth ->
-            if (auth !is JwtAuthenticationToken || auth.token == null) {
+            if (auth !is JwtAuthenticationToken) {
                 logger.trace("Authentication failed: JWT token is missing or invalid")
                 return@map false
             }
@@ -133,12 +133,15 @@ class WebSecurityConfig {
         }
     }
 
+    @Suppress("SpreadOperator") // RolesAllowed.value is an array and hasAnyRole only takes varargs
     fun addRolesAllowedRules(http: ServerHttpSecurity) {
         logger.trace("Adding RolesAllowed rules")
 
         applicationContext.getBeanNamesForAnnotation(RolesAllowed::class.java)
             .associateWith { bean ->
-                applicationContext.findAnnotationOnBean(bean, RolesAllowed::class.java)!!.value
+                checkNotNull(applicationContext.findAnnotationOnBean(bean, RolesAllowed::class.java)) {
+                    "$bean is listed with @RolesAllowed but carries none"
+                }.value
             }
             .forEach { (name, roles) ->
                 logger.trace("Setting up role-based authorization for $name with roles: ${roles.joinToString()}")
