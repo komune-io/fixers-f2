@@ -4,7 +4,6 @@ import f2.dsl.cqrs.error.F2ErrorDTO
 import f2.dsl.cqrs.exception.F2Exception
 import f2.spring.exception.missingParameterError
 import f2.spring.exception.refusalAttributes
-import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -17,8 +16,8 @@ private const val EXCEPTION_HANDLER_ORDER = -2
 /**
  * Answers an [F2Exception] with the status its error names and the body [F2ErrorAttributes] gives every error:
  * the refusal code, and a refusal's message, parameters and citers — nothing else the exception was raised with.
+ * Registered by [F2ExceptionWebMvcAutoConfiguration].
  */
-@Configuration
 @RestControllerAdvice
 @Order(EXCEPTION_HANDLER_ORDER)
 class F2ExceptionHandler {

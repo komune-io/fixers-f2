@@ -7,7 +7,6 @@ import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.web.WebProperties
 import org.springframework.boot.webflux.autoconfigure.error.DefaultErrorWebExceptionHandler
 import org.springframework.context.ApplicationContext
-import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerCodecConfigurer
@@ -20,9 +19,11 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import tools.jackson.module.kotlin.KotlinInvalidNullException
 
-@Configuration
-@Suppress("MagicNumber")
-@Order(-2)
+/**
+ * Answers every error with the [F2ErrorAttributes] body, ahead of Spring Boot's handler. Registered by
+ * [F2ExceptionWebFluxAutoConfiguration].
+ */
+@Order(F2ErrorWebExceptionHandler.ORDER)
 class F2ErrorWebExceptionHandler(
     applicationContext: ApplicationContext,
     webProperties: WebProperties,
@@ -36,6 +37,9 @@ class F2ErrorWebExceptionHandler(
 ) {
     companion object {
         private const val INTERNAL_ERROR = 500
+
+        /** Ahead of Spring Boot's handler (-1) and of WebFlux's own (0). */
+        const val ORDER: Int = -2
     }
     init {
         setViewResolvers(viewResolvers.toList())
