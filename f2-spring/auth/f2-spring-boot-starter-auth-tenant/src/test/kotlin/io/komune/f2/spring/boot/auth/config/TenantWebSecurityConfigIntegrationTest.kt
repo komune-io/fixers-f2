@@ -18,7 +18,9 @@ import org.springframework.test.web.reactive.server.WebTestClient
     classes = [TenantAuthTestApp::class],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-class TenantWebSecurityConfigIntegrationTest {
+class TenantWebSecurityConfigIntegrationTest(
+    @LocalServerPort private val port: Int,
+) {
 
     companion object {
         const val TENANT_1 = "tenant-1"
@@ -36,9 +38,6 @@ class TenantWebSecurityConfigIntegrationTest {
         @AfterAll
         fun stopOidcProviderStub() = oidc.stop()
     }
-
-    @LocalServerPort
-    private var port: Int = 0
 
     private val webTestClient: WebTestClient by lazy {
         WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()

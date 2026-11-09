@@ -145,7 +145,7 @@ class StormingSinkPersistenceTest {
 
     private class FailingCloudEventEntityRepository : InMemoryCloudEventEntityRepository() {
         override suspend fun <S : CloudEventEntity> save(entity: S): CloudEventEntity =
-            throw IllegalStateException("write failed")
+            error("write failed")
     }
 
     @Configuration

@@ -44,6 +44,7 @@ class F2ErrorWebExceptionHandler(
         setMessageReaders(serverCodecConfigurer.readers)
     }
 
+    @Suppress("ForbiddenVoid") // overrides the Java signature of ErrorWebExceptionHandler
     override fun handle(
         exchange: ServerWebExchange, throwable: Throwable
     ): Mono<Void> {

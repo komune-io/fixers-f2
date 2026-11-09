@@ -24,7 +24,9 @@ import org.springframework.test.web.reactive.server.WebTestClient
     classes = [PermitAllRulesTest.App::class],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-class PermitAllRulesTest {
+class PermitAllRulesTest(
+    @LocalServerPort private val port: Int,
+) {
 
     @SpringBootApplication
     class App {
@@ -54,9 +56,6 @@ class PermitAllRulesTest {
             return http.build()
         }
     }
-
-    @LocalServerPort
-    private var port: Int = 0
 
     private val webTestClient: WebTestClient by lazy {
         WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()

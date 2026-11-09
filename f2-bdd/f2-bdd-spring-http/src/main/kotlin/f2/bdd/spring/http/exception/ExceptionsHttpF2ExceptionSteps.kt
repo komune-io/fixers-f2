@@ -25,7 +25,7 @@ class ExceptionsHttpF2ExceptionSteps: HttpF2GenericsSteps<MutableMap<String, Str
 	}
 
 	override fun consumerReceiver(): List<String> {
-		val bean = bag.applicationContext!!.getBean(StringConsumerReceiver::class.java)
+		val bean = bag.requireApplicationContext().getBean(StringConsumerReceiver::class.java)
 		return bean.items
 	}
 

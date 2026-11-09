@@ -47,7 +47,7 @@ class F2AuthTest {
     }
 
     private fun tokenJson(accessToken: String, refreshToken: String? = null): String {
-        val refresh = refreshToken?.let { ""","refresh_token":"$it"""" } ?: ""
+        val refresh = refreshToken?.let { ""","refresh_token":"$it"""" }.orEmpty()
         return """{"access_token":"$accessToken","expires_in":300,""" +
             """"token_type":"Bearer","scope":"openid"$refresh}"""
     }

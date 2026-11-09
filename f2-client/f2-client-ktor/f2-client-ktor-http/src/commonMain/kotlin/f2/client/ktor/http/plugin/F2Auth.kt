@@ -111,18 +111,13 @@ class F2Auth(
             val refreshTokenInfo = json.decodeFromString<TokenInfo>(tokenInfo)
             lastBearerTokens = BearerTokens(
                 refreshTokenInfo.accessToken,
-                refreshTokenInfo.refreshToken ?: ""
+                refreshTokenInfo.refreshToken.orEmpty()
             )
             lastBearerTokens
         } catch (e: IllegalArgumentException) {
             val debugInfo = if (debug) "Invalid argument encountered: $tokenInfo" else ""
             throw F2Error(
                 message = "Unable to decode response from auth provider. $debugInfo"
-            ).asException(e)
-        } catch (e: Exception) {
-            val debugInfo = if (debug) " Response: $tokenInfo" else ""
-            throw F2Error(
-                message = "Unknown exception occurred.$debugInfo"
             ).asException(e)
         }
     }
@@ -133,7 +128,7 @@ class F2Auth(
         return mapOf(
             "grant_type" to "refresh_token",
             "client_id" to authRealm.clientId,
-            "refresh_token" to (oldTokens?.refreshToken ?: "")
+            "refresh_token" to oldTokens?.refreshToken.orEmpty()
         )
     }
 

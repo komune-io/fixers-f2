@@ -28,6 +28,6 @@ abstract class LambdaListSteps : LambdaListStepsBase<String, String>() {
 	}
 
 	override fun receiver(): ConsumerReceiver<String> {
-		return bag.applicationContext!!.getBean(StringConsumerReceiver::class.java)
+		return bag.requireApplicationContext().getBean(StringConsumerReceiver::class.java)
 	}
 }

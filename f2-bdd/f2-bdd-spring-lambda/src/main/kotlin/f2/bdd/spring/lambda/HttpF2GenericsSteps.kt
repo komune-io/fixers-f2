@@ -20,7 +20,7 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 		prepareSteps()
 
 		When("${prefix}Function catalog contains") { table: DataTable ->
-			val functionCatalog = bag.applicationContext!!.getBean(FunctionCatalog::class.java)
+			val functionCatalog = bag.requireApplicationContext().getBean(FunctionCatalog::class.java)
 			table.asList().forEach { name ->
 				val result = functionCatalog.lookup<Any>(name)
 				Assertions.assertThat(result).isNotNull

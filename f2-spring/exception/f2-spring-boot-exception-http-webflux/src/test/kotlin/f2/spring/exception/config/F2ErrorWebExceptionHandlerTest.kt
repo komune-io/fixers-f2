@@ -56,10 +56,9 @@ class TestApp {
 	classes = [TestApp::class],
 	webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-class F2ErrorWebExceptionHandlerTest {
-
-	@LocalServerPort
-	private var port: Int = 0
+class F2ErrorWebExceptionHandlerTest(
+	@LocalServerPort private val port: Int,
+) {
 
 	private val webTestClient: WebTestClient by lazy {
 		WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()

@@ -15,6 +15,6 @@ open class LambdaF2VehicleSteps : FunctionCatalogStepsBase<Vehicle, Vehicle>("Ve
 	}
 
 	override fun consumerReceiver(): List<Vehicle> {
-		return bag.applicationContext!!.getBean(VehicleReceiver::class.java).items
+		return bag.requireApplicationContext().getBean(VehicleReceiver::class.java).items
 	}
 }

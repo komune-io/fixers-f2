@@ -31,6 +31,6 @@ class F2BomPlugin : Plugin<Project> {
         val props = Properties()
         javaClass.getResourceAsStream("/f2-plugin.properties")?.use { props.load(it) }
         return props.getProperty("version")
-            ?: throw IllegalStateException("Could not determine F2 BOM version from f2-plugin.properties")
+            ?: error("Could not determine F2 BOM version from f2-plugin.properties")
     }
 }

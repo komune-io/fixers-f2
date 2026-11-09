@@ -19,7 +19,7 @@ internal class F2SampleHttpAppTest {
 	lateinit var catalog: FunctionCatalog
 
 	@Test
-	suspend fun testCatalogue() {
+	fun testCatalogue() {
 		val sha256 = catalog.lookup<Any>("sha256")
 		val namesFunction = catalog.getNames(Function::class.java)
 		val namesSupplier = catalog.getNames(Supplier::class.java)

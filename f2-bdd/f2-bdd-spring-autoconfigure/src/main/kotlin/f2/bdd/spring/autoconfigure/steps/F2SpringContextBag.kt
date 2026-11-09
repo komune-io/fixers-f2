@@ -29,8 +29,8 @@ class F2SpringContextBag {
 	lateinit var uuid: String
 
 	var applicationParameters: Map<String, String> = emptyMap()
-	var result: MutableMap<String, Any> = mutableMapOf()
-	var exceptions: MutableMap<String, Throwable> = mutableMapOf()
+	val result: MutableMap<String, Any> = mutableMapOf()
+	val exceptions: MutableMap<String, Throwable> = mutableMapOf()
 	lateinit var contextBuilder: ReactiveWebApplicationContextRunner
     var applicationContext: GenericApplicationContext? = null
 
@@ -65,7 +65,10 @@ class F2SpringContextBag {
 		return applicationContext?.getBean(name) as suspend (P) -> Unit
 	}
 
+	fun requireApplicationContext(): GenericApplicationContext =
+		checkNotNull(applicationContext) { "No application context started for this scenario" }
+
     fun getFunctionCatalog(): FunctionCatalog {
-        return applicationContext!!.getBean(FunctionCatalog::class.java)
+        return requireApplicationContext().getBean(FunctionCatalog::class.java)
     }
 }
