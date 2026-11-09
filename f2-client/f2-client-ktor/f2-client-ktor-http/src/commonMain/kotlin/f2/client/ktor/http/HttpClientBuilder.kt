@@ -9,7 +9,7 @@ import kotlin.js.JsExport
  * Obtain one from [httpClientBuilderDefault], [httpClientBuilderGenerics] or the platform `httpClientBuilder`.
  */
 @JsExport
-interface HttpClientBuilder {
+fun interface HttpClientBuilder {
     /**
      * Builds an [HttpF2Client] with the specified base URL.
      *
