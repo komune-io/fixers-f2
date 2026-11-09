@@ -44,14 +44,14 @@ interface F2ErrorDTO: Problem {
 @JsName("F2Error")
 @OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
 open class F2Error(
-	override val message: String,
-	override val id: String? = Uuid.random().toString(),
-	override val timestamp: String = Clock.System.now().toString(),
-	override val code: Int = 500,
-	override val requestId: String? = null,
-	override val refusal: String? = null,
-	override val parameters: Map<String, String> = emptyMap(),
-	override val citers: List<String> = emptyList(),
+    override val message: String,
+    override val id: String? = Uuid.random().toString(),
+    override val timestamp: String = Clock.System.now().toString(),
+    override val code: Int = 500,
+    override val requestId: String? = null,
+    override val refusal: String? = null,
+    override val parameters: Map<String, String> = emptyMap(),
+    override val citers: List<String> = emptyList(),
 ) : F2ErrorDTO {
 	override fun toString(): String {
 		return "F2Error(timestamp='$timestamp', code=$code, requestId='$requestId', refusal=$refusal, " +

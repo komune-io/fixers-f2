@@ -1,11 +1,8 @@
 package f2.spring.exception.config
 
-import f2.spring.exception.findF2Exception
-import f2.spring.exception.refusalAttributes
-import f2.spring.exception.unreadableBody
+import f2.spring.exception.completeWithRefusal
 import org.springframework.boot.web.error.ErrorAttributeOptions
 import org.springframework.boot.webflux.error.DefaultErrorAttributes
-import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.server.ServerRequest
 
 /**
@@ -16,23 +13,7 @@ import org.springframework.web.reactive.function.server.ServerRequest
 class F2ErrorAttributes: DefaultErrorAttributes() {
     override fun getErrorAttributes(request: ServerRequest, options: ErrorAttributeOptions): MutableMap<String, Any?> {
         val attributes = super.getErrorAttributes(request, options.excluding(ErrorAttributeOptions.Include.MESSAGE))
-        val error = getError(request)
-        val f2Exception = error.findF2Exception()
-        val status = when {
-            error.unreadableBody() != null -> HttpStatus.BAD_REQUEST
-            else -> f2Exception?.error?.code?.let(HttpStatus::resolve)
-        }
-        status?.let {
-            attributes[STATUS] = it.value()
-            attributes[ERROR] = it.reasonPhrase
-        }
-        val resolved = attributes[STATUS] as? Int ?: HttpStatus.INTERNAL_SERVER_ERROR.value()
-        attributes.putAll(refusalAttributes(resolved, f2Exception?.error))
+        attributes.completeWithRefusal(getError(request))
         return attributes
-    }
-
-    private companion object {
-        const val STATUS = "status"
-        const val ERROR = "error"
     }
 }

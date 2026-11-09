@@ -5,6 +5,7 @@ import f2.dsl.cqrs.error.F2ErrorDTO
 import f2.dsl.cqrs.error.HttpRefusal
 import f2.dsl.cqrs.exception.F2Exception
 import java.util.UUID
+import org.springframework.http.HttpStatus
 import tools.jackson.core.JacksonException
 
 /** The error body's key for the refusal code. */
@@ -27,6 +28,29 @@ fun refusalAttributes(status: Int, error: F2ErrorDTO?): Map<String, Any> = build
 		error.citers.takeIf { it.isNotEmpty() }?.let { put(F2Error::citers.name, it) }
 	}
 }
+
+/**
+ * Completes Spring's error [attributes] for [error], the failure they describe: the status an [F2Exception] names —
+ * or 400 for a request body nobody could read — and the [refusalAttributes] of that status. Spring's own message is
+ * never kept: only a refusal's travels.
+ */
+fun MutableMap<String, Any?>.completeWithRefusal(error: Throwable?) {
+	remove(F2Error::message.name)
+	val f2Exception = error.findF2Exception()
+	val status = when {
+		error?.unreadableBody() != null -> HttpStatus.BAD_REQUEST
+		else -> f2Exception?.error?.code?.let(HttpStatus::resolve)
+	}
+	status?.let {
+		this[STATUS_ATTRIBUTE] = it.value()
+		this[ERROR_ATTRIBUTE] = it.reasonPhrase
+	}
+	val resolved = this[STATUS_ATTRIBUTE] as? Int ?: HttpStatus.INTERNAL_SERVER_ERROR.value()
+	putAll(refusalAttributes(resolved, f2Exception?.error))
+}
+
+private const val STATUS_ATTRIBUTE = "status"
+private const val ERROR_ATTRIBUTE = "error"
 
 /**
  * Finds the [F2Exception] carried by this throwable, either directly or as its immediate cause.
