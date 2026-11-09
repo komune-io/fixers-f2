@@ -2322,11 +2322,11 @@ initMetadataForClass(AbstractMutableCollection, 'AbstractMutableCollection', VOI
 protoOf(AbstractMap).asJsReadonlyMapView = asJsReadonlyMapView;
 initMetadataForClass(AbstractMap, 'AbstractMap', VOID, VOID, [KtMap]);
 initMetadataForClass(AbstractMutableMap, 'AbstractMutableMap', VOID, VOID, [KtMap]);
-initMetadataForClass(AbstractMutableSet, 'AbstractMutableSet', VOID, VOID, [KtSet, Collection]);
+initMetadataForClass(AbstractMutableSet, 'AbstractMutableSet', VOID, VOID, [Collection, KtSet]);
 initMetadataForClass(HashMap, 'HashMap', HashMap.q2, VOID, [KtMap]);
-initMetadataForClass(HashMapKeys, 'HashMapKeys', VOID, VOID, [KtSet, Collection]);
+initMetadataForClass(HashMapKeys, 'HashMapKeys', VOID, VOID, [Collection, KtSet]);
 initMetadataForClass(HashMapValues, 'HashMapValues', VOID, VOID, [Collection]);
-initMetadataForClass(HashMapEntrySetBase, 'HashMapEntrySetBase', VOID, VOID, [KtSet, Collection]);
+initMetadataForClass(HashMapEntrySetBase, 'HashMapEntrySetBase', VOID, VOID, [Collection, KtSet]);
 initMetadataForClass(HashMapEntrySet, 'HashMapEntrySet');
 initMetadataForClass(HashMapKeysDefault$iterator$1);
 initMetadataForClass(HashMapKeysDefault, 'HashMapKeysDefault');

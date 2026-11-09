@@ -5949,13 +5949,13 @@ initMetadataForClass(AbstractMutableCollection, 'AbstractMutableCollection', VOI
 initMetadataForClass(IteratorImpl, 'IteratorImpl');
 initMetadataForClass(ListIteratorImpl, 'ListIteratorImpl');
 protoOf(AbstractMutableList).asJsReadonlyArrayView = asJsReadonlyArrayView;
-initMetadataForClass(AbstractMutableList, 'AbstractMutableList', VOID, VOID, [Collection, KtList]);
+initMetadataForClass(AbstractMutableList, 'AbstractMutableList', VOID, VOID, [KtList, Collection]);
 initMetadataForClass(SubList, 'SubList');
 initMetadataForClass(AbstractMap, 'AbstractMap', VOID, VOID, [KtMap]);
 initMetadataForClass(AbstractMutableMap, 'AbstractMutableMap', VOID, VOID, [KtMap]);
 initMetadataForClass(AbstractMutableSet, 'AbstractMutableSet', VOID, VOID, [KtSet, Collection]);
 initMetadataForCompanion(Companion_1);
-initMetadataForClass(ArrayList, 'ArrayList', ArrayList.l4, VOID, [Collection, KtList]);
+initMetadataForClass(ArrayList, 'ArrayList', ArrayList.l4, VOID, [KtList, Collection]);
 initMetadataForClass(HashMap, 'HashMap', HashMap.u4, VOID, [KtMap]);
 initMetadataForClass(HashMapKeys, 'HashMapKeys', VOID, VOID, [KtSet, Collection]);
 initMetadataForClass(HashMapEntrySetBase, 'HashMapEntrySetBase', VOID, VOID, [KtSet, Collection]);

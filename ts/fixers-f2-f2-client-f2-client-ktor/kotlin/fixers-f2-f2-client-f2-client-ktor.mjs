@@ -29,17 +29,17 @@ class F2ClientBuilder {
     requireHttpUrl(this, url);
     return httpClientBuilderDefault().build(url);
   }
-  *n46(urlBase, config, $completion) {
+  n46(urlBase, config) {
     if (!this.m46(urlBase)) {
       throw InvalidUrlException.q46(urlBase);
     }
     return httpClientBuilderGenerics(config).build(urlBase);
   }
-  r46(urlBase, config, $completion, $super) {
+  r46(urlBase, config, $super) {
     config = config === VOID ? null : config;
-    return $super === VOID ? this.n46(urlBase, config, $completion) : $super.n46.call(this, urlBase, config, $completion);
+    return $super === VOID ? this.n46(urlBase, config) : $super.n46.call(this, urlBase, config);
   }
-  *s46(url, $completion) {
+  o2b(url) {
     requireHttpUrl(this, url);
     return httpClientBuilderDefault().build(url);
   }
@@ -67,7 +67,7 @@ function F2ClientBuilder_getInstance() {
   return F2ClientBuilder_instance;
 }
 //region block: post-declaration
-initMetadataForObject(F2ClientBuilder, 'F2ClientBuilder', VOID, VOID, VOID, [2, 1]);
+initMetadataForObject(F2ClientBuilder, 'F2ClientBuilder');
 initMetadataForClass(InvalidUrlException, 'InvalidUrlException');
 //endregion
 //region block: init

@@ -72,8 +72,8 @@ import {
   _ChannelResult___get_isClosed__impl__mg7kuul2jcxqhngcqm as _ChannelResult___get_isClosed__impl__mg7kuu,
   close$default2suggcywjwe8g as close$default,
   cancel$default3v09jht7i082i as cancel$default,
-  ReceiveChannel24wu5e2tj9lbp as ReceiveChannel,
   SendChannel38sllbxw662ws as SendChannel,
+  ReceiveChannel24wu5e2tj9lbp as ReceiveChannel,
 } from './kotlinx-coroutines-core.mjs';
 import {
   get_isTraceEnabled82xibuu04nxp as get_isTraceEnabled,
@@ -1516,7 +1516,7 @@ initMetadataForClass(ChannelOverflow, 'ChannelOverflow');
 initMetadataForCompanion(Companion_5);
 protoOf(BoundedChannel).z27 = close$default;
 protoOf(BoundedChannel).b28 = cancel$default;
-initMetadataForClass(BoundedChannel, 'BoundedChannel', VOID, VOID, [ReceiveChannel, SendChannel], [1, 0]);
+initMetadataForClass(BoundedChannel, 'BoundedChannel', VOID, VOID, [SendChannel, ReceiveChannel], [1, 0]);
 initMetadataForClass(ChannelOverflowException, 'ChannelOverflowException');
 initMetadataForInterface(WebSocketExtension, 'WebSocketExtension');
 initMetadataForClass(WebSocketExtensionsConfig, 'WebSocketExtensionsConfig', WebSocketExtensionsConfig);

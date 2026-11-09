@@ -1,4 +1,5 @@
 import {
+  initMetadataForInterface1egvbzx539z91 as initMetadataForInterface,
   THROW_CCE2g6jy02ryeudk as THROW_CCE,
   isInterface3d6p8outrmvmk as isInterface,
   Unit_instance3kz1zqli6gr1r as Unit_instance,
@@ -22,7 +23,6 @@ import {
   to2cs3ny02qtbcb as to,
   plus2lr02ok6jhhxu as plus,
   isBlank1dvkhjjvox3p0 as isBlank,
-  initMetadataForInterface1egvbzx539z91 as initMetadataForInterface,
   mapOf2zpbbmyqk8xpf as mapOf,
   toString30pk9tzaqopn as toString,
   toString1pkumu07cwy4m as toString_0,
@@ -97,6 +97,7 @@ import { ByteReadChannel1cb89sbyipkce as ByteReadChannel } from './ktor-ktor-io.
 var imul = Math.imul;
 //endregion
 //region block: pre-declaration
+class HttpClientBuilder {}
 class sam$f2_dsl_fnc_F2Supplier$0 {
   constructor(function_0) {
     this.j43_1 = function_0;
@@ -531,19 +532,13 @@ class F2FilePart {
     return this.q44(name, ByteReadChannel(bytes), contentType);
   }
 }
-class HttpClientBuilder {
+class JsHttpClientBuilder {
   constructor(config) {
-    var tmp;
-    if (config === VOID) {
-      tmp = HttpClientBuilder$_init_$lambda_3mg5wj;
-    } else {
-      tmp = config;
-    }
-    config = tmp;
     this.r44_1 = config;
   }
   build(urlBase) {
-    var tmp0_httpClient = httpClient(this);
+    var tmp = Js_instance;
+    var tmp0_httpClient = HttpClient(tmp, JsHttpClientBuilder$build$lambda(this));
     return new HttpF2Client(tmp0_httpClient, urlBase);
   }
 }
@@ -948,27 +943,24 @@ function decodeError_0(_this__u8e3s4, structured, body, status) {
   var unreadCode = tmp_6;
   return unreadCode == null ? decoded : new F2Error(decoded.message + ' (code ' + unreadCode + ')', decoded.id, decoded.timestamp, decoded.code, decoded.requestId);
 }
-function httpClient($this) {
-  var tmp = Js_instance;
-  return HttpClient(tmp, HttpClientBuilder$httpClient$lambda($this));
+function httpClientBuilderDefault() {
+  return new JsHttpClientBuilder(httpClientBuilderDefault$lambda);
 }
-function HttpClientBuilder$_init_$lambda_3mg5wj(_this__u8e3s4) {
+function httpClientBuilderGenerics(config) {
+  config = config === VOID ? null : config;
+  return new JsHttpClientBuilder(config);
+}
+function httpClientBuilderDefault$lambda($this$JsHttpClientBuilder) {
   return Unit_instance;
 }
-function HttpClientBuilder$httpClient$lambda(this$0) {
+function JsHttpClientBuilder$build$lambda(this$0) {
   return ($this$HttpClient) => {
     applyConfig($this$HttpClient, this$0.r44_1);
     return Unit_instance;
   };
 }
-function httpClientBuilderDefault() {
-  return new HttpClientBuilder();
-}
-function httpClientBuilderGenerics(config) {
-  config = config === VOID ? null : config;
-  return new HttpClientBuilder(config);
-}
 //region block: post-declaration
+initMetadataForInterface(HttpClientBuilder, 'HttpClientBuilder');
 initMetadataForClass(sam$f2_dsl_fnc_F2Supplier$0, 'sam$f2_dsl_fnc_F2Supplier$0', VOID, VOID, [F2Supplier, FunctionAdapter], [0]);
 initMetadataForClass(sam$kotlinx_coroutines_flow_FlowCollector$0, 'sam$kotlinx_coroutines_flow_FlowCollector$0', VOID, VOID, [FlowCollector, FunctionAdapter], [1]);
 initMetadataForClass(sam$f2_dsl_fnc_F2Function$0, 'sam$f2_dsl_fnc_F2Function$0', VOID, VOID, [F2Function, FunctionAdapter], [1]);
@@ -982,7 +974,7 @@ initMetadataForInterface(F2UploadCommand, 'F2UploadCommand');
 initMetadataForClass(F2UploadSingleCommand, 'F2UploadSingleCommand', VOID, VOID, [F2UploadCommand]);
 initMetadataForClass(F2UploadMultipleCommand, 'F2UploadMultipleCommand', VOID, VOID, [F2UploadCommand]);
 initMetadataForClass(F2FilePart, 'F2FilePart');
-initMetadataForClass(HttpClientBuilder, 'HttpClientBuilder', HttpClientBuilder);
+initMetadataForClass(JsHttpClientBuilder, 'JsHttpClientBuilder', VOID, VOID, [HttpClientBuilder]);
 //endregion
 //region block: exports
 export {
@@ -990,7 +982,6 @@ export {
   F2UploadSingleCommand as F2UploadSingleCommand,
   F2UploadMultipleCommand as F2UploadMultipleCommand,
   F2FilePart as F2FilePart,
-  HttpClientBuilder as HttpClientBuilder,
   httpClientBuilderDefault as httpClientBuilderDefault,
 };
 export {

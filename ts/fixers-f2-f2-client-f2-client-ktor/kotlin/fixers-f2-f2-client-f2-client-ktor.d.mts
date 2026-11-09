@@ -214,6 +214,9 @@ export declare namespace PagePagination {
         const constructor: abstract new () => PagePagination;
     }
 }
+export declare interface HttpClientBuilder {
+    build(urlBase: string): HttpF2Client;
+}
 export declare class HttpF2Client implements F2Client {
     private constructor();
     get urlBase(): string;
@@ -271,16 +274,6 @@ export declare namespace F2FilePart {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
     namespace $metadata$ {
         const constructor: abstract new () => F2FilePart;
-    }
-}
-export declare class HttpClientBuilder {
-    private constructor();
-    build(urlBase: string): HttpF2Client;
-}
-export declare namespace HttpClientBuilder {
-    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
-    namespace $metadata$ {
-        const constructor: abstract new () => HttpClientBuilder;
     }
 }
 export declare function httpClientBuilderDefault(): HttpClientBuilder;
