@@ -2,6 +2,7 @@ package f2.spring.exception
 
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.exception.F2Exception
+import java.time.Instant
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import tools.jackson.core.JsonParser
@@ -91,6 +92,6 @@ class F2ErrorExtensionsTest {
 		assertThat(error.refusal).isEqualTo("http.INVALID_PAYLOAD")
 		assertThat(error.parameters).containsExactlyEntriesOf(mapOf("parameter" to "userId"))
 		assertThat(error.id).isNotBlank()
-		assertThat(error.timestamp).isNotBlank()
+		assertThat(Instant.parse(error.timestamp)).isNotNull()
 	}
 }

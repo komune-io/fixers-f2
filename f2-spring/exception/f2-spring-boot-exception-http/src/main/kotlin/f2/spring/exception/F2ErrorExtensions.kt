@@ -4,6 +4,7 @@ import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.error.F2ErrorDTO
 import f2.dsl.cqrs.error.HttpRefusal
 import f2.dsl.cqrs.exception.F2Exception
+import java.time.Instant
 import java.util.UUID
 import org.springframework.http.HttpStatus
 import tools.jackson.core.JacksonException
@@ -80,7 +81,7 @@ fun Throwable.unreadableBody(): JacksonException? =
  */
 fun missingParameterError(name: String): F2Error = F2Error(
 	id = UUID.randomUUID().toString(),
-	timestamp = System.currentTimeMillis().toString(),
+	timestamp = Instant.now().toString(),
 	message = "Missing parameter `$name`",
 	code = HttpRefusal.INVALID_PAYLOAD.status,
 	refusal = HttpRefusal.INVALID_PAYLOAD.refusal,

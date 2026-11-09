@@ -1,5 +1,6 @@
 package f2.spring.exception
 
+import java.time.Instant
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
@@ -60,6 +61,7 @@ class F2HttpExceptionTest {
 		)
 		assertThat(exception.error.id).isNotBlank()
 		assertThat(exception.error.timestamp).isNotBlank()
+		assertThat(Instant.parse(exception.error.timestamp)).isNotNull()
 	}
 
 	@Test

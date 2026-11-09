@@ -9,6 +9,7 @@ import java.io.InputStream
 import java.io.Reader
 import java.lang.reflect.Type
 import java.nio.charset.StandardCharsets
+import java.time.Instant
 import java.util.UUID
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -50,7 +51,7 @@ class KSerializationMapper(
         } catch (e: MissingFieldException) {
             throw F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
-                timestamp = System.currentTimeMillis().toString(),
+                timestamp = Instant.now().toString(),
                 message = "Missing parameter `${e.missingFields.joinToString(",")}`",
                 code = HttpRefusal.INVALID_PAYLOAD.status,
                 refusal = HttpRefusal.INVALID_PAYLOAD.refusal,
@@ -59,7 +60,7 @@ class KSerializationMapper(
         } catch (e: SerializationException) {
             throw F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
-                timestamp = System.currentTimeMillis().toString(),
+                timestamp = Instant.now().toString(),
                 message = e.message ?: "Invalid JSON",
                 code = HttpRefusal.INVALID_PAYLOAD.status,
             ), e)
