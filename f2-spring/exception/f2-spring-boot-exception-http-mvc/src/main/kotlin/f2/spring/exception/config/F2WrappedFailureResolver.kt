@@ -18,10 +18,14 @@ import tools.jackson.module.kotlin.KotlinInvalidNullException
  * convert — with the status they name and the F2 error body, ahead of every `@ExceptionHandler`: one of the
  * wrapper's own type would otherwise win over [F2ExceptionHandler]'s.
  *
+ * The body is written with [jsonMapper], the application's own when the auto-configuration finds one.
+ *
  * Any other failure is left alone ([resolveException] answers `null`): the application's own exception handlers
  * and Spring's resolution see it as if this resolver did not exist.
  */
-class F2WrappedFailureResolver : HandlerExceptionResolver, Ordered {
+class F2WrappedFailureResolver(
+    private val jsonMapper: JsonMapper = JsonMapper.shared(),
+) : HandlerExceptionResolver, Ordered {
 
     override fun getOrder(): Int = ORDER
 
@@ -36,7 +40,7 @@ class F2WrappedFailureResolver : HandlerExceptionResolver, Ordered {
         response.status = answer.statusCode.value()
         response.contentType = MediaType.APPLICATION_JSON_VALUE
         response.characterEncoding = Charsets.UTF_8.name()
-        response.outputStream.write(JsonMapper.shared().writeValueAsBytes(answer.body))
+        response.outputStream.write(jsonMapper.writeValueAsBytes(answer.body))
         return ModelAndView()
     }
 

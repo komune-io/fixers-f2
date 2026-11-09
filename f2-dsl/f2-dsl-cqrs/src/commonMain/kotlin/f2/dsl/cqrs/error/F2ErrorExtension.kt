@@ -17,11 +17,11 @@ fun Exception.asError() = F2Error(
     message = this.message ?: "Unknown error"
 )
 
-/** Whether this error is a refusal: written for the caller, with a [F2ErrorDTO.message] meant to be read. */
+/** @see isRefusal */
 @get:JvmName("isRefusalExtension")
 val F2ErrorDTO.isRefusal: Boolean get() = isRefusal(this)
 
-/** The code a caller tells this error apart by: its refusal's, or the meaning of its status. */
+/** @see refusalCode */
 @get:JvmName("refusalCodeExtension")
 val F2ErrorDTO.refusalCode: String get() = refusalCode(this)
 

@@ -1,11 +1,13 @@
 package f2.spring.exception.config
 
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.boot.webmvc.autoconfigure.error.ErrorMvcAutoConfiguration
 import org.springframework.boot.webmvc.error.ErrorAttributes
 import org.springframework.context.annotation.Bean
+import tools.jackson.databind.json.JsonMapper
 
 /**
  * The F2 error body in every servlet application on the classpath, before Spring Boot's own: a refusal code
@@ -26,5 +28,6 @@ class F2ExceptionWebMvcAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(F2WrappedFailureResolver::class)
-    fun f2WrappedFailureResolver(): F2WrappedFailureResolver = F2WrappedFailureResolver()
+    fun f2WrappedFailureResolver(jsonMapper: ObjectProvider<JsonMapper>): F2WrappedFailureResolver =
+        F2WrappedFailureResolver(jsonMapper.getIfAvailable { JsonMapper.shared() })
 }

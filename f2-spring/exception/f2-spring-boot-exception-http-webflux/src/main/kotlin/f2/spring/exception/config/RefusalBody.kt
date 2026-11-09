@@ -15,7 +15,8 @@ import tools.jackson.databind.json.JsonMapper
  * chain's entry point and access-denied handler.
  *
  * The body names [refusal], the meaning of [status] unless a rule of the application's own is given. [message] is
- * for a sentence written to be read by the caller, and for nothing else.
+ * for a sentence written to be read by the caller, and for nothing else. A filter has no bean of its own to
+ * reach the application's mapper: pass it as [jsonMapper], or the shared default writes the body.
  */
 // The Mono<Void> of ServerHttpResponse.writeWith, and of the security handlers that return it.
 @Suppress("ForbiddenVoid")
@@ -23,6 +24,7 @@ fun ServerWebExchange.writeRefusal(
     status: HttpStatus,
     message: String? = null,
     refusal: String = HttpRefusal.of(status.value()).refusal,
+    jsonMapper: JsonMapper = JsonMapper.shared(),
 ): Mono<Void> {
     val body = errorBody(request.path.value(), status, null).apply {
         put(REFUSAL_ATTRIBUTE, refusal)
@@ -32,6 +34,6 @@ fun ServerWebExchange.writeRefusal(
     response.statusCode = status
     response.headers.contentType = MediaType.APPLICATION_JSON
     return response.writeWith(Mono.fromSupplier {
-        response.bufferFactory().wrap(JsonMapper.shared().writeValueAsBytes(body))
+        response.bufferFactory().wrap(jsonMapper.writeValueAsBytes(body))
     })
 }
