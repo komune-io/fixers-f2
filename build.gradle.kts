@@ -38,6 +38,10 @@ subprojects {
         dependencies {
             "commonMainApi"(platform(project(":f2-gradle:f2-gradle-bom")))
         }
+        // A type the JS export cannot render becomes `any` in the TypeScript contract: fail the build instead.
+        tasks.withType<org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile>().configureEach {
+            compilerOptions.freeCompilerArgs.add("-Xwarning-level=NON_EXPORTABLE_TYPE:error")
+        }
     }
 }
 

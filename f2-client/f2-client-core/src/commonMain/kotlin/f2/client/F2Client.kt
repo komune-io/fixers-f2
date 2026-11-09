@@ -7,6 +7,7 @@ import io.ktor.util.reflect.TypeInfo
 import io.ktor.util.reflect.typeInfo
 import kotlin.js.JsExport
 
+@JsExport
 enum class F2ClientType {
 	HTTP
 }
@@ -14,10 +15,15 @@ enum class F2ClientType {
 @JsExport
 interface F2Client {
 	val type: F2ClientType
+	@JsExport.Ignore
 	fun <RESPONSE> supplier(route: String, responseTypeInfo: TypeInfo): F2Supplier<RESPONSE>
+
+	@JsExport.Ignore
 	fun <QUERY, RESPONSE> function(
 		route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo
 	): F2Function<QUERY, RESPONSE>
+
+	@JsExport.Ignore
 	fun <QUERY> consumer(route: String, queryTypeInfo: TypeInfo): F2Consumer<QUERY>
 }
 

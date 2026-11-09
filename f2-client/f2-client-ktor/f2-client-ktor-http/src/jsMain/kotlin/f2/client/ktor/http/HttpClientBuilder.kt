@@ -14,7 +14,7 @@ import io.ktor.client.engine.js.JsClientEngineConfig
  */
 @JsExport
 @JsName("HttpClientBuilder")
-actual class HttpClientBuilder(
+actual class HttpClientBuilder @JsExport.Ignore constructor(
 	private val config: F2ClientConfigLambda<JsClientEngineConfig>? = {}
 ) {
 

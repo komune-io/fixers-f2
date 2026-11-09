@@ -18,6 +18,7 @@ fun interface F2Supplier<R> : F2LambdaSupplier<R> {
      *
      * @return The Flow of type R.
      */
+    @JsExport.Ignore
     override suspend operator fun invoke(): Flow<R>
 }
 

@@ -17,7 +17,6 @@ actual fun httpClientBuilderDefault() = HttpClientBuilder()
  * @param config Additional configuration for the HTTP client. Defaults to null.
  * @return An instance of [HttpClientBuilder] with the specified configuration.
  */
-@JsExport
 actual fun httpClientBuilderGenerics(
 	config: F2ClientConfigLambda<*>?
 ) = HttpClientBuilder(config)
