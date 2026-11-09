@@ -3,6 +3,8 @@ package f2.client.ktor.http
 import f2.dsl.cqrs.exception.F2Exception
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.HttpResponseValidator
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.statement.HttpResponsePipeline
 import io.ktor.http.HttpHeaders
@@ -251,6 +253,22 @@ class HttpF2ClientErrorTest {
 
         assertThat(exception.error.code).isEqualTo(400)
         assertThat(requestCount).isEqualTo(2)
+    }
+
+    @Test
+    suspend fun `consumer propagates a response exception the caller raises on a successful response`() {
+        val client = f2Client(HttpStatusCode.OK, "") {
+            mockContentNegotiation()
+            HttpResponseValidator {
+                validateResponse { response -> throw ResponseException(response, "rejected by the caller") }
+            }
+        }
+
+        val exception = assertThrows<ResponseException> {
+            client.testConsumer().invoke(flowOf(TestRequest("id", 1)))
+        }
+
+        assertThat(exception.message).contains("rejected by the caller")
     }
 
     @Test
