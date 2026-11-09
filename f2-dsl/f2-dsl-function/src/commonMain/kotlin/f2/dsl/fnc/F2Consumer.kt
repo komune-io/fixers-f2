@@ -18,5 +18,6 @@ fun interface F2Consumer<T> : F2LambdaConsumer<T> {
      *
      * @param msg The Flow of type T to be consumed.
      */
+    @JsExport.Ignore
     override suspend operator fun invoke(msg: Flow<T>)
 }

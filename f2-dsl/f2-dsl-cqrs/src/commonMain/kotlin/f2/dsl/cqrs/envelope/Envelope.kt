@@ -29,7 +29,5 @@ class Envelope<T>(
     override val specversion: String? = null,
     override val source: String? = null,
     override val time: String? = null
-) : EnvelopeDTO<T> {
-    companion object
-}
+) : EnvelopeDTO<T>
 

@@ -19,5 +19,6 @@ fun interface F2Function<in T, out R> : F2LambdaFunction<T, R> {
      * @param msgs The Flow of type T to be transformed.
      * @return The transformed Flow of type R.
      */
+    @JsExport.Ignore
     override suspend operator fun invoke(msgs: Flow<T>): Flow<R>
 }

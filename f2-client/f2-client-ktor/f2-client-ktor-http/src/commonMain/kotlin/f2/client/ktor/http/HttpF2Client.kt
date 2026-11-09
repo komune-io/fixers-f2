@@ -47,9 +47,11 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.serializer
 
 @JsExport
-open class HttpF2Client(
+class HttpF2Client @JsExport.Ignore constructor(
+	@property:JsExport.Ignore
 	val httpClient: HttpClient,
 	val urlBase: String,
+	@property:JsExport.Ignore
 	val json: Json = F2DefaultJson
 ) : F2Client {
 
@@ -116,6 +118,7 @@ open class HttpF2Client(
 		}
 	}
 
+	@JsExport.Ignore
 	override fun <RESPONSE> supplier(
 		route: String, responseTypeInfo: TypeInfo
 	): F2Supplier<RESPONSE> = F2Supplier<RESPONSE> {
@@ -124,6 +127,7 @@ open class HttpF2Client(
 		}
 	}
 
+	@JsExport.Ignore
 	override fun <QUERY, RESPONSE> function(
 		route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo
 	) = F2Function<QUERY, RESPONSE> { messageFlow ->
@@ -135,6 +139,7 @@ open class HttpF2Client(
 		}
 	}
 
+	@JsExport.Ignore
 	override fun <QUERY> consumer(
 		route: String, queryTypeInfo: TypeInfo
 	): F2Consumer<QUERY> = F2Consumer { messages ->

@@ -12,7 +12,7 @@ Treat F2 as **CQRS-first**: every public capability in Komune's services is mode
 - **`F2Function<T, R>`** — transformer: `suspend (Flow<T>) -> Flow<R>`.
 - **`F2Consumer<T>`** — sink: `suspend (Flow<T>) -> Unit`.
 
-All three are Kotlin `fun interface`s declared once in common code (`f2-dsl-function`, `f2.dsl.fnc`) over kotlinx-coroutines `Flow` — there are no platform-specific (Promise-based) variants; the same `Flow` signatures are exported to JS via `@JsExport`. A fourth shape, **`F2SupplierSingle<R>`** (`suspend () -> R`), supplies a single value instead of a stream.
+All three are Kotlin `fun interface`s declared once in common code (`f2-dsl-function`, `f2.dsl.fnc`) over kotlinx-coroutines `Flow` — there are no platform-specific (Promise-based) variants. The interfaces are exported to JS via `@JsExport` so generated clients keep their types, but `invoke` is hidden from JS (`@JsExport.Ignore`): a `Flow` has no JS form. A fourth shape, **`F2SupplierSingle<R>`** (`suspend () -> R`), supplies a single value instead of a stream.
 
 These are F2's wire-level function shapes, reused by every other Komune library that publishes an HTTP-callable function.
 
