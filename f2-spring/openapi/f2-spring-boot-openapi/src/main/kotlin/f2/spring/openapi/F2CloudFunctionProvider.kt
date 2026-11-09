@@ -34,10 +34,10 @@ class F2CloudFunctionProvider(
     }
 
     override fun getRouterOperations(openAPI: OpenAPI): List<RouterOperation> {
-        return collectOperations(openAPI, F2Function::class.java, FUNCTION) +
-            collectOperations(openAPI, F2Supplier::class.java, SUPPLIER) +
-            collectOperations(openAPI, F2SupplierSingle::class.java, SUPPLIER) +
-            collectOperations(openAPI, F2Consumer::class.java, CONSUMER)
+        return collectOperations(openAPI, F2Function::class.java, Kind.FUNCTION) +
+            collectOperations(openAPI, F2Supplier::class.java, Kind.SUPPLIER) +
+            collectOperations(openAPI, F2SupplierSingle::class.java, Kind.SUPPLIER) +
+            collectOperations(openAPI, F2Consumer::class.java, Kind.CONSUMER)
     }
 
     private fun <T : Any> collectOperations(
@@ -67,7 +67,7 @@ class F2CloudFunctionProvider(
         val method = kind.method
         val operation = Operation()
             .operationId("${name}_$method")
-            .description("$name ${kind.name}")
+            .description("$name ${kind.label}")
 
         if (inputType != null && method == RequestMethod.POST) {
             operation.requestBody(requestBody(openAPI, inputType))
@@ -123,12 +123,13 @@ class F2CloudFunctionProvider(
         return if (normalizedPrefix.isEmpty()) "/$name" else "/$normalizedPrefix/$name".replace("//", "/")
     }
 
-    private class Kind(val name: String, val method: RequestMethod, val inputIndex: Int?, val outputIndex: Int?)
+    private enum class Kind(val label: String, val method: RequestMethod, val inputIndex: Int?, val outputIndex: Int?) {
+        FUNCTION("function", RequestMethod.POST, inputIndex = 0, outputIndex = 1),
+        SUPPLIER("supplier", RequestMethod.GET, inputIndex = null, outputIndex = 0),
+        CONSUMER("consumer", RequestMethod.POST, inputIndex = 0, outputIndex = null),
+    }
 
     companion object {
-        private val FUNCTION = Kind("function", RequestMethod.POST, inputIndex = 0, outputIndex = 1)
-        private val SUPPLIER = Kind("supplier", RequestMethod.GET, inputIndex = null, outputIndex = 0)
-        private val CONSUMER = Kind("consumer", RequestMethod.POST, inputIndex = 0, outputIndex = null)
         private val DEFAULT_MEDIA_TYPES = arrayOf(
             org.springframework.http.MediaType.APPLICATION_JSON_VALUE,
             org.springframework.http.MediaType.TEXT_PLAIN_VALUE,

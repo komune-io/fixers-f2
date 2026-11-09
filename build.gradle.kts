@@ -25,6 +25,17 @@ plugins {
 }
 
 subprojects {
+    pluginManager.withPlugin("org.springframework.boot") {
+        tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage>().configureEach {
+            builder = "docker.io/paketobuildpacks/builder-noble-java-tiny:" +
+                "${rootProject.libs.versions.paketo.builder.version.get()}" +
+                "@${rootProject.libs.versions.paketo.builder.digest.get()}"
+            buildpacks = listOf(
+                "urn:cnb:builder:paketo-buildpacks/java",
+                "docker.io/paketobuildpacks/health-checker:${rootProject.libs.versions.paketo.health.checker.get()}",
+            )
+        }
+    }
     configurations.matching { it.name == "kapt" }.configureEach {
         val bomDep = project.dependencies.platform(project.dependencies.project(":f2-gradle:f2-gradle-bom"))
         project.dependencies.add(name, bomDep)

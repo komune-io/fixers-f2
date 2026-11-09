@@ -31,7 +31,8 @@ jackson2 = "2.22.4"
 # Raises the SCRAM client that r2dbc-postgresql, whose version Spring Boot sets, still declares below it.
 scram = "3.4"
 # Spring Boot images of the samples (fixers image convention: builder pinned by digest, health checker)
-paketo-builder-noble-java-tiny = "0.0.211@sha256:8da9782949bb9f39f4b9d8079216531fe2791286fe33bbf450e533949cfbcc91"
+paketo-builder-version = "0.0.211"
+paketo-builder-digest = "sha256:8da9782949bb9f39f4b9d8079216531fe2791286fe33bbf450e533949cfbcc91"
 paketo-health-checker = "2.14.2"
 
 # Patched transitive npm versions for kotlin-js-store/yarn.lock (Dependabot cannot update it: no package.json),
