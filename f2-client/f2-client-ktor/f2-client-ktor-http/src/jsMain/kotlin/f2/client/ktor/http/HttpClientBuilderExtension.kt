@@ -9,7 +9,7 @@ import io.ktor.client.engine.js.JsClientEngineConfig
  * @return A default instance of [HttpClientBuilder].
  */
 @JsExport
-actual fun httpClientBuilderDefault() = HttpClientBuilder()
+actual fun httpClientBuilderDefault(): HttpClientBuilder = JsHttpClientBuilder {}
 
 /**
  * Provides a generic instance of [HttpClientBuilder].
@@ -19,7 +19,7 @@ actual fun httpClientBuilderDefault() = HttpClientBuilder()
  */
 actual fun httpClientBuilderGenerics(
 	config: F2ClientConfigLambda<*>?
-) = HttpClientBuilder(config)
+): HttpClientBuilder = JsHttpClientBuilder(config)
 
 /**
  * Provides a generic instance of [HttpClientBuilder].
@@ -29,4 +29,4 @@ actual fun httpClientBuilderGenerics(
  */
 fun httpClientBuilder(
 	config: F2ClientConfigLambda<JsClientEngineConfig>? = {  }
-) = HttpClientBuilder(config)
+): HttpClientBuilder = JsHttpClientBuilder(config)
