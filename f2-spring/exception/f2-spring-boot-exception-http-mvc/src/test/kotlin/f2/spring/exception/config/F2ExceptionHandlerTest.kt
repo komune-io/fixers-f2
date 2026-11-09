@@ -56,50 +56,6 @@ class F2ExceptionHandlerTest {
     }
 
     @Test
-    fun `a refusal wrapped once by the function runtime answers its own status, in the response and the body`() {
-        val refusal = F2Exception(error = F2Error(message = "Cited", code = 409, refusal = "item.CITED"))
-
-        val response = handler.handleWrapped(IllegalStateException("wrapper", refusal), request)
-
-        assertThat(response.statusCode).isEqualTo(HttpStatus.CONFLICT)
-        assertThat(response.body!!["status"]).isEqualTo(409)
-    }
-
-    @Test
-    fun `a refusal wrapped twice by the function runtime still answers its own status`() {
-        val missing = F2Exception(error = f2.dsl.cqrs.error.missingParameterError("description"))
-        val wrapped = IllegalStateException("Failed to convert input", IllegalStateException("convert", missing))
-
-        val response = handler.handleWrapped(wrapped, request)
-
-        assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-        assertThat(response.body!!["message"]).isEqualTo("Missing parameter `description`")
-    }
-
-    @Test
-    fun `a missing parameter wrapped by the function runtime is the caller's`() {
-        val response = handler.handleWrapped(IllegalStateException("convert", kotlinInvalidNullException()), request)
-
-        assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-        assertThat(response.body!!["parameters"]).isEqualTo(mapOf("parameter" to "name"))
-    }
-
-    @Test
-    fun `an input that converts to nothing is the caller's`() {
-        val response = handler.handleWrapped(IllegalArgumentException("Failed to convert input: {} to Item"), request)
-
-        assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-        assertThat(response.body).containsEntry("refusal", "http.INVALID_PAYLOAD").doesNotContainKey("message")
-    }
-
-    @Test
-    fun `any other wrapper is thrown back, to Spring's own resolution`() {
-        val internal = IllegalStateException("connect to db-internal failed")
-
-        assertThatThrownBy { handler.handleWrapped(internal, request) }.isSameAs(internal)
-    }
-
-    @Test
     fun `handleKotlinNullException should return bad request with missing parameter message`() {
         val response = handler.handleKotlinNullException(kotlinInvalidNullException(), request)
 

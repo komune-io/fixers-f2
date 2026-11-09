@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Bean
 
 /**
  * The F2 error body in every servlet application on the classpath, before Spring Boot's own: a refusal code
- * on every error, and no message but a refusal's. An application that declares its own error attributes or
- * F2 exception handler keeps them.
+ * on every error, and no message but a refusal's. An application that declares its own error attributes,
+ * F2 exception handler or wrapped-failure resolver keeps them.
  */
 @AutoConfiguration(before = [ErrorMvcAutoConfiguration::class])
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
@@ -23,4 +23,8 @@ class F2ExceptionWebMvcAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(F2ExceptionHandler::class)
     fun f2ExceptionHandler(): F2ExceptionHandler = F2ExceptionHandler()
+
+    @Bean
+    @ConditionalOnMissingBean(F2WrappedFailureResolver::class)
+    fun f2WrappedFailureResolver(): F2WrappedFailureResolver = F2WrappedFailureResolver()
 }

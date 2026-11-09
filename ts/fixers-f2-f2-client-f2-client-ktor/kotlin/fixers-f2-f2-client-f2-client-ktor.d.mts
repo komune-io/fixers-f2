@@ -109,6 +109,8 @@ export declare namespace F2Error {
         const constructor: abstract new () => F2Error;
     }
 }
+export declare function isRefusal(error: F2ErrorDTO): boolean;
+export declare function refusalCode(error: F2ErrorDTO): string;
 export declare abstract class HttpRefusal {
     private constructor();
     static get INVALID_PAYLOAD(): HttpRefusal & {
