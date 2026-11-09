@@ -1,25 +1,20 @@
 package f2.client.ktor.http
 
 import f2.dsl.cqrs.exception.F2Exception
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandler
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.respondError
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
-import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.reflect.TypeInfo
 import kotlin.reflect.typeOf
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -32,19 +27,8 @@ data class TestResponse(val result: String, val count: Int)
 
 class HttpF2ClientMockTest {
 
-    private val json = Json {
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-    }
-
-    private fun f2Client(urlBase: String = "http://localhost", handler: MockRequestHandler): HttpF2Client {
-        val mockClient = HttpClient(MockEngine(handler)) {
-            install(ContentNegotiation) {
-                json(json)
-            }
-        }
-        return HttpF2Client(mockClient, urlBase, json)
-    }
+    private fun f2Client(urlBase: String = "http://localhost", handler: MockRequestHandler): HttpF2Client =
+        mockF2Client(urlBase = urlBase, handler = handler)
 
     @Test
     suspend fun `supplier returns single response from GET request`() {
