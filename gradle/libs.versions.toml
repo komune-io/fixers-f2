@@ -30,21 +30,17 @@ jackson3 = "3.3.0"
 jackson2 = "2.22.4"
 # Raises the SCRAM client that r2dbc-postgresql, whose version Spring Boot sets, still declares below it.
 scram = "3.4"
+# Spring Boot images of the samples (fixers image convention: builder pinned by digest, health checker)
+paketo-builder-noble-java-tiny = "0.0.211@sha256:8da9782949bb9f39f4b9d8079216531fe2791286fe33bbf450e533949cfbcc91"
+paketo-health-checker = "2.14.2"
+
 # Patched transitive npm versions for kotlin-js-store/yarn.lock (Dependabot cannot update it: no package.json),
-# applied as yarn resolutions in the root build.gradle.kts. Every pin is path-scoped there with `**/`:
-# an unscoped glob breaks karma, and `mocha/x` without `**/` is ignored.
+# applied as yarn resolutions in the root build.gradle.kts. Every pin is path-scoped there with `**/`.
 # - ws: pinned to 8.20.1 by ktor-client-core, which KGP copies into every ktor-using package,
 #   so it needs `**/ws`.
-# - serialize-javascript, diff, glob, minimatch: from mocha 11; minimatch also from karma-webpack 5.
-# Upstream bumps do not make a pin safe to drop (mocha 12 still asks for minimatch ^10, which is vulnerable):
-# remove a pin only once `js-lock-refresh` without it still resolves patched versions for every advisory.
+# Remove a pin only once `js-lock-refresh` without it still resolves patched versions for every advisory.
 # Regenerate the lock after any change: `make -f infra/make/libs.mk js-lock-refresh`.
 npm-ws = "8.22.2"
-npm-mocha-serialize-javascript = "7.1.4"
-npm-mocha-diff = "8.0.4"
-npm-mocha-glob = "14.0.4"
-npm-mocha-minimatch = "11.0.5"
-npm-karma-webpack-minimatch = "11.0.5"
 
 [libraries]
 # BOM (version required — consumers use platform(f2.bom))

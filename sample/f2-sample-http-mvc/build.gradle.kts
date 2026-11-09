@@ -11,3 +11,11 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     testImplementation(libs.bundles.spring.test)
 }
+
+tasks.bootBuildImage {
+    builder = "docker.io/paketobuildpacks/builder-noble-java-tiny:${libs.versions.paketo.builder.noble.java.tiny.get()}"
+    buildpacks = listOf(
+        "urn:cnb:builder:paketo-buildpacks/java",
+        "docker.io/paketobuildpacks/health-checker:${libs.versions.paketo.health.checker.get()}",
+    )
+}
