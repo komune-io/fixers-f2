@@ -17,6 +17,7 @@ class F2ClientBuilderBinaryCompatibilityTest {
 
     private val continuation = Continuation<Any?>(EmptyCoroutineContext) { }
     private val config: (Any) -> Unit = { }
+    // The file name of get.kt is part of the extension's binary signature: renaming it breaks callers.
     private val extensions = Class.forName("f2.client.ktor.GetKt")
 
     @Test
