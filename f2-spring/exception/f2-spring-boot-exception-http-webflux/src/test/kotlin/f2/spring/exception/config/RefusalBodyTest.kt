@@ -24,14 +24,12 @@ class RefusalBodyTest {
 
         assertThat(exchange.response.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
         assertThat(exchange.response.headers.contentType).isEqualTo(MediaType.APPLICATION_JSON)
-        assertThat(body).containsExactlyInAnyOrderEntriesOf(
-            mapOf(
-                "path" to "/items/i-1",
-                "status" to 401,
-                "error" to "Unauthorized",
-                "refusal" to "http.UNAUTHENTICATED",
-            )
-        )
+        assertThat(body.keys).containsExactlyInAnyOrder("timestamp", "path", "status", "error", "refusal", "requestId")
+        assertThat(body).containsEntry("path", "/items/i-1")
+            .containsEntry("status", 401)
+            .containsEntry("error", "Unauthorized")
+            .containsEntry("refusal", "http.UNAUTHENTICATED")
+            .containsEntry("requestId", exchange.request.id)
     }
 
     @Test

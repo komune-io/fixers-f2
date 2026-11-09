@@ -2,6 +2,7 @@ package f2.spring
 
 import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.error.HttpRefusal
+import f2.dsl.cqrs.error.missingParameterError
 import f2.dsl.cqrs.exception.F2Exception
 import java.io.ByteArrayInputStream
 import java.io.IOException
@@ -49,14 +50,7 @@ class KSerializationMapper(
         try {
             return decode(json, type) as T
         } catch (e: MissingFieldException) {
-            throw F2Exception(error = F2Error(
-                id = UUID.randomUUID().toString(),
-                timestamp = Instant.now().toString(),
-                message = "Missing parameter `${e.missingFields.joinToString(",")}`",
-                code = HttpRefusal.INVALID_PAYLOAD.status,
-                refusal = HttpRefusal.INVALID_PAYLOAD.refusal,
-                parameters = mapOf("parameter" to e.missingFields.joinToString(",")),
-            ), e)
+            throw F2Exception(error = missingParameterError(e.missingFields.joinToString(",")), e)
         } catch (e: SerializationException) {
             throw F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),

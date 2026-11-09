@@ -27,12 +27,15 @@ interface F2ErrorDTO: Problem {
 
 	/**
 	 * The rule the request broke, as `<domain>.<NAME>`: a stable code a caller tells two errors apart by, and
-	 * never reused for another meaning. `null` on the server when the error is not a refusal; an error body always
-	 * carries a code, the meaning of its status ([HttpRefusal]) when no rule names one.
+	 * never reused for another meaning. `null` when the error is not a refusal — on the server and in a client
+	 * alike; [refusalCode] is then the meaning of its status ([HttpRefusal]), the code its error body carries.
 	 */
 	val refusal: String?
 
-	/** The values the refusal names — an alias, a file name — for a caller to word the refusal itself. */
+	/**
+	 * The values the error names — an alias, a file name, the field a body could not be read at — for a caller to
+	 * word it itself. They are the caller's own values, and travel with any error that gives them.
+	 */
 	val parameters: Map<String, String>
 
 	/** The objects whose citing keeps the refused one alive, by name. */

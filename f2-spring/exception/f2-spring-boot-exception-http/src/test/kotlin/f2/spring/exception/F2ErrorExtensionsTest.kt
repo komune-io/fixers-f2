@@ -1,12 +1,15 @@
 package f2.spring.exception
 
 import f2.dsl.cqrs.error.F2Error
+import f2.dsl.cqrs.error.missingParameterError
 import f2.dsl.cqrs.exception.F2Exception
 import java.time.Instant
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus
 import tools.jackson.core.JsonParser
 import tools.jackson.core.exc.StreamReadException
+import tools.jackson.databind.exc.MismatchedInputException
 
 class F2ErrorExtensionsTest {
 
@@ -57,6 +60,39 @@ class F2ErrorExtensionsTest {
 			.isSameAs(parser)
 		assertThat(IllegalStateException("reading the cache", parser).unreadableBody()).isNull()
 		assertThat(IllegalStateException("Failed to convert input").unreadableBody()).isNull()
+	}
+
+	@Test
+	fun `unreadableBody finds an input that converted to nothing`() {
+		val nothing = IllegalArgumentException("Failed to convert input: {} to class Item")
+
+		assertThat(nothing.unreadableBody()).isSameAs(nothing)
+		assertThat(IllegalArgumentException("Failed to convert the cache").unreadableBody()).isNull()
+		assertThat(nothing.describeError(HttpStatus.INTERNAL_SERVER_ERROR).status).isEqualTo(HttpStatus.BAD_REQUEST)
+	}
+
+	@Test
+	fun `an unreadable body names the field the parser stopped at, and nothing it was parsed with`() {
+		val mismatch = MismatchedInputException
+			.from(null as JsonParser?, Int::class.java, "Cannot deserialize at db-internal")
+			.apply { prependPath(Any(), "count") }
+
+		val described = IllegalStateException("Failed to convert input", RuntimeException(mismatch))
+			.describeError(HttpStatus.INTERNAL_SERVER_ERROR)
+
+		assertThat(described.status).isEqualTo(HttpStatus.BAD_REQUEST)
+		assertThat(refusalAttributes(400, described.error)).containsExactlyInAnyOrderEntriesOf(
+			mapOf("refusal" to "http.INVALID_PAYLOAD", "parameters" to mapOf("parameter" to "count"))
+		)
+	}
+
+	@Test
+	fun `the error body has one shape, when and where then the status, its phrase and the refusal code`() {
+		val body = errorBody("/items", HttpStatus.NOT_FOUND, null)
+
+		assertThat(body.keys).containsExactly("timestamp", "path", "status", "error", "refusal")
+		assertThat(Instant.parse(body["timestamp"].toString())).isNotNull()
+		assertThat(body).containsEntry("refusal", "http.NOT_FOUND").containsEntry("status", 404)
 	}
 
 	@Test

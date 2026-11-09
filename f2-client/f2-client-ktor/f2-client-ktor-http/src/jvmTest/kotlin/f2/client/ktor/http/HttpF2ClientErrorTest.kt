@@ -1,5 +1,7 @@
 package f2.client.ktor.http
 
+import f2.dsl.cqrs.error.isRefusal
+import f2.dsl.cqrs.error.refusalCode
 import f2.dsl.cqrs.exception.F2Exception
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.mock.respond
@@ -221,6 +223,7 @@ class HttpF2ClientErrorTest {
         }
 
         assertThat(exception.error.code).isEqualTo(409)
+        assertThat(exception.error.isRefusal).isTrue()
         assertThat(exception.error.refusal).isEqualTo("item.CITED")
         assertThat(exception.error.message).isEqualTo("Cited by A: it stays")
         assertThat(exception.error.parameters).containsExactlyEntriesOf(mapOf("id" to "i-1"))
@@ -237,7 +240,9 @@ class HttpF2ClientErrorTest {
         }
 
         assertThat(exception.error.code).isEqualTo(404)
-        assertThat(exception.error.refusal).isEqualTo("http.NOT_FOUND")
+        assertThat(exception.error.isRefusal).isFalse()
+        assertThat(exception.error.refusal).isNull()
+        assertThat(exception.error.refusalCode).isEqualTo("http.NOT_FOUND")
         assertThat(exception.error.message).isEqualTo("Not Found")
     }
 

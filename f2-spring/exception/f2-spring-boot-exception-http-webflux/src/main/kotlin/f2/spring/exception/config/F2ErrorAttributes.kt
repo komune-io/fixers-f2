@@ -1,19 +1,17 @@
 package f2.spring.exception.config
 
-import f2.spring.exception.completeWithRefusal
+import f2.spring.exception.toF2ErrorBody
 import org.springframework.boot.web.error.ErrorAttributeOptions
 import org.springframework.boot.webflux.error.DefaultErrorAttributes
 import org.springframework.web.reactive.function.server.ServerRequest
 
 /**
- * The error body: Spring's attributes, the status an [f2.dsl.cqrs.exception.F2Exception] names, and the refusal
- * code of every error. Only a refusal tells the caller its message — never through `server.error.include-message`,
- * which would hand every client the message of every exception the application fails on.
+ * The F2 error body: when, where, the status an [f2.dsl.cqrs.exception.F2Exception] names, and the refusal code of
+ * every error. Only a refusal tells the caller its message; no exception, trace or binding error ever travels,
+ * whatever `server.error.include-*` asks for.
  */
 class F2ErrorAttributes: DefaultErrorAttributes() {
-    override fun getErrorAttributes(request: ServerRequest, options: ErrorAttributeOptions): MutableMap<String, Any?> {
-        val attributes = super.getErrorAttributes(request, options.excluding(ErrorAttributeOptions.Include.MESSAGE))
-        attributes.completeWithRefusal(getError(request))
-        return attributes
-    }
+    override fun getErrorAttributes(request: ServerRequest, options: ErrorAttributeOptions): MutableMap<String, Any?> =
+        super.getErrorAttributes(request, ErrorAttributeOptions.defaults())
+            .toF2ErrorBody(getError(request), statusFromError = true)
 }

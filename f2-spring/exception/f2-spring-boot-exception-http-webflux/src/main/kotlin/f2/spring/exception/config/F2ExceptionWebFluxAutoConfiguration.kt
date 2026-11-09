@@ -33,10 +33,12 @@ class F2ExceptionWebFluxAutoConfiguration {
     @ConditionalOnMissingBean(ErrorWebExceptionHandler::class)
     @Order(F2ErrorWebExceptionHandler.ORDER)
     fun f2ErrorWebExceptionHandler(
+        errorAttributes: ErrorAttributes,
         applicationContext: ApplicationContext,
         webProperties: WebProperties,
         serverCodecConfigurer: ServerCodecConfigurer,
         viewResolvers: ObjectProvider<ViewResolver>,
-    ): F2ErrorWebExceptionHandler =
-        F2ErrorWebExceptionHandler(applicationContext, webProperties, serverCodecConfigurer, viewResolvers)
+    ): F2ErrorWebExceptionHandler = F2ErrorWebExceptionHandler(
+        errorAttributes, applicationContext, webProperties, serverCodecConfigurer, viewResolvers,
+    )
 }

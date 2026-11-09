@@ -1,11 +1,12 @@
 package f2.spring.exception.config
 
+import f2.dsl.cqrs.error.missingParameterError
 import f2.dsl.cqrs.exception.F2Exception
 import f2.spring.exception.F2HttpException
-import f2.spring.exception.missingParameterError
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.web.WebProperties
 import org.springframework.boot.webflux.autoconfigure.error.DefaultErrorWebExceptionHandler
+import org.springframework.boot.webflux.error.ErrorAttributes
 import org.springframework.context.ApplicationContext
 import org.springframework.core.annotation.Order
 import org.springframework.http.MediaType
@@ -20,17 +21,19 @@ import reactor.core.publisher.Mono
 import tools.jackson.module.kotlin.KotlinInvalidNullException
 
 /**
- * Answers every error with the [F2ErrorAttributes] body, ahead of Spring Boot's handler. Registered by
+ * Answers every error with the body of [errorAttributes] — [F2ErrorAttributes] unless the application declares its
+ * own — at the status that body names, ahead of Spring Boot's handler. Registered by
  * [F2ExceptionWebFluxAutoConfiguration].
  */
 @Order(F2ErrorWebExceptionHandler.ORDER)
 class F2ErrorWebExceptionHandler(
+    errorAttributes: ErrorAttributes,
     applicationContext: ApplicationContext,
     webProperties: WebProperties,
     serverCodecConfigurer: ServerCodecConfigurer,
     viewResolvers: ObjectProvider<ViewResolver>,
 ): DefaultErrorWebExceptionHandler(
-    F2ErrorAttributes(),
+    errorAttributes,
     webProperties.resources,
     webProperties.error,
     applicationContext

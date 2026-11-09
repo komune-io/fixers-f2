@@ -116,13 +116,14 @@ class F2ErrorAttributesTest {
     }
 
     @Test
-    fun `a message asked for by configuration is still withheld from anything but a refusal`() {
+    fun `whatever configuration asks for, nothing but a refusal's own words travel`() {
         val body = bodyFor(
             IllegalStateException(internal),
-            ErrorAttributeOptions.defaults().including(ErrorAttributeOptions.Include.MESSAGE),
+            ErrorAttributeOptions.of(ErrorAttributeOptions.Include.entries),
         )
 
-        assertThat(body).doesNotContainKey("message")
+        assertThat(body).doesNotContainKeys("message", "exception", "trace", "errors")
+        assertThat(body.keys).containsExactly("timestamp", "path", "status", "error", "refusal", "requestId")
         assertThat(body["refusal"]).isEqualTo("http.UNEXPECTED")
     }
 
@@ -134,6 +135,15 @@ class F2ErrorAttributesTest {
 
         assertThat(body["status"]).isEqualTo(400)
         assertThat(body["error"]).isEqualTo("Bad Request")
+        assertThat(body["refusal"]).isEqualTo("http.INVALID_PAYLOAD")
+        assertThat(body).doesNotContainKey("message")
+    }
+
+    @Test
+    fun `an input that converts to nothing is the caller's`() {
+        val body = bodyFor(IllegalArgumentException("Failed to convert input: {} to class Item"))
+
+        assertThat(body["status"]).isEqualTo(400)
         assertThat(body["refusal"]).isEqualTo("http.INVALID_PAYLOAD")
         assertThat(body).doesNotContainKey("message")
     }
