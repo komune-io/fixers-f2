@@ -211,6 +211,37 @@ class HttpF2ClientErrorTest {
     }
 
     @Test
+    suspend fun `a refusal body hands its code, sentence, parameters and citers to the caller`() {
+        val body = """{"path":"/item","status":409,"error":"Conflict","refusal":"item.CITED",""" +
+            """"message":"Cited by A: it stays","parameters":{"id":"i-1"},"citers":["A"]}"""
+        val client = f2Client(HttpStatusCode.Conflict, body)
+
+        val exception = assertThrows<F2Exception> {
+            client.testSupplier().invoke().toList()
+        }
+
+        assertThat(exception.error.code).isEqualTo(409)
+        assertThat(exception.error.refusal).isEqualTo("item.CITED")
+        assertThat(exception.error.message).isEqualTo("Cited by A: it stays")
+        assertThat(exception.error.parameters).containsExactlyEntriesOf(mapOf("id" to "i-1"))
+        assertThat(exception.error.citers).containsExactly("A")
+    }
+
+    @Test
+    suspend fun `an error body without a message is read with the meaning of its status`() {
+        val body = """{"path":"/item","status":404,"error":"Not Found","refusal":"http.NOT_FOUND"}"""
+        val client = f2Client(HttpStatusCode.NotFound, body)
+
+        val exception = assertThrows<F2Exception> {
+            client.testSupplier().invoke().toList()
+        }
+
+        assertThat(exception.error.code).isEqualTo(404)
+        assertThat(exception.error.refusal).isEqualTo("http.NOT_FOUND")
+        assertThat(exception.error.message).isEqualTo("Not Found")
+    }
+
+    @Test
     suspend fun `structured error is decoded when the HTTP client has no converter`() {
         val client = f2Client(HttpStatusCode.NotFound, """{"message":"Not found","id":"err-2","code":404}""") {}
 

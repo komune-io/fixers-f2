@@ -4,43 +4,58 @@ import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.exception.F2Exception
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import tools.jackson.core.JsonParser
+import tools.jackson.core.exc.StreamReadException
 
 class F2ErrorExtensionsTest {
 
 	@Test
-	fun `toAttributeMap should expose id, code, message and timestamp`() {
+	fun `a refusal tells the caller its message, parameters and citers beside its code`() {
 		val error = F2Error(
-			message = "boom",
-			id = "error-id",
-			timestamp = "2026-01-01T00:00:00Z",
-			code = 500,
+			message = "The item is cited by A, B: it stays",
+			code = 409,
+			refusal = "item.CITED",
+			parameters = mapOf("id" to "i-1"),
+			citers = listOf("A", "B"),
 		)
 
-		val attributes = error.toAttributeMap()
-
-		assertThat(attributes).containsExactlyInAnyOrderEntriesOf(
+		assertThat(refusalAttributes(409, error)).containsExactlyInAnyOrderEntriesOf(
 			mapOf(
-				"id" to "error-id",
-				"code" to 500,
-				"message" to "boom",
-				"timestamp" to "2026-01-01T00:00:00Z",
+				"refusal" to "item.CITED",
+				"message" to "The item is cited by A, B: it stays",
+				"parameters" to mapOf("id" to "i-1"),
+				"citers" to listOf("A", "B"),
 			)
 		)
 	}
 
 	@Test
-	fun `toAttributeMap should keep a null id entry`() {
-		val error = F2Error(
-			message = "boom",
-			id = null,
-			timestamp = "2026-01-01T00:00:00Z",
-			code = 400,
-		)
+	fun `a refusal without parameters or citers leaves both keys out`() {
+		val error = F2Error(message = "A name is required", code = 400, refusal = "item.NAME_REQUIRED")
 
-		val attributes = error.toAttributeMap()
+		assertThat(refusalAttributes(400, error))
+			.containsEntry("refusal", "item.NAME_REQUIRED")
+			.containsEntry("message", "A name is required")
+			.doesNotContainKeys("parameters", "citers")
+	}
 
-		assertThat(attributes).containsEntry("id", null)
-		assertThat(attributes.filterValues { it != null }).doesNotContainKey("id")
+	@Test
+	fun `an error that is not a refusal carries the meaning of its status and nothing it was raised with`() {
+		val internal = F2Error(message = "jdbc:postgresql://db-internal:5432/app", code = 404)
+
+		assertThat(refusalAttributes(404, internal)).containsExactlyEntriesOf(mapOf("refusal" to "http.NOT_FOUND"))
+		assertThat(refusalAttributes(503, null)).containsExactlyEntriesOf(mapOf("refusal" to "http.UNAVAILABLE"))
+		assertThat(refusalAttributes(502, null)).containsExactlyEntriesOf(mapOf("refusal" to "http.UNEXPECTED"))
+	}
+
+	@Test
+	fun `unreadableBody finds the parser failure only under the input conversion wrapper`() {
+		val parser = StreamReadException(null as JsonParser?, "Unexpected end-of-input")
+
+		assertThat(IllegalStateException("Failed to convert input", RuntimeException(parser)).unreadableBody())
+			.isSameAs(parser)
+		assertThat(IllegalStateException("reading the cache", parser).unreadableBody()).isNull()
+		assertThat(IllegalStateException("Failed to convert input").unreadableBody()).isNull()
 	}
 
 	@Test
@@ -68,11 +83,13 @@ class F2ErrorExtensionsTest {
 	}
 
 	@Test
-	fun `missingParameterError should build a 400 error naming the parameter`() {
+	fun `missingParameterError should build a 400 refusal naming the parameter`() {
 		val error = missingParameterError("userId")
 
 		assertThat(error.code).isEqualTo(400)
 		assertThat(error.message).isEqualTo("Missing parameter `userId`")
+		assertThat(error.refusal).isEqualTo("http.INVALID_PAYLOAD")
+		assertThat(error.parameters).containsExactlyEntriesOf(mapOf("parameter" to "userId"))
 		assertThat(error.id).isNotBlank()
 		assertThat(error.timestamp).isNotBlank()
 	}

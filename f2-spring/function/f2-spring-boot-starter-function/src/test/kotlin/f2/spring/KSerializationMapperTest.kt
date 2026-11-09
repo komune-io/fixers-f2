@@ -7,6 +7,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -66,6 +67,8 @@ class KSerializationMapperTest {
         assertNotNull(exception.error)
         assertEquals(400, exception.error.code)
         assertTrue(exception.error.message.contains("required") || exception.error.message.contains("Missing"))
+        assertEquals("http.INVALID_PAYLOAD", exception.error.refusal)
+        assertEquals(mapOf("parameter" to "required"), exception.error.parameters)
     }
 
     @Test
@@ -78,6 +81,7 @@ class KSerializationMapperTest {
 
         assertNotNull(exception.error)
         assertEquals(400, exception.error.code)
+        assertNull(exception.error.refusal, "a parser's own sentence is not written for the caller")
     }
 
     @Test

@@ -192,8 +192,15 @@ private fun Json.decodeError(body: String, status: Int): F2Error {
 private fun Json.decodeError(structured: JsonObject, body: String, status: Int): F2Error {
 	val rawCode = (structured["code"] as? JsonPrimitive)?.takeUnless { it is JsonNull }
 	val code = rawCode?.intOrNull ?: status
+	// Only a refusal carries its message: any other error body says what the status means, in `error`.
+	val message = structured["message"]?.takeUnless { it is JsonNull }
+		?: (structured["error"] as? JsonPrimitive)?.takeUnless { it is JsonNull }
+		?: JsonPrimitive(body)
 	val decoded = try {
-		decodeFromJsonElement(F2Error.serializer(), JsonObject(structured + ("code" to JsonPrimitive(code))))
+		decodeFromJsonElement(
+			F2Error.serializer(),
+			JsonObject(structured + ("code" to JsonPrimitive(code)) + ("message" to message)),
+		)
 	} catch (_: SerializationException) {
 		return F2Error(message = body, code = code)
 	}
@@ -204,6 +211,9 @@ private fun Json.decodeError(structured: JsonObject, body: String, status: Int):
 		timestamp = decoded.timestamp,
 		code = decoded.code,
 		requestId = decoded.requestId,
+		refusal = decoded.refusal,
+		parameters = decoded.parameters,
+		citers = decoded.citers,
 	)
 }
 
