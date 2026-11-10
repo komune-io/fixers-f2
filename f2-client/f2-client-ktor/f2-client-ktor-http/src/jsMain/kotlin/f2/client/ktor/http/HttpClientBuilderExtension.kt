@@ -18,7 +18,7 @@ actual fun httpClientBuilderDefault(): HttpClientBuilder = JsHttpClientBuilder {
  * @return An instance of [HttpClientBuilder] with the specified configuration.
  */
 actual fun httpClientBuilderGenerics(
-	config: F2ClientConfigLambda<*>?
+    config: F2ClientConfigLambda<*>?
 ): HttpClientBuilder = JsHttpClientBuilder(config)
 
 /**
@@ -28,5 +28,5 @@ actual fun httpClientBuilderGenerics(
  * @return An instance of [HttpClientBuilder] with the specified configuration.
  */
 fun httpClientBuilder(
-	config: F2ClientConfigLambda<JsClientEngineConfig>? = {  }
+    config: F2ClientConfigLambda<JsClientEngineConfig>? = {  }
 ): HttpClientBuilder = JsHttpClientBuilder(config)

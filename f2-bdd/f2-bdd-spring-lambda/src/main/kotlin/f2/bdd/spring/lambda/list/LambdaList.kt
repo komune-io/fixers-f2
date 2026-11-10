@@ -7,18 +7,18 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class LambdaList {
 
-	@Bean
-	fun functionList(): (List<String>) -> List<String> = { values ->
-		values.map { it.reversed() }
-	}
+    @Bean
+    fun functionList(): (List<String>) -> List<String> = { values ->
+        values.map { it.reversed() }
+    }
 
-	@Bean
-	fun supplierList(): () -> List<String> = {
-		listOf("supplierValuePureKotlinValue")
-	}
+    @Bean
+    fun supplierList(): () -> List<String> = {
+        listOf("supplierValuePureKotlinValue")
+    }
 
-	@Bean
-	fun consumerList(receiver: ConsumerReceiver<String>): (List<String>) -> Unit = {
-		receiver.items.addAll(it)
-	}
+    @Bean
+    fun consumerList(receiver: ConsumerReceiver<String>): (List<String>) -> Unit = {
+        receiver.items.addAll(it)
+    }
 }

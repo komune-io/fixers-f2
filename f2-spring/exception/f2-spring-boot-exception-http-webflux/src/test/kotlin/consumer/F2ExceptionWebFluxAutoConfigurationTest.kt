@@ -23,7 +23,7 @@ import org.springframework.web.reactive.function.server.router
 class ConsumerApp {
     @Bean
     fun consumerRoutes(): RouterFunction<ServerResponse> = router {
-        GET("/missing") { throw NotFoundException("Item", "jdbc:postgresql://db-internal:5432/app") }
+        GET("/missing") { throw NotFoundException(name = "Item", id = "jdbc:postgresql://db-internal:5432/app") }
     }
 }
 
@@ -44,12 +44,17 @@ class F2ExceptionWebFluxAutoConfigurationTest(
     fun `its errors answer with the refusal code and nothing they were raised with`() {
         // jdbc:… is the caller's id here, a refusal's own value: it is told back, and nothing else is.
         WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()
-            .get().uri("/missing")
+            .get()
+            .uri("/missing")
             .exchange()
-            .expectStatus().isNotFound
+            .expectStatus()
+            .isNotFound
             .expectBody()
-            .jsonPath("$.refusal").isEqualTo("http.NOT_FOUND")
-            .jsonPath("$.exception").doesNotExist()
-            .jsonPath("$.trace").doesNotExist()
+            .jsonPath("$.refusal")
+            .isEqualTo("http.NOT_FOUND")
+            .jsonPath("$.exception")
+            .doesNotExist()
+            .jsonPath("$.trace")
+            .doesNotExist()
     }
 }

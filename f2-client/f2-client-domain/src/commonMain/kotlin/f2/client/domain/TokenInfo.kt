@@ -14,5 +14,5 @@ data class TokenInfo(
     @SerialName("id_token") val idToken: String? = null,
     @SerialName("refresh_token") val refreshToken: String? = null,
 ) {
-    override fun toString(): String = "TokenInfo(tokenType=$tokenType, expiresIn=$expiresIn, scope=$scope)"
+    override fun toString(): String = "TokenInfo(tokenType=$tokenType, expiresIn=$expiresIn, scope=${scope ?: "null"})"
 }

@@ -27,7 +27,7 @@ class OwnAttributesApp {
     @Bean
     fun ownErrorAttributes(): ErrorAttributes = object : DefaultErrorAttributes() {
         override fun getErrorAttributes(request: ServerRequest, options: ErrorAttributeOptions) =
-            super.getErrorAttributes(request, options).apply { put("own", "yes") }
+            super.getErrorAttributes(request, options).apply { this["own"] = "yes" }
     }
 
     @Bean
@@ -45,11 +45,14 @@ class F2ExceptionWebFluxOwnAttributesTest(
     @Test
     fun `Spring Boot's handler answers with the application's own error attributes, at the status they name`() {
         WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()
-            .get().uri("/missing")
+            .get()
+            .uri("/missing")
             .exchange()
-            .expectStatus().isNotFound
+            .expectStatus()
+            .isNotFound
             .expectBody()
-            .jsonPath("$.own").isEqualTo("yes")
+            .jsonPath("$.own")
+            .isEqualTo("yes")
         assertThat(context.getBeansOfType(ErrorWebExceptionHandler::class.java).values)
             .hasExactlyElementsOfTypes(DefaultErrorWebExceptionHandler::class.java)
     }

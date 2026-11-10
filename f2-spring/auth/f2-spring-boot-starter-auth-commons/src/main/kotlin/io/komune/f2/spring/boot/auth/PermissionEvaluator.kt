@@ -7,9 +7,7 @@ const val SUPER_ADMIN_ROLE = "super_admin"
 
 @Service
 class PermissionEvaluator {
-    suspend fun isSuperAdmin(): Boolean {
-        return hasRole(SUPER_ADMIN_ROLE)
-    }
+    suspend fun isSuperAdmin(): Boolean = hasRole(SUPER_ADMIN_ROLE)
 
     suspend fun checkOrganizationId(organizationId: String?): Boolean {
         if (organizationId == null) return false

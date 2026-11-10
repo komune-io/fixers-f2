@@ -33,12 +33,6 @@ class KSerializationMapper(
 
     private val logger = LoggerFactory.getLogger(KSerializationMapper::class.java)
 
-    companion object {
-        val defaultJson = Json {
-            ignoreUnknownKeys = true
-        }
-        private const val LOG_SERIALIZATION_ERROR = "Ignored Error while serializing {}"
-    }
     private val serializerCache: MutableMap<Type, KSerializer<Any>> =
         ConcurrentReferenceHashMap<Type, KSerializer<Any>>()
 
@@ -67,9 +61,9 @@ class KSerializationMapper(
         return when (json) {
             is String -> mapper.decodeFromString(serializerType, json)
             is ByteArray -> mapper.decodeFromString(serializerType, String(json))
-            is Reader -> mapper.decodeFromStream(serializerType, json.toInputStream())
+            is Reader -> json.toInputStream().use { mapper.decodeFromStream(serializerType, it) }
             is JsonElement -> mapper.decodeFromJsonElement(serializerType, json)
-            else -> error("Failed to convert. Unknown type ${json::class.qualifiedName}")
+            else -> error("Failed to convert. Unknown type ${json::class.java.name}")
         }
     }
 
@@ -113,11 +107,18 @@ class KSerializationMapper(
             val builder = StringBuilder()
             var numCharsRead: Int
             while (initialReader.read(charBuffer, 0, charBuffer.size).also { numCharsRead = it } != -1) {
-                builder.appendRange(charBuffer, 0, numCharsRead)
+                builder.appendRange(value = charBuffer, startIndex = 0, endIndex = numCharsRead)
             }
             ByteArrayInputStream(
                 builder.toString().toByteArray(StandardCharsets.UTF_8)
             )
         }
+    }
+
+    companion object {
+        val defaultJson = Json {
+            ignoreUnknownKeys = true
+        }
+        private const val LOG_SERIALIZATION_ERROR = "Ignored Error while serializing {}"
     }
 }

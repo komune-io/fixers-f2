@@ -1,7 +1,7 @@
 plugins {
-    alias(catalogue.plugins.fixers.gradle.kotlin.jvm)
-    alias(catalogue.plugins.fixers.gradle.publish)
-    alias(catalogue.plugins.kotlin.spring)
+    alias(libs.plugins.fixers.gradle.kotlin.jvm)
+    alias(libs.plugins.fixers.gradle.publish)
+    alias(libs.plugins.kotlin.spring)
     `java-test-fixtures`
 }
 

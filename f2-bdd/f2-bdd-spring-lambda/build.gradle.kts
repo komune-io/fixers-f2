@@ -1,16 +1,16 @@
 plugins {
-	alias(catalogue.plugins.fixers.gradle.kotlin.jvm)
-	alias(catalogue.plugins.kotlin.spring)
-	alias(catalogue.plugins.kotlin.serialization)
+    alias(libs.plugins.fixers.gradle.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
-	api(project(":f2-bdd:f2-bdd-spring-autoconfigure"))
-	api(project(":f2-dsl:f2-dsl-function"))
-	api(project(":f2-dsl:f2-dsl-cqrs"))
-	api(libs.bundles.spring.cloud.function)
-	api(libs.bundles.spring.test)
+    api(project(":f2-bdd:f2-bdd-spring-autoconfigure"))
+    api(project(":f2-dsl:f2-dsl-function"))
+    api(project(":f2-dsl:f2-dsl-cqrs"))
+    api(libs.bundles.spring.cloud.function)
+    api(libs.bundles.spring.test)
 
-	implementation(libs.kotlinx.coroutines.core)
-	implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.core)
 }

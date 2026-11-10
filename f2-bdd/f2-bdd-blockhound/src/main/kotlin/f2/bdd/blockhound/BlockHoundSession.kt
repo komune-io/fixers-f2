@@ -13,33 +13,36 @@ import reactor.blockhound.integration.BlockHoundIntegration
  * The test JVM needs `-XX:+AllowRedefinitionToAddDeleteMethods` (JDK 13 and later).
  */
 class BlockHoundSession : LauncherSessionListener {
-	override fun launcherSessionOpened(session: LauncherSession) {
-		BlockHound.install(KnownAllowances)
-	}
+    override fun launcherSessionOpened(session: LauncherSession) {
+        BlockHound.install(KnownAllowances)
+    }
 }
 
 /** Blocking calls that are safe on a non-blocking thread, found in Kotlin, the JDK and Lettuce. */
 object KnownAllowances : BlockHoundIntegration {
-	override fun applyTo(builder: BlockHound.Builder) {
-		// read once per JVM
-		builder.allowBlockingCallsInside("kotlin.reflect.jvm.internal.impl.builtins.KotlinBuiltIns", "createBuiltInsModule")
-		// cached after the first read
-		builder.allowBlockingCallsInside("java.util.ResourceBundle", "getBundle")
-		// /dev/urandom never waits
-		builder.allowBlockingCallsInside("sun.security.provider.NativePRNG\$RandomIO", "implNextBytes")
-		// Lettuce's write lock, held for a counter update or a channel (de)activation
-		builder.allowBlockingCallsInside("io.lettuce.core.protocol.SharedLock", "incrementWriters")
-		builder.allowBlockingCallsInside("io.lettuce.core.protocol.SharedLock", "doExclusive")
-		builder.blockingMethodCallback { method -> BlockingCalls.report(blockingCall(method)) }
-	}
+    override fun applyTo(builder: BlockHound.Builder) {
+        // read once per JVM
+        builder.allowBlockingCallsInside(
+            "kotlin.reflect.jvm.internal.impl.builtins.KotlinBuiltIns",
+            "createBuiltInsModule",
+        )
+        // cached after the first read
+        builder.allowBlockingCallsInside("java.util.ResourceBundle", "getBundle")
+        // /dev/urandom never waits
+        builder.allowBlockingCallsInside("sun.security.provider.NativePRNG\$RandomIO", "implNextBytes")
+        // Lettuce's write lock, held for a counter update or a channel (de)activation
+        builder.allowBlockingCallsInside("io.lettuce.core.protocol.SharedLock", "incrementWriters")
+        builder.allowBlockingCallsInside("io.lettuce.core.protocol.SharedLock", "doExclusive")
+        builder.blockingMethodCallback { method -> BlockingCalls.report(blockingCall(method)) }
+    }
 }
 
-/** BlockHound's own error, its trace starting at the blocking method rather than in BlockHound. */
+// BlockHound's own error, its trace starting at the blocking method rather than in BlockHound.
 private fun blockingCall(method: BlockingMethod) = BlockingOperationError(method).apply {
-	val probe = stackTrace.indexOfFirst {
-		it.className == "reactor.blockhound.BlockHoundRuntime" && it.methodName == "checkBlocking"
-	}
-	if (probe >= 0) stackTrace = stackTrace.copyOfRange(probe + 1, stackTrace.size)
+    val probe = stackTrace.indexOfFirst {
+        it.className == "reactor.blockhound.BlockHoundRuntime" && it.methodName == "checkBlocking"
+    }
+    if (probe >= 0) stackTrace = stackTrace.copyOfRange(fromIndex = probe + 1, toIndex = stackTrace.size)
 }
 
 /**
@@ -47,16 +50,18 @@ private fun blockingCall(method: BlockingMethod) = BlockingOperationError(method
  * every later caller; [RECORD_ONLY] lets the call through instead, and the next [requireNone] fails with it.
  */
 object BlockingCalls {
-	const val RECORD_ONLY = "f2.blockhound.record-only"
+    const val RECORD_ONLY = "f2.blockhound.record-only"
 
-	private val first = AtomicReference<BlockingOperationError?>()
+    private val first = AtomicReference<BlockingOperationError?>()
 
-	internal fun report(error: BlockingOperationError) {
-		first.compareAndSet(null, error)
-		if (!java.lang.Boolean.getBoolean(RECORD_ONLY)) throw error
-	}
+    internal fun report(error: BlockingOperationError) {
+        first.compareAndSet(null, error)
+        if (!System.getProperty(RECORD_ONLY).toBoolean()) throw error
+    }
 
-	fun requireNone() {
-		first.getAndSet(null)?.let { throw IllegalStateException("A blocking call was made: ${it.message}", it) }
-	}
+    fun requireNone() {
+        first.getAndSet(null)?.let { error ->
+            throw IllegalStateException("A blocking call was made: ${error.message.orEmpty()}", error)
+        }
+    }
 }

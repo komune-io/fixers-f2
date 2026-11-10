@@ -10,9 +10,13 @@ import kotlin.reflect.full.isSubclassOf
  * This allows proper handling of upload commands vs regular JSON payloads.
  */
 inline fun <reified MSG, reified RESPONSE> HttpF2Client.function(route: String): F2Function<MSG, RESPONSE> {
-	return if (MSG::class.isSubclassOf(F2UploadCommand::class)) {
-		function(route, typeInfo<MSG>(), typeInfo<RESPONSE>())
-	} else {
-		function(route, typeInfo<List<MSG>>(), typeInfo<List<RESPONSE>>())
-	}
+    return if (MSG::class.isSubclassOf(F2UploadCommand::class)) {
+        function(route = route, queryTypeInfo = typeInfo<MSG>(), responseTypeInfo = typeInfo<RESPONSE>())
+    } else {
+        function(
+            route = route,
+            queryTypeInfo = typeInfo<List<MSG>>(),
+            responseTypeInfo = typeInfo<List<RESPONSE>>(),
+        )
+    }
 }

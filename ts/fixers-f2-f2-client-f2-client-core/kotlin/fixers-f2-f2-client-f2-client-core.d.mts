@@ -1,4 +1,4 @@
-declare function KtSingleton<T>(): T & (abstract new() => any);
+declare function KtSingleton<T>(): T & (abstract new() => unknown);
 export declare interface F2Consumer<T> {
 }
 export declare interface F2Function<in T, out R> {
@@ -11,6 +11,10 @@ export declare class Batch {
     constructor(size?: number, concurrency?: number);
     get size(): number;
     get concurrency(): number;
+    copy(size?: number, concurrency?: number): Batch;
+    toString(): string;
+    hashCode(): number;
+    equals(other?: unknown): boolean;
 }
 export declare namespace Batch {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -49,7 +53,11 @@ export declare class Envelope<T> implements EnvelopeDTO<T> {
     get datacontenttype(): string | null;
     get source(): string | null;
     get time(): string | null;
-    get specversion(): string | null;
+    get specversion(): string;
+    copy(id?: string, data?: T, type?: string, datacontenttype?: string | null, source?: string | null, time?: string | null): Envelope<T>;
+    toString(): string;
+    hashCode(): number;
+    equals(other?: unknown): boolean;
 }
 export declare namespace Envelope {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -81,7 +89,10 @@ export declare class F2Refusal implements F2RefusalDTO {
     get code(): string;
     get parameters(): Record<string, string>;
     get citers(): string[];
+    copy(code?: string, parameters?: Record<string, string>, citers?: string[]): F2Refusal;
     toString(): string;
+    hashCode(): number;
+    equals(other?: unknown): boolean;
 }
 export declare namespace F2Refusal {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -249,7 +260,7 @@ export declare namespace HttpRefusal {
         namespace $metadata$ {
             abstract class constructor {
                 get DOMAIN(): string;
-                of(status: number): HttpRefusal;
+                ofStatus(status: number): HttpRefusal;
                 private constructor();
             }
         }
@@ -266,7 +277,7 @@ export declare namespace F2Exception {
     }
 }
 export declare interface Match<T> {
-    readonly negative: boolean;
+    readonly isNegative: boolean;
     map<R>(transform: (value: T) => R): Match<R>;
     not(): Match<T>;
     and(match: Match<T>): Match<T>;
@@ -274,8 +285,8 @@ export declare interface Match<T> {
 }
 export declare interface SortDTO {
     readonly property: string;
-    readonly ascending: boolean;
-    readonly nullsFirst?: boolean | null;
+    readonly isAscending: boolean;
+    readonly areNullsFirst?: boolean | null;
 }
 export declare interface PageDTO<out OBJECT> {
     readonly total: number;
@@ -285,6 +296,10 @@ export declare class Page<out OBJECT> implements PageDTO<OBJECT> {
     constructor(total: number, items: OBJECT[]);
     get total(): number;
     get items(): OBJECT[];
+    copy(total?: number, items?: OBJECT[]): Page<OBJECT>;
+    toString(): string;
+    hashCode(): number;
+    equals(other?: unknown): boolean;
 }
 export declare namespace Page {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -303,6 +318,10 @@ export declare interface PageQueryResultDTO<out OBJECT> extends Event, PageDTO<O
 export declare class PageQuery implements PageQueryDTO {
     constructor(pagination?: OffsetPaginationDTO | null);
     get pagination(): OffsetPaginationDTO | null;
+    copy(pagination?: OffsetPaginationDTO | null): PageQuery;
+    toString(): string;
+    hashCode(): number;
+    equals(other?: unknown): boolean;
 }
 export declare namespace PageQuery {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -315,6 +334,10 @@ export declare class PageQueryResult<out OBJECT> implements PageQueryResultDTO<O
     get pagination(): OffsetPagination | null;
     get total(): number;
     get items(): OBJECT[];
+    copy(pagination?: OffsetPagination | null, total?: number, items?: OBJECT[]): PageQueryResult<OBJECT>;
+    toString(): string;
+    hashCode(): number;
+    equals(other?: unknown): boolean;
 }
 export declare namespace PageQueryResult {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -336,6 +359,10 @@ export declare class OffsetPagination implements OffsetPaginationDTO {
     constructor(offset: number, limit: number);
     get offset(): number;
     get limit(): number;
+    copy(offset?: number, limit?: number): OffsetPagination;
+    toString(): string;
+    hashCode(): number;
+    equals(other?: unknown): boolean;
 }
 export declare namespace OffsetPagination {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -347,6 +374,10 @@ export declare class PagePagination implements PagePaginationDTO {
     constructor(page?: number | null, size?: number | null);
     get page(): number | null;
     get size(): number | null;
+    copy(page?: number | null, size?: number | null): PagePagination;
+    toString(): string;
+    hashCode(): number;
+    equals(other?: unknown): boolean;
 }
 export declare namespace PagePagination {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */

@@ -13,94 +13,90 @@ import org.assertj.core.api.Assertions
 import org.springframework.cloud.function.context.FunctionCatalog
 
 abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
-	private val prefix: String
+    private val prefix: String
 ) : F2SpringStep() {
 
-	open fun En.prepareFunctionCatalogSteps() {
-		prepareSteps()
+    open fun En.prepareFunctionCatalogSteps() {
+        prepareSteps()
 
-		When("${prefix}Function catalog contains") { table: DataTable ->
-			val functionCatalog = bag.requireApplicationContext().getBean(FunctionCatalog::class.java)
-			table.asList().forEach { name ->
-				val result = functionCatalog.lookup<Any>(name)
-				Assertions.assertThat(result).isNotNull
-			}
-		}
+        When("${prefix}Function catalog contains") { table: DataTable ->
+            val functionCatalog = bag.requireApplicationContext().getBean(FunctionCatalog::class.java)
+            table.asList().forEach { name ->
+                val result = functionCatalog.lookup<Any>(name)
+                Assertions.assertThat(result).isNotNull
+            }
+        }
 
-		When("${prefix}Execute supplier {string}") { supplierName: String ->
-			step(supplierName) {
-				val result = supplier(supplierName)
-				bag.result[supplierName] = result
-			}
-		}
+        When("${prefix}Execute supplier {string}") { supplierName: String ->
+            step(supplierName) {
+                val result = supplier(supplierName)
+                bag.result[supplierName] = result
+            }
+        }
 
-		When("${prefix}Execute function {string} with") { functionName: String, table: DataTable ->
-			step(functionName) {
-				val json = transform(table).asFlow()
-				val result = function(functionName, json)
-				bag.result[functionName] = result
-			}
-		}
+        When("${prefix}Execute function {string} with") { functionName: String, table: DataTable ->
+            step(functionName) {
+                val json = transform(table).asFlow()
+                val result = function(functionName, json)
+                bag.result[functionName] = result
+            }
+        }
 
-		When("${prefix}Execute consumer {string} with") { consumerName: String, table: DataTable ->
-			step(consumerName) {
-				val items = transform(table)
-				val expectedCount = consumerReceiver().size + items.size
-				consumer(consumerName, items.asFlow())
-				awaitConsumerReceiverCount(expectedCount)
-				bag.result[consumerName] = consumerReceiver()
-			}
-		}
+        When("${prefix}Execute consumer {string} with") { consumerName: String, table: DataTable ->
+            step(consumerName) {
+                val items = transform(table)
+                val expectedCount = consumerReceiver().size + items.size
+                consumer(consumerName, items.asFlow())
+                awaitConsumerReceiverCount(expectedCount)
+                bag.result[consumerName] = consumerReceiver()
+            }
+        }
 
-		Then("${prefix}The result for {string} is") { value: String, dataTable: DataTable ->
-			Assertions.assertThat(bag.result[value]).isEqualTo(transform(dataTable))
-		}
+        Then("${prefix}The result for {string} is") { value: String, dataTable: DataTable ->
+            Assertions.assertThat(bag.result[value]).isEqualTo(transform(dataTable))
+        }
 
-		Then("${prefix}An exception with code {int} has been thrown for {string}") { code: Int, name: String ->
-			val exception = checkNotNull(bag.exceptions.remove(name)) { "No F2Exception thrown for $name" }
-			Assertions.assertThat(exception.error.code).isEqualTo(code)
-		}
+        Then("${prefix}An exception with code {int} has been thrown for {string}") { code: Int, name: String ->
+            val exception = checkNotNull(bag.exceptions.remove(name)) { "No F2Exception thrown for $name" }
+            Assertions.assertThat(exception.error.code).isEqualTo(code)
+        }
 
-		Then("${prefix}An exception with code {int} has been thrown for {string} with message {string}")
-		{ code: Int, name: String, message: String ->
-			val exception = checkNotNull(bag.exceptions.remove(name)) { "No F2Exception thrown for $name" }
-			Assertions.assertThat(exception.error.code).isEqualTo(code)
-			Assertions.assertThat(exception.message).isEqualTo(message)
-		}
-	}
+        Then("${prefix}An exception with code {int} has been thrown for {string} with message {string}")
+        { code: Int, name: String, message: String ->
+            val exception = checkNotNull(bag.exceptions.remove(name)) { "No F2Exception thrown for $name" }
+            Assertions.assertThat(exception.error.code).isEqualTo(code)
+            Assertions.assertThat(exception.message).isEqualTo(message)
+        }
+    }
 
-	/**
-	 * The consumer endpoint acks before the items reach the receiver bean, so poll until the
-	 * expected count arrives instead of sleeping a fixed amount. On timeout the snapshot is
-	 * taken as-is and the subsequent assertion reports the mismatch.
-	 */
-	private suspend fun awaitConsumerReceiverCount(expectedCount: Int) {
-		withTimeoutOrNull(CONSUMER_RECEIVER_TIMEOUT_MILLIS) {
-			while (consumerReceiver().size < expectedCount) {
-				delay(CONSUMER_RECEIVER_POLL_MILLIS)
-			}
-		}
-	}
+    // The consumer endpoint acks before the items reach the receiver bean, so poll until the
+    // expected count arrives instead of sleeping a fixed amount. On timeout the snapshot is
+    // taken as-is and the subsequent assertion reports the mismatch.
+    private suspend fun awaitConsumerReceiverCount(expectedCount: Int) {
+        withTimeoutOrNull(CONSUMER_RECEIVER_TIMEOUT_MILLIS) {
+            while (consumerReceiver().size < expectedCount) {
+                delay(CONSUMER_RECEIVER_POLL_MILLIS)
+            }
+        }
+    }
 
-	/**
-	 * Keeps the [F2Exception] the exception steps assert on; any other failure fails the step.
-	 */
-	private fun step(name: String, block: suspend () -> Unit) = runBlocking {
-		try {
-			block()
-		} catch (e: F2Exception) {
-			bag.exceptions[name] = e
-		}
-	}
+    // Keeps the F2Exception the exception steps assert on; any other failure fails the step.
+    private fun step(name: String, block: suspend () -> Unit) = runBlocking {
+        try {
+            block()
+        } catch (e: F2Exception) {
+            bag.exceptions[name] = e
+        }
+    }
 
-	abstract fun function(functionName: String, msgs: Flow<REQUEST>): List<RESPONSE>
-	abstract fun consumer(consumerName: String, msgs: Flow<REQUEST>)
-	abstract fun supplier(supplierName: String): List<RESPONSE>
-	abstract fun transform(dataTable: DataTable): List<REQUEST>
-	abstract fun consumerReceiver(): List<RESPONSE>
+    abstract fun function(functionName: String, msgs: Flow<REQUEST>): List<RESPONSE>
+    abstract fun consumer(consumerName: String, msgs: Flow<REQUEST>)
+    abstract fun supplier(supplierName: String): List<RESPONSE>
+    abstract fun transform(dataTable: DataTable): List<REQUEST>
+    abstract fun consumerReceiver(): List<RESPONSE>
 
-	companion object {
-		private const val CONSUMER_RECEIVER_TIMEOUT_MILLIS = 10_000L
-		private const val CONSUMER_RECEIVER_POLL_MILLIS = 50L
-	}
+    companion object {
+        private const val CONSUMER_RECEIVER_TIMEOUT_MILLIS = 10_000L
+        private const val CONSUMER_RECEIVER_POLL_MILLIS = 50L
+    }
 }

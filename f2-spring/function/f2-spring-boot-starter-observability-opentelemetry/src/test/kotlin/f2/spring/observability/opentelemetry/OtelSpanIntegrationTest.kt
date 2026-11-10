@@ -11,12 +11,6 @@ import org.junit.jupiter.api.extension.RegisterExtension
  */
 class OtelSpanIntegrationTest {
 
-    companion object {
-        @RegisterExtension
-        @JvmStatic
-        val otelTesting: OpenTelemetryExtension = OpenTelemetryExtension.create()
-    }
-
     @Test
     fun `should create spans`() {
         val tracer = otelTesting.openTelemetry.getTracer("test-tracer")
@@ -67,5 +61,11 @@ class OtelSpanIntegrationTest {
         assertThat(attributes.get(AttributeKey.stringKey("string.attr"))).isEqualTo("value")
         assertThat(attributes.get(AttributeKey.longKey("long.attr"))).isEqualTo(42L)
         assertThat(attributes.get(AttributeKey.booleanKey("boolean.attr"))).isTrue()
+    }
+
+    companion object {
+        @RegisterExtension
+        @JvmStatic
+        val otelTesting: OpenTelemetryExtension = OpenTelemetryExtension.create()
     }
 }

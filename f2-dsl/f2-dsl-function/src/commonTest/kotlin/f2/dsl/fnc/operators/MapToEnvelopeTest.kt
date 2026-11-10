@@ -17,16 +17,16 @@ class MapToEnvelopeTest {
     fun `test mapToEnvelopeWithRandomId on F2Function`() = runTest {
         val function = F2Function<Int, String> { flow -> flow.map { it.toString() } }
         val result = function.mapToEnvelopeWithRandomId().invoke(flowOf(1, 2, 3)).toList()
-        assertEquals(3, (result).count())
-        assertEquals(listOf("1", "2", "3"), (result.map { it.data }).toList())
+        assertEquals(expected = 3, actual = result.count())
+        assertEquals(expected = listOf("1", "2", "3"), actual = result.map { it.data }.toList())
     }
 
     @Test
     fun `test mapToEnvelope with custom ID`() = runTest {
         val function = F2Function<Int, String> { flow -> flow.map { it.toString() } }
         val result = function.mapToEnvelope { it.toString() }.invoke(flowOf(1, 2, 3)).toList()
-        assertEquals(3, (result).count())
-        assertEquals(listOf("1", "2", "3"), (result.map { it.id }).toList())
+        assertEquals(expected = 3, actual = result.count())
+        assertEquals(expected = listOf("1", "2", "3"), actual = result.map { it.id }.toList())
     }
 
 
@@ -34,7 +34,7 @@ class MapToEnvelopeTest {
     fun `test mapToEnvelopeWithRandomId on Flow`() = runTest {
         val flow = flowOf(1, 2, 3)
         val result = flow.mapToEnvelopeWithRandomId().toList()
-        assertEquals(3, (result).count())
+        assertEquals(expected = 3, actual = result.count())
         result.forEach { envelope ->
             assertNotNull(envelope.id)
             assertTrue(envelope.data in listOf(1, 2, 3))
@@ -45,7 +45,7 @@ class MapToEnvelopeTest {
     fun `test mapToEnvelope with custom ID function`() = runTest {
         val flow = flowOf("a", "b", "c")
         val result = flow.mapToEnvelope { it.uppercase() }.toList()
-        assertEquals(3, (result).count())
+        assertEquals(expected = 3, actual = result.count())
         result.forEach { envelope ->
             assertTrue(envelope.id in listOf("A", "B", "C"))
             assertTrue(envelope.data in listOf("a", "b", "c"))
@@ -56,9 +56,9 @@ class MapToEnvelopeTest {
     fun `test mapToEnvelope with type parameter`() = runTest {
         val flow = flowOf(1, 2, 3)
         val result = flow.mapToEnvelope(type = "IntType") { "id-$it" }.toList()
-        assertEquals(3, (result).count())
+        assertEquals(expected = 3, actual = result.count())
         result.forEach { envelope ->
-            assertEquals("IntType", envelope.type)
+            assertEquals(expected = "IntType", actual = envelope.type)
         }
     }
 
@@ -66,8 +66,8 @@ class MapToEnvelopeTest {
     fun `test mapEnvelope transforms envelope data`() = runTest {
         val envelope = 10.asEnvelope(id = "test-id")
         val result = envelope.mapEnvelope<Int, Int>(transform = { it * 2 })
-        assertEquals("test-id", result.id)
-        assertEquals(20, result.data)
+        assertEquals(expected = "test-id", actual = result.id)
+        assertEquals(expected = 20, actual = result.data)
     }
 
     @Test
@@ -77,9 +77,9 @@ class MapToEnvelopeTest {
             transform = { it.toString() },
             type = "StringResult"
         )
-        assertEquals("test-id", result.id)
-        assertEquals("10", result.data)
-        assertEquals("StringResult", result.type)
+        assertEquals(expected = "test-id", actual = result.id)
+        assertEquals(expected = "10", actual = result.data)
+        assertEquals(expected = "StringResult", actual = result.type)
     }
 
     @Test
@@ -89,8 +89,8 @@ class MapToEnvelopeTest {
             2.asEnvelope(id = "2")
         )
         val result = flow.mapEnvelopesReified<Int, Int> { it * 3 }.toList()
-        assertEquals(2, (result).count())
-        assertEquals(listOf(3, 6), (result.map { it.data }).toList())
+        assertEquals(expected = 2, actual = result.count())
+        assertEquals(expected = listOf(3, 6), actual = result.map { it.data }.toList())
     }
 
     @Test
@@ -103,8 +103,8 @@ class MapToEnvelopeTest {
             transform = { "value-$it" },
             type = "StringType"
         ).toList()
-        assertEquals(2, (result).count())
-        assertEquals(listOf("value-1", "value-2"), (result.map { it.data }).toList())
+        assertEquals(expected = 2, actual = result.count())
+        assertEquals(expected = listOf("value-1", "value-2"), actual = result.map { it.data }.toList())
         assertTrue(result.all { it.type == "StringType" })
     }
 }

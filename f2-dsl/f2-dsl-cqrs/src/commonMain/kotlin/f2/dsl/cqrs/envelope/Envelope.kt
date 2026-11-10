@@ -5,7 +5,6 @@ import kotlin.js.JsExport
 import kotlin.js.JsName
 import kotlinx.serialization.Serializable
 
-
 @JsExport
 @JsName("EnvelopeDTO")
 interface EnvelopeDTO<T>: WithEnvelopeId, WithEnvelopeData<T>, Message {
@@ -25,7 +24,7 @@ const val ENVELOPE_SPEC_VERSION: String = "1.0"
 @Serializable
 @JsExport
 @JsName("Envelope")
-class Envelope<T>(
+data class Envelope<T>(
     override val id: String,
     override val data: T,
     override val type: String,
@@ -33,6 +32,6 @@ class Envelope<T>(
     override val source: String? = null,
     override val time: String? = null
 ) : EnvelopeDTO<T> {
-    override val specversion: String? = ENVELOPE_SPEC_VERSION
+    override val specversion: String = ENVELOPE_SPEC_VERSION
 }
 

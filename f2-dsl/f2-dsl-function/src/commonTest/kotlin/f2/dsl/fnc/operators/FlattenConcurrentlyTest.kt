@@ -16,7 +16,10 @@ class FlattenConcurrentlyTest {
             flowOf(7, 8, 9)
         )
         val result = flow.flattenConcurrently().toList()
-        assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9).sortedBy { it.toString() }, (result).sortedBy { it.toString() })
+        assertEquals(
+            expected = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9).sortedBy { it.toString() },
+            actual = result.sortedBy { it.toString() },
+        )
     }
 
     @Test
@@ -27,7 +30,10 @@ class FlattenConcurrentlyTest {
             listOf(7, 8, 9)
         )
         val result = flow.flattenConcurrently().toList()
-        assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9).sortedBy { it.toString() }, (result).sortedBy { it.toString() })
+        assertEquals(
+            expected = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9).sortedBy { it.toString() },
+            actual = result.sortedBy { it.toString() },
+        )
     }
 
     @Test
@@ -38,6 +44,9 @@ class FlattenConcurrentlyTest {
             listOf(7, 8, 9)
         )
         val result = flow.flattenConcurrently(concurrency = 2).toList()
-        assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9).sortedBy { it.toString() }, (result).sortedBy { it.toString() })
+        assertEquals(
+            expected = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9).sortedBy { it.toString() },
+            actual = result.sortedBy { it.toString() },
+        )
     }
 }

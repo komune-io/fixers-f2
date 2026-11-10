@@ -48,7 +48,11 @@ object VendoredPatchVerifier {
     }
 
     private fun loadedFrom(): String = runCatching {
-        SimpleFunctionRegistry::class.java.protectionDomain?.codeSource?.location?.toString()
+        SimpleFunctionRegistry::class.java
+            .protectionDomain
+            ?.codeSource
+            ?.location
+            ?.toString()
     }.getOrNull() ?: "unknown location"
 
     private fun errorMessage() = """

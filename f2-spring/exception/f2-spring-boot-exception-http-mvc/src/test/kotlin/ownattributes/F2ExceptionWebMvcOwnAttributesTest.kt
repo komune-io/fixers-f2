@@ -19,7 +19,7 @@ class OwnAttributesApp {
     @Bean
     fun ownErrorAttributes(): ErrorAttributes = object : DefaultErrorAttributes() {
         override fun getErrorAttributes(webRequest: WebRequest, options: ErrorAttributeOptions) =
-            super.getErrorAttributes(webRequest, options).apply { put("own", "yes") }
+            super.getErrorAttributes(webRequest, options).apply { this["own"] = "yes" }
     }
 }
 

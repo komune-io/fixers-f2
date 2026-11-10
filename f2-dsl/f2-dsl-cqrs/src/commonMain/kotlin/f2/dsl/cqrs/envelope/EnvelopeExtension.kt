@@ -6,6 +6,7 @@ import kotlin.uuid.Uuid
 /**
  * This object in an envelope typed by the simple name of [T].
  *
+ * @param T The type of the enveloped object.
  * @param from The envelope whose `source`, `time` and `datacontenttype` the new one keeps. Defaults to null.
  * @param id The ID of the envelope. Defaults to the ID of the `from` envelope or a randomly generated UUID.
  * @param type The type of the envelope. Defaults to the simple name of the class of T.
@@ -21,6 +22,7 @@ inline fun <reified T> T.asEnvelope(
 /**
  * This object in an envelope of the given [type].
  *
+ * @param T The type of the enveloped object.
  * @param type The type of the envelope.
  * @param from The envelope whose `source`, `time` and `datacontenttype` the new one keeps. Defaults to null.
  * @param id The ID of the envelope. Defaults to the ID of the `from` envelope or a randomly generated UUID.

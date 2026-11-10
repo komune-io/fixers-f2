@@ -12,12 +12,6 @@ import org.junit.jupiter.api.extension.RegisterExtension
  */
 class OtelLogIntegrationTest {
 
-    companion object {
-        @RegisterExtension
-        @JvmStatic
-        val otelTesting: OpenTelemetryExtension = OpenTelemetryExtension.create()
-    }
-
     @Test
     fun `should capture log records`() {
         val logger = otelTesting.openTelemetry.logsBridge.get("test-logger")
@@ -105,5 +99,11 @@ class OtelLogIntegrationTest {
         val spanData = spans[0]
         assertThat(logRecord.spanContext.traceId).isEqualTo(spanData.traceId)
         assertThat(logRecord.spanContext.spanId).isEqualTo(spanData.spanId)
+    }
+
+    companion object {
+        @RegisterExtension
+        @JvmStatic
+        val otelTesting: OpenTelemetryExtension = OpenTelemetryExtension.create()
     }
 }

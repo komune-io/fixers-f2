@@ -1,10 +1,8 @@
 package io.komune.f2.spring.boot.auth.config
 
-import io.komune.f2.spring.boot.auth.ROLE_PREFIX
 import io.komune.f2.spring.boot.auth.security.TrustedIssuerJwtAuthenticationManagerResolver
 import jakarta.annotation.security.RolesAllowed
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
@@ -31,25 +29,15 @@ import tools.jackson.databind.json.JsonMapper
 @Configuration
 @ConditionalOnMissingBean(WebSecurityConfig::class)
 @EnableConfigurationProperties(F2TrustedIssuersConfig::class)
-class WebSecurityConfig {
-
-    companion object {
-        const val SPRING_SECURITY_FILTER_CHAIN = "springSecurityFilterChain"
-    }
+class WebSecurityConfig(
+    @Value("\${spring.cloud.function.web.path:}")
+    val contextPath: String,
+    val applicationContext: ApplicationContext,
+    val f2TrustedIssuersResolver: F2TrustedIssuersConfig,
+    val jsonMapper: JsonMapper,
+) {
 
     private val logger = LoggerFactory.getLogger(WebSecurityConfig::class.java)
-
-    @Value("\${spring.cloud.function.web.path:}")
-    lateinit var contextPath: String
-
-    @Autowired
-    lateinit var applicationContext: ApplicationContext
-
-    @Autowired
-    lateinit var f2TrustedIssuersResolver: F2TrustedIssuersConfig
-
-    @Autowired
-    lateinit var jsonMapper: JsonMapper
 
     @Bean
     @ConfigurationProperties(prefix = "f2.filter")
@@ -106,18 +94,18 @@ class WebSecurityConfig {
         logger.trace("Authenticating using custom filter")
 
         return authentication.map { auth ->
-            if (auth !is JwtAuthenticationToken) {
+            if (auth is JwtAuthenticationToken) {
+                val filters = authFilter()
+                val isGranted = filters.isEmpty() || filters.all { (key, value) ->
+                    auth.token.claims[key] == value
+                }
+
+                logger.trace("Authentication decision: $isGranted")
+                isGranted
+            } else {
                 logger.trace("Authentication failed: JWT token is missing or invalid")
-                return@map false
+                false
             }
-
-            val filters = authFilter()
-            val decision = filters.isEmpty() || filters.all { (key, value) ->
-                auth.token.claims[key] == value
-            }
-
-            logger.trace("Authentication decision: $decision")
-            decision
         }.map { granted -> AuthorizationDecision(granted) }
     }
 
@@ -186,5 +174,9 @@ class WebSecurityConfig {
                 JwtIssuerReactiveAuthenticationManagerResolver(trustedIssuerJwtAuthenticationManagerResolver)
             )
         }
+    }
+
+    companion object {
+        const val SPRING_SECURITY_FILTER_CHAIN = "springSecurityFilterChain"
     }
 }

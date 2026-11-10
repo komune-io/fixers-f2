@@ -8,26 +8,26 @@ import kotlinx.serialization.Serializable
 @JsName("SortDTO")
 interface SortDTO {
     val property: String
-    val ascending: Boolean
-    val nullsFirst: Boolean?
+    val isAscending: Boolean
+    val areNullsFirst: Boolean?
 }
 
 @Serializable
 data class SortDTOBase(
     override val property: String,
-    override val ascending: Boolean,
-    override val nullsFirst: Boolean
+    override val isAscending: Boolean,
+    override val areNullsFirst: Boolean
 ): SortDTO
 
 @Serializable
 data class Sort<P: Enum<*>>(
     val property: P,
-    val ascending: Boolean,
-    val nullsFirst: Boolean
+    val isAscending: Boolean,
+    val areNullsFirst: Boolean
 )
 
 inline fun <reified E : Enum<E>> SortDTOBase.toSort() = Sort(
     property = enumValueOf<E>(property),
-    ascending = ascending,
-    nullsFirst = nullsFirst
+    isAscending = isAscending,
+    areNullsFirst = areNullsFirst
 )

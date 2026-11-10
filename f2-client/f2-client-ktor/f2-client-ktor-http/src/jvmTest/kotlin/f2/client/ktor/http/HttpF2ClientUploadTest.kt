@@ -19,6 +19,7 @@ import io.ktor.utils.io.ByteReadChannel
 import kotlin.reflect.typeOf
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
@@ -28,7 +29,7 @@ import org.junit.jupiter.api.Test
 data class UploadTestBody(val someData: String)
 
 @Serializable
-data class UploadTestEvent(val ok: Boolean)
+data class UploadTestEvent(@SerialName("ok") val isOk: Boolean)
 
 class HttpF2ClientUploadTest {
 
@@ -48,7 +49,7 @@ class HttpF2ClientUploadTest {
         respond(
             content = """{"ok":true}""",
             status = HttpStatusCode.OK,
-            headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
         )
     }) {
         install(ContentNegotiation) {
@@ -66,8 +67,6 @@ class HttpF2ClientUploadTest {
     @Test
     suspend fun `function posts single upload command as multipart form data`() {
         val recorded = RecordedRequest()
-        val client = HttpF2Client(mockClient(recorded), "http://localhost", json)
-
         val command = F2UploadSingleCommand(
             command = UploadTestBody("hello-upload"),
             file = F2FilePart(
@@ -77,9 +76,11 @@ class HttpF2ClientUploadTest {
             )
         )
 
-        val results = uploadFunction(client).invoke(flowOf(command)).toList()
+        val results = mockClient(recorded).use { httpClient ->
+            uploadFunction(HttpF2Client(httpClient, "http://localhost", json)).invoke(flowOf(command)).toList()
+        }
 
-        assertThat(results).containsExactly(UploadTestEvent(ok = true))
+        assertThat(results).containsExactly(UploadTestEvent(isOk = true))
         assertThat(recorded.contentType).startsWith("multipart/form-data")
         assertThat(recorded.body)
             .contains("someData")
@@ -92,8 +93,6 @@ class HttpF2ClientUploadTest {
     @Test
     suspend fun `function posts multiple upload files in one multipart request`() {
         val recorded = RecordedRequest()
-        val client = HttpF2Client(mockClient(recorded), "http://localhost", json)
-
         val command = F2UploadMultipleCommand(
             command = UploadTestBody("multi-upload"),
             files = listOf(
@@ -102,9 +101,11 @@ class HttpF2ClientUploadTest {
             )
         )
 
-        val results = uploadFunction(client).invoke(flowOf(command)).toList()
+        val results = mockClient(recorded).use { httpClient ->
+            uploadFunction(HttpF2Client(httpClient, "http://localhost", json)).invoke(flowOf(command)).toList()
+        }
 
-        assertThat(results).containsExactly(UploadTestEvent(ok = true))
+        assertThat(results).containsExactly(UploadTestEvent(isOk = true))
         assertThat(recorded.contentType).startsWith("multipart/form-data")
         assertThat(recorded.body)
             .contains("multi-upload")

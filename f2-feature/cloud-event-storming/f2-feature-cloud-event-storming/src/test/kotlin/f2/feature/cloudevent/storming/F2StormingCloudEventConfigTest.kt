@@ -1,6 +1,8 @@
-package f2.feature.cloudEvent.storming
+package f2.feature.cloudevent.storming
 
-import f2.feature.cloudEvent.storming.entity.CloudEventEntity
+import f2.dsl.event.CloudEvent
+import f2.dsl.event.CloudEventAttributes
+import f2.feature.cloudevent.storming.entity.CloudEventEntity
 import java.util.UUID
 import kotlinx.coroutines.flow.toList
 import org.assertj.core.api.Assertions.assertThat
@@ -16,13 +18,11 @@ class F2StormingCloudEventConfigTest {
 
     private val repository = InMemoryCloudEventEntityRepository()
 
-    /**
-     * The module does not bring a Spring Data module of its own: the repository is materialised from
-     * whatever [ReactiveRepositoryFactorySupport] the host application exposes. This stub only fills
-     * in the storage-specific hooks and leaves `getRepository` to the real factory machinery, so the
-     * test proves that the reactive factory can build a proxy for a
-     * [org.springframework.data.repository.kotlin.CoroutineCrudRepository]-based interface.
-     */
+    // The module does not bring a Spring Data module of its own: the repository is materialised from
+    // whatever ReactiveRepositoryFactorySupport the host application exposes. This stub only fills
+    // in the storage-specific hooks and leaves `getRepository` to the real factory machinery, so the
+    // test proves that the reactive factory can build a proxy for a CoroutineCrudRepository-based
+    // interface.
     private val repositoryFactory = object : ReactiveRepositoryFactorySupport() {
         override fun getRepositoryBaseClass(metadata: RepositoryMetadata): Class<*> =
             InMemoryCloudEventEntityRepository::class.java
@@ -61,7 +61,7 @@ class F2StormingCloudEventConfigTest {
     suspend fun `stormingCommandSink should be wired with the repository`() {
         val objectMapper = JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
 
-        config.stormingCommandSink(repository, objectMapper)
+        config.stormingCommandSink(cloudEventRepository = repository, objectMapper = objectMapper)
             .storeCommand(CreateUserCommand(name = "john", age = 42))
 
         assertThat(repository.saved).hasSize(1)
@@ -76,11 +76,11 @@ class F2StormingCloudEventConfigTest {
         assertThat(repository.saved.single().event).isSameAs(event)
     }
 
-    private fun cloudEvent(id: String) = f2.dsl.event.CloudEvent(
+    private fun cloudEvent(id: String) = CloudEvent(
         eventType = "UserCreated",
         source = "S2",
         eventID = id,
-        attributes = f2.dsl.event.CloudEventAttributes(cloudEventsVersion = "1"),
+        attributes = CloudEventAttributes(cloudEventsVersion = "1"),
         data = """{"name":"john"}"""
     )
 }

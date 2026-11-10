@@ -13,49 +13,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 class TrustedIssuerJwtAuthenticationManagerResolverTest {
 
-    companion object {
-        private const val TENANT_PATH = "/auth/realms/tenant-1"
-
-        /** Base URI of issuers that are never dereferenced: only the trust decision is asserted. */
-        private const val AUTH_BASE_URI = "https://auth.example.org/auth"
-
-        private lateinit var server: HttpServer
-        private lateinit var issuerBaseUri: String
-        private lateinit var trustedIssuer: String
-
-        @JvmStatic
-        @BeforeAll
-        fun startOidcProviderStub() {
-            server = HttpServer.create(InetSocketAddress(0), 0)
-            issuerBaseUri = "http://localhost:${server.address.port}/auth/realms/"
-            trustedIssuer = "http://localhost:${server.address.port}$TENANT_PATH"
-            server.createContext("$TENANT_PATH/.well-known/openid-configuration") { exchange ->
-                val body = """
-                    {
-                      "issuer": "$trustedIssuer",
-                      "jwks_uri": "$trustedIssuer/protocol/openid-connect/certs"
-                    }
-                """.trimIndent().toByteArray()
-                exchange.responseHeaders.add("Content-Type", "application/json")
-                exchange.sendResponseHeaders(200, body.size.toLong())
-                exchange.responseBody.use { it.write(body) }
-            }
-            server.createContext("$TENANT_PATH/protocol/openid-connect/certs") { exchange ->
-                val body = """{"keys":[]}""".toByteArray()
-                exchange.responseHeaders.add("Content-Type", "application/json")
-                exchange.sendResponseHeaders(200, body.size.toLong())
-                exchange.responseBody.use { it.write(body) }
-            }
-            server.start()
-        }
-
-        @JvmStatic
-        @AfterAll
-        fun stopOidcProviderStub() {
-            server.stop(0)
-        }
-    }
-
     private val resolver = TrustedIssuerJwtAuthenticationManagerResolver(
         trustedIssuersConfig = F2TrustedIssuersConfig(issuerBaseUri = issuerBaseUri)
     )
@@ -187,5 +144,48 @@ class TrustedIssuerJwtAuthenticationManagerResolverTest {
         assertThat(authentication).isInstanceOf(JwtAuthenticationToken::class.java)
         assertThat(authentication!!.authorities.map { it.authority })
             .containsExactly("${ROLE_PREFIX}admin")
+    }
+
+    companion object {
+        private const val TENANT_PATH = "/auth/realms/tenant-1"
+
+        // Base URI of issuers that are never dereferenced: only the trust decision is asserted.
+        private const val AUTH_BASE_URI = "https://auth.example.org/auth"
+
+        private lateinit var server: HttpServer
+        private lateinit var issuerBaseUri: String
+        private lateinit var trustedIssuer: String
+
+        @JvmStatic
+        @BeforeAll
+        fun startOidcProviderStub() {
+            server = HttpServer.create(InetSocketAddress(0), 0)
+            issuerBaseUri = "http://localhost:${server.address.port}/auth/realms/"
+            trustedIssuer = "http://localhost:${server.address.port}$TENANT_PATH"
+            server.createContext("$TENANT_PATH/.well-known/openid-configuration") { exchange ->
+                val body = """
+                    {
+                      "issuer": "$trustedIssuer",
+                      "jwks_uri": "$trustedIssuer/protocol/openid-connect/certs"
+                    }
+                """.trimIndent().toByteArray()
+                exchange.responseHeaders.add("Content-Type", "application/json")
+                exchange.sendResponseHeaders(200, body.size.toLong())
+                exchange.responseBody.use { it.write(body) }
+            }
+            server.createContext("$TENANT_PATH/protocol/openid-connect/certs") { exchange ->
+                val body = """{"keys":[]}""".toByteArray()
+                exchange.responseHeaders.add("Content-Type", "application/json")
+                exchange.sendResponseHeaders(200, body.size.toLong())
+                exchange.responseBody.use { it.write(body) }
+            }
+            server.start()
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun stopOidcProviderStub() {
+            server.stop(0)
+        }
     }
 }

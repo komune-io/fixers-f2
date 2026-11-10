@@ -35,7 +35,8 @@ class JsonMessageConverterTest {
                 assertThat(error.error.code).isEqualTo(400)
                 assertThat(error.error.refusal?.code).isEqualTo("http.INVALID_PAYLOAD")
             }
-            .cause().isInstanceOf(cause)
+            .cause()
+            .isInstanceOf(cause)
     }
 
     private fun assertStatus(payload: Any, status: HttpStatus, reason: String, cause: Class<out Throwable>) {
@@ -44,7 +45,8 @@ class JsonMessageConverterTest {
                 assertThat(error.statusCode).isEqualTo(status)
                 assertThat(error.reason).isEqualTo(reason)
             }
-            .cause().isInstanceOf(cause)
+            .cause()
+            .isInstanceOf(cause)
     }
 
     @Test
@@ -77,12 +79,16 @@ class JsonMessageConverterTest {
 
     @Test
     fun `a body whose read fails is a server error and answers 500`() {
-        val failingReader = object : Reader() {
+        object : Reader() {
             override fun read(buffer: CharArray, offset: Int, length: Int): Int = throw IOException("read failed")
             override fun close() = Unit
+        }.use { reader ->
+            assertStatus(
+                payload = reader,
+                status = HttpStatus.INTERNAL_SERVER_ERROR,
+                reason = "Error reading json",
+                cause = JacksonIOException::class.java,
+            )
         }
-        assertStatus(
-            failingReader, HttpStatus.INTERNAL_SERVER_ERROR, "Error reading json", JacksonIOException::class.java
-        )
     }
 }

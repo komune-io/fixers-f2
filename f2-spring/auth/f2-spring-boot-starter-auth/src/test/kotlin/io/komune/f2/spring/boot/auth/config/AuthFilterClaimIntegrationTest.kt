@@ -20,24 +20,6 @@ class AuthFilterClaimIntegrationTest(
     @LocalServerPort private val port: Int,
 ) {
 
-    companion object {
-        private const val REALM = "master"
-        private val oidc = OidcProviderStub(listOf(REALM))
-
-        @JvmStatic
-        @DynamicPropertySource
-        fun properties(registry: DynamicPropertyRegistry) {
-            registry.add("f2.issuers[0].name") { "first" }
-            registry.add("f2.issuers[0].auth-url") { oidc.authUrl }
-            registry.add("f2.issuers[0].realm") { REALM }
-            registry.add("f2.filter.azp") { "trusted-client" }
-        }
-
-        @JvmStatic
-        @AfterAll
-        fun stopOidcProviderStub() = oidc.stop()
-    }
-
     private val webTestClient: WebTestClient by lazy {
         WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()
     }
@@ -63,5 +45,25 @@ class AuthFilterClaimIntegrationTest(
     fun `token missing the filtered claim should be rejected with 403`() {
         val token = oidc.mintToken(REALM)
         getSecured(token).expectStatus().isForbidden
+    }
+
+    companion object {
+        private const val REALM = "master"
+        private val oidc = OidcProviderStub(listOf(REALM))
+
+        @JvmStatic
+        @DynamicPropertySource
+        fun properties(registry: DynamicPropertyRegistry) {
+            registry.add("f2.issuers[0].name") { "first" }
+            registry.add("f2.issuers[0].auth-url") { oidc.authUrl }
+            registry.add("f2.issuers[0].realm") { REALM }
+            registry.add("f2.filter.azp") { "trusted-client" }
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun stopOidcProviderStub() {
+            oidc.stop()
+        }
     }
 }

@@ -7,6 +7,6 @@ import kotlin.js.JsName
 @JsExport
 @JsName("F2Exception")
 open class F2Exception(
-	val error: F2ErrorDTO,
-	cause: Throwable? = null
+    val error: F2ErrorDTO,
+    cause: Throwable? = null
 ) : RuntimeException(error.message, cause)

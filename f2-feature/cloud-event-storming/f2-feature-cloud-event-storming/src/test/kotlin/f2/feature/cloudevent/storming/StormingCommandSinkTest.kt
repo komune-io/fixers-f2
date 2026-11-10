@@ -1,4 +1,4 @@
-package f2.feature.cloudEvent.storming
+package f2.feature.cloudevent.storming
 
 import f2.dsl.cqrs.Command
 import java.time.Instant
@@ -72,7 +72,8 @@ class StormingCommandSinkTest {
 
         sink.storeCommand(CreateUserCommand(name = "john", age = 42))
 
-        val eventTime = Instant.parse(repository.saved.single().event.attributes.eventTime)
+        val saved = repository.saved.single()
+        val eventTime = Instant.parse(saved.event.attributes.eventTime)
         assertThat(eventTime).isAfterOrEqualTo(before)
         assertThat(eventTime).isBeforeOrEqualTo(Instant.now().plusSeconds(1))
     }

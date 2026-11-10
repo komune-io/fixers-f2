@@ -1,4 +1,4 @@
-declare function KtSingleton<T>(): T & (abstract new() => any);
+declare function KtSingleton<T>(): T & (abstract new() => unknown);
 export declare class CloudEventAttributes {
     constructor(cloudEventsVersion: string, eventTypeVersion?: string | null, eventTime?: string | null, schemaURL?: string | null, contentType?: string | null, extensions?: Record<string, string> | null);
     get cloudEventsVersion(): string;
@@ -7,6 +7,10 @@ export declare class CloudEventAttributes {
     get schemaURL(): string | null;
     get contentType(): string | null;
     get extensions(): Record<string, string> | null;
+    copy(cloudEventsVersion?: string, eventTypeVersion?: string | null, eventTime?: string | null, schemaURL?: string | null, contentType?: string | null, extensions?: Record<string, string> | null): CloudEventAttributes;
+    toString(): string;
+    hashCode(): number;
+    equals(other?: unknown): boolean;
 }
 export declare namespace CloudEventAttributes {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */

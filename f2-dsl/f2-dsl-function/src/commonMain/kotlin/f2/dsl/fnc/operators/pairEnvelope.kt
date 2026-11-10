@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.channelFlow
 /**
  * Extension function to pair elements of a Flow of Envelopes with their corresponding results.
  *
- * @param props Properties for chunking the flow.
+ * @param T The type of the enveloped commands.
+ * @param R The type of the enveloped results.
+ * @param chunk The size of the chunks the flow is executed by.
  * @param execute A function to execute on the chunked flow of Envelopes.
  * @return A Flow emitting pairs of original data and corresponding results.
  */

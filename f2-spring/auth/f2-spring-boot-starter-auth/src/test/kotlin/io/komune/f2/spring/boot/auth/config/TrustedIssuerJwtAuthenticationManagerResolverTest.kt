@@ -10,6 +10,30 @@ import org.springframework.security.oauth2.server.resource.authentication.Reacti
 
 class TrustedIssuerJwtAuthenticationManagerResolverTest {
 
+    private val resolver = TrustedIssuerJwtAuthenticationManagerResolver(
+        isTrustedIssuer = { issuer -> issuer == trustedIssuer },
+        reactiveJwtAuthenticationConverter = ReactiveJwtAuthenticationConverter()
+    )
+
+    @Test
+    fun `resolve should return empty mono for untrusted issuer`() {
+        val manager = resolver.resolve("http://evil.example.com/realms/master").block()
+        assertThat(manager).isNull()
+    }
+
+    @Test
+    fun `resolve should return a manager mono for trusted issuer`() {
+        val manager = resolver.resolve(trustedIssuer).block()
+        assertThat(manager).isNotNull
+    }
+
+    @Test
+    fun `resolve should cache the manager mono per issuer`() {
+        val first = resolver.resolve(trustedIssuer)
+        val second = resolver.resolve(trustedIssuer)
+        assertThat(second).isSameAs(first)
+    }
+
     companion object {
         private const val ISSUER_PATH = "/auth/realms/master"
 
@@ -46,29 +70,5 @@ class TrustedIssuerJwtAuthenticationManagerResolverTest {
         fun stopOidcProviderStub() {
             server.stop(0)
         }
-    }
-
-    private val resolver = TrustedIssuerJwtAuthenticationManagerResolver(
-        isTrustedIssuer = { issuer -> issuer == trustedIssuer },
-        reactiveJwtAuthenticationConverter = ReactiveJwtAuthenticationConverter()
-    )
-
-    @Test
-    fun `resolve should return empty mono for untrusted issuer`() {
-        val manager = resolver.resolve("http://evil.example.com/realms/master").block()
-        assertThat(manager).isNull()
-    }
-
-    @Test
-    fun `resolve should return a manager mono for trusted issuer`() {
-        val manager = resolver.resolve(trustedIssuer).block()
-        assertThat(manager).isNotNull
-    }
-
-    @Test
-    fun `resolve should cache the manager mono per issuer`() {
-        val first = resolver.resolve(trustedIssuer)
-        val second = resolver.resolve(trustedIssuer)
-        assertThat(second).isSameAs(first)
     }
 }

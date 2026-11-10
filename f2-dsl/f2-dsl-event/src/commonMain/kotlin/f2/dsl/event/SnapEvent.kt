@@ -7,15 +7,15 @@ import kotlin.js.JsName
 @JsExport
 @JsName("SnapEvent")
 open class SnapEvent<T>(
-	eventType: String,
-	source: String,
-	eventID: String,
-	attributes: CloudEventAttributes,
-	data: T,
+    eventType: String,
+    source: String,
+    eventID: String,
+    attributes: CloudEventAttributes,
+    data: T,
 ) : CloudEvent<T>(
-	eventType = eventType,
-	source = source,
-	eventID = eventID,
-	attributes = attributes,
-	data = data,
+    eventType = eventType,
+    source = source,
+    eventID = eventID,
+    attributes = attributes,
+    data = data,
 )

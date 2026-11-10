@@ -1,14 +1,13 @@
-package f2.feature.cloudEvent.storming
+package f2.feature.cloudevent.storming
 
 import f2.dsl.event.CloudEvent
 import f2.dsl.event.CloudEventAttributes
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule
 
@@ -29,7 +28,7 @@ class StormingEventListenerWiringTest {
         @Bean
         fun stormingCommandSink(
             repository: InMemoryCloudEventEntityRepository,
-            objectMapper: tools.jackson.databind.ObjectMapper
+            objectMapper: ObjectMapper
         ) = StormingCommandSink(repo = repository, objectMapper = objectMapper)
 
         @Bean
@@ -37,44 +36,46 @@ class StormingEventListenerWiringTest {
             StormingCloudEventSink(repo = repository)
     }
 
-    private lateinit var context: AnnotationConfigApplicationContext
-    private lateinit var repository: InMemoryCloudEventEntityRepository
-
-    @BeforeEach
-    fun setUp() {
-        context = AnnotationConfigApplicationContext(SinksConfig::class.java)
-        repository = context.getBean(InMemoryCloudEventEntityRepository::class.java)
-    }
-
-    @AfterEach
-    fun tearDown() = context.close()
-
     @Test
     fun `publishing a command should reach the command sink`() {
-        context.publishEvent(CreateUserCommand(name = "john", age = 42))
+        withSinks { context, repository ->
+            context.publishEvent(CreateUserCommand(name = "john", age = 42))
 
-        assertThat(repository.saved).hasSize(1)
+            assertThat(repository.saved).hasSize(1)
+        }
     }
 
     @Test
     fun `publishing a cloud event should reach the cloud event sink`() {
-        context.publishEvent(
-            CloudEvent(
-                eventType = "UserCreated",
-                source = "S2",
-                eventID = "event-1",
-                attributes = CloudEventAttributes(cloudEventsVersion = "1"),
-                data = """{"name":"john"}"""
+        withSinks { context, repository ->
+            context.publishEvent(
+                CloudEvent(
+                    eventType = "UserCreated",
+                    source = "S2",
+                    eventID = "event-1",
+                    attributes = CloudEventAttributes(cloudEventsVersion = "1"),
+                    data = """{"name":"john"}"""
+                )
             )
-        )
 
-        assertThat(repository.saved).hasSize(1)
+            assertThat(repository.saved).hasSize(1)
+        }
     }
 
     @Test
     fun `publishing an unrelated event should reach no sink`() {
-        context.publishEvent("some-unrelated-payload")
+        withSinks { context, repository ->
+            context.publishEvent("some-unrelated-payload")
 
-        assertThat(repository.saved).isEmpty()
+            assertThat(repository.saved).isEmpty()
+        }
+    }
+
+    private fun withSinks(
+        block: (AnnotationConfigApplicationContext, InMemoryCloudEventEntityRepository) -> Unit,
+    ) {
+        AnnotationConfigApplicationContext(SinksConfig::class.java).use { context ->
+            block(context, context.getBean(InMemoryCloudEventEntityRepository::class.java))
+        }
     }
 }

@@ -14,8 +14,8 @@ class GroupByTest {
         val result = flow.groupBy { it % 2 }.toList()
         val evenGroup = result.first { it.first == 0 }.second.toList()
         val oddGroup = result.first { it.first == 1 }.second.toList()
-        assertEquals(listOf(2, 4, 6), (evenGroup).toList())
-        assertEquals(listOf(1, 3, 5), (oddGroup).toList())
+        assertEquals(expected = listOf(2, 4, 6), actual = evenGroup.toList())
+        assertEquals(expected = listOf(1, 3, 5), actual = oddGroup.toList())
     }
 
     @Test
@@ -24,7 +24,7 @@ class GroupByTest {
         val result = flow.groupBy { it.first() }.toList()
         val aGroup = result.first { it.first == 'a' }.second.toList()
         val bGroup = result.first { it.first == 'b' }.second.toList()
-        assertEquals(listOf("apple", "apricot"), (aGroup).toList())
-        assertEquals(listOf("banana", "blueberry"), (bGroup).toList())
+        assertEquals(expected = listOf("apple", "apricot"), actual = aGroup.toList())
+        assertEquals(expected = listOf("banana", "blueberry"), actual = bGroup.toList())
     }
 }

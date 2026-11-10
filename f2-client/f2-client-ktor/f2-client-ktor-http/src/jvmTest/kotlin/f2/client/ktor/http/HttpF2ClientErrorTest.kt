@@ -25,6 +25,11 @@ import org.junit.jupiter.api.assertThrows
 
 class HttpF2ClientErrorTest {
 
+    private val expectingSuccess: HttpClientConfig<*>.() -> Unit = {
+        mockContentNegotiation()
+        expectSuccess = true
+    }
+
     private fun f2Client(
         status: HttpStatusCode,
         body: String,
@@ -40,7 +45,7 @@ class HttpF2ClientErrorTest {
         respond(
             content = body,
             status = status,
-            headers = headersOf(HttpHeaders.ContentType, contentType)
+            headers = headersOf(name = HttpHeaders.ContentType, value = contentType)
         )
     }
 
@@ -64,20 +69,15 @@ class HttpF2ClientErrorTest {
         mockContentNegotiation()
         install(
             createClientPlugin("FailFirstErrorRead") {
-                var failed = false
+                var hasFailed = false
                 client.responsePipeline.intercept(HttpResponsePipeline.Receive) {
-                    if (!this.context.response.status.isSuccess() && !failed) {
-                        failed = true
+                    if (!this.context.response.status.isSuccess() && !hasFailed) {
+                        hasFailed = true
                         throw failure()
                     }
                 }
             }
         )
-    }
-
-    private val expectingSuccess: HttpClientConfig<*>.() -> Unit = {
-        mockContentNegotiation()
-        expectSuccess = true
     }
 
     @Test
@@ -88,10 +88,11 @@ class HttpF2ClientErrorTest {
             failingOnFirstErrorRead { CancellationException("caller went away") }
         )
 
-        val failure = runCatching { client.testConsumer().invoke(flowOf(TestRequest("id", 1))) }.exceptionOrNull()
+        val failure = assertThrows<CancellationException> {
+            client.testConsumer().invoke(flowOf(TestRequest("id", 1)))
+        }
 
-        assertThat(failure).isInstanceOf(CancellationException::class.java)
-            .isNotInstanceOf(F2Exception::class.java)
+        assertThat(failure).isNotInstanceOf(F2Exception::class.java)
     }
 
     @Test
@@ -102,9 +103,9 @@ class HttpF2ClientErrorTest {
             failingOnFirstErrorRead { CancellationException("caller went away") }
         )
 
-        val failure = runCatching { client.testSupplier().invoke().toList() }.exceptionOrNull()
-
-        assertThat(failure).isInstanceOf(CancellationException::class.java)
+        assertThrows<CancellationException> {
+            client.testSupplier().invoke().toList()
+        }
     }
 
     @Test

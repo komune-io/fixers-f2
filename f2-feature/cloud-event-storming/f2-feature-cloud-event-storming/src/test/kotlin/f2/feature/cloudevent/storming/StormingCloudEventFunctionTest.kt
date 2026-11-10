@@ -1,8 +1,8 @@
-package f2.feature.cloudEvent.storming
+package f2.feature.cloudevent.storming
 
 import f2.dsl.event.CloudEvent
 import f2.dsl.event.CloudEventAttributes
-import f2.feature.cloudEvent.storming.entity.CloudEventEntity
+import f2.feature.cloudevent.storming.entity.CloudEventEntity
 import java.util.UUID
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest

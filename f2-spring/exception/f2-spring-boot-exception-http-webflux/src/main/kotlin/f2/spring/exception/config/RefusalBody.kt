@@ -15,10 +15,9 @@ import tools.jackson.databind.json.JsonMapper
  *
  * The body is written with [jsonMapper], the application's own: the bean every F2 error writer uses.
  */
-@Suppress("ForbiddenVoid") // the Mono<Void> of ServerHttpResponse.writeWith, and of the security handlers
 fun ServerWebExchange.writeRefusal(error: F2ErrorDTO, jsonMapper: JsonMapper): Mono<Void> {
     val status = error.httpStatus()
-    val body = errorBody(request.path.value(), status, error).apply { put("requestId", request.id) }
+    val body = errorBody(request.path.value(), status, error).apply { this["requestId"] = request.id }
     response.statusCode = status
     response.headers.contentType = MediaType.APPLICATION_JSON
     return response.writeWith(Mono.fromSupplier {

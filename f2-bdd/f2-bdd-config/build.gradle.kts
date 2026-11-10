@@ -1,7 +1,7 @@
 plugins {
-	alias(catalogue.plugins.fixers.gradle.kotlin.jvm)
+    alias(libs.plugins.fixers.gradle.kotlin.jvm)
 }
 
 dependencies {
-	api(libs.bundles.cucumber)
+    api(libs.bundles.cucumber)
 }

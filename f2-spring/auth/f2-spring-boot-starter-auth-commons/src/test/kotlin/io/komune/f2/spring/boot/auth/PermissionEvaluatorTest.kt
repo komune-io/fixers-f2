@@ -67,18 +67,18 @@ class PermissionEvaluatorTest {
 
     @Test
     suspend fun `checkOrganizationId should return true when it matches the authenticated organization`() {
-        val checked = withAuthentication("user") {
+        val isChecked = withAuthentication("user") {
             permissionEvaluator.checkOrganizationId("organization-1")
         }
-        assertThat(checked).isTrue()
+        assertThat(isChecked).isTrue()
     }
 
     @Test
     suspend fun `checkOrganizationId should return false when it does not match`() {
-        val checked = withAuthentication("user") {
+        val isChecked = withAuthentication("user") {
             permissionEvaluator.checkOrganizationId("organization-2")
         }
-        assertThat(checked).isFalse()
+        assertThat(isChecked).isFalse()
     }
 
     @Test

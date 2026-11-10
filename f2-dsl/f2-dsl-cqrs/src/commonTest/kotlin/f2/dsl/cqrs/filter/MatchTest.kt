@@ -9,17 +9,17 @@ class MatchTest {
 
     @Test
     fun `exactMatch map transforms value and keeps negative flag`() {
-        val match = ExactMatch(value = 1, negative = true).map { it.toString() }
+        val match = ExactMatch(value = 1, isNegative = true).map { it.toString() }
 
-        assertEquals(ExactMatch(value = "1", negative = true), match)
+        assertEquals(expected = ExactMatch(value = "1", isNegative = true), actual = match)
     }
 
     @Test
     fun `exactMatch not inverts negative flag`() {
         val match = ExactMatch(value = 1)
 
-        assertTrue(match.not().negative)
-        assertTrue((!match).negative)
+        assertTrue(match.not().isNegative)
+        assertTrue((!match).isNegative)
     }
 
     @Test
@@ -29,7 +29,7 @@ class MatchTest {
 
         val match = left and right
 
-        assertEquals(AndMatch(matches = listOf(left, right)), match)
+        assertEquals(expected = AndMatch(matches = listOf(left, right)), actual = match)
     }
 
     @Test
@@ -39,7 +39,7 @@ class MatchTest {
 
         val match = left or right
 
-        assertEquals(OrMatch(matches = listOf(left, right)), match)
+        assertEquals(expected = OrMatch(matches = listOf(left, right)), actual = match)
     }
 
     @Test
@@ -47,12 +47,15 @@ class MatchTest {
         val match = AndMatch(matches = listOf(ExactMatch(value = 1), ExactMatch(value = 2)))
 
         val mapped = match.map { it * 10 }
-        assertEquals(AndMatch(matches = listOf(ExactMatch(value = 10), ExactMatch(value = 20))), mapped)
+        assertEquals(
+            expected = AndMatch(matches = listOf(ExactMatch(value = 10), ExactMatch(value = 20))),
+            actual = mapped,
+        )
 
-        assertTrue(match.not().negative)
+        assertTrue(match.not().isNegative)
 
         val extended = match and ExactMatch(value = 3)
-        assertEquals(3, (extended.matches).count())
+        assertEquals(expected = 3, actual = extended.matches.count())
     }
 
     @Test
@@ -60,12 +63,15 @@ class MatchTest {
         val match = OrMatch(matches = listOf(ExactMatch(value = 1), ExactMatch(value = 2)))
 
         val mapped = match.map { it * 10 }
-        assertEquals(OrMatch(matches = listOf(ExactMatch(value = 10), ExactMatch(value = 20))), mapped)
+        assertEquals(
+            expected = OrMatch(matches = listOf(ExactMatch(value = 10), ExactMatch(value = 20))),
+            actual = mapped,
+        )
 
-        assertTrue(match.not().negative)
+        assertTrue(match.not().isNegative)
 
         val extended = match or ExactMatch(value = 3)
-        assertEquals(3, (extended.matches).count())
+        assertEquals(expected = 3, actual = extended.matches.count())
     }
 
     @Test
@@ -74,16 +80,16 @@ class MatchTest {
 
         val mapped = match.map { it.toString() }
 
-        assertEquals(CollectionMatch(values = listOf("1", "2", "3")), mapped)
-        assertTrue(match.not().negative)
+        assertEquals(expected = CollectionMatch(values = listOf("1", "2", "3")), actual = mapped)
+        assertTrue(match.not().isNegative)
     }
 
     @Test
     fun `stringMatch toString builds pattern by condition`() {
-        assertEquals("abc", StringMatch("abc", StringMatchCondition.EXACT).toString())
-        assertEquals("abc%", StringMatch("abc", StringMatchCondition.STARTS_WITH).toString())
-        assertEquals("%abc", StringMatch("abc", StringMatchCondition.ENDS_WITH).toString())
-        assertEquals("%abc%", StringMatch("abc", StringMatchCondition.CONTAINS).toString())
+        assertEquals(expected = "abc", actual = StringMatch("abc", StringMatchCondition.EXACT).toString())
+        assertEquals(expected = "abc%", actual = StringMatch("abc", StringMatchCondition.STARTS_WITH).toString())
+        assertEquals(expected = "%abc", actual = StringMatch("abc", StringMatchCondition.ENDS_WITH).toString())
+        assertEquals(expected = "%abc%", actual = StringMatch("abc", StringMatchCondition.CONTAINS).toString())
     }
 
     @Test
@@ -92,8 +98,8 @@ class MatchTest {
 
         val mapped = match.map { it.uppercase() }
 
-        assertEquals(StringMatch("ABC", StringMatchCondition.EXACT), mapped)
-        assertTrue(match.not().negative)
+        assertEquals(expected = StringMatch("ABC", StringMatchCondition.EXACT), actual = mapped)
+        assertTrue(match.not().isNegative)
     }
 
     @Test
@@ -102,7 +108,7 @@ class MatchTest {
 
         val mapped = match.map { it.toInt() }
 
-        assertEquals(ExactMatch(value = 42), mapped)
+        assertEquals(expected = ExactMatch(value = 42), actual = mapped)
     }
 
     @Test
@@ -111,45 +117,51 @@ class MatchTest {
 
         val mapped = match.map { it * 2 }
 
-        assertEquals(ComparableMatch(value = 2, condition = ComparableMatchCondition.GT), mapped)
-        assertTrue(match.not().negative)
+        assertEquals(expected = ComparableMatch(value = 2, condition = ComparableMatchCondition.GT), actual = mapped)
+        assertTrue(match.not().isNegative)
     }
 
     @Test
     fun `collectionMatchOf builds a CollectionMatch from values`() {
-        assertEquals(CollectionMatch(values = setOf(1, 2)), collectionMatchOf(1, 2, 2))
+        assertEquals(expected = CollectionMatch(values = setOf(1, 2)), actual = collectionMatchOf(1, 2, 2))
     }
 
     @Test
     fun `collectionMatchOfNullable maps null literals to null`() {
         val match = collectionMatchOfNullable(listOf("a", "null", "NULL"))
 
-        assertEquals(listOf("a", null, null), (match.values).toList())
+        assertEquals(expected = listOf("a", null, null), actual = match.values.toList())
     }
 
     @Test
     fun `andMatchOf and orMatchOf build composite matches`() {
-        assertEquals(2, (andMatchOf(ExactMatch(1), ExactMatch(2)).matches).count())
-        assertEquals(2, (orMatchOf(ExactMatch(1), ExactMatch(2)).matches).count())
+        assertEquals(expected = 2, actual = andMatchOf(ExactMatch(1), ExactMatch(2)).matches.count())
+        assertEquals(expected = 2, actual = orMatchOf(ExactMatch(1), ExactMatch(2)).matches.count())
     }
 
     @Test
     fun `andMatchOfNotNull handles empty, single and multiple matches`() {
         assertNull(andMatchOfNotNull<Int>(null, null))
-        assertEquals(ExactMatch(1), andMatchOfNotNull(ExactMatch(1), null))
-        assertEquals(AndMatch(listOf(ExactMatch(1), ExactMatch(2))), andMatchOfNotNull(ExactMatch(1), ExactMatch(2)))
+        assertEquals(expected = ExactMatch(1), actual = andMatchOfNotNull(ExactMatch(1), null))
+        assertEquals(
+            expected = AndMatch(listOf(ExactMatch(1), ExactMatch(2))),
+            actual = andMatchOfNotNull(ExactMatch(1), ExactMatch(2)),
+        )
     }
 
     @Test
     fun `orMatchOfNotNull handles empty, single and multiple matches`() {
         assertNull(orMatchOfNotNull<Int>(null, null))
-        assertEquals(ExactMatch(1), orMatchOfNotNull(ExactMatch(1), null))
-        assertEquals(OrMatch(listOf(ExactMatch(1), ExactMatch(2))), orMatchOfNotNull(ExactMatch(1), ExactMatch(2)))
+        assertEquals(expected = ExactMatch(1), actual = orMatchOfNotNull(ExactMatch(1), null))
+        assertEquals(
+            expected = OrMatch(listOf(ExactMatch(1), ExactMatch(2))),
+            actual = orMatchOfNotNull(ExactMatch(1), ExactMatch(2)),
+        )
     }
 
     @Test
     fun `nullableExactMatchOf maps null literal to null value`() {
-        assertEquals(ExactMatch<String?>("value"), nullableExactMatchOf("value"))
-        assertEquals(ExactMatch<String?>(null), nullableExactMatchOf("null"))
+        assertEquals(expected = ExactMatch<String?>("value"), actual = nullableExactMatchOf("value"))
+        assertEquals(expected = ExactMatch<String?>(null), actual = nullableExactMatchOf("null"))
     }
 }

@@ -33,6 +33,86 @@ class OtelPropertiesListener : EnvironmentPostProcessor {
 
     private val logger = LoggerFactory.getLogger(OtelPropertiesListener::class.java)
 
+    override fun postProcessEnvironment(environment: ConfigurableEnvironment, application: SpringApplication) {
+        val mainEndpoint = environment.getProperty(F2_OTEL_ENDPOINT)?.takeIf { it.isNotBlank() }
+        val metricsEndpoint = environment.getProperty(F2_OTEL_METRICS_ENDPOINT)?.takeIf { it.isNotBlank() }
+            ?: mainEndpoint?.plus(F2_OTEL_METRICS_ENDPOINT_PATH)
+        val tracingEndpoint = environment.getProperty(F2_OTEL_TRACES_ENDPOINT)?.takeIf { it.isNotBlank() }
+            ?: mainEndpoint?.plus(F2_OTEL_TRACES_ENDPOINT_PATH)
+        val logsEndpoint = environment.getProperty(F2_OTEL_LOGS_ENDPOINT)?.takeIf { it.isNotBlank() }
+            ?: mainEndpoint?.plus(F2_OTEL_LOGS_ENDPOINT_PATH)
+        val applicationName = environment.getProperty(SPRING_APPLICATION_NAME)
+
+        val props = Properties()
+
+        if (tracingEndpoint != null || metricsEndpoint != null || logsEndpoint != null) {
+            configureCommonProperties(props)
+            applicationName?.let { props[MANAGEMENT_METRICS_TAGS_APPLICATION] = it }
+        }
+        configureTracingProperties(props, tracingEndpoint)
+        configureMetricsProperties(props, metricsEndpoint)
+        configureLogsProperties(props, logsEndpoint)
+
+        environment.propertySources.addFirst(PropertiesPropertySource(F2_OTEL_PROPS, props))
+
+        logConfiguration(tracingEndpoint, metricsEndpoint, logsEndpoint)
+    }
+
+    private fun configureCommonProperties(props: Properties) {
+        props[MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE] = "health, metrics"
+        props[MANAGEMENT_ENDPOINT_METRICS_ENABLED] = ENABLED
+        props[MANAGEMENT_TRACING_SAMPLING_PROBABILITY] = "1.0"
+    }
+
+    private fun configureTracingProperties(props: Properties, tracingEndpoint: String?) {
+        if (tracingEndpoint != null) {
+            props[MANAGEMENT_TRACING_ENABLED] = ENABLED
+            props[MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT] = tracingEndpoint
+        } else {
+            props[MANAGEMENT_TRACING_ENABLED] = DISABLED
+            // Disable OpenTelemetry SDK traces exporter to prevent connection attempts to localhost:4317
+            props[OTEL_TRACES_EXPORTER] = OTEL_EXPORTER_NONE
+            // Exclude OpenTelemetry tracing auto-configuration since it doesn't check management.tracing.enabled
+            props[SPRING_AUTOCONFIGURE_EXCLUDE] = OPENTELEMETRY_TRACING_AUTOCONFIG
+        }
+    }
+
+    private fun configureMetricsProperties(props: Properties, metricsEndpoint: String?) {
+        if (metricsEndpoint != null) {
+            props[MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED] = ENABLED
+            props[MANAGEMENT_OTLP_METRICS_EXPORT_URL] = metricsEndpoint
+        } else {
+            props[MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED] = DISABLED
+            // Disable OpenTelemetry SDK metrics exporter to prevent connection attempts to localhost:4318
+            props[OTEL_METRICS_EXPORTER] = OTEL_EXPORTER_NONE
+        }
+    }
+
+    private fun configureLogsProperties(props: Properties, logsEndpoint: String?) {
+        if (logsEndpoint != null) {
+            props[MANAGEMENT_LOGGING_EXPORT_OTLP_ENABLED] = ENABLED
+            props[MANAGEMENT_OPENTELEMETRY_LOGGING_ENDPOINT] = logsEndpoint
+        } else {
+            props[MANAGEMENT_LOGGING_EXPORT_OTLP_ENABLED] = DISABLED
+            // Disable OpenTelemetry SDK logs exporter to prevent connection attempts to localhost:4318
+            props[OTEL_LOGS_EXPORTER] = OTEL_EXPORTER_NONE
+        }
+    }
+
+    private fun logConfiguration(tracingEndpoint: String?, metricsEndpoint: String?, logsEndpoint: String?) {
+        val enabled = listOfNotNull(
+            tracingEndpoint?.let { "tracing: $it" },
+            metricsEndpoint?.let { "metrics: $it" },
+            logsEndpoint?.let { "logs: $it" }
+        )
+
+        if (enabled.isNotEmpty()) {
+            logger.info("F2 OpenTelemetry configured - {}", enabled.joinToString(", "))
+        } else {
+            logger.debug("F2 OpenTelemetry not configured - no endpoints specified")
+        }
+    }
+
     companion object {
         const val F2_OTEL_PROPS = "f2OtelProps"
         const val F2_OTEL_METRICS_ENDPOINT_PATH = "/v1/metrics"
@@ -65,96 +145,11 @@ class OtelPropertiesListener : EnvironmentPostProcessor {
         const val OTEL_LOGS_EXPORTER = "otel.logs.exporter"
         const val OTEL_EXPORTER_NONE = "none"
 
+        private const val ENABLED = "true"
+        private const val DISABLED = "false"
+
         const val OPENTELEMETRY_TRACING_AUTOCONFIG =
             "org.springframework.boot.micrometer.tracing.opentelemetry.autoconfigure." +
                 "OpenTelemetryTracingAutoConfiguration"
-    }
-
-    override fun postProcessEnvironment(environment: ConfigurableEnvironment, application: SpringApplication) {
-        val mainEndpoint = environment.getProperty(F2_OTEL_ENDPOINT)?.takeIf { it.isNotBlank() }
-        val metricsEndpoint = environment.getProperty(F2_OTEL_METRICS_ENDPOINT)?.takeIf { it.isNotBlank() }
-            ?: mainEndpoint?.plus(F2_OTEL_METRICS_ENDPOINT_PATH)
-        val tracingEndpoint = environment.getProperty(F2_OTEL_TRACES_ENDPOINT)?.takeIf { it.isNotBlank() }
-            ?: mainEndpoint?.plus(F2_OTEL_TRACES_ENDPOINT_PATH)
-        val logsEndpoint = environment.getProperty(F2_OTEL_LOGS_ENDPOINT)?.takeIf { it.isNotBlank() }
-            ?: mainEndpoint?.plus(F2_OTEL_LOGS_ENDPOINT_PATH)
-        val applicationName = environment.getProperty(SPRING_APPLICATION_NAME)
-
-        val props = Properties()
-
-        configureCommonProperties(props, tracingEndpoint, metricsEndpoint, logsEndpoint, applicationName)
-        configureTracingProperties(props, tracingEndpoint)
-        configureMetricsProperties(props, metricsEndpoint)
-        configureLogsProperties(props, logsEndpoint)
-
-        environment.propertySources.addFirst(PropertiesPropertySource(F2_OTEL_PROPS, props))
-
-        logConfiguration(tracingEndpoint, metricsEndpoint, logsEndpoint)
-    }
-
-    private fun configureCommonProperties(
-        props: Properties,
-        tracingEndpoint: String?,
-        metricsEndpoint: String?,
-        logsEndpoint: String?,
-        applicationName: String?
-    ) {
-        if (tracingEndpoint != null || metricsEndpoint != null || logsEndpoint != null) {
-            props[MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE] = "health, metrics"
-            props[MANAGEMENT_ENDPOINT_METRICS_ENABLED] = "true"
-            props[MANAGEMENT_TRACING_SAMPLING_PROBABILITY] = "1.0"
-            if (applicationName != null) {
-                props[MANAGEMENT_METRICS_TAGS_APPLICATION] = applicationName
-            }
-        }
-    }
-
-    private fun configureTracingProperties(props: Properties, tracingEndpoint: String?) {
-        if (tracingEndpoint != null) {
-            props[MANAGEMENT_TRACING_ENABLED] = "true"
-            props[MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT] = tracingEndpoint
-        } else {
-            props[MANAGEMENT_TRACING_ENABLED] = "false"
-            // Disable OpenTelemetry SDK traces exporter to prevent connection attempts to localhost:4317
-            props[OTEL_TRACES_EXPORTER] = OTEL_EXPORTER_NONE
-            // Exclude OpenTelemetry tracing auto-configuration since it doesn't check management.tracing.enabled
-            props[SPRING_AUTOCONFIGURE_EXCLUDE] = OPENTELEMETRY_TRACING_AUTOCONFIG
-        }
-    }
-
-    private fun configureMetricsProperties(props: Properties, metricsEndpoint: String?) {
-        if (metricsEndpoint != null) {
-            props[MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED] = "true"
-            props[MANAGEMENT_OTLP_METRICS_EXPORT_URL] = metricsEndpoint
-        } else {
-            props[MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED] = "false"
-            // Disable OpenTelemetry SDK metrics exporter to prevent connection attempts to localhost:4318
-            props[OTEL_METRICS_EXPORTER] = OTEL_EXPORTER_NONE
-        }
-    }
-
-    private fun configureLogsProperties(props: Properties, logsEndpoint: String?) {
-        if (logsEndpoint != null) {
-            props[MANAGEMENT_LOGGING_EXPORT_OTLP_ENABLED] = "true"
-            props[MANAGEMENT_OPENTELEMETRY_LOGGING_ENDPOINT] = logsEndpoint
-        } else {
-            props[MANAGEMENT_LOGGING_EXPORT_OTLP_ENABLED] = "false"
-            // Disable OpenTelemetry SDK logs exporter to prevent connection attempts to localhost:4318
-            props[OTEL_LOGS_EXPORTER] = OTEL_EXPORTER_NONE
-        }
-    }
-
-    private fun logConfiguration(tracingEndpoint: String?, metricsEndpoint: String?, logsEndpoint: String?) {
-        val enabled = listOfNotNull(
-            tracingEndpoint?.let { "tracing: $it" },
-            metricsEndpoint?.let { "metrics: $it" },
-            logsEndpoint?.let { "logs: $it" }
-        )
-
-        if (enabled.isNotEmpty()) {
-            logger.info("F2 OpenTelemetry configured - {}", enabled.joinToString(", "))
-        } else {
-            logger.debug("F2 OpenTelemetry not configured - no endpoints specified")
-        }
     }
 }

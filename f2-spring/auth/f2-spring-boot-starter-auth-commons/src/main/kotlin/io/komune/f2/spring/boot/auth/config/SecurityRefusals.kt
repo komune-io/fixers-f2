@@ -9,7 +9,7 @@ import org.springframework.security.web.server.ServerAuthenticationEntryPoint
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler
 import tools.jackson.databind.json.JsonMapper
 
-/** The bearer scheme a 401 names, and nothing the token was rejected for: its decoding message stays here. */
+// The bearer scheme a 401 names, and nothing the token was rejected for: its decoding message stays here.
 private const val BEARER_CHALLENGE = "Bearer"
 
 /**

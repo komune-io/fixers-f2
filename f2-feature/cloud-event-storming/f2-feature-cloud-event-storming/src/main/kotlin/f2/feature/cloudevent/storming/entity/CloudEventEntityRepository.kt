@@ -1,4 +1,4 @@
-package f2.feature.cloudEvent.storming.entity
+package f2.feature.cloudevent.storming.entity
 
 import java.util.UUID
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository

@@ -1,7 +1,7 @@
-package f2.feature.cloudEvent.storming
+package f2.feature.cloudevent.storming
 
-import f2.feature.cloudEvent.storming.entity.CloudEventEntity
-import f2.feature.cloudEvent.storming.entity.CloudEventEntityRepository
+import f2.feature.cloudevent.storming.entity.CloudEventEntity
+import f2.feature.cloudevent.storming.entity.CloudEventEntityRepository
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -56,12 +56,19 @@ class InMemoryCloudEventEntityRepository : CloudEventEntityRepository {
         saved.remove(entity)
     }
 
-    override suspend fun deleteAllById(ids: Iterable<UUID>) = ids.forEach { deleteById(it) }
+    override suspend fun deleteAllById(ids: Iterable<UUID>) {
+        ids.forEach { deleteById(it) }
+    }
 
-    override suspend fun deleteAll(entities: Iterable<CloudEventEntity>) = entities.forEach { delete(it) }
+    override suspend fun deleteAll(entities: Iterable<CloudEventEntity>) {
+        entities.forEach { delete(it) }
+    }
 
-    override suspend fun <S : CloudEventEntity> deleteAll(entityStream: Flow<S>) =
+    override suspend fun <S : CloudEventEntity> deleteAll(entityStream: Flow<S>) {
         entityStream.collect { delete(it) }
+    }
 
-    override suspend fun deleteAll() = saved.clear()
+    override suspend fun deleteAll() {
+        saved.clear()
+    }
 }

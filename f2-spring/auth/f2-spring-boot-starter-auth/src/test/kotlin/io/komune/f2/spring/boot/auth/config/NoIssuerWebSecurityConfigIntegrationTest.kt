@@ -24,14 +24,18 @@ class NoIssuerWebSecurityConfigIntegrationTest(
     @Test
     fun `secured path should be reachable without token when no issuer is configured`() {
         webTestClient.get().uri("/securedFunction").exchange()
-            .expectStatus().isOk
-            .expectBody(String::class.java).isEqualTo("secured")
+            .expectStatus()
+            .isOk
+            .expectBody(String::class.java)
+            .isEqualTo("secured")
     }
 
     @Test
     fun `RolesAllowed path should be reachable without token when no issuer is configured`() {
         webTestClient.get().uri("/adminFunction").exchange()
-            .expectStatus().isOk
-            .expectBody(String::class.java).isEqualTo("admin")
+            .expectStatus()
+            .isOk
+            .expectBody(String::class.java)
+            .isEqualTo("admin")
     }
 }

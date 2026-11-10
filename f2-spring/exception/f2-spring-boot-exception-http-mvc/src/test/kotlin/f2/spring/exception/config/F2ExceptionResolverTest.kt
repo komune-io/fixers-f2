@@ -17,7 +17,12 @@ class F2ExceptionResolverTest {
 
     private fun resolve(ex: Exception): Pair<MockHttpServletResponse, Boolean> {
         val response = MockHttpServletResponse()
-        val handled = resolver.resolveException(MockHttpServletRequest("POST", "/itemUpdate"), response, null, ex)
+        val handled = resolver.resolveException(
+            request = MockHttpServletRequest("POST", "/itemUpdate"),
+            response = response,
+            handler = null,
+            ex = ex,
+        )
         return response to (handled != null)
     }
 

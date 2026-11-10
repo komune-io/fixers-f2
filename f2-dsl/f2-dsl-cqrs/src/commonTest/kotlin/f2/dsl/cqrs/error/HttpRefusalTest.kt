@@ -42,21 +42,27 @@ class HttpRefusalTest {
             503 to "http.UNAVAILABLE",
         )
 
-        meanings.forEach { (status, code) -> assertEquals(code, HttpRefusal.of(status).refusal, "status $status") }
-        assertEquals(HttpRefusal.entries.size, meanings.size)
+        meanings.forEach { (status, code) ->
+            assertEquals(expected = code, actual = HttpRefusal.ofStatus(status).refusal, message = "status $status")
+        }
+        assertEquals(expected = HttpRefusal.entries.size, actual = meanings.size)
     }
 
     @Test
     fun `every standard client error has a meaning of its own`() {
         (400..499).filter { it in STANDARD_CLIENT_ERRORS }.forEach { status ->
-            assertTrue(HttpRefusal.of(status) != HttpRefusal.UNEXPECTED, "status $status")
+            assertTrue(HttpRefusal.ofStatus(status) != HttpRefusal.UNEXPECTED, "status $status")
         }
     }
 
     @Test
     fun `a status no meaning names is unexpected`() {
         listOf(418, 420, 499, 502, 504, 999, 0).forEach { status ->
-            assertEquals(HttpRefusal.UNEXPECTED, HttpRefusal.of(status), "status $status")
+            assertEquals(
+                expected = HttpRefusal.UNEXPECTED,
+                actual = HttpRefusal.ofStatus(status),
+                message = "status $status",
+            )
         }
     }
 

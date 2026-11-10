@@ -1,7 +1,7 @@
 plugins {
     `kotlin-dsl`
-    alias(catalogue.plugins.gradle.plugin.publish)
-    alias(catalogue.plugins.fixers.gradle.publish)
+    alias(libs.plugins.gradle.plugin.publish)
+    alias(libs.plugins.fixers.gradle.publish)
 }
 
 gradlePlugin {

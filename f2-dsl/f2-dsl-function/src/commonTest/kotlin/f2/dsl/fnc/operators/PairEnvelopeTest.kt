@@ -23,7 +23,7 @@ class PairEnvelopeTest {
                 (envelope.data * 2).asEnvelope(id = envelope.id)
             }
         }.toList()
-        assertEquals(listOf(1 to 2, 2 to 4, 3 to 6), (result).toList())
+        assertEquals(expected = listOf(1 to 2, 2 to 4, 3 to 6), actual = result.toList())
     }
 
     @Test
@@ -39,6 +39,6 @@ class PairEnvelopeTest {
                 Envelope(id = envelope.id, data = envelope.data * 2, Int::class.simpleName!!)
             }
         }.toList()
-        assertEquals(listOf(1 to 2, 2 to 4, 3 to 6, 4 to 8), (result).toList())
+        assertEquals(expected = listOf(1 to 2, 2 to 4, 3 to 6, 4 to 8), actual = result.toList())
     }
 }

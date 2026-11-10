@@ -5,16 +5,14 @@ import org.springframework.boot.test.context.runner.ReactiveWebApplicationContex
 
 class ApplicationContextRunnerBuilder {
 
-	fun buildContext(config: Map<String, String> = emptyMap()): ReactiveWebApplicationContextRunner {
-		return ReactiveWebApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(ApplicationContextBuilder.SimpleConfiguration::class.java))
-			.withConfig(config)
-	}
+    fun buildContext(config: Map<String, String> = emptyMap()): ReactiveWebApplicationContextRunner {
+        return ReactiveWebApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(ApplicationContextBuilder.SimpleConfiguration::class.java))
+            .withConfig(config)
+    }
 
-
-	private fun ReactiveWebApplicationContextRunner.withConfig(
-		config: Map<String, String>
-	): ReactiveWebApplicationContextRunner {
-		return config.entries.fold(this) { runner, (key, value) -> runner.withPropertyValues("$key=$value") }
-	}
+    private fun ReactiveWebApplicationContextRunner.withConfig(
+        config: Map<String, String>
+    ): ReactiveWebApplicationContextRunner =
+        config.entries.fold(this) { runner, (key, value) -> runner.withPropertyValues("$key=$value") }
 }

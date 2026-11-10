@@ -1,78 +1,78 @@
 plugins {
-	`java-platform`
-	alias(catalogue.plugins.fixers.gradle.publish)
+    `java-platform`
+    alias(libs.plugins.fixers.gradle.publish)
 }
 
 javaPlatform {
-	allowDependencies()
+    allowDependencies()
 }
 
 dependencies {
-	api(platform(catalogue.spring.boot.dependencies)) { endorseStrictVersions() }
-	api(platform(catalogue.kotlinx.coroutines.bom)) { endorseStrictVersions() }
-	api(platform(catalogue.kotlinx.serialization.bom)) { endorseStrictVersions() }
-	api(platform(catalogue.ktor.bom)) { endorseStrictVersions() }
-	api(platform(catalogue.opentelemetry.bom)) { endorseStrictVersions() }
-	api(platform(catalogue.cucumber.bom)) { endorseStrictVersions() }
-	api(platform(catalogue.arrow.stack)) { endorseStrictVersions() }
-	api(platform(catalogue.spring.cloud.dependencies)) { endorseStrictVersions() }
-	api(platform(catalogue.springdoc.openapi.bom)) { endorseStrictVersions() }
-	api(platform(catalogue.testcontainers.bom)) { endorseStrictVersions() }
-	api(platform(catalogue.cloudevents.bom)) { endorseStrictVersions() }
-	api(platform(catalogue.netty.bom)) { endorseStrictVersions() }
-	api(platform(catalogue.jackson3.bom)) { endorseStrictVersions() }
-	api(platform(catalogue.jackson2.bom)) { endorseStrictVersions() }
+    api(platform(libs.spring.boot.dependencies)) { endorseStrictVersions() }
+    api(platform(libs.kotlinx.coroutines.bom)) { endorseStrictVersions() }
+    api(platform(libs.kotlinx.serialization.bom)) { endorseStrictVersions() }
+    api(platform(libs.ktor.bom)) { endorseStrictVersions() }
+    api(platform(libs.opentelemetry.bom)) { endorseStrictVersions() }
+    api(platform(libs.cucumber.bom)) { endorseStrictVersions() }
+    api(platform(libs.arrow.stack)) { endorseStrictVersions() }
+    api(platform(libs.spring.cloud.dependencies)) { endorseStrictVersions() }
+    api(platform(libs.springdoc.openapi.bom)) { endorseStrictVersions() }
+    api(platform(libs.testcontainers.bom)) { endorseStrictVersions() }
+    api(platform(libs.cloudevents.bom)) { endorseStrictVersions() }
+    api(platform(libs.netty.bom)) { endorseStrictVersions() }
+    api(platform(libs.jackson3.bom)) { endorseStrictVersions() }
+    api(platform(libs.jackson2.bom)) { endorseStrictVersions() }
 
-	constraints {
-		// ═══════════════════════════════════════════
-		// F2 Modules
-		// ═══════════════════════════════════════════
+    constraints {
+        // ═══════════════════════════════════════════
+        // F2 Modules
+        // ═══════════════════════════════════════════
 
-		// f2-dsl
-		api("io.komune.f2:f2-dsl-function:${project.version}")
-		api("io.komune.f2:f2-dsl-cqrs:${project.version}")
-		api("io.komune.f2:f2-dsl-event:${project.version}")
+        // f2-dsl
+        api("io.komune.f2:f2-dsl-function:${project.version}")
+        api("io.komune.f2:f2-dsl-cqrs:${project.version}")
+        api("io.komune.f2:f2-dsl-event:${project.version}")
 
-		// f2-client
-		api("io.komune.f2:f2-client-core:${project.version}")
-		api("io.komune.f2:f2-client-domain:${project.version}")
-		api("io.komune.f2:f2-client-ktor:${project.version}")
-		api("io.komune.f2:f2-client-ktor-common:${project.version}")
-		api("io.komune.f2:f2-client-ktor-http:${project.version}")
+        // f2-client
+        api("io.komune.f2:f2-client-core:${project.version}")
+        api("io.komune.f2:f2-client-domain:${project.version}")
+        api("io.komune.f2:f2-client-ktor:${project.version}")
+        api("io.komune.f2:f2-client-ktor-common:${project.version}")
+        api("io.komune.f2:f2-client-ktor-http:${project.version}")
 
-		// f2-spring (auth)
-		api("io.komune.f2:f2-spring-boot-starter-auth:${project.version}")
-		api("io.komune.f2:f2-spring-boot-starter-auth-commons:${project.version}")
-		api("io.komune.f2:f2-spring-boot-starter-auth-keycloak:${project.version}")
-		api("io.komune.f2:f2-spring-boot-starter-auth-tenant:${project.version}")
-		api("io.komune.f2:f2-spring-boot-exception-http:${project.version}")
-		api("io.komune.f2:f2-spring-boot-exception-http-webflux:${project.version}")
-		api("io.komune.f2:f2-spring-boot-exception-http-mvc:${project.version}")
-		api("io.komune.f2:f2-spring-boot-openapi:${project.version}")
-		api("io.komune.f2:f2-spring-boot-openapi-mvc:${project.version}")
-		api("io.komune.f2:f2-spring-boot-openapi-webflux:${project.version}")
-		api("io.komune.f2:f2-spring-boot-starter-function:${project.version}")
-		api("io.komune.f2:f2-spring-boot-starter-function-http:${project.version}")
-		api("io.komune.f2:f2-spring-boot-starter-function-http-webflux:${project.version}")
-		api("io.komune.f2:f2-spring-boot-starter-function-http-mvc:${project.version}")
-		api("io.komune.f2:f2-spring-boot-starter-observability-opentelemetry:${project.version}")
+        // f2-spring (auth)
+        api("io.komune.f2:f2-spring-boot-starter-auth:${project.version}")
+        api("io.komune.f2:f2-spring-boot-starter-auth-commons:${project.version}")
+        api("io.komune.f2:f2-spring-boot-starter-auth-keycloak:${project.version}")
+        api("io.komune.f2:f2-spring-boot-starter-auth-tenant:${project.version}")
+        api("io.komune.f2:f2-spring-boot-exception-http:${project.version}")
+        api("io.komune.f2:f2-spring-boot-exception-http-webflux:${project.version}")
+        api("io.komune.f2:f2-spring-boot-exception-http-mvc:${project.version}")
+        api("io.komune.f2:f2-spring-boot-openapi:${project.version}")
+        api("io.komune.f2:f2-spring-boot-openapi-mvc:${project.version}")
+        api("io.komune.f2:f2-spring-boot-openapi-webflux:${project.version}")
+        api("io.komune.f2:f2-spring-boot-starter-function:${project.version}")
+        api("io.komune.f2:f2-spring-boot-starter-function-http:${project.version}")
+        api("io.komune.f2:f2-spring-boot-starter-function-http-webflux:${project.version}")
+        api("io.komune.f2:f2-spring-boot-starter-function-http-mvc:${project.version}")
+        api("io.komune.f2:f2-spring-boot-starter-observability-opentelemetry:${project.version}")
 
-		// f2-bdd
-		// f2-bdd-config, f2-bdd-spring-* and the f2-feature-* modules are never published: no constraint
-		api("io.komune.f2:f2-bdd-blockhound:${project.version}")
+        // f2-bdd
+        // f2-bdd-config, f2-bdd-spring-* and the f2-feature-* modules are never published: no constraint
+        api("io.komune.f2:f2-bdd-blockhound:${project.version}")
 
-		// ═══════════════════════════════════════════
-		// Third-party deps
-		// ═══════════════════════════════════════════
+        // ═══════════════════════════════════════════
+        // Third-party deps
+        // ═══════════════════════════════════════════
 
-		// Kotlin
-		api(catalogue.kotlinx.datetime)
+        // Kotlin
+        api(libs.kotlinx.datetime)
 
-		// PostgreSQL
-		api(catalogue.scram.client)
+        // PostgreSQL
+        api(libs.scram.client)
 
-		// KSP
-		api(catalogue.ksp.symbol.processing.api)
-		api(catalogue.arrow.optics.ksp.plugin)
-	}
+        // KSP
+        api(libs.ksp.symbol.processing.api)
+        api(libs.arrow.optics.ksp.plugin)
+    }
 }

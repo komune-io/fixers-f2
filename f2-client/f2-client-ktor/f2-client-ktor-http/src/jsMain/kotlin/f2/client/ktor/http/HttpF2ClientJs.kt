@@ -35,7 +35,7 @@ fun <QUERY, RESPONSE> httpF2Function(client: HttpF2Client, route: String): F2Fun
 /** The consumer at [route] of the F2 server [client] calls: one POST of every message. */
 @JsExport
 fun <QUERY> httpF2Consumer(client: HttpF2Client, route: String): F2Consumer<QUERY> = F2Consumer { messages ->
-    client.checked(client.postAll(route, messages))
+    val _ = client.checked(client.postAll(route, messages))
 }
 
 private fun HttpF2Client.routeUrl(route: String) = "$urlBase/$route"

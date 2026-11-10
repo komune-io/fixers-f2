@@ -46,7 +46,7 @@ class ConsumerApp {
     class OwnAdvice {
         @ExceptionHandler(IllegalArgumentException::class)
         fun own(ex: IllegalArgumentException): ResponseEntity<String> =
-            ResponseEntity.status(HttpStatus.GONE).body("own: ${ex.message}")
+            ResponseEntity.status(HttpStatus.GONE).body("own: ${ex.message.orEmpty()}")
     }
 }
 

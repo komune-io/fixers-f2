@@ -1,6 +1,7 @@
 package org.springframework.cloud.function.context.config
 
 import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
 import kotlin.coroutines.Continuation
 import kotlinx.coroutines.delay
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import reactor.core.publisher.Flux
 
 class CoroutinesUtilsTest {
@@ -21,7 +21,7 @@ class CoroutinesUtilsTest {
     @Test
     fun `isFlowType returns true for Flow type`() {
         val flowType = object : ParameterizedType {
-            override fun getActualTypeArguments() = arrayOf<java.lang.reflect.Type>(String::class.java)
+            override fun getActualTypeArguments() = arrayOf<Type>(String::class.java)
             override fun getRawType() = Flow::class.java
             override fun getOwnerType() = null
             override fun getTypeName() = "kotlinx.coroutines.flow.Flow<java.lang.String>"
@@ -37,7 +37,7 @@ class CoroutinesUtilsTest {
     @Test
     fun `isContinuationType returns true for Continuation type`() {
         val continuationType = object : ParameterizedType {
-            override fun getActualTypeArguments() = arrayOf<java.lang.reflect.Type>(String::class.java)
+            override fun getActualTypeArguments() = arrayOf<Type>(String::class.java)
             override fun getRawType() = Continuation::class.java
             override fun getOwnerType() = null
             override fun getTypeName() = "kotlin.coroutines.Continuation<java.lang.String>"
@@ -53,7 +53,7 @@ class CoroutinesUtilsTest {
     @Test
     fun `isContinuationUnitType returns true for Continuation of Unit`() {
         val continuationType = object : ParameterizedType {
-            override fun getActualTypeArguments() = arrayOf<java.lang.reflect.Type>(Unit::class.java)
+            override fun getActualTypeArguments() = arrayOf<Type>(Unit::class.java)
             override fun getRawType() = Continuation::class.java
             override fun getOwnerType() = null
             override fun getTypeName() = "kotlin.coroutines.Continuation<kotlin.Unit>"
@@ -64,7 +64,7 @@ class CoroutinesUtilsTest {
     @Test
     fun `isContinuationUnitType returns false for Continuation of non-Unit`() {
         val continuationType = object : ParameterizedType {
-            override fun getActualTypeArguments() = arrayOf<java.lang.reflect.Type>(String::class.java)
+            override fun getActualTypeArguments() = arrayOf<Type>(String::class.java)
             override fun getRawType() = Continuation::class.java
             override fun getOwnerType() = null
             override fun getTypeName() = "kotlin.coroutines.Continuation<java.lang.String>"
@@ -75,7 +75,7 @@ class CoroutinesUtilsTest {
     @Test
     fun `isContinuationFlowType returns true for Continuation of Flow`() {
         val continuationType = object : ParameterizedType {
-            override fun getActualTypeArguments() = arrayOf<java.lang.reflect.Type>(Flow::class.java)
+            override fun getActualTypeArguments() = arrayOf<Type>(Flow::class.java)
             override fun getRawType() = Continuation::class.java
             override fun getOwnerType() = null
             override fun getTypeName() =
@@ -87,7 +87,7 @@ class CoroutinesUtilsTest {
     @Test
     fun `isContinuationFlowType returns false for Continuation of non-Flow`() {
         val continuationType = object : ParameterizedType {
-            override fun getActualTypeArguments() = arrayOf<java.lang.reflect.Type>(String::class.java)
+            override fun getActualTypeArguments() = arrayOf<Type>(String::class.java)
             override fun getRawType() = Continuation::class.java
             override fun getOwnerType() = null
             override fun getTypeName() = "kotlin.coroutines.Continuation<java.lang.String>"
@@ -98,7 +98,7 @@ class CoroutinesUtilsTest {
     @Test
     fun `getFlowTypeArguments returns inner type for Flow`() {
         val flowType = object : ParameterizedType {
-            override fun getActualTypeArguments() = arrayOf<java.lang.reflect.Type>(String::class.java)
+            override fun getActualTypeArguments() = arrayOf<Type>(String::class.java)
             override fun getRawType() = Flow::class.java
             override fun getOwnerType() = null
             override fun getTypeName() = "kotlinx.coroutines.flow.Flow<java.lang.String>"
@@ -171,7 +171,7 @@ class CoroutinesUtilsTest {
     @Test
     fun `getSuspendingFunctionArgType delegates to getFlowTypeArguments`() {
         val flowType = object : ParameterizedType {
-            override fun getActualTypeArguments() = arrayOf<java.lang.reflect.Type>(String::class.java)
+            override fun getActualTypeArguments() = arrayOf<Type>(String::class.java)
             override fun getRawType() = Flow::class.java
             override fun getOwnerType() = null
             override fun getTypeName() = "kotlinx.coroutines.flow.Flow<java.lang.String>"
@@ -187,11 +187,11 @@ class CoroutinesUtilsTest {
     @Test
     fun `getFlowTypeArguments handles WildcardType`() {
         val wildcardType = object : WildcardType {
-            override fun getUpperBounds() = arrayOf<java.lang.reflect.Type>(String::class.java)
-            override fun getLowerBounds() = arrayOf<java.lang.reflect.Type>()
+            override fun getUpperBounds() = arrayOf<Type>(String::class.java)
+            override fun getLowerBounds() = emptyArray<Type>()
         }
         val flowType = object : ParameterizedType {
-            override fun getActualTypeArguments() = arrayOf<java.lang.reflect.Type>(wildcardType)
+            override fun getActualTypeArguments() = arrayOf<Type>(wildcardType)
             override fun getRawType() = Flow::class.java
             override fun getOwnerType() = null
             override fun getTypeName() = "kotlinx.coroutines.flow.Flow<? extends java.lang.String>"
@@ -202,7 +202,7 @@ class CoroutinesUtilsTest {
     @Test
     fun `getFlowTypeArguments returns parameterized type when actualTypeArguments is empty`() {
         val flowType = object : ParameterizedType {
-            override fun getActualTypeArguments() = arrayOf<java.lang.reflect.Type>()
+            override fun getActualTypeArguments() = emptyArray<Type>()
             override fun getRawType() = Flow::class.java
             override fun getOwnerType() = null
             override fun getTypeName() = "kotlinx.coroutines.flow.Flow"
@@ -213,11 +213,11 @@ class CoroutinesUtilsTest {
     @Test
     fun `getSuspendingFunctionReturnType extracts type from Continuation of Flow`() {
         val wildcardType = object : WildcardType {
-            override fun getUpperBounds() = arrayOf<java.lang.reflect.Type>(Any::class.java)
-            override fun getLowerBounds(): Array<java.lang.reflect.Type> {
+            override fun getUpperBounds() = arrayOf<Type>(Any::class.java)
+            override fun getLowerBounds(): Array<Type> {
                 val innerFlowType = object : ParameterizedType {
                     override fun getActualTypeArguments() =
-                        arrayOf<java.lang.reflect.Type>(String::class.java)
+                        arrayOf<Type>(String::class.java)
                     override fun getRawType() = Flow::class.java
                     override fun getOwnerType() = null
                     override fun getTypeName() = "kotlinx.coroutines.flow.Flow<java.lang.String>"
@@ -226,7 +226,7 @@ class CoroutinesUtilsTest {
             }
         }
         val continuationType = object : ParameterizedType {
-            override fun getActualTypeArguments() = arrayOf<java.lang.reflect.Type>(wildcardType)
+            override fun getActualTypeArguments() = arrayOf<Type>(wildcardType)
             override fun getRawType() = Continuation::class.java
             override fun getOwnerType() = null
             override fun getTypeName() =

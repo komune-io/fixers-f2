@@ -6,21 +6,21 @@ package f2.client.ktor.http.model.exported
 // library compiles to.
 
 external class F2FilePart {
-	val name: String
-	val contentType: String?
+    val name: String
+    val contentType: String?
 
-	companion object {
-		fun fromBytes(name: String, bytes: ByteArray, contentType: String?): F2FilePart
-	}
+    companion object {
+        fun fromBytes(name: String, bytes: ByteArray, contentType: String?): F2FilePart
+    }
 }
 
 external class F2UploadSingleCommand(command: dynamic, file: F2FilePart) {
-	val command: dynamic
-	val file: F2FilePart
+    val command: dynamic
+    val file: F2FilePart
 }
 
 external interface HttpClientBuilder {
-	fun build(urlBase: String): dynamic
+    fun build(urlBase: String): dynamic
 }
 
 external fun httpClientBuilderDefault(): HttpClientBuilder

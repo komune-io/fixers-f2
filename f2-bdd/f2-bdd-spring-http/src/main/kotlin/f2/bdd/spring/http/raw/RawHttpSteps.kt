@@ -14,10 +14,6 @@ import org.assertj.core.api.Assertions.assertThat
 
 class RawHttpSteps : F2SpringStep(), En {
 
-    private companion object {
-        const val TIMEOUT_SECONDS = 20L
-    }
-
     private val client: HttpClient = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
         .build()
@@ -31,13 +27,13 @@ class RawHttpSteps : F2SpringStep(), En {
         }
 
         When("Raw: I send {string} to {string}") { method: String, path: String ->
-            response = send(method, path, null, null)
+            response = send(method = method, path = path, body = null, contentType = null)
         }
 
         When(
             "Raw: I send {string} to {string} with body {string} and content type {string}"
         ) { method: String, path: String, body: String, contentType: String ->
-            response = send(method, path, body, contentType)
+            response = send(method = method, path = path, body = body, contentType = contentType)
         }
 
         Then("Raw: The response status is {int}") { expected: Int ->
@@ -75,5 +71,9 @@ class RawHttpSteps : F2SpringStep(), En {
             builder.header("Content-Type", contentType)
         }
         return client.send(builder.build(), HttpResponse.BodyHandlers.ofString())
+    }
+
+    private companion object {
+        const val TIMEOUT_SECONDS = 20L
     }
 }

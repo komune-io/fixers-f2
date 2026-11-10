@@ -14,34 +14,24 @@ const val AZP_CLAIM_NAME = "azp"
 const val ROLE_PREFIX = "ROLE_"
 
 object AuthenticationProvider {
-    suspend fun getSecurityContext(): SecurityContext? {
-        return coroutineContext[ReactorContext.Key]
-            ?.context?.getOrDefault<Mono<SecurityContext>>(SecurityContext::class.java, null)
-            ?.awaitSingleOrNull()
-    }
+    suspend fun getSecurityContext(): SecurityContext? = coroutineContext[ReactorContext.Key]
+        ?.context
+        ?.getOrDefault<Mono<SecurityContext>>(SecurityContext::class.java, null)
+        ?.awaitSingleOrNull()
 
-    suspend fun getAuthentication(): JwtAuthenticationToken? {
-        return getSecurityContext()?.authentication as JwtAuthenticationToken?
-    }
+    suspend fun getAuthentication(): JwtAuthenticationToken? =
+        getSecurityContext()?.authentication as? JwtAuthenticationToken
 
-    suspend fun getPrincipal(): Jwt? {
-        return getAuthentication()?.principal as Jwt?
-    }
+    suspend fun getPrincipal(): Jwt? = getAuthentication()?.principal as? Jwt
 
-    suspend fun getOrganizationId(): String? {
-        return getPrincipal()?.getClaim<String>(ORGANIZATION_ID_CLAIM_NAME)
-    }
+    suspend fun getOrganizationId(): String? = getPrincipal()?.getClaim<String>(ORGANIZATION_ID_CLAIM_NAME)
 
-    suspend fun getIssuer(): String? {
-        return getPrincipal()?.issuer?.toString()
-    }
+    suspend fun getIssuer(): String? = getPrincipal()?.issuer?.toString()
 
-    suspend fun getClientId(): String? {
-        return getPrincipal()?.getClaim<String>(AZP_CLAIM_NAME)
-    }
+    suspend fun getClientId(): String? = getPrincipal()?.getClaim<String>(AZP_CLAIM_NAME)
 
-    suspend fun getTenant(): String? {
-        return getIssuer()?.substringAfterLast("/", "")?.ifEmpty { null }
+    suspend fun getTenant(): String? = getIssuer()?.run {
+        substringAfterLast(delimiter = "/", missingDelimiterValue = "").ifEmpty { null }
     }
 
     suspend fun hasRole(role: String): Boolean {

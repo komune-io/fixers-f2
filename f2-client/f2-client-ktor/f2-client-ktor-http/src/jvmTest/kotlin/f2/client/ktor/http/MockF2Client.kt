@@ -17,6 +17,7 @@ fun HttpClientConfig<*>.mockContentNegotiation() {
     install(ContentNegotiation) { json(mockJson) }
 }
 
+@Suppress("MissingUseCall") // a factory: the HttpF2Client it returns owns the HttpClient, the calling test holds it
 fun mockF2Client(
     urlBase: String = "http://localhost",
     config: HttpClientConfig<*>.() -> Unit = { mockContentNegotiation() },

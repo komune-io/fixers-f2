@@ -14,60 +14,70 @@ import reactor.core.scheduler.Schedulers
 @Suppress("SleepInsteadOfDelay", "InjectDispatcher")
 class BlockHoundSessionTest {
 
-	private fun clearPendingCall() {
-		try {
-			BlockingCalls.requireNone()
-		} catch (_: IllegalStateException) {
-			// a call left by an earlier test
-		}
-	}
+    private fun clearPendingCall() {
+        try {
+            BlockingCalls.requireNone()
+        } catch (_: IllegalStateException) {
+            // a call left by an earlier test
+        }
+    }
 
-	@Test
-	suspend fun `a blocking call on Dispatchers Default fails`() {
-		val thrown = runCatching { withContext(Dispatchers.Default) { Thread.sleep(1) } }.exceptionOrNull()
-		assertThat(thrown).isInstanceOf(BlockingOperationError::class.java)
-		assertThat(thrown!!.stackTrace.first().className).isEqualTo("java.lang.Thread")
-	}
+    private suspend fun blockingErrorOnDefault(): BlockingOperationError? = try {
+        withContext(Dispatchers.Default) { Thread.sleep(1) }
+        null
+    } catch (error: BlockingOperationError) {
+        error
+    }
 
-	@Test
-	fun `a blocking call on a Reactor non-blocking scheduler fails`() {
-		assertThatThrownBy {
-			Mono.fromCallable { Thread.sleep(1) }.subscribeOn(Schedulers.parallel()).block()
-		}.hasCauseInstanceOf(BlockingOperationError::class.java)
-	}
+    @Test
+    suspend fun `a blocking call on Dispatchers Default fails`() {
+        val thrown = blockingErrorOnDefault()
+        assertThat(thrown).isInstanceOf(BlockingOperationError::class.java)
+        assertThat(thrown!!.stackTrace.first().className).isEqualTo("java.lang.Thread")
+    }
 
-	@Test
-	suspend fun `a random UUID drawn on Dispatchers Default passes`() {
-		assertThat(withContext(Dispatchers.Default) { UUID.randomUUID() }).isNotNull
-	}
+    @Test
+    fun `a blocking call on a Reactor non-blocking scheduler fails`() {
+        assertThatThrownBy {
+            Mono.fromCallable { Thread.sleep(1) }.subscribeOn(Schedulers.parallel()).block()
+        }.hasCauseInstanceOf(BlockingOperationError::class.java)
+    }
 
-	@Test
-	suspend fun `a blocking call on Dispatchers IO passes`() {
-		assertThat(withContext(Dispatchers.IO) { Thread.sleep(1); "slept" }).isEqualTo("slept")
-	}
+    @Test
+    suspend fun `a random UUID drawn on Dispatchers Default passes`() {
+        assertThat(withContext(Dispatchers.Default) { UUID.randomUUID() }).isNotNull
+    }
 
-	@Test
-	suspend fun `a blocking call fails the next check only, with the call as its cause`() {
-		clearPendingCall()
-		assertThat(runCatching { withContext(Dispatchers.Default) { Thread.sleep(1) } }.exceptionOrNull())
-			.isInstanceOf(BlockingOperationError::class.java)
-		assertThatThrownBy { BlockingCalls.requireNone() }
-			.isInstanceOf(IllegalStateException::class.java)
-			.cause().isInstanceOf(BlockingOperationError::class.java)
-		BlockingCalls.requireNone()
-	}
+    @Test
+    suspend fun `a blocking call on Dispatchers IO passes`() {
+        assertThat(withContext(Dispatchers.IO) { Thread.sleep(1); "slept" }).isEqualTo("slept")
+    }
 
-	@Test
-	suspend fun `in record-only mode a blocking call runs through, and the next check fails with it`() {
-		clearPendingCall()
-		System.setProperty(BlockingCalls.RECORD_ONLY, "true")
-		try {
-			assertThat(withContext(Dispatchers.Default) { Thread.sleep(1); "slept" }).isEqualTo("slept")
-		} finally {
-			System.clearProperty(BlockingCalls.RECORD_ONLY)
-		}
-		assertThatThrownBy { BlockingCalls.requireNone() }
-			.cause().isInstanceOf(BlockingOperationError::class.java)
-			.extracting { it.stackTrace.first().className }.isEqualTo("java.lang.Thread")
-	}
+    @Test
+    suspend fun `a blocking call fails the next check only, with the call as its cause`() {
+        clearPendingCall()
+        assertThat(blockingErrorOnDefault())
+            .isInstanceOf(BlockingOperationError::class.java)
+        assertThatThrownBy { BlockingCalls.requireNone() }
+            .isInstanceOf(IllegalStateException::class.java)
+            .cause()
+            .isInstanceOf(BlockingOperationError::class.java)
+        BlockingCalls.requireNone()
+    }
+
+    @Test
+    suspend fun `in record-only mode a blocking call runs through, and the next check fails with it`() {
+        clearPendingCall()
+        System.setProperty(BlockingCalls.RECORD_ONLY, "true")
+        try {
+            assertThat(withContext(Dispatchers.Default) { Thread.sleep(1); "slept" }).isEqualTo("slept")
+        } finally {
+            System.clearProperty(BlockingCalls.RECORD_ONLY)
+        }
+        assertThatThrownBy { BlockingCalls.requireNone() }
+            .cause()
+            .isInstanceOf(BlockingOperationError::class.java)
+            .extracting { it.stackTrace.first().className }
+            .isEqualTo("java.lang.Thread")
+    }
 }

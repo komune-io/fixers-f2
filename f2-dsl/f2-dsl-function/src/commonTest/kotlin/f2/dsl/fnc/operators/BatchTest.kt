@@ -58,7 +58,7 @@ class BatchTest {
     fun `test batch default configuration`() = runTest {
         val batch = Batch()
 
-        assertEquals(BATCH_DEFAULT_SIZE, batch.size)
-        assertEquals(BATCH_DEFAULT_CONCURRENCY, batch.concurrency)
+        assertEquals(expected = BATCH_DEFAULT_SIZE, actual = batch.size)
+        assertEquals(expected = BATCH_DEFAULT_CONCURRENCY, actual = batch.concurrency)
     }
 }

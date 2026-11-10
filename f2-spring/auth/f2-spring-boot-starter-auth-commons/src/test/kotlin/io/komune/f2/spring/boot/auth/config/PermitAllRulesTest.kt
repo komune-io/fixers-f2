@@ -68,14 +68,20 @@ class PermitAllRulesTest(
 
     @Test
     fun `a PermitAll supplier answers GET without a token`() {
-        call(HttpMethod.GET, "/openSupplier").expectStatus().isOk
-            .expectBody(String::class.java).isEqualTo("open")
+        call(HttpMethod.GET, "/openSupplier")
+            .expectStatus()
+            .isOk
+            .expectBody(String::class.java)
+            .isEqualTo("open")
     }
 
     @Test
     fun `a PermitAll function answers POST without a token`() {
-        call(HttpMethod.POST, "/openFunction").expectStatus().isOk
-            .expectBody(String::class.java).isEqualTo("A")
+        call(HttpMethod.POST, "/openFunction")
+            .expectStatus()
+            .isOk
+            .expectBody(String::class.java)
+            .isEqualTo("A")
     }
 
     @Test

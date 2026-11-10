@@ -7,11 +7,8 @@ import org.springframework.boot.info.BuildProperties
 
 class DefaultFunctionConfigTest {
 
-    private fun config(properties: Properties): DefaultFunctionConfig {
-        return DefaultFunctionConfig().apply {
-            buildProperties = BuildProperties(properties)
-        }
-    }
+    private fun config(properties: Properties): DefaultFunctionConfig =
+        DefaultFunctionConfig(buildProperties = BuildProperties(properties))
 
     @Test
     fun `version should return build version`() {

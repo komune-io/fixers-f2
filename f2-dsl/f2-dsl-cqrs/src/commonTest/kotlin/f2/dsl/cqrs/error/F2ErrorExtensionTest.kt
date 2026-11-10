@@ -16,9 +16,9 @@ class F2ErrorExtensionTest {
 
         val exception = error.asException()
 
-        assertEquals(error, exception.error)
+        assertEquals(expected = error, actual = exception.error)
         assertNull(exception.cause)
-        assertEquals("boom", exception.message)
+        assertEquals(expected = "boom", actual = exception.message)
     }
 
     @Test
@@ -28,8 +28,8 @@ class F2ErrorExtensionTest {
 
         val exception = error.asException(cause)
 
-        assertEquals(error, exception.error)
-        assertEquals(cause, exception.cause)
+        assertEquals(expected = error, actual = exception.error)
+        assertEquals(expected = cause, actual = exception.cause)
     }
 
     @Test
@@ -37,21 +37,21 @@ class F2ErrorExtensionTest {
         val error = F2Error(message = "boom")
 
         val exception = assertFailsWith<F2Exception> { error.throwException() }
-        assertEquals("boom", exception.message)
+        assertEquals(expected = "boom", actual = exception.message)
 
         val cause = IllegalArgumentException("cause")
         val exceptionWithCause = assertFailsWith<F2Exception> { error.throwException(cause) }
-        assertEquals(cause, exceptionWithCause.cause)
+        assertEquals(expected = cause, actual = exceptionWithCause.cause)
     }
 
     @Test
     fun `missingParameterError is a 400 refusal naming the parameter`() {
         val error = missingParameterError("userId")
 
-        assertEquals(400, error.code)
-        assertEquals("http.INVALID_PAYLOAD", error.refusal?.code)
-        assertEquals(mapOf(PARAMETER_KEY to "userId"), error.refusal?.parameters)
-        assertEquals("Missing parameter `userId`", error.message)
+        assertEquals(expected = 400, actual = error.code)
+        assertEquals(expected = "http.INVALID_PAYLOAD", actual = error.refusal?.code)
+        assertEquals(expected = mapOf(PARAMETER_KEY to "userId"), actual = error.refusal?.parameters)
+        assertEquals(expected = "Missing parameter `userId`", actual = error.message)
     }
 
     @Test
@@ -59,9 +59,9 @@ class F2ErrorExtensionTest {
         val refused = F2Error(message = "x", code = 409, refusal = F2Refusal("order.CLOSED"))
 
         assertTrue(isRefusal(refused))
-        assertEquals("order.CLOSED", refusalCode(refused))
+        assertEquals(expected = "order.CLOSED", actual = refusalCode(refused))
         assertFalse(isRefusal(F2Error(message = "x", code = 404)))
-        assertEquals("http.NOT_FOUND", refusalCode(F2Error(message = "x", code = 404)))
+        assertEquals(expected = "http.NOT_FOUND", actual = refusalCode(F2Error(message = "x", code = 404)))
     }
 
     @Test
@@ -69,8 +69,8 @@ class F2ErrorExtensionTest {
         val error = F2Error(message = "boom", code = 400, timestamp = "now", requestId = "req-1")
 
         assertEquals(
-            "F2Error(timestamp='now', code=400, requestId='req-1', refusal=null, message='boom')",
-            error.toString(),
+            expected = "F2Error(timestamp='now', code=400, requestId='req-1', refusal=null, message='boom')",
+            actual = error.toString(),
         )
     }
 }

@@ -38,7 +38,7 @@ class HttpF2ClientMockTest {
             respond(
                 content = """{"result": "success", "count": 42}""",
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }
         val supplier = client.supplier<TestResponse>(
@@ -59,7 +59,7 @@ class HttpF2ClientMockTest {
             respond(
                 content = """[{"result": "first", "count": 1}, {"result": "second", "count": 2}]""",
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }
         // When response type is List, items are emitted individually to the flow
@@ -82,7 +82,7 @@ class HttpF2ClientMockTest {
             respond(
                 content = """{"result": "processed", "count": 100}""",
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }
         val function = client.function<TestRequest, TestResponse>(
@@ -108,7 +108,7 @@ class HttpF2ClientMockTest {
             respond(
                 content = """{"result": "item-$requestCount", "count": $requestCount}""",
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }
         val function = client.function<TestRequest, TestResponse>(
@@ -134,7 +134,7 @@ class HttpF2ClientMockTest {
             respond(
                 content = """[{"result": "a", "count": 1}, {"result": "b", "count": 2}]""",
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }
         val function = client.function<TestRequest, List<TestResponse>>(
@@ -150,15 +150,15 @@ class HttpF2ClientMockTest {
 
     @Test
     suspend fun `consumer posts data without expecting response body`() {
-        var receivedRequest = false
+        var hasReceivedRequest = false
 
         val client = f2Client { request ->
             assertThat(request.method).isEqualTo(HttpMethod.Post)
-            receivedRequest = true
+            hasReceivedRequest = true
             respond(
                 content = "",
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }
         val consumer = client.consumer<TestRequest>(
@@ -168,7 +168,7 @@ class HttpF2ClientMockTest {
 
         consumer.invoke(flowOf(TestRequest("consume-id", 99)))
 
-        assertThat(receivedRequest).isTrue()
+        assertThat(hasReceivedRequest).isTrue()
     }
 
     @Test
@@ -259,18 +259,20 @@ class HttpF2ClientMockTest {
 
     @Test
     suspend fun `supplier handles F2Error JSON response`() {
-        val errorJson = """{
-            "id": "error-123",
-            "timestamp": "2024-01-01T00:00:00Z",
-            "code": 404,
-            "message": "Not found"
-        }"""
+        val errorJson = """
+            {
+                "id": "error-123",
+                "timestamp": "2024-01-01T00:00:00Z",
+                "code": 404,
+                "message": "Not found"
+            }
+        """.trimIndent()
 
         val client = f2Client { _ ->
             respond(
                 content = errorJson,
                 status = HttpStatusCode.NotFound,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }
         val supplier = client.supplier<TestResponse>(
@@ -295,7 +297,7 @@ class HttpF2ClientMockTest {
             respond(
                 content = """{"result": "batch-processed", "count": 10}""",
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }
         // When queryTypeInfo is List, all items in the flow are collected and sent as one array
@@ -326,7 +328,7 @@ class HttpF2ClientMockTest {
             respond(
                 content = """{"result": "ok", "count": 0}""",
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }
         val supplier = client.supplier<TestResponse>(
@@ -348,7 +350,7 @@ class HttpF2ClientMockTest {
             respond(
                 content = """{"result": "ok", "count": 0}""",
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }
         val function = client.function<TestRequest, TestResponse>(

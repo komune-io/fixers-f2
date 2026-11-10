@@ -1,6 +1,6 @@
 plugins {
     `version-catalog`
-    alias(catalogue.plugins.fixers.gradle.publish)
+    alias(libs.plugins.fixers.gradle.publish)
 }
 
 catalog {

@@ -4,7 +4,7 @@ import io.cucumber.java8.En
 
 class HttpF2FlowSteps : StringHttpF2Steps("Flow: "), En {
 
-	init {
-		prepareFunctionCatalogSteps()
-	}
+    init {
+        prepareFunctionCatalogSteps()
+    }
 }

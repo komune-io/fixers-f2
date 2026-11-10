@@ -2,7 +2,6 @@ package io.komune.f2.spring.boot.auth.config
 
 import io.komune.f2.spring.boot.auth.ROLE_PREFIX
 import jakarta.annotation.security.RolesAllowed
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -33,32 +32,20 @@ import tools.jackson.databind.json.JsonMapper
 @Configuration
 @ConditionalOnMissingBean(WebSecurityConfig::class)
 @EnableConfigurationProperties(F2TrustedIssuersConfig::class)
-class WebSecurityConfig {
-
-    companion object {
-        const val SPRING_SECURITY_FILTER_CHAIN = "springSecurityFilterChain"
-    }
-
+class WebSecurityConfig(
     @Value("\${spring.cloud.function.web.path:}")
-    lateinit var contextPath: String
-
-    @Autowired
-    lateinit var applicationContext: ApplicationContext
-
-    @Autowired
-    lateinit var f2TrustedIssuersResolver: F2TrustedIssuersConfig
-
-    @Autowired
-    lateinit var jsonMapper: JsonMapper
+    val contextPath: String,
+    val applicationContext: ApplicationContext,
+    val f2TrustedIssuersResolver: F2TrustedIssuersConfig,
+    val jsonMapper: JsonMapper,
+) {
 
     @Bean
     @ConfigurationProperties(prefix = "f2.filter")
     fun authFilter(): Map<String, String> = HashMap()
 
     @Bean
-    fun trustedIssuers(): List<String> {
-        return f2TrustedIssuersResolver.getTrustedIssuers()
-    }
+    fun trustedIssuers(): List<String> = f2TrustedIssuersResolver.trustedIssuers
 
     @Bean(SPRING_SECURITY_FILTER_CHAIN)
     @ConditionalOnExpression(NO_AUTHENTICATION_REQUIRED_EXPRESSION)
@@ -96,12 +83,12 @@ class WebSecurityConfig {
         authentication: Mono<Authentication>
     ): Mono<AuthorizationResult> {
         return authentication.map { auth ->
-            if (auth !is JwtAuthenticationToken) {
-                return@map false
+            if (auth is JwtAuthenticationToken) {
+                val filters = authFilter()
+                filters.isEmpty() || filters.all { (key, value) -> auth.token.claims[key] == value }
+            } else {
+                false
             }
-
-            val filters = authFilter()
-            filters.isEmpty() || filters.all { (key, value) -> auth.token.claims[key] == value }
         }.map { granted -> AuthorizationDecision(granted) }
     }
 
@@ -173,7 +160,9 @@ class WebSecurityConfig {
         }.let { Flux.fromIterable(it) }
     }
 
-    fun isTrustedIssuer(issuer: String): Boolean {
-        return issuer in trustedIssuers()
+    fun isTrustedIssuer(issuer: String): Boolean = issuer in trustedIssuers()
+
+    companion object {
+        const val SPRING_SECURITY_FILTER_CHAIN = "springSecurityFilterChain"
     }
 }

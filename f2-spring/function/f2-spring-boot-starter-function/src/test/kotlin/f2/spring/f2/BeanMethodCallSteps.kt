@@ -10,22 +10,24 @@ import kotlinx.coroutines.runBlocking
 
 class BeanMethodCallSteps : MethodCallSteps(), En {
 
-	init {
-		prepareLambdaSteps()
-	}
+    init {
+        prepareLambdaSteps()
+    }
 
-	override fun function(values: List<String>): List<String> = runBlocking {
-		val lambda: suspend (Flow<String>) -> Flow<String> = MethodCall::functionMethodCall.functionBean()
-		lambda(values.asFlow()).toList()
-	}
+    override fun function(values: List<String>): List<String> = runBlocking {
+        val lambda: suspend (Flow<String>) -> Flow<String> = MethodCall::functionMethodCall.functionBean()
+        lambda(values.asFlow()).toList()
+    }
 
-	override fun supplier(): List<String> = runBlocking {
-		val functionPureKotlin: suspend () -> Flow<String> = MethodCall::supplierMethodCall.supplierBean()
-		functionPureKotlin().toList()
-	}
+    override fun supplier(): List<String> = runBlocking {
+        val functionPureKotlin: suspend () -> Flow<String> = MethodCall::supplierMethodCall.supplierBean()
+        functionPureKotlin().toList()
+    }
 
-	override fun consumer(values: List<String>) = runBlocking {
-		val functionPureKotlin: suspend (Flow<String>) -> Unit = MethodCall::consumerMethodCall.consumerBean()
-		functionPureKotlin(values.asFlow())
-	}
+    override fun consumer(values: List<String>) {
+        runBlocking {
+            val functionPureKotlin: suspend (Flow<String>) -> Unit = MethodCall::consumerMethodCall.consumerBean()
+            functionPureKotlin(values.asFlow())
+        }
+    }
 }

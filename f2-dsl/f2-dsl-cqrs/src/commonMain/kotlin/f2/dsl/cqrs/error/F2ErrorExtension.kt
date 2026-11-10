@@ -18,7 +18,7 @@ fun isRefusal(error: F2ErrorDTO): Boolean = error.refusal != null
 
 /** The code a caller tells [error] apart by: its refusal's, or the meaning of its status. */
 @JsExport
-fun refusalCode(error: F2ErrorDTO): String = error.refusal?.code ?: HttpRefusal.of(error.code).refusal
+fun refusalCode(error: F2ErrorDTO): String = error.refusal?.code ?: HttpRefusal.ofStatus(error.code).refusal
 
 /** The `parameters` key naming the request parameter a refusal is about. */
 const val PARAMETER_KEY: String = "parameter"
@@ -40,4 +40,7 @@ fun invalidPayloadError(message: String, parameter: String? = null): F2Error = F
  * The refusal of a request missing a required parameter: `http.INVALID_PAYLOAD`, naming the parameter in
  * `parameters.parameter`.
  */
-fun missingParameterError(name: String): F2Error = invalidPayloadError("Missing parameter `$name`", name)
+fun missingParameterError(name: String): F2Error = invalidPayloadError(
+    message = "Missing parameter `$name`",
+    parameter = name,
+)

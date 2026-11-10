@@ -1,28 +1,19 @@
 
 pluginManagement {
 	repositories {
-		if(System.getenv("FIXERS_REPOSITORIES_MAVEN_LOCAL") == "true") {
-			mavenLocal()
-		}
 		gradlePluginPortal()
 		mavenCentral()
-		maven { url = uri("https://central.sonatype.com/repository/maven-snapshots") }
+		maven("https://central.sonatype.com/repository/maven-snapshots") {
+			mavenContent { snapshotsOnly() }
+			content { includeGroupByRegex("io\\.komune(\\..*)?") }
+		}
 	}
 }
 
-dependencyResolutionManagement {
-	repositories {
-		mavenCentral()
-		maven { url = uri("https://central.sonatype.com/repository/maven-snapshots") }
-		if(System.getenv("FIXERS_REPOSITORIES_MAVEN_LOCAL") == "true") {
-			mavenLocal()
-		}
-	}
-	versionCatalogs {
-		create("catalogue") {
-			from(files("gradle/libs.versions.toml"))
-		}
-	}
+// The repositories of the build: Maven Central and the io.komune snapshots, nothing a build script may add.
+// Its `catalogue` is the published f2 catalog; this build reads its own, gradle/libs.versions.toml, as `libs`.
+plugins {
+	id("io.komune.fixers.gradle.settings") version "0.47.0-SNAPSHOT"
 }
 
 rootProject.name = "fixers-f2"

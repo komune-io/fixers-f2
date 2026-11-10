@@ -12,11 +12,12 @@ import io.ktor.client.engine.java.JavaHttpConfig
  * @param config Additional configuration for the HTTP client.
  */
 internal class JavaHttpClientBuilder(
-	private val config: F2ClientConfigLambda<JavaHttpConfig>?
+    private val config: F2ClientConfigLambda<JavaHttpConfig>?
 ) : HttpClientBuilder {
 
-	override fun build(urlBase: String): HttpF2Client = HttpF2Client(
-		httpClient = HttpClient(Java) { applyConfig(config) },
-		urlBase = urlBase
-	)
+    @Suppress("MissingUseCall") // a builder: the HttpF2Client it returns owns the HttpClient, its caller closes it
+    override fun build(urlBase: String): HttpF2Client = HttpF2Client(
+        httpClient = HttpClient(Java) { applyConfig(config) },
+        urlBase = urlBase
+    )
 }

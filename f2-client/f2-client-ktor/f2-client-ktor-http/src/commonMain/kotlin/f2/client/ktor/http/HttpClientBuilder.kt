@@ -3,7 +3,6 @@ package f2.client.ktor.http
 import f2.client.ktor.common.F2ClientConfigLambda
 import kotlin.js.JsExport
 
-
 /**
  * Builds [HttpF2Client] instances on the platform's Ktor engine.
  * Obtain one from [httpClientBuilderDefault], [httpClientBuilderGenerics] or the platform `httpClientBuilder`.

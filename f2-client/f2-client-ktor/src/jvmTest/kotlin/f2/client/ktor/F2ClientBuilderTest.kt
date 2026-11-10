@@ -15,18 +15,18 @@ class F2ClientBuilderTest {
 
     @Test
     fun `get with config applies it`() {
-        var configured = false
-        val client = F2ClientBuilder.get("http://localhost:8080") { configured = true }
+        var isConfigured = false
+        val client = F2ClientBuilder.get("http://localhost:8080") { isConfigured = true }
 
         assertThat(client.type).isEqualTo(F2ClientType.HTTP)
-        assertThat(configured).isTrue()
+        assertThat(isConfigured).isTrue()
     }
 
     @Test
     fun `get rejects unsupported protocols, with or without config`() {
         listOf<() -> Unit>(
-            { F2ClientBuilder.get("ftp://localhost") },
-            { F2ClientBuilder.get("ftp://localhost") { } },
+            { val _ = F2ClientBuilder.get("ftp://localhost") },
+            { val _ = F2ClientBuilder.get("ftp://localhost") { } },
         ).forEach { get ->
             assertThatThrownBy { get() }
                 .isInstanceOf(InvalidUrlException::class.java)

@@ -15,7 +15,7 @@ import tools.jackson.module.kotlin.KotlinInvalidNullException
 /** The error body's key for the refusal code. */
 const val REFUSAL_ATTRIBUTE: String = "refusal"
 
-/** `SimpleFunctionRegistry`'s message, or its prefix, when converting a function's input fails. */
+// `SimpleFunctionRegistry`'s message, or its prefix, when converting a function's input fails.
 private const val UNREADABLE_INPUT = "Failed to convert input"
 
 private const val TIMESTAMP_ATTRIBUTE = "timestamp"
@@ -33,12 +33,13 @@ private const val CITERS_ATTRIBUTE = "citers"
  * nothing it was raised with: its message was not written for the caller, and may carry ids, hosts or SQL.
  */
 fun refusalAttributes(error: F2ErrorDTO): Map<String, Any> = buildMap {
-	put(REFUSAL_ATTRIBUTE, refusalCode(error))
-	error.refusal?.let { refusal ->
-		put(MESSAGE_ATTRIBUTE, error.message)
-		refusal.parameters.takeIf { it.isNotEmpty() }?.let { put(PARAMETERS_ATTRIBUTE, it) }
-		refusal.citers.takeIf { it.isNotEmpty() }?.let { put(CITERS_ATTRIBUTE, it) }
-	}
+    this[REFUSAL_ATTRIBUTE] = refusalCode(error)
+    val refusal = error.refusal
+    if (refusal != null) {
+        this[MESSAGE_ATTRIBUTE] = error.message
+        if (refusal.parameters.isNotEmpty()) this[PARAMETERS_ATTRIBUTE] = refusal.parameters
+        if (refusal.citers.isNotEmpty()) this[CITERS_ATTRIBUTE] = refusal.citers
+    }
 }
 
 /**
@@ -46,12 +47,12 @@ fun refusalAttributes(error: F2ErrorDTO): Map<String, Any> = buildMap {
  * the security chain: when, where, [status] and its phrase, then the [refusalAttributes] of [error].
  */
 fun errorBody(path: String, status: HttpStatus, error: F2ErrorDTO): MutableMap<String, Any?> =
-	linkedMapOf<String, Any?>(
-		TIMESTAMP_ATTRIBUTE to Instant.now().toString(),
-		PATH_ATTRIBUTE to path,
-		STATUS_ATTRIBUTE to status.value(),
-		ERROR_ATTRIBUTE to status.reasonPhrase,
-	).apply { putAll(refusalAttributes(error)) }
+    linkedMapOf<String, Any?>(
+        TIMESTAMP_ATTRIBUTE to Instant.now().toString(),
+        PATH_ATTRIBUTE to path,
+        STATUS_ATTRIBUTE to status.value(),
+        ERROR_ATTRIBUTE to status.reasonPhrase,
+    ).apply { putAll(refusalAttributes(error)) }
 
 /** The error a failure the framework answered with [status] gives the caller: the meaning of that status only. */
 fun statusError(status: HttpStatus): F2Error = F2Error(message = status.reasonPhrase, code = status.value())
@@ -66,14 +67,14 @@ fun F2ErrorDTO.httpStatus(): HttpStatus = HttpStatus.resolve(code) ?: HttpStatus
  * stands, and the caller learns its meaning only.
  */
 fun Throwable?.describeError(): F2ErrorDTO? {
-	if (this == null) return null
-	return generateSequence(this) { it.cause }.firstNotNullOfOrNull { failure ->
-		when (failure) {
-			is F2Exception -> failure.error
-			is KotlinInvalidNullException -> missingParameterError(failure.kotlinPropertyName)
-			else -> null
-		}
-	} ?: unreadableBody()?.unreadableBodyError()
+    if (this == null) return null
+    return generateSequence(this) { it.cause }.firstNotNullOfOrNull { failure ->
+        when (failure) {
+            is F2Exception -> failure.error
+            is KotlinInvalidNullException -> missingParameterError(failure.kotlinPropertyName)
+            else -> null
+        }
+    } ?: unreadableBody()?.unreadableBodyError()
 }
 
 /**
@@ -81,11 +82,11 @@ fun Throwable?.describeError(): F2ErrorDTO? {
  * the field the parser stopped at when it knows it, and nothing it was parsed with.
  */
 fun Throwable.unreadableBodyError(): F2Error = invalidPayloadError(
-	message = "Unreadable request body",
-	parameter = (this as? DatabindException)?.path.orEmpty()
-		.mapNotNull { it.propertyName }
-		.takeIf { it.isNotEmpty() }
-		?.joinToString("."),
+    message = "Unreadable request body",
+    parameter = (this as? DatabindException)?.path.orEmpty()
+        .mapNotNull { it.propertyName }
+        .takeIf { it.isNotEmpty() }
+        ?.joinToString("."),
 )
 
 /**
@@ -95,12 +96,12 @@ fun Throwable.unreadableBodyError(): F2Error = invalidPayloadError(
  * failure carries; without it, the status Spring resolved, the one the response already carries.
  */
 fun Map<String, Any?>.toF2ErrorBody(failure: Throwable?, statusFromError: Boolean): MutableMap<String, Any?> {
-	val resolved = (this[STATUS_ATTRIBUTE] as? Int)?.let(HttpStatus::resolve) ?: HttpStatus.INTERNAL_SERVER_ERROR
-	val error = failure.describeError() ?: statusError(resolved)
-	val status = if (statusFromError) error.httpStatus() else resolved
-	return errorBody(this[PATH_ATTRIBUTE]?.toString().orEmpty(), status, error).also { body ->
-		this[REQUEST_ID_ATTRIBUTE]?.let { body[REQUEST_ID_ATTRIBUTE] = it }
-	}
+    val resolved = (this[STATUS_ATTRIBUTE] as? Int)?.let(HttpStatus::resolve) ?: HttpStatus.INTERNAL_SERVER_ERROR
+    val error = failure.describeError() ?: statusError(resolved)
+    val status = if (statusFromError) error.httpStatus() else resolved
+    val body = errorBody(this[PATH_ATTRIBUTE]?.toString().orEmpty(), status, error)
+    this[REQUEST_ID_ATTRIBUTE]?.let { body[REQUEST_ID_ATTRIBUTE] = it }
+    return body
 }
 
 /**
@@ -111,8 +112,8 @@ fun Map<String, Any?>.toF2ErrorBody(failure: Throwable?, statusFromError: Boolea
  * parser failing on something the server read itself is a server error.
  */
 fun Throwable.unreadableBody(): Throwable? = when {
-	this is IllegalStateException && message == UNREADABLE_INPUT ->
-		generateSequence(cause) { it.cause }.filterIsInstance<JacksonException>().firstOrNull()
-	this is IllegalArgumentException && message.orEmpty().startsWith("$UNREADABLE_INPUT: ") -> this
-	else -> null
+    this is IllegalStateException && message == UNREADABLE_INPUT ->
+        generateSequence(cause) { it.cause }.filterIsInstance<JacksonException>().firstOrNull()
+    this is IllegalArgumentException && message.orEmpty().startsWith("$UNREADABLE_INPUT: ") -> this
+    else -> null
 }

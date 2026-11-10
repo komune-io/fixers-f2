@@ -1,10 +1,11 @@
-package f2.feature.cloudEvent.storming
+package f2.feature.cloudevent.storming
 
 import f2.dsl.cqrs.Command
 import f2.dsl.event.CloudEvent
 import f2.dsl.event.CloudEventAttributes
-import f2.feature.cloudEvent.storming.entity.CloudEventEntity
+import f2.feature.cloudevent.storming.entity.CloudEventEntity
 import java.time.Duration
+import kotlin.coroutines.cancellation.CancellationException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeEach
@@ -28,14 +29,6 @@ data class RegisterUserCommand(val name: String) : Command
  * that nothing else is published as a side effect.
  */
 class StormingSinkPersistenceTest {
-
-    companion object {
-        /** Repository handed to the sink bean of [SinkConfig], reset before each test. */
-        lateinit var contextRepository: InMemoryCloudEventEntityRepository
-
-        /** Everything the catch-all [EventSpy] listener saw, reset before each test. */
-        val observedEvents = mutableListOf<Any>()
-    }
 
     private val objectMapper = JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
 
@@ -91,7 +84,14 @@ class StormingSinkPersistenceTest {
     suspend fun `a repository failure should propagate to a direct caller of the suspending sink`() {
         val sink = StormingCloudEventSink(repo = FailingCloudEventEntityRepository())
 
-        val thrown = runCatching { sink.storeCommand(cloudEvent("event-1")) }.exceptionOrNull()
+        val thrown = try {
+            sink.storeCommand(cloudEvent("event-1"))
+            null
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (failure: IllegalStateException) {
+            failure
+        }
 
         assertThat(thrown)
             .isInstanceOf(IllegalStateException::class.java)
@@ -105,7 +105,7 @@ class StormingSinkPersistenceTest {
 
             // the listener suspends: Spring subscribes to the returned Mono, so the write is only
             // guaranteed to have happened eventually, not by the time publishEvent returns
-            eventually {
+            retryAssertionUntilTimeout {
                 assertThat(contextRepository.saved.map { it.event.eventID }).containsExactly("event-1")
             }
             // the sink returns Unit: no entity is re-published as a follow-up application event
@@ -127,8 +127,7 @@ class StormingSinkPersistenceTest {
         }
     }
 
-    /** Retries [assertion] until it holds or [timeout] elapses, so an async write can be awaited. */
-    private fun eventually(timeout: Duration = Duration.ofSeconds(5), assertion: () -> Unit) {
+    private fun retryAssertionUntilTimeout(timeout: Duration = Duration.ofSeconds(5), assertion: () -> Unit) {
         val deadline = System.nanoTime() + timeout.toNanos()
         while (true) {
             try {
@@ -162,5 +161,13 @@ class StormingSinkPersistenceTest {
         open fun onAnyEvent(event: Any) {
             observedEvents.add(event)
         }
+    }
+
+    companion object {
+        /** Repository handed to the sink bean of [SinkConfig], reset before each test. */
+        lateinit var contextRepository: InMemoryCloudEventEntityRepository
+
+        /** Everything the catch-all [EventSpy] listener saw, reset before each test. */
+        val observedEvents = mutableListOf<Any>()
     }
 }

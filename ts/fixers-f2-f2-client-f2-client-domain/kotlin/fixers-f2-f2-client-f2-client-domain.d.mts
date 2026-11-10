@@ -1,4 +1,4 @@
-declare function KtSingleton<T>(): T & (abstract new() => any);
+declare function KtSingleton<T>(): T & (abstract new() => unknown);
 export declare abstract class AuthRealm {
     private constructor();
     get serverUrl(): string;

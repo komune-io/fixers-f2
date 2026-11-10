@@ -15,47 +15,47 @@ import kotlinx.coroutines.runBlocking
 
 class HttpF2VehicleSteps : HttpF2GenericsSteps<Vehicle, Vehicle>("Vehicle: "), En {
 
-	init {
-		prepareFunctionCatalogSteps()
-	}
+    init {
+        prepareFunctionCatalogSteps()
+    }
 
-	override fun transform(dataTable: DataTable): List<Vehicle> {
-		return dataTable.asMaps().map {
-			Vehicle(
-				name = requireNotNull(it.getValue(Vehicle::name.name)),
-				broken = it.getValue(Vehicle::broken.name).toBoolean()
-			)
-		}
-	}
+    override fun transform(dataTable: DataTable): List<Vehicle> {
+        return dataTable.asMaps().map { row ->
+            Vehicle(
+                name = requireNotNull(row.getValue(Vehicle::name.name)),
+                isBroken = row.getValue(Vehicle::isBroken.name).toBoolean()
+            )
+        }
+    }
 
-	override fun consumerReceiver(): List<Vehicle> {
-		val bean = bag.requireApplicationContext().getBean(VehicleReceiver::class.java)
-		return bean.items
-	}
+    override fun consumerReceiver(): List<Vehicle> {
+        val bean = bag.requireApplicationContext().getBean(VehicleReceiver::class.java)
+        return bean.items
+    }
 
-	override fun function(functionName: String, msgs: Flow<Vehicle>) = runBlocking {
+    override fun function(functionName: String, msgs: Flow<Vehicle>) = runBlocking {
 
-		F2ClientBuilder
-			.get(F2SpringHttpCucumberConfig.urlBase(bag))
-			.function<Vehicle, Vehicle>(functionName)
-			.invoke(msgs)
-			.toList()
+        F2ClientBuilder
+            .get(F2SpringHttpCucumberConfig.urlBase(bag))
+            .function<Vehicle, Vehicle>(functionName)
+            .invoke(msgs)
+            .toList()
 
-	}
+    }
 
-	override fun consumer(consumerName: String, msgs: Flow<Vehicle>): Unit = runBlocking {
-		F2ClientBuilder
-			.get(F2SpringHttpCucumberConfig.urlBase(bag))
-			.consumer<Vehicle>(consumerName)
-			.invoke(msgs)
-	}
+    override fun consumer(consumerName: String, msgs: Flow<Vehicle>): Unit = runBlocking {
+        F2ClientBuilder
+            .get(F2SpringHttpCucumberConfig.urlBase(bag))
+            .consumer<Vehicle>(consumerName)
+            .invoke(msgs)
+    }
 
-	override fun supplier(supplierName: String) = runBlocking {
-		F2ClientBuilder
-			.get(F2SpringHttpCucumberConfig.urlBase(bag))
-			.supplier<Vehicle>(supplierName)
-			.invoke()
-			.toList()
-	}
+    override fun supplier(supplierName: String) = runBlocking {
+        F2ClientBuilder
+            .get(F2SpringHttpCucumberConfig.urlBase(bag))
+            .supplier<Vehicle>(supplierName)
+            .invoke()
+            .toList()
+    }
 
 }

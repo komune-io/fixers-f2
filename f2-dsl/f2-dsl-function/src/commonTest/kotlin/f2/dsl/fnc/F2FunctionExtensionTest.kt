@@ -16,7 +16,7 @@ class F2FunctionExtensionTest {
 
         val result = function.invoke(42)
 
-        assertEquals("result-42", result)
+        assertEquals(expected = "result-42", actual = result)
     }
 
     @Test
@@ -25,7 +25,7 @@ class F2FunctionExtensionTest {
 
         val result = "hello".invokeWith(function)
 
-        assertEquals(5, result)
+        assertEquals(expected = 5, actual = result)
     }
 
     @Test
@@ -34,7 +34,7 @@ class F2FunctionExtensionTest {
 
         val result = function.invoke(flowOf(1, 2, 3)).toList()
 
-        assertEquals(listOf("value-1", "value-2", "value-3"), (result).toList())
+        assertEquals(expected = listOf("value-1", "value-2", "value-3"), actual = result.toList())
     }
 
     @Test
@@ -43,7 +43,7 @@ class F2FunctionExtensionTest {
 
         val result = supplier.invoke()
 
-        assertEquals("supplied-value", result)
+        assertEquals(expected = "supplied-value", actual = result)
     }
 
     @Test
@@ -52,7 +52,7 @@ class F2FunctionExtensionTest {
 
         val result = supplier.invoke().toList()
 
-        assertEquals(listOf("a", "b", "c"), (result).toList())
+        assertEquals(expected = listOf("a", "b", "c"), actual = result.toList())
     }
 
     @Test
@@ -62,7 +62,7 @@ class F2FunctionExtensionTest {
         val supplier = list.asF2Supplier()
         val result = supplier.invoke().toList()
 
-        assertEquals(listOf(1, 2, 3), (result).toList())
+        assertEquals(expected = listOf(1, 2, 3), actual = result.toList())
     }
 
     @Test
@@ -72,7 +72,7 @@ class F2FunctionExtensionTest {
 
         consumer.invoke(flowOf(1, 2, 3))
 
-        assertEquals(listOf(1, 2, 3), (consumed).toList())
+        assertEquals(expected = listOf(1, 2, 3), actual = consumed.toList())
     }
 
     @Test
@@ -81,7 +81,7 @@ class F2FunctionExtensionTest {
 
         val result = function.invoke(flowOf()).toList()
 
-        assertTrue((result).isEmpty())
+        assertTrue(result.isEmpty())
     }
 
     @Test
@@ -91,7 +91,7 @@ class F2FunctionExtensionTest {
 
         consumer.invoke(flowOf())
 
-        assertTrue((consumed).isEmpty())
+        assertTrue(consumed.isEmpty())
     }
 
     @Test
@@ -101,6 +101,6 @@ class F2FunctionExtensionTest {
         val supplier = emptyList.asF2Supplier()
         val result = supplier.invoke().toList()
 
-        assertTrue((result).isEmpty())
+        assertTrue(result.isEmpty())
     }
 }

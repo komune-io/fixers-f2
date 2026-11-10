@@ -8,21 +8,21 @@ import reactor.core.publisher.Flux
 @Configuration
 class LambdaFlux {
 
-	@Bean
-	fun functionFlux(functionSimple: (String) -> String): (Flux<String>) -> Flux<String> = { value ->
-		value.map { functionSimple(it) }
-	}
+    @Bean
+    fun functionFlux(functionSimple: (String) -> String): (Flux<String>) -> Flux<String> = { value ->
+        value.map { functionSimple(it) }
+    }
 
-	@Bean
-	fun supplierFlux(): () -> Flux<String> = {
-		Flux.just("supplierFlux")
-	}
+    @Bean
+    fun supplierFlux(): () -> Flux<String> = {
+        Flux.just("supplierFlux")
+    }
 
-	@Bean
-	fun consumerFlux(receiver: ConsumerReceiver<String>): (Flux<String>) -> Unit = {
-		it.map { value ->
-			receiver.items.add(value)
-		}.collectList().block()
-	}
+    @Bean
+    fun consumerFlux(receiver: ConsumerReceiver<String>): (Flux<String>) -> Unit = { values ->
+        values.map { value ->
+            receiver.items.add(value)
+        }.collectList().block()
+    }
 
 }

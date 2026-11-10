@@ -59,7 +59,7 @@ class VendoredPatchVerifierTest {
     @Test
     fun `verify fails fast when the upstream registry shadowed the vendored one`() {
         val verifier = IsolatedVerifier(withMarker = false)
-        assertThatThrownBy { verifier.call("verify") }
+        assertThatThrownBy { val _ = verifier.call("verify") }
             .isInstanceOf(IllegalStateException::class.java)
             .hasMessageContaining(REGISTRY_CLASS_NAME)
             .hasMessageContaining(UPSTREAM_JAR)
@@ -70,7 +70,7 @@ class VendoredPatchVerifierTest {
     @Test
     fun `the failure message falls back to an unknown location when the registry has no code source`() {
         val verifier = IsolatedVerifier(withMarker = false, registryLocation = null)
-        assertThatThrownBy { verifier.call("verify") }
+        assertThatThrownBy { val _ = verifier.call("verify") }
             .isInstanceOf(IllegalStateException::class.java)
             .hasMessageContaining("was loaded from unknown location")
     }
@@ -78,7 +78,7 @@ class VendoredPatchVerifierTest {
     @Test
     fun `verify passes as soon as the loaded registry declares the marker`() {
         val verifier = IsolatedVerifier(withMarker = true)
-        assertThatCode { verifier.call("verify") }.doesNotThrowAnyException()
+        assertThatCode { val _ = verifier.call("verify") }.doesNotThrowAnyException()
     }
 
     @Test
@@ -162,22 +162,20 @@ private class ShadowedRegistryClassLoader(
     }
 
     private fun classFileOf(name: String): ByteArray {
-        val path = "${name.replace('.', '/')}.class"
+        val path = "${name.replace(oldChar = '.', newChar = '/')}.class"
         val stream = checkNotNull(parent.getResourceAsStream(path)) { "Cannot locate class file $path" }
         return stream.use { it.readBytes() }
     }
 }
 
-/**
- * Bytes of a bare `SimpleFunctionRegistry` standing in for either copy of the class: the upstream one has no
- * marker field, F2's vendored one has it.
- */
+// Bytes of a bare `SimpleFunctionRegistry` standing in for either copy of the class: the upstream one has no
+// marker field, F2's vendored one has it.
 private fun registryStub(withMarker: Boolean): ByteArray {
     val writer = ClassWriter(0)
     writer.visit(
         Opcodes.V17,
         Opcodes.ACC_PUBLIC or Opcodes.ACC_SUPER,
-        REGISTRY_CLASS_NAME.replace('.', '/'),
+        REGISTRY_CLASS_NAME.replace(oldChar = '.', newChar = '/'),
         null,
         "java/lang/Object",
         null

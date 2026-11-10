@@ -5,14 +5,15 @@ import io.cucumber.java8.En
 
 class HttpF2ListSteps : StringHttpF2Steps("List: "), En {
 
-	init {
-		prepareFunctionCatalogSteps()
-	}
+    init {
+        prepareFunctionCatalogSteps()
+    }
 
-	override fun transform(dataTable: DataTable): List<String> {
-		return dataTable.asList().map { requireNotNull(it) }
-			.flatMap { it.split(",") }
-			.map { it.trim() }
-			.filter { it.isNotEmpty() }
-	}
+    override fun transform(dataTable: DataTable): List<String> = dataTable.asList()
+        .asSequence()
+        .map { requireNotNull(it) }
+        .flatMap { it.split(",") }
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .toList()
 }

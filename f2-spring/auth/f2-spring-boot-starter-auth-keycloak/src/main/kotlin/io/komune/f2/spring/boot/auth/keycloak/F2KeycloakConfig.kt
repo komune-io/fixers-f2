@@ -6,13 +6,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class F2KeycloakConfig (
     val issuers: List<KeycloakIssuers> = emptyList()
 ) {
-    fun getConfig(): Map<String, KeycloakConfig> {
-        return issuers.associate {
-            it.name to KeycloakConfig(
-                realm = it.realm,
-                authServerUrl = it.authUrl,
-                resource = it.web?.clientId
+    val config: Map<String, KeycloakConfig>
+        get() = issuers.associate { issuer ->
+            issuer.name to KeycloakConfig(
+                realm = issuer.realm,
+                authServerUrl = issuer.authUrl,
+                resource = issuer.web?.clientId
             )
         }
-    }
 }

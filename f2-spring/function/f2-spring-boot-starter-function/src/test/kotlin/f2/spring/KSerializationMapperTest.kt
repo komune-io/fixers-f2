@@ -36,8 +36,7 @@ class KSerializationMapperTest {
     @Test
     fun `doFromJson deserializes from Reader`() {
         val json = """{"name":"reader","value":200}"""
-        val reader = StringReader(json)
-        val result: TestData = mapper.fromJson(reader, TestData::class.java)
+        val result: TestData = StringReader(json).use { mapper.fromJson(it, TestData::class.java) }
 
         assertEquals("reader", result.name)
         assertEquals(200, result.value)
@@ -86,7 +85,7 @@ class KSerializationMapperTest {
 
     @Test
     fun `doFromJson throws exception for unsupported type`() {
-        val unsupportedInput = 12345
+        val unsupportedInput = 12_345
 
         // The mapper tries to convert the input but fails - it may throw F2Exception or IllegalStateException
         // depending on how the input is processed
@@ -182,9 +181,7 @@ class KSerializationMapperTest {
     @Test
     fun `Reader toInputStream converts correctly`() {
         val json = """{"name":"inputstream","value":700}"""
-        val reader = StringReader(json)
-
-        val result: TestData = mapper.fromJson(reader, TestData::class.java)
+        val result: TestData = StringReader(json).use { mapper.fromJson(it, TestData::class.java) }
 
         assertEquals("inputstream", result.name)
         assertEquals(700, result.value)
@@ -192,11 +189,9 @@ class KSerializationMapperTest {
 
     @Test
     fun `Reader toInputStream handles large content`() {
-        val largeContent = "x".repeat(10000)
+        val largeContent = "x".repeat(10_000)
         val json = """{"name":"$largeContent","value":800}"""
-        val reader = StringReader(json)
-
-        val result: TestData = mapper.fromJson(reader, TestData::class.java)
+        val result: TestData = StringReader(json).use { mapper.fromJson(it, TestData::class.java) }
 
         assertEquals(largeContent, result.name)
         assertEquals(800, result.value)

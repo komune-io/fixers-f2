@@ -15,20 +15,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 
 /**
- * Declare Spring Boot Application
+ * Declare Spring Boot Application.
  */
 @SpringBootApplication
 class F2SampleHttpApp {
-
-    companion object {
-        private const val UUID_COUNT = 100
-        private const val UUID_DELAY_MS = 500L
-    }
 
     @Bean
     fun sha256(): F2Function<String, String> = f2Function { bytes ->
@@ -51,12 +47,19 @@ class F2SampleHttpApp {
     }
 
     @Bean
-    fun println(): F2Consumer<String> = f2Consumer(::println)
+    fun println(): F2Consumer<String> = f2Consumer { message -> logger.info(message) }
+
+    companion object {
+        private const val UUID_COUNT = 100
+        private const val UUID_DELAY_MS = 500L
+        private val logger = LoggerFactory.getLogger(F2SampleHttpApp::class.java)
+    }
 }
 
 /**
- * Main method to start Spring Boot Application
+ * Main method to start Spring Boot Application.
  */
+@Suppress("MissingUseCall") // the application context lives as long as the process
 fun main(vararg args: String) {
     runApplication<F2SampleHttpApp>(*args)
 }

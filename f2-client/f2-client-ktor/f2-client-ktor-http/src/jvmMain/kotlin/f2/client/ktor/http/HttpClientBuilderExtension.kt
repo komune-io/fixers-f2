@@ -4,7 +4,6 @@ package f2.client.ktor.http
 import f2.client.ktor.common.F2ClientConfigLambda
 import io.ktor.client.engine.java.JavaHttpConfig
 
-
 /**
  * Provides a default instance of [HttpClientBuilder].
  *

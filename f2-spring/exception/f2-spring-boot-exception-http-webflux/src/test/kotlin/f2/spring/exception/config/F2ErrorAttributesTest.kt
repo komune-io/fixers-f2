@@ -152,9 +152,10 @@ class F2ErrorAttributesTest {
 
     @Test
     fun `typed refusals tell the values the caller gave`() {
-        assertThat(bodyFor(NotFoundException("Item", "i-1"))["parameters"])
+        assertThat(bodyFor(NotFoundException(name = "Item", id = "i-1"))["parameters"])
             .isEqualTo(mapOf("entity" to "Item", "id" to "i-1"))
-        assertThat(bodyFor(ConflictException("Item", "name", "n"))["refusal"]).isEqualTo("http.CONFLICT")
+        assertThat(bodyFor(ConflictException(entity = "Item", property = "name", value = "n"))["refusal"])
+            .isEqualTo("http.CONFLICT")
         assertThat(bodyFor(ForbiddenAccessException("Read only"))["message"]).isEqualTo("Read only")
     }
 

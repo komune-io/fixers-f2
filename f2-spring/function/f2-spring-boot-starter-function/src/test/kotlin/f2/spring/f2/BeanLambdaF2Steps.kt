@@ -12,23 +12,25 @@ import kotlinx.coroutines.runBlocking
 
 class BeanLambdaF2Steps : LambdaF2Steps(), En {
 
-	init {
-		prepareLambdaSteps()
-	}
+    init {
+        prepareLambdaSteps()
+    }
 
-	override fun function(values: List<String>): List<String> = runBlocking {
-		val lambda: F2Function<String, String> = LambdaF2::functionBasic.functionF2Bean()
-		lambda(values.asFlow()).toList()
-	}
+    override fun function(values: List<String>): List<String> = runBlocking {
+        val lambda: F2Function<String, String> = LambdaF2::functionBasic.functionF2Bean()
+        lambda(values.asFlow()).toList()
+    }
 
-	override fun supplier(): List<String> = runBlocking {
-		val lambda: F2Supplier<String> = LambdaF2::supplierBasic.supplierF2Bean()
-		lambda().toList()
-	}
+    override fun supplier(): List<String> = runBlocking {
+        val lambda: F2Supplier<String> = LambdaF2::supplierBasic.supplierF2Bean()
+        lambda().toList()
+    }
 
-	override fun consumer(values: List<String>) = runBlocking {
-		val lambda: F2Consumer<String> = LambdaF2::consumerBasic.consumerF2Bean()
-		val flow = values.asFlow()
-		lambda(flow)
-	}
+    override fun consumer(values: List<String>) {
+        runBlocking {
+            val lambda: F2Consumer<String> = LambdaF2::consumerBasic.consumerF2Bean()
+            val flow = values.asFlow()
+            lambda(flow)
+        }
+    }
 }
