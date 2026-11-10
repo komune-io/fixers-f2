@@ -16,9 +16,8 @@ abstract class LambdaListSteps : LambdaListStepsBase<String, String>() {
 			consumerName = LambdaList::consumerList.name
 		)
 
-		@Suppress("UNCHECKED_CAST")
 		Then("The result for {string} is") { value: String, dataTable: DataTable ->
-			Assertions.assertThat(bag.result[value] as List<String>?).isEqualTo(dataTable.asList())
+			Assertions.assertThat(bag.result[value]).isEqualTo(dataTable.asList())
 		}
 	}
 

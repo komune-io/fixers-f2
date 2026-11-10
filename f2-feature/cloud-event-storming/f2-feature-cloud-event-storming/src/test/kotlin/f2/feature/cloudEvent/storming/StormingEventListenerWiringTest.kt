@@ -1,6 +1,7 @@
 package f2.feature.cloudEvent.storming
 
 import f2.dsl.event.CloudEvent
+import f2.dsl.event.CloudEventAttributes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -60,9 +61,9 @@ class StormingEventListenerWiringTest {
         context.publishEvent(
             CloudEvent(
                 eventType = "UserCreated",
-                cloudEventsVersion = "1",
                 source = "S2",
                 eventID = "event-1",
+                attributes = CloudEventAttributes(cloudEventsVersion = "1"),
                 data = """{"name":"john"}"""
             )
         )

@@ -1,6 +1,7 @@
 package f2.feature.cloudEvent.storming
 
 import f2.dsl.event.CloudEvent
+import f2.dsl.event.CloudEventAttributes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -11,10 +12,9 @@ class StormingCloudEventSinkTest {
 
     private fun cloudEvent(id: String) = CloudEvent(
         eventType = "UserCreated",
-        eventTypeVersion = "1",
-        cloudEventsVersion = "1",
         source = "S2",
         eventID = id,
+        attributes = CloudEventAttributes(cloudEventsVersion = "1", eventTypeVersion = "1"),
         data = """{"name":"john"}"""
     )
 

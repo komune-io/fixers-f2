@@ -63,7 +63,7 @@ class HttpF2Client @JsExport.Ignore constructor(
 
 	override val type: F2ClientType = F2ClientType.HTTP
 
-	private suspend inline fun <T> handlePayloadResponse(response: HttpResponse, typeInfo: TypeInfo): Flow<T> {
+	private fun <T> handlePayloadResponse(response: HttpResponse, typeInfo: TypeInfo): Flow<T> {
 		return flow {
 			if (!response.status.isSuccess()) {
 				throw json.responseError(response)
@@ -167,7 +167,7 @@ internal suspend fun send(request: suspend () -> HttpResponse): HttpResponse = t
 
 private suspend fun <T> FlowCollector<T>.emitPayload(result: T) {
 	if (result is Collection<*>) {
-		@Suppress("UNCHECKED_CAST")
+		@Suppress("UNCHECKED_CAST") // a list response decoded as T: its items are the T the caller asked for, erased
 		(result as Collection<T>).forEach { emit(it) }
 	} else {
 		emit(result)

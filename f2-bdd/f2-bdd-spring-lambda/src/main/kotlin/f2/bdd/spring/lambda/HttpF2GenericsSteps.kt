@@ -52,11 +52,8 @@ abstract class HttpF2GenericsSteps<REQUEST, RESPONSE>(
 			}
 		}
 
-		@Suppress("UNCHECKED_CAST")
 		Then("${prefix}The result for {string} is") { value: String, dataTable: DataTable ->
-			val result = (bag.result[value] as List<REQUEST>?)
-			val expected = transform(dataTable)
-			Assertions.assertThat(result).isEqualTo(expected)
+			Assertions.assertThat(bag.result[value]).isEqualTo(transform(dataTable))
 		}
 
 		Then("${prefix}An exception with code {int} has been thrown for {string}") { code: Int, name: String ->

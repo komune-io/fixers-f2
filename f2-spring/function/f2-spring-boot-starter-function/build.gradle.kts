@@ -17,3 +17,7 @@ dependencies {
 
     testImplementation(project(":f2-bdd:f2-bdd-spring-lambda"))
 }
+
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
+}

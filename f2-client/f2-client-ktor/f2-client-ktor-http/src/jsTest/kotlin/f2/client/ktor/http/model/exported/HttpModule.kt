@@ -2,7 +2,8 @@
 
 package f2.client.ktor.http.model.exported
 
-// The client and the upload types as JS sees them: imported by their exported names from the module the library compiles to.
+// The client and the upload types as JS sees them: imported by their exported names from the module the
+// library compiles to.
 
 external class F2FilePart {
 	val name: String

@@ -15,9 +15,8 @@ abstract class LambdaSimpleSteps: LambdaSingleStepsBase<String, String>() {
 			consumerName = LambdaSimple::consumerSingle.name,
 		)
 
-		@Suppress("UNCHECKED_CAST")
 		Then("Single: The result for {string} is") { value: String, dataTable: DataTable ->
-			Assertions.assertThat(listOf(bag.result[value] as String)).isEqualTo(dataTable.asList())
+			Assertions.assertThat(listOf(bag.result[value])).isEqualTo(dataTable.asList())
 		}
 	}
 

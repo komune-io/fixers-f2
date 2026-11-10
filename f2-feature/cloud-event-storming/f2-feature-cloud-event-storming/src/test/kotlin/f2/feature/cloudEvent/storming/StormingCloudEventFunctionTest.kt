@@ -1,6 +1,7 @@
 package f2.feature.cloudEvent.storming
 
 import f2.dsl.event.CloudEvent
+import f2.dsl.event.CloudEventAttributes
 import f2.feature.cloudEvent.storming.entity.CloudEventEntity
 import java.util.UUID
 import kotlinx.coroutines.flow.toList
@@ -16,9 +17,9 @@ class StormingCloudEventFunctionTest {
     private suspend fun store(eventId: String) {
         val event = CloudEvent(
             eventType = "UserCreated",
-            cloudEventsVersion = "1",
             source = "S2",
             eventID = eventId,
+            attributes = CloudEventAttributes(cloudEventsVersion = "1"),
             data = """{"name":"john"}"""
         )
         repository.save(CloudEventEntity(id = UUID.randomUUID(), event = event))

@@ -65,9 +65,9 @@ class OtelPropertiesListener : EnvironmentPostProcessor {
         const val OTEL_LOGS_EXPORTER = "otel.logs.exporter"
         const val OTEL_EXPORTER_NONE = "none"
 
-        @Suppress("MaxLineLength")
         const val OPENTELEMETRY_TRACING_AUTOCONFIG =
-            "org.springframework.boot.micrometer.tracing.opentelemetry.autoconfigure.OpenTelemetryTracingAutoConfiguration"
+            "org.springframework.boot.micrometer.tracing.opentelemetry.autoconfigure." +
+                "OpenTelemetryTracingAutoConfiguration"
     }
 
     override fun postProcessEnvironment(environment: ConfigurableEnvironment, application: SpringApplication) {

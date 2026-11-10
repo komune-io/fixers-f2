@@ -97,7 +97,7 @@ data class StringMatch(
         val newValue = transform(value)
 
         return if (newValue is String) {
-            @Suppress("UNCHECKED_CAST")
+            @Suppress("UNCHECKED_CAST") // newValue is a String: R is String, erased
             copy(value = newValue) as Match<R>
         } else {
             ExactMatch(

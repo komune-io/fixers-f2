@@ -35,9 +35,8 @@ abstract class FunctionCatalogStepsBase<P, R>(
 			handleResult(lambda, functionName, result)
 		}
 
-		@Suppress("UNCHECKED_CAST")
 		Then("${prefix}The function catalog result for {string} is") { value: String, dataTable: DataTable ->
-			Assertions.assertThat(bag.result[value] as List<Any>?).isEqualTo(transform(dataTable))
+			Assertions.assertThat(bag.result[value]).isEqualTo(transform(dataTable))
 		}
 	}
 

@@ -11,3 +11,7 @@ dependencies {
 
     testImplementation(libs.bundles.test.junit)
 }
+
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
+}

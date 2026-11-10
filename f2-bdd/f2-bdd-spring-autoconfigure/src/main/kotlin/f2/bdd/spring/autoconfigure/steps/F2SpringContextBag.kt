@@ -36,35 +36,21 @@ class F2SpringContextBag {
     var applicationContext: GenericApplicationContext? = null
 
 
-	@Suppress("UNCHECKED_CAST")
-	fun <P, R> getBlockingFunctionBean(name: String): (P) -> R {
-		return applicationContext?.getBean(name) as (P) -> R
-	}
+	fun <P, R> getBlockingFunctionBean(name: String): (P) -> R = typedBean(name)
 
-	@Suppress("UNCHECKED_CAST")
-	fun <R> getBlockingSupplierBean(name: String): () -> R {
-		return applicationContext?.getBean(name) as () -> R
-	}
+	fun <R> getBlockingSupplierBean(name: String): () -> R = typedBean(name)
 
-	@Suppress("UNCHECKED_CAST")
-	fun <P> getBlockingConsumerBean(name: String): (P) -> Unit {
-		return applicationContext?.getBean(name) as (P) -> Unit
-	}
+	fun <P> getBlockingConsumerBean(name: String): (P) -> Unit = typedBean(name)
 
-	@Suppress("UNCHECKED_CAST")
-	fun <P, R> getFunctionBean(name: String): suspend (P) -> R {
-		return applicationContext?.getBean(name) as suspend (P) -> R
-	}
+	fun <P, R> getFunctionBean(name: String): suspend (P) -> R = typedBean(name)
 
-	@Suppress("UNCHECKED_CAST")
-	fun <R> getSupplierBean(name: String): suspend () -> R {
-		return applicationContext?.getBean(name) as suspend () -> R
-	}
+	fun <R> getSupplierBean(name: String): suspend () -> R = typedBean(name)
 
-	@Suppress("UNCHECKED_CAST")
-	fun <P> getConsumerBean(name: String): suspend (P) -> Unit {
-		return applicationContext?.getBean(name) as suspend (P) -> Unit
-	}
+	fun <P> getConsumerBean(name: String): suspend (P) -> Unit = typedBean(name)
+
+	/** The bean [name], as the function type the caller registered it with. */
+	@Suppress("UNCHECKED_CAST") // a function type is erased at runtime: the caller names the one it registered
+	fun <F> typedBean(name: String): F = requireApplicationContext().getBean(name) as F
 
 	fun requireApplicationContext(): GenericApplicationContext =
 		checkNotNull(applicationContext) { "No application context started for this scenario" }

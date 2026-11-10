@@ -6,7 +6,7 @@ clean:
 	./gradlew clean
 
 lint:
-	./gradlew check
+	./gradlew check --continue
 
 # `clean` runs alone: in one invocation the root `clean` deletes build/js while the subprojects'
 # Kotlin/JS tasks write their packages there (Unable to delete directory … New files were found).

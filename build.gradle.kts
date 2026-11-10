@@ -62,6 +62,8 @@ fixers {
         name = "F2"
         description = "Wrapper around Spring Cloud Function"
         url = "https://github.com/komune-io/fixers-f2"
+        scmConnection = "scm:git:git://github.com/komune-io/fixers-f2.git"
+        scmDeveloperConnection = "scm:git:ssh://github.com/komune-io/fixers-f2.git"
     }
     sonar {
         organization = "komune-io"

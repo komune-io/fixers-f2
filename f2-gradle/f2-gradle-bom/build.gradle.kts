@@ -58,16 +58,8 @@ dependencies {
 		api("io.komune.f2:f2-spring-boot-starter-observability-opentelemetry:${project.version}")
 
 		// f2-bdd
-		api("io.komune.f2:f2-bdd-config:${project.version}")
-		api("io.komune.f2:f2-bdd-spring-autoconfigure:${project.version}")
-		api("io.komune.f2:f2-bdd-spring-http:${project.version}")
-		api("io.komune.f2:f2-bdd-spring-lambda:${project.version}")
+		// f2-bdd-config, f2-bdd-spring-* and the f2-feature-* modules are never published: no constraint
 		api("io.komune.f2:f2-bdd-blockhound:${project.version}")
-
-		// f2-feature
-		api("io.komune.f2:f2-feature-catalog:${project.version}")
-		api("io.komune.f2:f2-feature-cloud-event-storming:${project.version}")
-		api("io.komune.f2:f2-feature-version:${project.version}")
 
 		// ═══════════════════════════════════════════
 		// Third-party deps

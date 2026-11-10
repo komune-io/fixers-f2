@@ -45,11 +45,11 @@ class StormingCommandSinkTest {
 
         val event = repository.saved.single().event
         assertThat(event.source).isEqualTo("S2")
-        assertThat(event.cloudEventsVersion).isEqualTo("1")
-        assertThat(event.eventTypeVersion).isEqualTo("1")
-        assertThat(event.contentType).isEqualTo("application/json")
-        assertThat(event.schemaURL).isNull()
-        assertThat(event.extensions).isNull()
+        assertThat(event.attributes.cloudEventsVersion).isEqualTo("1")
+        assertThat(event.attributes.eventTypeVersion).isEqualTo("1")
+        assertThat(event.attributes.contentType).isEqualTo("application/json")
+        assertThat(event.attributes.schemaURL).isNull()
+        assertThat(event.attributes.extensions).isNull()
     }
 
     @Test
@@ -72,7 +72,7 @@ class StormingCommandSinkTest {
 
         sink.storeCommand(CreateUserCommand(name = "john", age = 42))
 
-        val eventTime = Instant.parse(repository.saved.single().event.eventTime)
+        val eventTime = Instant.parse(repository.saved.single().event.attributes.eventTime)
         assertThat(eventTime).isAfterOrEqualTo(before)
         assertThat(eventTime).isBeforeOrEqualTo(Instant.now().plusSeconds(1))
     }

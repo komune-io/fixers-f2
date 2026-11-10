@@ -27,7 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import f2.dsl.cqrs.exception.F2Exception;
 import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.AbstractMessageConverter;
@@ -116,7 +116,7 @@ public class SmartCompositeMessageConverter extends CompositeMessageConverter {
                     isConverted = true;
                 }
                 for (Iterator<MessageConverter> iterator = getConverters().iterator(); iterator.hasNext() && !isConverted;) {
-                    MessageConverter converter = (MessageConverter) iterator.next();
+                    MessageConverter converter = iterator.next();
                     if (!converter.getClass().getName().endsWith("ApplicationJsonMessageMarshallingConverter")) { // TODO Stream stuff, needs to be removed
                         Message<?> m  = MessageBuilder.withPayload(item).copyHeaders(message.getHeaders()).build(); // TODO Message creating may be expensive
                         Object conversionResult = (converter instanceof SmartMessageConverter & genericItemRawType != genericItemType ?

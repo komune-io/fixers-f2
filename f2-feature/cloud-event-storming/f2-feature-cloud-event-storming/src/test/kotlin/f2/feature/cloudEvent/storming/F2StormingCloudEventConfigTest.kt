@@ -78,9 +78,9 @@ class F2StormingCloudEventConfigTest {
 
     private fun cloudEvent(id: String) = f2.dsl.event.CloudEvent(
         eventType = "UserCreated",
-        cloudEventsVersion = "1",
         source = "S2",
         eventID = id,
+        attributes = f2.dsl.event.CloudEventAttributes(cloudEventsVersion = "1"),
         data = """{"name":"john"}"""
     )
 }

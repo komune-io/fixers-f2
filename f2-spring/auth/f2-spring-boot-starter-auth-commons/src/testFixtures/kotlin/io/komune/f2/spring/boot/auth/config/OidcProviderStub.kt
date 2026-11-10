@@ -62,20 +62,19 @@ class OidcProviderStub(realms: List<String>) {
      * @param realm the realm whose signing key is used
      * @param issuer the `iss` claim, defaults to the realm issuer. Override it to simulate a token
      * claiming to come from another issuer while being signed by [realm]'s key.
+     * @param claims more claims; the subject is always [SUBJECT]
      */
-    @Suppress("LongParameterList")
     fun mintToken(
         realm: String,
         roles: List<String> = emptyList(),
         issuer: String = issuer(realm),
-        subject: String = "user-1",
         claims: Map<String, Any> = emptyMap(),
         expiresAt: Instant = Instant.now().plusSeconds(EXPIRY_SECONDS)
     ): String {
         val key = keys.getValue(realm)
         val claimsSet = JWTClaimsSet.Builder()
             .issuer(issuer)
-            .subject(subject)
+            .subject(SUBJECT)
             .jwtID(UUID.randomUUID().toString())
             .issueTime(Date.from(Instant.now().minusSeconds(EXPIRY_SECONDS)))
             .expirationTime(Date.from(expiresAt))
@@ -103,5 +102,8 @@ class OidcProviderStub(realms: List<String>) {
     companion object {
         private const val RSA_KEY_SIZE = 2048
         private const val EXPIRY_SECONDS = 3600L
+
+        /** The subject of every minted token. */
+        const val SUBJECT = "user-1"
     }
 }

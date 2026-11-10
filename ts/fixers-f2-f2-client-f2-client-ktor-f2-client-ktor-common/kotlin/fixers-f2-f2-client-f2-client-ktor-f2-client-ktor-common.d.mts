@@ -52,14 +52,14 @@ export declare interface EnvelopeDTO<T> extends WithEnvelopeId, WithEnvelopeData
     readonly time?: string | null;
 }
 export declare class Envelope<T> implements EnvelopeDTO<T> {
-    constructor(id: string, data: T, type: string, datacontenttype?: string | null, specversion?: string | null, source?: string | null, time?: string | null);
+    constructor(id: string, data: T, type: string, datacontenttype?: string | null, source?: string | null, time?: string | null);
     get id(): string;
     get data(): T;
     get type(): string;
     get datacontenttype(): string | null;
-    get specversion(): string | null;
     get source(): string | null;
     get time(): string | null;
+    get specversion(): string | null;
 }
 export declare namespace Envelope {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */

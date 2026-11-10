@@ -3,18 +3,33 @@ package f2.dsl.event
 import kotlin.js.JsExport
 import kotlin.js.JsName
 
+/**
+ * The attributes of a [CloudEvent] beside its identity and its data, as CloudEvents 0.1 names them.
+ *
+ * @property eventTime when the event happened, RFC 3339
+ * @property schemaURL the schema [CloudEvent.data] follows, RFC 3986
+ * @property contentType the media type of [CloudEvent.data], RFC 2046
+ */
+@JsExport
+@JsName("CloudEventAttributes")
+class CloudEventAttributes(
+	val cloudEventsVersion: String,
+	val eventTypeVersion: String? = null,
+	val eventTime: String? = null,
+	val schemaURL: String? = null,
+	val contentType: String? = null,
+	val extensions: Map<String, String>? = null,
+)
+
+/**
+ * An event of type [eventType], [eventID] at [source] (RFC 3986), carrying [data] and its [attributes].
+ */
 @JsExport
 @JsName("CloudEvent")
-@Suppress("LongParameterList") // mirrors the CloudEvents attributes
 open class CloudEvent<T>(
 	open val eventType: String,
-	open val eventTypeVersion: String? = null,
-	open val cloudEventsVersion: String,
-	open val source: String, // RFC 3986
+	open val source: String,
 	open val eventID: String,
-	open val eventTime: String? = null, // RFC 3339
-	open val schemaURL: String? = null,  // RFC 3986
-	open val contentType: String? = null, // RFC 2046
-	open val extensions: Map<String, Any>? = null,
+	open val attributes: CloudEventAttributes,
 	open val data: T,
 )

@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import tools.jackson.databind.json.JsonMapper
 
+// One open step per rule the chain is built from, beside the beans: an application overrides any of them.
 @Suppress("TooManyFunctions")
 @Configuration
 @ConditionalOnMissingBean(WebSecurityConfig::class)
