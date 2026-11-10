@@ -157,7 +157,8 @@ class HttpF2Client @JsExport.Ignore constructor(
 	private fun buildUrl(route: String) = "$urlBase/${route}"
 }
 
-private suspend fun send(request: suspend () -> HttpResponse): HttpResponse = try {
+/** The response [request] answers, an error one included: a client expecting success throws it instead. */
+internal suspend fun send(request: suspend () -> HttpResponse): HttpResponse = try {
 	request()
 } catch (e: ResponseException) {
 	if (e.response.status.isSuccess()) throw e

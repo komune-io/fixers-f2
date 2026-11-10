@@ -8,55 +8,39 @@ import org.junit.jupiter.api.Test
 class F2ClientBuilderTest {
 
     @Test
-    fun `getHttp builds a client for http and https urls`() {
-        assertThat(F2ClientBuilder.getHttp("http://localhost:8080").type).isEqualTo(F2ClientType.HTTP)
-        assertThat(F2ClientBuilder.getHttp("https://localhost:8080").type).isEqualTo(F2ClientType.HTTP)
-    }
-
-    @Test
-    fun `getHttp rejects unsupported protocols`() {
-        assertThatThrownBy { F2ClientBuilder.getHttp("ftp://localhost") }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("Invalid Url")
-    }
-
-    @Test
     fun `get builds a client for http and https urls`() {
         assertThat(F2ClientBuilder.get("http://localhost:8080").type).isEqualTo(F2ClientType.HTTP)
         assertThat(F2ClientBuilder.get("https://localhost:8080").type).isEqualTo(F2ClientType.HTTP)
     }
 
     @Test
-    fun `get rejects unsupported protocols`() {
-        val thrown = runCatching { F2ClientBuilder.get("ftp://localhost") }.exceptionOrNull()
-
-        assertThat(thrown).isInstanceOf(IllegalArgumentException::class.java)
-    }
-
-    @Test
-    fun `get with config builds a client for http and https urls`() {
+    fun `get with config applies it`() {
         var configured = false
         val client = F2ClientBuilder.get("http://localhost:8080") { configured = true }
 
         assertThat(client.type).isEqualTo(F2ClientType.HTTP)
         assertThat(configured).isTrue()
-
-        assertThat(F2ClientBuilder.get("https://localhost:8080") { }.type).isEqualTo(F2ClientType.HTTP)
     }
 
     @Test
-    fun `get with config defaults to no configuration`() {
-        val client = F2ClientBuilder.get(urlBase = "http://localhost:8080")
-
-        assertThat(client.type).isEqualTo(F2ClientType.HTTP)
+    fun `get rejects unsupported protocols, with or without config`() {
+        listOf<() -> Unit>(
+            { F2ClientBuilder.get("ftp://localhost") },
+            { F2ClientBuilder.get("ftp://localhost") { } },
+        ).forEach { get ->
+            assertThatThrownBy { get() }
+                .isInstanceOf(InvalidUrlException::class.java)
+                .isInstanceOf(IllegalArgumentException::class.java)
+                .hasMessageContaining("Invalid Url[ftp://localhost]")
+        }
     }
 
     @Test
-    fun `get with config rejects unsupported protocols`() {
-        val thrown = runCatching { F2ClientBuilder.get("ftp://localhost") { } }.exceptionOrNull()
+    fun `the get overloads that were suspend are gone from the binary`() {
+        val gets = F2ClientBuilder::class.java.methods.filter { it.name.startsWith("get") && it.name != "getClass" }
 
-        assertThat(thrown)
-            .isInstanceOf(InvalidUrlException::class.java)
-            .hasMessageContaining("is invalid")
+        assertThat(gets.flatMap { it.parameterTypes.toList() })
+            .noneMatch { it.name == "kotlin.coroutines.Continuation" }
+        assertThat(runCatching { Class.forName("f2.client.ktor.GetKt") }.isFailure).isTrue()
     }
 }

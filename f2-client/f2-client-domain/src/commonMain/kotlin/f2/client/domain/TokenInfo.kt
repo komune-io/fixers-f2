@@ -1,10 +1,9 @@
 package f2.client.domain
 
-import kotlin.js.JsExport
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@JsExport
+/** The token response of an OAuth2 provider, as `F2Auth` reads it; its `toString` names no token. */
 @Serializable
 data class TokenInfo(
     @SerialName("access_token") val accessToken: String,
@@ -14,4 +13,6 @@ data class TokenInfo(
     @SerialName("scope") val scope: String?,
     @SerialName("id_token") val idToken: String? = null,
     @SerialName("refresh_token") val refreshToken: String? = null,
-)
+) {
+    override fun toString(): String = "TokenInfo(tokenType=$tokenType, expiresIn=$expiresIn, scope=$scope)"
+}

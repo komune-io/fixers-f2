@@ -343,10 +343,6 @@ export declare class Batch {
     constructor(size?: number, concurrency?: number);
     get size(): number;
     get concurrency(): number;
-    copy(size?: number, concurrency?: number): Batch;
-    toString(): string;
-    hashCode(): number;
-    equals(other?: any): boolean;
 }
 export declare namespace Batch {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */

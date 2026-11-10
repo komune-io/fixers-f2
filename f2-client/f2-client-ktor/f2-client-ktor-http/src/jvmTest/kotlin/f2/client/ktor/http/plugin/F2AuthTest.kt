@@ -24,7 +24,7 @@ class F2AuthTest {
         private const val TOKEN_PATH = "/realms/$REALM_ID/protocol/openid-connect/token"
     }
 
-    private class TokenServer(vararg responses: String) : AutoCloseable {
+    private class TokenServer(vararg responses: String, status: Int = 200) : AutoCloseable {
         val requestBodies = mutableListOf<String>()
         private val server: HttpServer = HttpServer.create(InetSocketAddress(0), 0)
 
@@ -35,7 +35,7 @@ class F2AuthTest {
                 val response = responses[minOf(index, responses.size - 1)].toByteArray()
                 index++
                 exchange.responseHeaders.add("Content-Type", "application/json")
-                exchange.sendResponseHeaders(200, response.size.toLong())
+                exchange.sendResponseHeaders(status, response.size.toLong())
                 exchange.responseBody.use { it.write(response) }
             }
             server.start()
@@ -169,6 +169,26 @@ class F2AuthTest {
                 .firstOrNull()
             assertThat(f2Exception).isNotNull()
             assertThat(f2Exception!!.error.message).contains("Unable to decode response")
+            client.close()
+        }
+    }
+
+    @Test
+    suspend fun `fails with the provider's status when the token request is refused, even with a token body`() {
+        TokenServer(tokenJson("token-refused"), status = 401).use { server ->
+            val authHeaders = mutableListOf<String?>()
+            val client = protectedClient(
+                realm = clientSecretRealm(server.url),
+                acceptedTokens = setOf("token-refused"),
+                authHeaders = authHeaders,
+            )
+
+            val thrown = runCatching { client.get("http://protected/api") }.exceptionOrNull()
+
+            val f2Exception = generateSequence(thrown) { it.cause }.filterIsInstance<F2Exception>().firstOrNull()
+            assertThat(f2Exception?.error?.code).isEqualTo(401)
+            assertThat(f2Exception?.error?.message).contains("refused the token request with 401")
+            assertThat(authHeaders).noneMatch { it == "Bearer token-refused" }
             client.close()
         }
     }

@@ -44,14 +44,14 @@ val BATCH_DEFAULT_CONCURRENCY: Int = DEFAULT_CONCURRENCY
 const val BATCH_DEFAULT_SIZE: Int = CHUNK_DEFAULT_SIZE
 
 /**
- * Data class representing the configuration for batching elements in a Flow.
+ * The configuration for batching elements in a Flow. Not a data class: an exported `equals` takes `any`.
  *
  * @property size The size of each batch.
  * @property concurrency The number of concurrently collected batches.
  */
 @JsExport
 @Serializable
-data class Batch(
+class Batch(
     val size: Int = BATCH_DEFAULT_SIZE,
     val concurrency: Int = BATCH_DEFAULT_CONCURRENCY
 )

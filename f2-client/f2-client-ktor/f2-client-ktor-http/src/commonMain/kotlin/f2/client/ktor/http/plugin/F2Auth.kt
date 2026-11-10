@@ -22,6 +22,7 @@ import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
+import io.ktor.http.isSuccess
 import io.ktor.http.parametersOf
 import io.ktor.util.AttributeKey
 import io.ktor.util.logging.KtorSimpleLogger
@@ -98,15 +99,24 @@ class F2Auth(
             refreshToken(oldTokens, authRealm)
         }
         val params = parametersOf(parameters.mapValues { (_, value) -> listOf(value) })
-        val client = httpClientBuilderGenerics().build(authRealm.serverUrl).httpClient
-        val refreshTokenInfoRequest = client.post {
-            url("${authRealm.serverUrl}/realms/${authRealm.realmId}/protocol/openid-connect/token")
-            setBody(FormDataContent(params))
-            if(onTokenRequestSent != null) {
-                onTokenRequestSent()
+        val tokenResponse = httpClientBuilderGenerics().build(authRealm.serverUrl).httpClient.use { client ->
+            val response = client.post {
+                url("${authRealm.serverUrl}/realms/${authRealm.realmId}/protocol/openid-connect/token")
+                setBody(FormDataContent(params))
+                if (onTokenRequestSent != null) {
+                    onTokenRequestSent()
+                }
             }
+            response.status to response.body<String>()
         }
-        val tokenInfo = refreshTokenInfoRequest.body<String>()
+        val (status, tokenInfo) = tokenResponse
+        if (!status.isSuccess()) {
+            val debugInfo = if (debug) " Response: $tokenInfo" else ""
+            throw F2Error(
+                message = "The auth provider refused the token request with ${status.value}.$debugInfo",
+                code = status.value,
+            ).asException()
+        }
         return try {
             val refreshTokenInfo = json.decodeFromString<TokenInfo>(tokenInfo)
             lastBearerTokens = BearerTokens(

@@ -24,6 +24,8 @@ dependencies {
 
     jvmTestImplementation(libs.bundles.test.junit)
     jvmTestImplementation(libs.ktor.client.mock)
+    jsTestImplementation(libs.ktor.client.mock)
+    jsTestImplementation(libs.kotlinx.coroutines.test)
 
     jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http-webflux"))
 
