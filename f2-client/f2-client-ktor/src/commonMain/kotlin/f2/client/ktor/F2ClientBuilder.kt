@@ -70,4 +70,22 @@ object F2ClientBuilder {
         requireHttpUrl(url)
         return httpClientBuilderDefault().build(url)
     }
+
+    // The type parameter keeps the klib signature apart from the non-suspend get; the JVM erases it.
+    @Deprecated(SUSPEND_GET_REMOVED, level = DeprecationLevel.HIDDEN)
+    @JsExport.Ignore
+    @Suppress("RedundantSuspendModifier") // the suspend signature is what compiled callers link to
+    suspend fun <T> get(
+        urlBase: String,
+        config: F2ClientConfigLambda<*>? = null
+    ): F2Client = get(urlBase, config)
+
+    @Deprecated(SUSPEND_GET_REMOVED, level = DeprecationLevel.HIDDEN)
+    @JsExport.Ignore
+    @Suppress("RedundantSuspendModifier") // the suspend signature is what compiled callers link to
+    suspend fun <T> get(
+        url: String,
+    ): F2Client = get(url)
 }
+
+internal const val SUSPEND_GET_REMOVED = "get is no longer suspend; kept for already compiled callers until 0.48"
