@@ -11,6 +11,7 @@ dependencies {
 
     api(libs.spring.boot.starter.security)
     api(libs.bundles.spring.oauth2)
+    api(project(":f2-spring:exception:f2-spring-boot-exception-http-webflux"))
 
     testImplementation(libs.bundles.spring.test)
     testImplementation(libs.spring.boot.starter.webflux)

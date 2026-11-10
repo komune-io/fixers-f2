@@ -5,6 +5,8 @@ import f2.client.F2ClientType
 import f2.client.ktor.common.F2DefaultJson
 import f2.client.ktor.http.model.F2UploadCommand
 import f2.dsl.cqrs.error.F2Error
+import f2.dsl.cqrs.error.F2Refusal
+import f2.dsl.cqrs.error.refusalCode
 import f2.dsl.cqrs.exception.F2Exception
 import f2.dsl.fnc.F2Consumer
 import f2.dsl.fnc.F2Function
@@ -37,12 +39,16 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transform
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlinx.io.IOException
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.serializer
 
@@ -167,57 +173,59 @@ private suspend fun <T> FlowCollector<T>.emitPayload(result: T) {
 	}
 }
 
-@Suppress("TooGenericExceptionCaught")
-private suspend fun Json.responseError(response: HttpResponse): F2Exception {
+/** The F2 error a failed response answers, read from its body; a body the client cannot read keeps the status. */
+internal suspend fun Json.responseError(response: HttpResponse): F2Exception {
 	val status = response.status.value
-	val body = try {
-		response.bodyAsText()
+	return try {
+		F2Exception(error = decodeError(response.bodyAsText(), status))
 	} catch (e: CancellationException) {
 		throw e
-	} catch (e: Throwable) {
-		return F2Exception(error = F2Error(message = e.message.orEmpty(), code = status), cause = e)
+	} catch (e: IOException) {
+		// a body cut while read, or not decodable in its charset
+		F2Exception(error = F2Error(message = e.message.orEmpty(), code = status), cause = e)
+	} catch (e: IllegalArgumentException) {
+		// a charset the platform does not know
+		F2Exception(error = F2Error(message = e.message.orEmpty(), code = status), cause = e)
 	}
-	return F2Exception(error = decodeError(body, status))
 }
 
+/**
+ * The error an F2 server's error body names — or, for `code` and `id`, a body written before 0.47. Only a body
+ * with a `message` is a refusal's: any other names the meaning of its status in `refusal`, which [refusalCode]
+ * derives from the status again. A body that is no JSON object is the message itself.
+ */
+@OptIn(ExperimentalTime::class)
 private fun Json.decodeError(body: String, status: Int): F2Error {
-	val structured = try {
+	val fields = try {
 		parseToJsonElement(body) as? JsonObject
 	} catch (_: SerializationException) {
 		null
-	}
-	return if (structured == null) F2Error(message = body, code = status) else decodeError(structured, body, status)
+	} ?: return F2Error(message = body, code = status)
+	val message = fields.text("message")
+	return F2Error(
+		message = message ?: fields.text("error") ?: body,
+		id = fields.text("id"),
+		timestamp = fields.text("timestamp") ?: Clock.System.now().toString(),
+		code = (fields["code"] as? JsonPrimitive)?.intOrNull ?: status,
+		requestId = fields.text("requestId"),
+		refusal = fields.text("refusal")?.takeIf { message != null }?.let { code ->
+			F2Refusal(
+				code = code,
+				parameters = decodeOrNull<Map<String, String>>(fields["parameters"]).orEmpty(),
+				citers = decodeOrNull<List<String>>(fields["citers"]).orEmpty(),
+			)
+		},
+	)
 }
 
-private fun Json.decodeError(structured: JsonObject, body: String, status: Int): F2Error {
-	val rawCode = (structured["code"] as? JsonPrimitive)?.takeUnless { it is JsonNull }
-	val code = rawCode?.intOrNull ?: status
-	// Only a refusal carries its message. Any other error body says what its status means, in `error` and in its
-	// `refusal` code: it is not a refusal, and its code stays the meaning of its status (`refusalCode`).
-	val refused = structured["message"]?.takeUnless { it is JsonNull }
-	val message = refused
-		?: (structured["error"] as? JsonPrimitive)?.takeUnless { it is JsonNull }
-		?: JsonPrimitive(body)
-	val fields = structured + ("code" to JsonPrimitive(code)) + ("message" to message)
-	val decoded = try {
-		decodeFromJsonElement(
-			F2Error.serializer(),
-			JsonObject(if (refused == null) fields - "refusal" else fields),
-		)
-	} catch (_: SerializationException) {
-		return F2Error(message = body, code = code)
-	}
-	val unreadCode = rawCode?.takeIf { it.intOrNull == null }?.content?.takeIf { it.isNotBlank() }
-	return if (unreadCode == null) decoded else F2Error(
-		message = "${decoded.message} (code $unreadCode)",
-		id = decoded.id,
-		timestamp = decoded.timestamp,
-		code = decoded.code,
-		requestId = decoded.requestId,
-		refusal = decoded.refusal,
-		parameters = decoded.parameters,
-		citers = decoded.citers,
-	)
+private fun JsonObject.text(key: String): String? = (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.content
+
+private inline fun <reified T> Json.decodeOrNull(element: JsonElement?): T? = try {
+	element?.let { decodeFromJsonElement<T>(it) }
+} catch (_: SerializationException) {
+	null
+} catch (_: IllegalArgumentException) {
+	null
 }
 
 private class FormDataBodyBuilder<T>(

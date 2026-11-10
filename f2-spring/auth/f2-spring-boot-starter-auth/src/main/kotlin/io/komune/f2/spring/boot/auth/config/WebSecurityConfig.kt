@@ -26,6 +26,7 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import tools.jackson.databind.json.JsonMapper
 
 @Suppress("TooManyFunctions")
 @Configuration
@@ -45,6 +46,9 @@ class WebSecurityConfig {
 
     @Autowired
     lateinit var f2TrustedIssuersResolver: F2TrustedIssuersConfig
+
+    @Autowired
+    lateinit var jsonMapper: JsonMapper
 
     @Bean
     @ConfigurationProperties(prefix = "f2.filter")
@@ -80,6 +84,7 @@ class WebSecurityConfig {
     }
 
     fun addAuthenticationRules(http: ServerHttpSecurity) {
+        http.answerDenialsWithF2Body(jsonMapper)
         addRolesAllowedRules(http)
         addPermitAllRules(http)
         addMandatoryAuthRules(http)

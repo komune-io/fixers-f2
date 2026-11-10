@@ -23,18 +23,25 @@ Feature: Raw HTTP behaviour of the vendored spring-cloud-function fixes
     Then Raw: The response status is 500
     And Raw: The response body does not contain "foo"
 
-  # Unlike the reactive runtime (see the webflux copy of this feature file for why its
-  # wire status can't be asserted), MVC's exception handling (F2ExceptionHandler) only
-  # intercepts F2Exception and KotlinInvalidNullException. A raw ResponseStatusException,
-  # such as the one JsonMessageConverter throws here, bypasses that advice entirely and
-  # falls to Spring's own default handling, which correctly derives the wire status from
-  # it. So on MVC the status can be asserted directly.
   @jacksonOnly
   Scenario: Raw: a type-mismatched JSON body is rejected with 400
     When Raw: I send "POST" to "/rawEchoFunction" with body "{\"name\":\"a\",\"count\":[]}" and content type "application/json"
     Then Raw: The response status is 400
+    And Raw: The response body contains "\"refusal\":\"http.INVALID_PAYLOAD\""
+    And Raw: The response body contains "\"message\":\"Unreadable request body\""
+    And Raw: The response body contains "\"parameter\":\"count\""
+    And Raw: The response body does not contain "Error parsing json"
 
   @jacksonOnly
   Scenario: Raw: a truncated JSON body is rejected with 400
     When Raw: I send "POST" to "/rawEchoFunction" with body "{\"name\":\"a\",\"count\":1" and content type "application/json"
     Then Raw: The response status is 400
+    And Raw: The response body contains "\"refusal\":\"http.INVALID_PAYLOAD\""
+    And Raw: The response body contains "\"message\":\"Unreadable request body\""
+    And Raw: The response body does not contain "Error parsing json"
+
+  @jacksonOnly
+  Scenario: Raw: a truncated CloudEvents JSON body is rejected with 400
+    When Raw: I send "POST" to "/rawEchoFunction" with body "{\"name\":\"a\",\"count\":1" and content type "application/cloudevents+json"
+    Then Raw: The response status is 400
+    And Raw: The response body contains "\"refusal\":\"http.INVALID_PAYLOAD\""

@@ -5,7 +5,9 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -152,5 +154,32 @@ class WebSecurityConfigIntegrationTest(
     @Test
     fun `malformed bearer token should be rejected with 401`() {
         get("/securedFunction", "not-a-jwt").expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `a 401 of the security chain answers the F2 body and no decoding message`() {
+        listOf(null, "not-a-jwt").forEach { token ->
+            get("/securedFunction", token)
+                .expectStatus().isUnauthorized
+                .expectHeader().valueEquals(HttpHeaders.WWW_AUTHENTICATE, "Bearer")
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(401)
+                .jsonPath("$.path").isEqualTo("/securedFunction")
+                .jsonPath("$.refusal").isEqualTo("http.UNAUTHENTICATED")
+                .jsonPath("$.message").doesNotExist()
+        }
+    }
+
+    @Test
+    fun `a 403 of the security chain answers the F2 body`() {
+        val token = oidc.mintToken(FIRST_REALM, roles = listOf("user"))
+        get("/adminFunction", token)
+            .expectStatus().isForbidden
+            .expectHeader().doesNotExist(HttpHeaders.WWW_AUTHENTICATE)
+            .expectBody()
+            .jsonPath("$.status").isEqualTo(403)
+            .jsonPath("$.refusal").isEqualTo("http.FORBIDDEN")
+            .jsonPath("$.message").doesNotExist()
     }
 }

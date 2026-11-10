@@ -1,12 +1,14 @@
 package f2.spring.exception.config
 
+import f2.dsl.cqrs.error.F2Error
+import f2.dsl.cqrs.error.F2Refusal
 import f2.dsl.cqrs.exception.F2Exception
 import f2.spring.exception.ConflictException
 import f2.spring.exception.F2HttpException
 import f2.spring.exception.ForbiddenAccessException
 import f2.spring.exception.NotFoundException
+import f2.spring.exception.statusError
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -19,6 +21,7 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.router
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.WebFilter
+import tools.jackson.databind.json.JsonMapper
 
 data class RequiredNameBody(val name: String)
 
@@ -26,9 +29,12 @@ data class RequiredNameBody(val name: String)
 class TestApp {
 
 	@Bean
-	fun refusingFilter() = WebFilter { exchange, chain ->
-		if (exchange.request.path.value() == "/filtered") exchange.writeRefusal(HttpStatus.UNAUTHORIZED)
-		else chain.filter(exchange)
+	fun refusingFilter(jsonMapper: JsonMapper) = WebFilter { exchange, chain ->
+		if (exchange.request.path.value() == "/filtered") {
+			exchange.writeRefusal(statusError(HttpStatus.UNAUTHORIZED), jsonMapper)
+		} else {
+			chain.filter(exchange)
+		}
 	}
 
 	@Bean
@@ -43,13 +49,16 @@ class TestApp {
 			throw ConflictException("User", "email", "test@example.com")
 		}
 		GET("/f2-exception") {
-			throw F2Exception(message = "Something broke", code = 500)
+			throw F2Exception(F2Error(message = "Something broke", code = 500))
 		}
 		GET("/refusal") {
 			throw F2HttpException(
-				status = HttpStatus.CONFLICT, message = "The item is cited: it stays", cause = null,
-				refusal = "item.CITED", parameters = mapOf("id" to "i-1"), citers = listOf("A"),
+				status = HttpStatus.CONFLICT, message = "The item is cited: it stays",
+				refusal = F2Refusal("item.CITED", parameters = mapOf("id" to "i-1"), citers = listOf("A")),
 			)
+		}
+		GET("/wrapped-refusal") {
+			throw IllegalStateException("outer", IllegalStateException("inner", NotFoundException("User", "9")))
 		}
 		GET("/generic-error") {
 			throw IllegalStateException("unexpected")
@@ -70,7 +79,7 @@ class TestApp {
 	classes = [TestApp::class],
 	webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-class F2ErrorWebExceptionHandlerTest(
+class F2ErrorWebFluxTest(
 	@LocalServerPort private val port: Int,
 ) {
 
@@ -79,34 +88,46 @@ class F2ErrorWebExceptionHandlerTest(
 	}
 
 	@Test
-	fun `should return 404 for NotFoundException, without its message`() {
+	fun `should answer NotFoundException as the refusal naming the entity and its id`() {
 		webTestClient.get().uri("/not-found")
 			.exchange()
 			.expectStatus().isNotFound
 			.expectBody()
 			.jsonPath("$.status").isEqualTo(404)
 			.jsonPath("$.refusal").isEqualTo("http.NOT_FOUND")
-			.jsonPath("$.message").doesNotExist()
+			.jsonPath("$.message").isEqualTo("User [123] not found")
+			.jsonPath("$.parameters.entity").isEqualTo("User")
+			.jsonPath("$.parameters.id").isEqualTo("123")
 	}
 
 	@Test
-	fun `should return 403 for ForbiddenAccessException, without its message`() {
+	fun `should answer ForbiddenAccessException as a refusal telling its sentence`() {
 		webTestClient.get().uri("/forbidden")
 			.exchange()
 			.expectStatus().isForbidden
 			.expectBody()
 			.jsonPath("$.refusal").isEqualTo("http.FORBIDDEN")
-			.jsonPath("$.message").doesNotExist()
+			.jsonPath("$.message").isEqualTo("Access denied to this resource")
 	}
 
 	@Test
-	fun `should return 409 for ConflictException, without its message`() {
+	fun `should answer ConflictException as the refusal naming its values`() {
 		webTestClient.get().uri("/conflict")
 			.exchange()
 			.expectStatus().isEqualTo(HttpStatus.CONFLICT)
 			.expectBody()
 			.jsonPath("$.refusal").isEqualTo("http.CONFLICT")
-			.jsonPath("$.message").doesNotExist()
+			.jsonPath("$.parameters.property").isEqualTo("email")
+	}
+
+	@Test
+	fun `should answer a refusal wrapped at any depth with its own status and body`() {
+		webTestClient.get().uri("/wrapped-refusal")
+			.exchange()
+			.expectStatus().isNotFound
+			.expectBody()
+			.jsonPath("$.refusal").isEqualTo("http.NOT_FOUND")
+			.jsonPath("$.parameters.id").isEqualTo("9")
 	}
 
 	@Test
@@ -147,10 +168,13 @@ class F2ErrorWebExceptionHandlerTest(
 	}
 
 	@Test
-	fun `should return 500 for generic RuntimeException`() {
+	fun `should return 500 for generic RuntimeException, without its message`() {
 		webTestClient.get().uri("/generic-error")
 			.exchange()
 			.expectStatus().is5xxServerError
+			.expectBody()
+			.jsonPath("$.refusal").isEqualTo("http.UNEXPECTED")
+			.jsonPath("$.message").doesNotExist()
 	}
 
 	@Test

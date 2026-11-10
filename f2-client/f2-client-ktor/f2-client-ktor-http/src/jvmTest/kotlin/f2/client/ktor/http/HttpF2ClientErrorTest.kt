@@ -177,7 +177,7 @@ class HttpF2ClientErrorTest {
     }
 
     @Test
-    suspend fun `error body with a code that is not a number keeps it in the message`() {
+    suspend fun `error body with a code that is not a number carries the HTTP status`() {
         val client = f2Client(HttpStatusCode.Forbidden, """{"message":"Forbidden","code":"ACCESS_DENIED"}""")
 
         val exception = assertThrows<F2Exception> {
@@ -185,7 +185,7 @@ class HttpF2ClientErrorTest {
         }
 
         assertThat(exception.error.code).isEqualTo(403)
-        assertThat(exception.error.message).isEqualTo("Forbidden (code ACCESS_DENIED)")
+        assertThat(exception.error.message).isEqualTo("Forbidden")
     }
 
     @Test
@@ -210,6 +210,7 @@ class HttpF2ClientErrorTest {
 
         assertThat(exception.error.code).isEqualTo(409)
         assertThat(exception.error.message).isEqualTo(body)
+        assertThat(exception.error.id).isNull()
     }
 
     @Test
@@ -223,11 +224,11 @@ class HttpF2ClientErrorTest {
         }
 
         assertThat(exception.error.code).isEqualTo(409)
-        assertThat(exception.error.isRefusal).isTrue()
-        assertThat(exception.error.refusal).isEqualTo("item.CITED")
+        assertThat(isRefusal(exception.error)).isTrue()
+        assertThat(exception.error.refusal?.code).isEqualTo("item.CITED")
         assertThat(exception.error.message).isEqualTo("Cited by A: it stays")
-        assertThat(exception.error.parameters).containsExactlyEntriesOf(mapOf("id" to "i-1"))
-        assertThat(exception.error.citers).containsExactly("A")
+        assertThat(exception.error.refusal?.parameters).containsExactlyEntriesOf(mapOf("id" to "i-1"))
+        assertThat(exception.error.refusal?.citers).containsExactly("A")
     }
 
     @Test
@@ -240,9 +241,10 @@ class HttpF2ClientErrorTest {
         }
 
         assertThat(exception.error.code).isEqualTo(404)
-        assertThat(exception.error.isRefusal).isFalse()
+        assertThat(isRefusal(exception.error)).isFalse()
         assertThat(exception.error.refusal).isNull()
-        assertThat(exception.error.refusalCode).isEqualTo("http.NOT_FOUND")
+        assertThat(refusalCode(exception.error)).isEqualTo("http.NOT_FOUND")
+        assertThat(exception.error.id).isNull()
         assertThat(exception.error.message).isEqualTo("Not Found")
     }
 

@@ -1,6 +1,7 @@
 package f2.spring.exception.config
 
 import f2.dsl.cqrs.error.F2Error
+import f2.dsl.cqrs.error.F2Refusal
 import f2.dsl.cqrs.error.missingParameterError
 import f2.dsl.cqrs.exception.F2Exception
 import org.assertj.core.api.Assertions.assertThat
@@ -10,9 +11,9 @@ import org.springframework.mock.web.MockHttpServletResponse
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
 
-class F2WrappedFailureResolverTest {
+class F2ExceptionResolverTest {
 
-    private val resolver = F2WrappedFailureResolver()
+    private val resolver = F2ExceptionResolver(JsonMapper.shared())
 
     private fun resolve(ex: Exception): Pair<MockHttpServletResponse, Boolean> {
         val response = MockHttpServletResponse()
@@ -24,7 +25,7 @@ class F2WrappedFailureResolverTest {
 
     @Test
     fun `a refusal wrapped once answers its own status, in the response and the body`() {
-        val refusal = F2Exception(error = F2Error(message = "Cited", code = 409, refusal = "item.CITED"))
+        val refusal = F2Exception(error = F2Error(message = "Cited", code = 409, refusal = F2Refusal("item.CITED")))
 
         val (response, handled) = resolve(IllegalStateException("wrapper", refusal))
 
@@ -52,7 +53,21 @@ class F2WrappedFailureResolverTest {
 
         assertThat(handled).isTrue()
         assertThat(response.status).isEqualTo(400)
-        assertThat(response.body()).containsEntry("refusal", "http.INVALID_PAYLOAD").doesNotContainKey("message")
+        assertThat(response.body()).containsEntry("refusal", "http.INVALID_PAYLOAD")
+            .containsEntry("message", "Unreadable request body")
+    }
+
+    @Test
+    fun `an F2 exception answers its own status, direct or wrapped at any depth`() {
+        listOf(
+            F2Exception(F2Error(message = "x", code = 409)),
+            RuntimeException("wrapper", RuntimeException("again", F2Exception(F2Error(message = "x", code = 409)))),
+        ).forEach { ex ->
+            val (response, handled) = resolve(ex)
+            assertThat(handled).`as`(ex.toString()).isTrue()
+            assertThat(response.status).isEqualTo(409)
+            assertThat(response.body()).containsEntry("refusal", "http.CONFLICT").doesNotContainKey("message")
+        }
     }
 
     @Test
@@ -60,8 +75,6 @@ class F2WrappedFailureResolverTest {
         listOf(
             IllegalStateException("connect to db-internal failed"),
             IllegalArgumentException("bad id"),
-            RuntimeException("wrapper", F2Exception(message = "x", code = 409)),
-            F2Exception(message = "direct, the exception handler's", code = 409),
         ).forEach { ex ->
             val (response, handled) = resolve(ex)
             assertThat(handled).`as`(ex.toString()).isFalse()

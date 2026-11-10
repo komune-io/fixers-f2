@@ -16,6 +16,7 @@ import org.springframework.mock.web.server.MockServerWebExchange
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.web.server.WebFilterChainProxy
 import reactor.core.publisher.Mono
+import tools.jackson.databind.json.JsonMapper
 
 class WebSecurityConfigTest {
 
@@ -45,6 +46,7 @@ class WebSecurityConfigTest {
         config = WebSecurityConfig().apply {
             contextPath = ""
             applicationContext = beansContext
+            jsonMapper = JsonMapper.shared()
             f2TrustedIssuersResolver = F2TrustedIssuersConfig(
                 issuerBaseUri = "http://localhost:8080/auth/realms/"
             )

@@ -1,5 +1,8 @@
 package f2.spring.exception.config
 
+import f2.dsl.cqrs.error.F2Error
+import f2.dsl.cqrs.error.F2Refusal
+import f2.spring.exception.statusError
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
@@ -20,7 +23,9 @@ class RefusalBodyTest {
 
     @Test
     fun `a status alone is answered with its meaning and no message`() {
-        val (exchange, body) = written { writeRefusal(HttpStatus.UNAUTHORIZED).block() }
+        val (exchange, body) = written {
+            writeRefusal(statusError(HttpStatus.UNAUTHORIZED), JsonMapper.shared()).block()
+        }
 
         assertThat(exchange.response.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
         assertThat(exchange.response.headers.contentType).isEqualTo(MediaType.APPLICATION_JSON)
@@ -35,8 +40,10 @@ class RefusalBodyTest {
     @Test
     fun `a rule of the application's own is answered with its code and sentence`() {
         val (_, body) = written {
-            writeRefusal(HttpStatus.FORBIDDEN, message = "This client may only read", refusal = "client.READ_ONLY")
-                .block()
+            writeRefusal(
+                F2Error(message = "This client may only read", code = 403, refusal = F2Refusal("client.READ_ONLY")),
+                JsonMapper.shared(),
+            ).block()
         }
 
         assertThat(body["status"]).isEqualTo(403)

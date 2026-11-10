@@ -25,4 +25,13 @@ class ConflictExceptionTest {
 		assertThat(exception.property).isEqualTo("sku")
 		assertThat(exception.value).isEqualTo("SKU-123")
 	}
+
+	@Test
+	fun `is the refusal http CONFLICT naming the entity, the property and the value`() {
+		val refusal = ConflictException("User", "email", "a@b.c").error.refusal
+
+		assertThat(refusal?.code).isEqualTo("http.CONFLICT")
+		assertThat(refusal?.parameters)
+			.containsExactlyEntriesOf(mapOf("entity" to "User", "property" to "email", "value" to "a@b.c"))
+	}
 }

@@ -1,10 +1,10 @@
 package consumer
 
 import f2.dsl.cqrs.error.F2Error
+import f2.dsl.cqrs.error.F2Refusal
 import f2.dsl.cqrs.exception.F2Exception
 import f2.spring.exception.config.F2ErrorAttributes
-import f2.spring.exception.config.F2ExceptionHandler
-import f2.spring.exception.config.F2WrappedFailureResolver
+import f2.spring.exception.config.F2ExceptionResolver
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -33,7 +33,8 @@ class ConsumerApp {
         /** What Spring Cloud Function does to a function's failure: wrap it once. */
         @GetMapping("/wrapped")
         fun wrapped(): String = throw IllegalStateException(
-            "wrapper", F2Exception(error = F2Error(message = "Cited: it stays", code = 409, refusal = "item.CITED")),
+            "wrapper",
+            F2Exception(error = F2Error(message = "Cited: it stays", code = 409, refusal = F2Refusal("item.CITED"))),
         )
 
         @GetMapping("/own")
@@ -54,9 +55,8 @@ class ConsumerApp {
 class F2ExceptionWebMvcAutoConfigurationTest(@Autowired private val context: ApplicationContext) {
 
     @Test
-    fun `an application without any import gets the F2 exception handler and error attributes`() {
-        assertThat(context.getBeansOfType(F2ExceptionHandler::class.java)).hasSize(1)
-        assertThat(context.getBeansOfType(F2WrappedFailureResolver::class.java)).hasSize(1)
+    fun `an application without any import gets the F2 exception resolver and error attributes`() {
+        assertThat(context.getBeansOfType(F2ExceptionResolver::class.java)).hasSize(1)
         assertThat(context.getBean(ErrorAttributes::class.java)).isInstanceOf(F2ErrorAttributes::class.java)
     }
 

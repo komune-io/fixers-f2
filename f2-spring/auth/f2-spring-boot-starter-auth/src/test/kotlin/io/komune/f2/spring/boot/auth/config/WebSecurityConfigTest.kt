@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.security.web.server.WebFilterChainProxy
 import reactor.core.publisher.Mono
+import tools.jackson.databind.json.JsonMapper
 
 class WebSecurityConfigTest {
 
@@ -50,6 +51,7 @@ class WebSecurityConfigTest {
         config = TestWebSecurityConfig().apply {
             contextPath = ""
             applicationContext = beansContext
+            jsonMapper = JsonMapper.shared()
             f2TrustedIssuersResolver = F2TrustedIssuersConfig(
                 issuers = listOf(
                     TrustedIssuerProperties(name = "keycloak", authUrl = "http://localhost:8080/auth", realm = "master")

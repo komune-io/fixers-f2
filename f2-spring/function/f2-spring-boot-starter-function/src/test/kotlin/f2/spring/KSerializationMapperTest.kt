@@ -67,8 +67,8 @@ class KSerializationMapperTest {
         assertNotNull(exception.error)
         assertEquals(400, exception.error.code)
         assertTrue(exception.error.message.contains("required") || exception.error.message.contains("Missing"))
-        assertEquals("http.INVALID_PAYLOAD", exception.error.refusal)
-        assertEquals(mapOf("parameter" to "required"), exception.error.parameters)
+        assertEquals("http.INVALID_PAYLOAD", exception.error.refusal?.code)
+        assertEquals(mapOf("parameter" to "required"), exception.error.refusal?.parameters)
     }
 
     @Test

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import f2.dsl.cqrs.exception.F2Exception;
 import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
@@ -78,8 +79,8 @@ public class SmartCompositeMessageConverter extends CompositeMessageConverter {
                 }
             }
             // KOMUNE Modification
-            // force message conversion error propagation
-            catch (ResponseStatusException e) {
+            // force message conversion error propagation: an F2 refusal (a body nobody could read) included
+            catch (ResponseStatusException | F2Exception e) {
                 throw e;
             }
             // KOMUNE End Of Modification

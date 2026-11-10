@@ -18,4 +18,9 @@ class ForbiddenAccessExceptionTest {
 		assertThat(exception.error.code).isEqualTo(403)
 		assertThat(exception.status.value()).isEqualTo(403)
 	}
+
+	@Test
+	fun `is the refusal http FORBIDDEN`() {
+		assertThat(ForbiddenAccessException("denied").error.refusal?.code).isEqualTo("http.FORBIDDEN")
+	}
 }

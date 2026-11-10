@@ -1,5 +1,6 @@
 package f2.spring.exception
 
+import f2.dsl.cqrs.error.F2Refusal
 import java.time.Instant
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -16,18 +17,6 @@ class F2HttpExceptionTest {
 		)
 		assertThat(exception.status).isEqualTo(HttpStatus.BAD_REQUEST)
 		assertThat(exception.error.code).isEqualTo(400)
-	}
-
-	@Test
-	fun `should allow custom code different from status`() {
-		val exception = F2HttpException(
-			status = HttpStatus.BAD_REQUEST,
-			code = 422,
-			message = "unprocessable",
-			cause = null
-		)
-		assertThat(exception.status).isEqualTo(HttpStatus.BAD_REQUEST)
-		assertThat(exception.error.code).isEqualTo(422)
 	}
 
 	@Test
@@ -69,14 +58,11 @@ class F2HttpExceptionTest {
 		val exception = F2HttpException(
 			status = HttpStatus.CONFLICT,
 			message = "The item is cited: it stays",
-			cause = null,
-			refusal = "item.CITED",
-			parameters = mapOf("id" to "i-1"),
-			citers = listOf("A"),
+			refusal = F2Refusal("item.CITED", parameters = mapOf("id" to "i-1"), citers = listOf("A")),
 		)
-		assertThat(exception.error.refusal).isEqualTo("item.CITED")
-		assertThat(exception.error.parameters).containsExactlyEntriesOf(mapOf("id" to "i-1"))
-		assertThat(exception.error.citers).containsExactly("A")
+		assertThat(exception.error.refusal?.code).isEqualTo("item.CITED")
+		assertThat(exception.error.refusal?.parameters).containsExactlyEntriesOf(mapOf("id" to "i-1"))
+		assertThat(exception.error.refusal?.citers).containsExactly("A")
 	}
 
 	@Test

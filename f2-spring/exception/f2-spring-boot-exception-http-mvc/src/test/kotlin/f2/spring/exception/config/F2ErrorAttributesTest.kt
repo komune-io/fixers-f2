@@ -1,6 +1,7 @@
 package f2.spring.exception.config
 
 import f2.dsl.cqrs.error.F2Error
+import f2.dsl.cqrs.error.F2Refusal
 import f2.dsl.cqrs.exception.F2Exception
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -33,8 +34,8 @@ class F2ErrorAttributesTest {
     fun `a refusal tells the caller its rule, its sentence and the values it names`() {
         val refusal = F2Exception(
             error = F2Error(
-                message = "Cited by A: it stays", code = 409, refusal = "item.CITED",
-                parameters = mapOf("id" to "i-1"), citers = listOf("A"),
+                message = "Cited by A: it stays", code = 409,
+                refusal = F2Refusal("item.CITED", parameters = mapOf("id" to "i-1"), citers = listOf("A")),
             )
         )
 
@@ -50,7 +51,7 @@ class F2ErrorAttributesTest {
 
     @Test
     fun `an f2 exception that is not a refusal answers its status and nothing it was raised with`() {
-        val body = bodyFor(F2Exception(message = internal, id = "error-id", code = 404), servletStatus = 404)
+        val body = bodyFor(F2Exception(F2Error(message = internal, id = "error-id", code = 404)), servletStatus = 404)
 
         assertThat(body["status"]).isEqualTo(404)
         assertThat(body["refusal"]).isEqualTo("http.NOT_FOUND")
@@ -72,7 +73,7 @@ class F2ErrorAttributesTest {
 
     @Test
     fun `the body never states a status the response does not carry`() {
-        val refusal = F2Exception(error = F2Error(message = "Cited", code = 409, refusal = "item.CITED"))
+        val refusal = F2Exception(error = F2Error(message = "Cited", code = 409, refusal = F2Refusal("item.CITED")))
 
         assertThat(bodyFor(IllegalStateException("wrapper", refusal))["status"]).isEqualTo(500)
     }
@@ -87,7 +88,7 @@ class F2ErrorAttributesTest {
 
         assertThat(body["status"]).isEqualTo(400)
         assertThat(body["refusal"]).isEqualTo("http.INVALID_PAYLOAD")
-        assertThat(body).doesNotContainKey("message")
+        assertThat(body["message"]).isEqualTo("Unreadable request body")
     }
 
     @Test

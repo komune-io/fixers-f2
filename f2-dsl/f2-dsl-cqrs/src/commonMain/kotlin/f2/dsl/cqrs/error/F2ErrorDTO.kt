@@ -5,20 +5,19 @@ import kotlin.js.JsExport
 import kotlin.js.JsName
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import kotlinx.serialization.Serializable
 
 /**
  * An error, as a caller receives it.
  *
  * [code] is the HTTP status. [refusal] says whether the error was written for the caller: a refusal names the
- * rule the request broke, and only a refusal discloses its [message], [parameters] and [citers]. Any other error
- * is an internal failure whose message stays on the server.
+ * rule the request broke, and only a refusal discloses the [message] and its own values. Any other error is an
+ * internal failure whose message stays on the server.
  */
 @JsExport
 @JsName("F2ErrorDTO")
 interface F2ErrorDTO: Problem {
+	/** The id the server gave this error, or `null`: an error body carries none, and a client never invents one. */
 	val id: String?
 	val timestamp: String
 	val code: Int
@@ -26,15 +25,25 @@ interface F2ErrorDTO: Problem {
 	val message: String
 
 	/**
-	 * The rule the request broke, as `<domain>.<NAME>`: a stable code a caller tells two errors apart by, and
-	 * never reused for another meaning. `null` when the error is not a refusal — on the server and in a client
-	 * alike; [refusalCode] is then the meaning of its status ([HttpRefusal]), the code its error body carries.
+	 * The rule the request broke, or `null` when the error is not a refusal — on the server and in a client alike;
+	 * [refusalCode] is then the meaning of its status ([HttpRefusal]), the code its error body carries.
 	 */
-	val refusal: String?
+	val refusal: F2RefusalDTO?
+}
+
+/** The rule a request broke, with the values a caller words it from. */
+@JsExport
+@JsName("F2RefusalDTO")
+interface F2RefusalDTO {
+	/**
+	 * The rule, as `<domain>.<NAME>`: a stable code a caller tells two errors apart by, and never reused for
+	 * another meaning.
+	 */
+	val code: String
 
 	/**
-	 * The values the error names — an alias, a file name, the field a body could not be read at — for a caller to
-	 * word it itself. They are the caller's own values, and travel with any error that gives them.
+	 * The values the refusal names — an alias, a file name, the field a body could not be read at — for a caller
+	 * to word it itself. They are the caller's own values.
 	 */
 	val parameters: Map<String, String>
 
@@ -44,21 +53,29 @@ interface F2ErrorDTO: Problem {
 
 @Serializable
 @JsExport
+@JsName("F2Refusal")
+class F2Refusal(
+	override val code: String,
+	override val parameters: Map<String, String> = emptyMap(),
+	override val citers: List<String> = emptyList(),
+) : F2RefusalDTO {
+	override fun toString(): String = "F2Refusal(code=$code, parameters=$parameters, citers=$citers)"
+}
+
+@Serializable
+@JsExport
 @JsName("F2Error")
-@Suppress("LongParameterList") // one parameter per F2ErrorDTO field
-@OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
+@OptIn(ExperimentalTime::class)
 open class F2Error(
-    override val message: String,
-    override val id: String? = Uuid.random().toString(),
-    override val timestamp: String = Clock.System.now().toString(),
-    override val code: Int = 500,
-    override val requestId: String? = null,
-    override val refusal: String? = null,
-    override val parameters: Map<String, String> = emptyMap(),
-    override val citers: List<String> = emptyList(),
+	override val message: String,
+	override val id: String? = null,
+	override val timestamp: String = Clock.System.now().toString(),
+	override val code: Int = HttpRefusal.UNEXPECTED.status,
+	override val requestId: String? = null,
+	override val refusal: F2Refusal? = null,
 ) : F2ErrorDTO {
 	override fun toString(): String {
-		return "F2Error(timestamp='$timestamp', code=$code, requestId='$requestId', refusal=$refusal, " +
+		return "F2Error(timestamp='$timestamp', code=$code, requestId='$requestId', refusal=${refusal?.code}, " +
 			"message='$message')"
 	}
 }

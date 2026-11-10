@@ -33,4 +33,11 @@ Feature: Raw HTTP behaviour of the vendored spring-cloud-function fixes
     When Raw: I send "POST" to "/rawEchoFunction" with body "{\"name\":\"a\",\"count\":1" and content type "application/json"
     Then Raw: The response status is 400
     And Raw: The response body contains "\"refusal\":\"http.INVALID_PAYLOAD\""
+    And Raw: The response body contains "\"message\":\"Unreadable request body\""
     And Raw: The response body does not contain "Error parsing json"
+
+  @jacksonOnly
+  Scenario: Raw: a truncated CloudEvents JSON body is rejected with 400
+    When Raw: I send "POST" to "/rawEchoFunction" with body "{\"name\":\"a\",\"count\":1" and content type "application/cloudevents+json"
+    Then Raw: The response status is 400
+    And Raw: The response body contains "\"refusal\":\"http.INVALID_PAYLOAD\""

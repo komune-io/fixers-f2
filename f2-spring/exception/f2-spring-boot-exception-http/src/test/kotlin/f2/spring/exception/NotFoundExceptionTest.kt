@@ -23,4 +23,12 @@ class NotFoundExceptionTest {
 		val exception = NotFoundException("Invoice", "42")
 		assertThat(exception.name).isEqualTo("Invoice")
 	}
+
+	@Test
+	fun `is the refusal http NOT_FOUND naming the entity and its id`() {
+		val refusal = NotFoundException("User", "123").error.refusal
+
+		assertThat(refusal?.code).isEqualTo("http.NOT_FOUND")
+		assertThat(refusal?.parameters).containsExactlyEntriesOf(mapOf("entity" to "User", "id" to "123"))
+	}
 }

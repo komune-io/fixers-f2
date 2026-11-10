@@ -4,7 +4,9 @@ import f2.dsl.cqrs.exception.F2Exception
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class F2ErrorExtensionTest {
 
@@ -43,9 +45,23 @@ class F2ErrorExtensionTest {
     }
 
     @Test
-    fun `asError builds an F2Error from an exception`() {
-        assertEquals("oops", IllegalStateException("oops").asError().message)
-        assertEquals("Unknown error", IllegalStateException().asError().message)
+    fun `missingParameterError is a 400 refusal naming the parameter`() {
+        val error = missingParameterError("userId")
+
+        assertEquals(400, error.code)
+        assertEquals("http.INVALID_PAYLOAD", error.refusal?.code)
+        assertEquals(mapOf(PARAMETER_KEY to "userId"), error.refusal?.parameters)
+        assertEquals("Missing parameter `userId`", error.message)
+    }
+
+    @Test
+    fun `refusalCode is the refusal's, or the meaning of the status`() {
+        val refused = F2Error(message = "x", code = 409, refusal = F2Refusal("order.CLOSED"))
+
+        assertTrue(isRefusal(refused))
+        assertEquals("order.CLOSED", refusalCode(refused))
+        assertFalse(isRefusal(F2Error(message = "x", code = 404)))
+        assertEquals("http.NOT_FOUND", refusalCode(F2Error(message = "x", code = 404)))
     }
 
     @Test
