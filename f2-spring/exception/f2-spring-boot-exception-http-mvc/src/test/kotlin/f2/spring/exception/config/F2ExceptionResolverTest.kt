@@ -6,9 +6,12 @@ import f2.dsl.cqrs.error.missingParameterError
 import f2.dsl.cqrs.exception.F2Exception
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.mock.http.MockHttpInputMessage
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule
 import tools.jackson.module.kotlin.readValue
 
 class F2ExceptionResolverTest {
@@ -86,4 +89,42 @@ class F2ExceptionResolverTest {
             assertThat(response.contentAsString).isEmpty()
         }
     }
+
+    @Test
+    fun `a missing field of a request body MVC could not read is the caller's refusal naming it`() {
+        val missing = checkNotNull(
+            runCatching {
+                JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
+                    .readValue("""{"name":null}""", Named::class.java)
+            }.exceptionOrNull()
+        )
+        val unreadable = HttpMessageNotReadableException(
+            "JSON parse error",
+            missing,
+            MockHttpInputMessage(ByteArray(0)),
+        )
+
+        val (response, handled) = resolve(unreadable)
+
+        assertThat(handled).isTrue()
+        assertThat(response.status).isEqualTo(400)
+        assertThat(response.body()).containsEntry("message", "Missing parameter `name`")
+    }
+
+    @Test
+    fun `a response already committed is left to Spring`() {
+        val response = MockHttpServletResponse().apply { setCommitted(true) }
+
+        val handled = resolver.resolveException(
+            request = MockHttpServletRequest("POST", "/itemUpdate"),
+            response = response,
+            handler = null,
+            ex = F2Exception(F2Error(message = "x", code = 409)),
+        )
+
+        assertThat(handled).isNull()
+        assertThat(response.contentAsString).isEmpty()
+    }
+
+    private data class Named(val name: String)
 }

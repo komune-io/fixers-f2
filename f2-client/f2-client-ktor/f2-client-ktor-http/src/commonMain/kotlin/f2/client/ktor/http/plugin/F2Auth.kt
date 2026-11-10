@@ -106,7 +106,8 @@ class F2Auth(
             val debugInfo = if (isDebug) " Response: $tokenInfo" else ""
             throw F2Error(
                 message = "The auth provider refused the token request with ${status.value}.$debugInfo",
-                code = status.value,
+                // a dependency of this service failed: the caller's own credentials are not in question
+                code = AUTH_PROVIDER_FAILURE,
             ).asException()
         }
         return try {
@@ -119,14 +120,14 @@ class F2Auth(
         } catch (e: IllegalArgumentException) {
             val debugInfo = if (isDebug) "Invalid argument encountered: $tokenInfo" else ""
             throw F2Error(
-                message = "Unable to decode response from auth provider. $debugInfo"
+                message = "Unable to decode response from auth provider. $debugInfo",
+                code = AUTH_PROVIDER_FAILURE,
             ).asException(e)
         }
     }
 
     private fun refreshToken(oldTokens: BearerTokens?, authRealm: AuthRealm): Map<String, String> {
-        LOGGER.debug("Refresh Token: grant_type[refresh_token] with client_id[${authRealm.clientId}] " +
-                "and refresh_token=${oldTokens?.refreshToken?.take(n = 5) ?: "none"}...}")
+        LOGGER.debug("Refresh Token: grant_type[refresh_token] with client_id[${authRealm.clientId}]")
         return mapOf(
             GRANT_TYPE to "refresh_token",
             CLIENT_ID to authRealm.clientId,
@@ -161,6 +162,9 @@ class F2Auth(
     companion object Plugin: HttpClientPlugin<F2Auth, F2Auth> {
         private const val GRANT_TYPE = "grant_type"
         private const val CLIENT_ID = "client_id"
+
+        // 502: the token endpoint is a dependency; its 401 is not the caller's.
+        private const val AUTH_PROVIDER_FAILURE = 502
 
         val LOGGER = KtorSimpleLogger("f2.client.ktor.http.plugin.F2Auth")
 

@@ -155,6 +155,7 @@ class F2AuthTest {
                 val f2Exception = requestFailure(client)
 
                 assertThat(f2Exception.error.message).contains("Unable to decode response")
+                assertThat(f2Exception.error.code).isEqualTo(502)
             }
         }
     }
@@ -170,7 +171,7 @@ class F2AuthTest {
             ).use { client ->
                 val f2Exception = requestFailure(client)
 
-                assertThat(f2Exception.error.code).isEqualTo(401)
+                assertThat(f2Exception.error.code).isEqualTo(502)
                 assertThat(f2Exception.error.message).contains("refused the token request with 401")
                 assertThat(authHeaders).noneMatch { it == "Bearer token-refused" }
             }

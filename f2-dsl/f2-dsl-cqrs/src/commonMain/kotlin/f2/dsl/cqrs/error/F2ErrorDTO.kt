@@ -5,7 +5,6 @@ import kotlin.js.JsExport
 import kotlin.js.JsName
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-import kotlinx.serialization.Serializable
 
 /**
  * An error, as a caller receives it.
@@ -43,24 +42,28 @@ interface F2RefusalDTO {
 
     /**
      * The values the refusal names — an alias, a file name, the field a body could not be read at — for a caller
-     * to word it itself. They are the caller's own values.
+     * to word it itself. They are the caller's own values. From JS: `refusalParameters(refusal)`.
      */
+    @JsExport.Ignore
     val parameters: Map<String, String>
 
-    /** The objects whose citing keeps the refused one alive, by name. */
+    /** The objects whose citing keeps the refused one alive, by name. From JS: `refusalCiters(refusal)`. */
+    @JsExport.Ignore
     val citers: List<String>
 }
 
-@Serializable
 @JsExport
 @JsName("F2Refusal")
 data class F2Refusal(
     override val code: String,
+    @property:JsExport.Ignore
     override val parameters: Map<String, String> = emptyMap(),
+    @property:JsExport.Ignore
     override val citers: List<String> = emptyList(),
 ) : F2RefusalDTO
 
-@Serializable
+// Not @Serializable: the wire body is flat (`refusal` is the code beside `message`, `parameters`, `citers`), and
+// both ends write and read it by hand — a serializer would write another shape.
 @JsExport
 @JsName("F2Error")
 @OptIn(ExperimentalTime::class)

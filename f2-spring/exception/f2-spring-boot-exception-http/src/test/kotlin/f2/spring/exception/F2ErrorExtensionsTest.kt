@@ -113,7 +113,7 @@ class F2ErrorExtensionsTest {
     }
 
     @Test
-    fun `describeError names a missing parameter at any depth, before the unreadable body it also is`() {
+    fun `describeError names a missing parameter under the request input, before the unreadable body it also is`() {
         val missing = runCatching {
             JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
                 .readValue("""{"description":null}""", Item::class.java)
@@ -129,6 +129,34 @@ class F2ErrorExtensionsTest {
     fun `describeError leaves a failure carrying nothing of F2 to the framework`() {
         assertThat(IllegalStateException("alone").describeError()).isNull()
         assertThat((null as Throwable?).describeError()).isNull()
+    }
+
+    @Test
+    fun `a missing field the server met reading its own data is a server failure, naming nothing`() {
+        val missing = checkNotNull(
+            runCatching {
+                JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
+                    .readValue("""{"description":null}""", Item::class.java)
+            }.exceptionOrNull()
+        )
+
+        assertThat(missing.describeError()).isNull()
+        assertThat(IllegalStateException("reading the cache", missing).describeError()).isNull()
+        assertThat(
+            HashMap<String, Any?>(mapOf("status" to 500, "path" to "/items"))
+                .toF2ErrorBody(IllegalStateException("reading the cache", missing), statusFromError = true)
+        ).containsEntry("status", 500)
+            .containsEntry("refusal", "http.UNEXPECTED")
+            .doesNotContainKeys("message", "parameters")
+    }
+
+    @Test
+    fun `a code that is no HTTP error status answers 500`() {
+        listOf(999, 0, 200, 302).forEach { code ->
+            assertThat(F2Error(message = "x", code = code).httpStatus()).`as`("code %s", code)
+                .isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+        assertThat(F2Error(message = "x", code = 409).httpStatus()).isEqualTo(HttpStatus.CONFLICT)
     }
 
     private data class Item(val description: String)

@@ -7,7 +7,10 @@ import f2.dsl.cqrs.error.missingParameterError
 import f2.dsl.cqrs.error.refusalCode
 import f2.dsl.cqrs.exception.F2Exception
 import java.time.Instant
+import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpStatus
+import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.web.server.ServerWebInputException
 import tools.jackson.core.JacksonException
 import tools.jackson.databind.DatabindException
 import tools.jackson.module.kotlin.KotlinInvalidNullException
@@ -17,6 +20,9 @@ const val REFUSAL_ATTRIBUTE: String = "refusal"
 
 // `SimpleFunctionRegistry`'s message, or its prefix, when converting a function's input fails.
 private const val UNREADABLE_INPUT = "Failed to convert input"
+
+// Spring Cloud Function's JacksonMapper, when the function input it converts fails.
+private const val UNREADABLE_JSON = "Failed to convert JSON to "
 
 private const val TIMESTAMP_ATTRIBUTE = "timestamp"
 private const val PATH_ATTRIBUTE = "path"
@@ -57,25 +63,37 @@ fun errorBody(path: String, status: HttpStatus, error: F2ErrorDTO): MutableMap<S
 /** The error a failure the framework answered with [status] gives the caller: the meaning of that status only. */
 fun statusError(status: HttpStatus): F2Error = F2Error(message = status.reasonPhrase, code = status.value())
 
-/** The status this error answers: its code, or 500 when its code is no HTTP status. */
-fun F2ErrorDTO.httpStatus(): HttpStatus = HttpStatus.resolve(code) ?: HttpStatus.INTERNAL_SERVER_ERROR
+/** The status this error answers: its code, or 500 when its code is no HTTP error status (a 2xx, a 3xx, 999…). */
+fun F2ErrorDTO.httpStatus(): HttpStatus =
+    HttpStatus.resolve(code)?.takeIf { it.isError } ?: HttpStatus.INTERNAL_SERVER_ERROR
 
 /**
  * The F2 error this failure carries — the one rule every F2 error writer reads: anywhere in its cause chain, an
- * [F2Exception]'s error or a missing required parameter; else a request body nobody could read, naming the field
- * the parser stopped at when it knows it. `null` when the failure carries nothing of F2: the framework's status
- * stands, and the caller learns its meaning only.
+ * [F2Exception]'s error; under the reading of the request's input (Spring Cloud Function's "Failed to convert
+ * input", a `ServerWebInputException`, a `DecodingException`, an `HttpMessageNotReadableException`), a missing
+ * required parameter; else a request body nobody could read, naming the field the parser stopped at when it knows
+ * it. `null` when the failure carries nothing of F2: the framework's status stands, and the caller learns its
+ * meaning only. A missing field the server met reading its own data is the server's failure, a 500.
  */
 fun Throwable?.describeError(): F2ErrorDTO? {
-    if (this == null) return null
-    return generateSequence(this) { it.cause }.firstNotNullOfOrNull { failure ->
-        when (failure) {
-            is F2Exception -> failure.error
-            is KotlinInvalidNullException -> missingParameterError(failure.kotlinPropertyName)
-            else -> null
-        }
-    } ?: unreadableBody()?.unreadableBodyError()
+    val chain = generateSequence(this) { it.cause }.toList()
+    val refused = chain.firstNotNullOfOrNull { (it as? F2Exception)?.error }
+    val missing = chain.dropWhile { !it.readsRequestInput() }
+        .firstNotNullOfOrNull { (it as? KotlinInvalidNullException)?.kotlinPropertyName }
+    return missing?.let(::missingParameterError) ?: refused ?: this?.unreadableBody()?.unreadableBodyError()
 }
+
+private fun Throwable.readsRequestInput(): Boolean =
+    this is ServerWebInputException ||
+        this is DecodingException ||
+        this is HttpMessageNotReadableException ||
+        this is UnreadableBodyException ||
+        isInputConversionWrapper()
+
+// Spring Cloud Function's wrappers of a function input it could not convert: the registry's, and its JSON mapper's.
+private fun Throwable.isInputConversionWrapper(): Boolean =
+    this is IllegalStateException && (message == UNREADABLE_INPUT || message.orEmpty().startsWith(UNREADABLE_JSON)) ||
+        this is IllegalArgumentException && message.orEmpty().startsWith("$UNREADABLE_INPUT: ")
 
 /**
  * The refusal of a request body nobody could read because of this parser failure: `http.INVALID_PAYLOAD`, naming
@@ -112,8 +130,8 @@ fun Map<String, Any?>.toF2ErrorBody(failure: Throwable?, statusFromError: Boolea
  * parser failing on something the server read itself is a server error.
  */
 fun Throwable.unreadableBody(): Throwable? = when {
-    this is IllegalStateException && message == UNREADABLE_INPUT ->
+    this is IllegalStateException && isInputConversionWrapper() ->
         generateSequence(cause) { it.cause }.filterIsInstance<JacksonException>().firstOrNull()
-    this is IllegalArgumentException && message.orEmpty().startsWith("$UNREADABLE_INPUT: ") -> this
+    this is IllegalArgumentException && isInputConversionWrapper() -> this
     else -> null
 }

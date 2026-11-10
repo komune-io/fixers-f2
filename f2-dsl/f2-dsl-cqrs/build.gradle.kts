@@ -12,6 +12,8 @@ dependencies {
 
     commonTestImplementation(kotlin("test"))
     commonTestImplementation(libs.kotlinx.coroutines.test)
+    commonTestImplementation(libs.kotlinx.serialization.json)
 
     jvmTestImplementation(libs.bundles.test.junit)
+    jvmTestImplementation(libs.jackson.module.kotlin)
 }

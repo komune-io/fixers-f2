@@ -2,7 +2,6 @@ package f2.feature.cloudevent.storming
 
 import f2.dsl.cqrs.Command
 import f2.dsl.event.CloudEvent
-import f2.dsl.event.CloudEventAttributes
 import f2.feature.cloudevent.storming.entity.CloudEventEntity
 import f2.feature.cloudevent.storming.entity.CloudEventEntityRepository
 import java.time.Instant
@@ -34,12 +33,10 @@ class StormingCommandSink(
             eventType = eventType,
             source = "S2",
             eventID = UUID.randomUUID().toString(),
-            attributes = CloudEventAttributes(
-                cloudEventsVersion = "1",
-                eventTypeVersion = "1",
-                eventTime = Instant.now().toString(),
-                contentType = "application/json",
-            ),
+            cloudEventsVersion = "1",
+            eventTypeVersion = "1",
+            eventTime = Instant.now().toString(),
+            contentType = "application/json",
             data = objectMapper.writeValueAsString(command)
         )
         val entity = CloudEventEntity(

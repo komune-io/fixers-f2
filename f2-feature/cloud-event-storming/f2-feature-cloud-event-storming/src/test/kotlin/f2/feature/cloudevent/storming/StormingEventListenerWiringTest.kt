@@ -1,7 +1,6 @@
 package f2.feature.cloudevent.storming
 
 import f2.dsl.event.CloudEvent
-import f2.dsl.event.CloudEventAttributes
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
@@ -53,7 +52,7 @@ class StormingEventListenerWiringTest {
                     eventType = "UserCreated",
                     source = "S2",
                     eventID = "event-1",
-                    attributes = CloudEventAttributes(cloudEventsVersion = "1"),
+                    cloudEventsVersion = "1",
                     data = """{"name":"john"}"""
                 )
             )

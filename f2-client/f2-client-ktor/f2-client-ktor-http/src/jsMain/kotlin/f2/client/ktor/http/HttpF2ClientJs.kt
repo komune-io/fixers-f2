@@ -17,9 +17,12 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 
 // The client's functions as JS calls them, with the JS values it holds: a message is written with
-// JSON.stringify, a result read with JSON.parse — no Kotlin serializer stands between. They are top-level
-// functions: a member would shadow the reified Kotlin extensions of the same name on every platform.
-// Call their result with invokeF2Supplier, invokeF2Function and invokeF2Consumer.
+// JSON.stringify, a result read with JSON.parse — no Kotlin serializer stands between. A message is therefore a
+// plain JS object or array (the shape of a command's TypeScript interface), never an instance of an exported
+// Kotlin class: JSON.stringify writes its mangled fields, so such a message is refused; an upload command has no
+// JSON form and is refused alike. They are top-level functions: a member would shadow the reified Kotlin
+// extensions of the same name on every platform. Call their result with invokeF2Supplier, invokeF2Function and
+// invokeF2Consumer.
 
 /** The supplier at [route] of the F2 server [client] calls: one GET, its results as JS values. */
 @JsExport
@@ -41,10 +44,22 @@ fun <QUERY> httpF2Consumer(client: HttpF2Client, route: String): F2Consumer<QUER
 private fun HttpF2Client.routeUrl(route: String) = "$urlBase/$route"
 
 private suspend fun <MSG> HttpF2Client.postAll(route: String, messages: Flow<MSG>): HttpResponse {
-    val body = JSON.stringify(messages.toList().toTypedArray())
+    val all = messages.toList()
+    all.forEach { message ->
+        require(isPlainJsValue(message)) {
+            "A JS message is a plain object or array, not an instance of an exported Kotlin class: $route"
+        }
+    }
+    val body = JSON.stringify(all.toTypedArray())
     return send {
         httpClient.post(routeUrl(route)) { setBody(TextContent(body, ContentType.Application.Json)) }
     }
+}
+
+private fun isPlainJsValue(value: Any?): Boolean {
+    if (value == null || jsTypeOf(value) != "object") return true
+    val prototype: dynamic = js("Object").getPrototypeOf(value)
+    return js("Array").isArray(value) as Boolean || prototype == js("Object.prototype") || prototype == null
 }
 
 private suspend fun HttpF2Client.checked(response: HttpResponse): HttpResponse {

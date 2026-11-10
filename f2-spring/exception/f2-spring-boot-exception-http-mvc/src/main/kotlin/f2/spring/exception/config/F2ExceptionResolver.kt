@@ -1,5 +1,6 @@
 package f2.spring.exception.config
 
+import f2.dsl.cqrs.error.F2ErrorDTO
 import f2.spring.exception.describeError
 import f2.spring.exception.errorBody
 import f2.spring.exception.httpStatus
@@ -34,12 +35,10 @@ class F2ExceptionResolver(
         handler: Any?,
         ex: Exception,
     ): ModelAndView? {
-        val error = ex.describeError() ?: return null
-        val status = error.httpStatus()
-        response.status = status.value()
-        response.contentType = MediaType.APPLICATION_JSON_VALUE
-        response.characterEncoding = Charsets.UTF_8.name()
-        response.outputStream.write(jsonMapper.writeValueAsBytes(errorBody(request.requestURI, status, error)))
+        val error = ex.describeError()
+        // a response already on its way cannot take another status nor a second body: Spring's resolution logs it
+        if (error == null || response.isCommitted) return null
+        response.writeF2Error(request.requestURI, error, jsonMapper)
         return ModelAndView()
     }
 
@@ -47,4 +46,13 @@ class F2ExceptionResolver(
         /** After `DefaultErrorAttributes`, which only records the error, and before every other resolver. */
         const val ORDER: Int = Ordered.HIGHEST_PRECEDENCE + 1
     }
+}
+
+/** Answers this response with the status of [error] and the F2 error body at [path], written with [jsonMapper]. */
+internal fun HttpServletResponse.writeF2Error(path: String, error: F2ErrorDTO, jsonMapper: JsonMapper) {
+    val status = error.httpStatus()
+    this.status = status.value()
+    contentType = MediaType.APPLICATION_JSON_VALUE
+    characterEncoding = Charsets.UTF_8.name()
+    outputStream.write(jsonMapper.writeValueAsBytes(errorBody(path, status, error)))
 }

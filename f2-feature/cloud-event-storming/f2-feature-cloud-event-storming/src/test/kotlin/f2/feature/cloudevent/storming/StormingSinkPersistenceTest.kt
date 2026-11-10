@@ -2,7 +2,6 @@ package f2.feature.cloudevent.storming
 
 import f2.dsl.cqrs.Command
 import f2.dsl.event.CloudEvent
-import f2.dsl.event.CloudEventAttributes
 import f2.feature.cloudevent.storming.entity.CloudEventEntity
 import java.time.Duration
 import kotlin.coroutines.cancellation.CancellationException
@@ -42,7 +41,8 @@ class StormingSinkPersistenceTest {
         eventType = "UserCreated",
         source = "S2",
         eventID = id,
-        attributes = CloudEventAttributes(cloudEventsVersion = "1", eventTypeVersion = "1"),
+        cloudEventsVersion = "1",
+        eventTypeVersion = "1",
         data = """{"name":"john"}"""
     )
 

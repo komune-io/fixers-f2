@@ -3,6 +3,8 @@ package f2.dsl.cqrs.envelope
 import f2.dsl.cqrs.Message
 import kotlin.js.JsExport
 import kotlin.js.JsName
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 
 @JsExport
@@ -32,6 +34,8 @@ data class Envelope<T>(
     override val source: String? = null,
     override val time: String? = null
 ) : EnvelopeDTO<T> {
+    @OptIn(ExperimentalSerializationApi::class)
+    @EncodeDefault(EncodeDefault.Mode.ALWAYS) // on the wire whatever the Json's encodeDefaults says
     override val specversion: String = ENVELOPE_SPEC_VERSION
 }
 

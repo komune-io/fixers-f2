@@ -8,6 +8,7 @@ import f2.client.ktor.http.model.exported.httpF2Supplier
 import f2.client.ktor.http.model.exported.invokeF2Consumer
 import f2.client.ktor.http.model.exported.invokeF2Function
 import f2.client.ktor.http.model.exported.invokeF2Supplier
+import f2.dsl.cqrs.error.F2Refusal
 import f2.dsl.cqrs.exception.F2Exception
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -88,5 +89,16 @@ class HttpF2ClientJsTest {
         assertEquals(409, error.code)
         assertEquals("item.CITED", error.refusal?.code)
         assertEquals(listOf("A"), error.refusal?.citers)
+    }
+
+    @Test
+    fun aMessageThatIsAKotlinObjectIsRefusedBeforeAnyRequest() = runTest {
+        val function = httpF2Function(client(body = "[]"), "itemCount")
+
+        val failure = runCatching { invokeF2Function(function, arrayOf(F2Refusal(code = "x"))).await() }
+            .exceptionOrNull()
+
+        assertIs<IllegalArgumentException>(failure)
+        assertTrue(requests.isEmpty())
     }
 }
