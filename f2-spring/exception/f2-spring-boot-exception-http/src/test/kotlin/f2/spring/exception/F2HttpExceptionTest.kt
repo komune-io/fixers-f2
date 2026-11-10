@@ -1,5 +1,6 @@
 package f2.spring.exception
 
+import java.time.Instant
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
@@ -60,5 +61,27 @@ class F2HttpExceptionTest {
 		)
 		assertThat(exception.error.id).isNotBlank()
 		assertThat(exception.error.timestamp).isNotBlank()
+		assertThat(Instant.parse(exception.error.timestamp)).isNotNull()
+	}
+
+	@Test
+	fun `a refusal carries its code, parameters and citers in its error`() {
+		val exception = F2HttpException(
+			status = HttpStatus.CONFLICT,
+			message = "The item is cited: it stays",
+			cause = null,
+			refusal = "item.CITED",
+			parameters = mapOf("id" to "i-1"),
+			citers = listOf("A"),
+		)
+		assertThat(exception.error.refusal).isEqualTo("item.CITED")
+		assertThat(exception.error.parameters).containsExactlyEntriesOf(mapOf("id" to "i-1"))
+		assertThat(exception.error.citers).containsExactly("A")
+	}
+
+	@Test
+	fun `an exception without a refusal code is not a refusal`() {
+		val exception = F2HttpException(status = HttpStatus.NOT_FOUND, message = "not found", cause = null)
+		assertThat(exception.error.refusal).isNull()
 	}
 }

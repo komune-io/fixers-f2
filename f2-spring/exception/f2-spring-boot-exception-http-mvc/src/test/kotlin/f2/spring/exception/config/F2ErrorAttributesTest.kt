@@ -1,77 +1,99 @@
 package f2.spring.exception.config
 
+import f2.dsl.cqrs.error.F2Error
 import f2.dsl.cqrs.exception.F2Exception
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.web.error.ErrorAttributeOptions
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.ServletWebRequest
+import tools.jackson.core.JsonParser
+import tools.jackson.core.exc.StreamReadException
 
 class F2ErrorAttributesTest {
 
     private val errorAttributes = F2ErrorAttributes()
+    private val internal = "jdbc:postgresql://db-internal:5432/app"
 
-    private fun webRequest(exception: Throwable?): ServletWebRequest {
+    private fun bodyFor(
+        exception: Throwable?,
+        options: ErrorAttributeOptions = ErrorAttributeOptions.defaults(),
+        servletStatus: Int = 500,
+    ): Map<String, Any?> {
         val request = MockHttpServletRequest()
-        request.setAttribute("jakarta.servlet.error.status_code", 500)
+        request.setAttribute("jakarta.servlet.error.status_code", servletStatus)
         request.setAttribute("jakarta.servlet.error.request_uri", "/test")
         if (exception != null) {
             request.setAttribute("jakarta.servlet.error.exception", exception)
         }
-        return ServletWebRequest(request)
+        return errorAttributes.getErrorAttributes(ServletWebRequest(request), options)
     }
 
     @Test
-    fun `should enrich attributes with f2 error fields for F2Exception`() {
-        val exception = F2Exception(message = "Something broke", id = "error-id", code = 404)
-
-        val attributes = errorAttributes.getErrorAttributes(
-            webRequest(exception),
-            ErrorAttributeOptions.defaults()
+    fun `a refusal tells the caller its rule, its sentence and the values it names`() {
+        val refusal = F2Exception(
+            error = F2Error(
+                message = "Cited by A: it stays", code = 409, refusal = "item.CITED",
+                parameters = mapOf("id" to "i-1"), citers = listOf("A"),
+            )
         )
 
-        assertThat(attributes["id"]).isEqualTo("error-id")
-        assertThat(attributes["code"]).isEqualTo(404)
-        assertThat(attributes["message"]).isEqualTo("Something broke")
-        assertThat(attributes["timestamp"]).isNotNull
+        val body = bodyFor(IllegalStateException("wrapper", refusal), servletStatus = 409)
+
+        assertThat(body["status"]).isEqualTo(409)
+        assertThat(body["refusal"]).isEqualTo("item.CITED")
+        assertThat(body["message"]).isEqualTo("Cited by A: it stays")
+        assertThat(body["parameters"]).isEqualTo(mapOf("id" to "i-1"))
+        assertThat(body["citers"]).isEqualTo(listOf("A"))
+        assertThat(body).doesNotContainKeys("id", "code")
     }
 
     @Test
-    fun `should enrich attributes when F2Exception is the cause`() {
-        val cause = F2Exception(message = "Nested failure", id = "cause-id", code = 409)
-        val exception = IllegalStateException("wrapper", cause)
+    fun `an f2 exception that is not a refusal answers its status and nothing it was raised with`() {
+        val body = bodyFor(F2Exception(message = internal, id = "error-id", code = 404), servletStatus = 404)
 
-        val attributes = errorAttributes.getErrorAttributes(
-            webRequest(exception),
-            ErrorAttributeOptions.defaults()
-        )
-
-        assertThat(attributes["id"]).isEqualTo("cause-id")
-        assertThat(attributes["code"]).isEqualTo(409)
-        assertThat(attributes["message"]).isEqualTo("Nested failure")
+        assertThat(body["status"]).isEqualTo(404)
+        assertThat(body["refusal"]).isEqualTo("http.NOT_FOUND")
+        assertThat(body).doesNotContainKeys("message", "id", "code", "parameters", "citers")
     }
 
     @Test
-    fun `should keep default attributes for non f2 exceptions`() {
-        val attributes = errorAttributes.getErrorAttributes(
-            webRequest(IllegalStateException("unexpected")),
-            ErrorAttributeOptions.defaults()
+    fun `any other exception says nothing it was raised with, even when configuration asks for all of it`() {
+        val body = bodyFor(
+            IllegalStateException(internal),
+            ErrorAttributeOptions.of(ErrorAttributeOptions.Include.entries),
         )
 
-        assertThat(attributes["code"]).isNull()
-        assertThat(attributes["id"]).isNull()
-        assertThat(attributes["message"]).isEqualTo("unexpected")
-        assertThat(attributes["status"]).isEqualTo(500)
+        assertThat(body["status"]).isEqualTo(500)
+        assertThat(body["refusal"]).isEqualTo("http.UNEXPECTED")
+        assertThat(body).doesNotContainKeys("message", "exception", "trace", "errors")
+        assertThat(body.keys).containsExactly("timestamp", "path", "status", "error", "refusal")
     }
 
     @Test
-    fun `should keep default attributes without exception`() {
-        val attributes = errorAttributes.getErrorAttributes(
-            webRequest(null),
-            ErrorAttributeOptions.defaults()
+    fun `the body never states a status the response does not carry`() {
+        val refusal = F2Exception(error = F2Error(message = "Cited", code = 409, refusal = "item.CITED"))
+
+        assertThat(bodyFor(IllegalStateException("wrapper", refusal))["status"]).isEqualTo(500)
+    }
+
+    @Test
+    fun `a body the parser cannot read is the caller's`() {
+        val parser = StreamReadException(null as JsonParser?, "Unexpected end-of-input")
+
+        val body = bodyFor(
+            IllegalStateException("Failed to convert input", RuntimeException(parser)), servletStatus = 400,
         )
 
-        assertThat(attributes["code"]).isNull()
-        assertThat(attributes["status"]).isEqualTo(500)
+        assertThat(body["status"]).isEqualTo(400)
+        assertThat(body["refusal"]).isEqualTo("http.INVALID_PAYLOAD")
+        assertThat(body).doesNotContainKey("message")
+    }
+
+    @Test
+    fun `an error without an exception carries the meaning of its status`() {
+        val body = bodyFor(null)
+
+        assertThat(body["refusal"]).isEqualTo("http.UNEXPECTED")
     }
 }

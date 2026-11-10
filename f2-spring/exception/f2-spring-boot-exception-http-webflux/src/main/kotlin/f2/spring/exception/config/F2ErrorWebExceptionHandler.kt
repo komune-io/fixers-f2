@@ -1,14 +1,13 @@
 package f2.spring.exception.config
 
-import f2.dsl.cqrs.error.F2Error
+import f2.dsl.cqrs.error.missingParameterError
 import f2.dsl.cqrs.exception.F2Exception
 import f2.spring.exception.F2HttpException
-import f2.spring.exception.missingParameterError
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.web.WebProperties
 import org.springframework.boot.webflux.autoconfigure.error.DefaultErrorWebExceptionHandler
+import org.springframework.boot.webflux.error.ErrorAttributes
 import org.springframework.context.ApplicationContext
-import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerCodecConfigurer
@@ -21,22 +20,29 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import tools.jackson.module.kotlin.KotlinInvalidNullException
 
-@Configuration
-@Suppress("MagicNumber")
-@Order(-2)
+/**
+ * Answers every error with the body of [errorAttributes] — [F2ErrorAttributes] unless the application declares its
+ * own — at the status that body names, ahead of Spring Boot's handler. Registered by
+ * [F2ExceptionWebFluxAutoConfiguration].
+ */
+@Order(F2ErrorWebExceptionHandler.ORDER)
 class F2ErrorWebExceptionHandler(
+    errorAttributes: ErrorAttributes,
     applicationContext: ApplicationContext,
     webProperties: WebProperties,
     serverCodecConfigurer: ServerCodecConfigurer,
     viewResolvers: ObjectProvider<ViewResolver>,
 ): DefaultErrorWebExceptionHandler(
-    F2ErrorAttributes(),
+    errorAttributes,
     webProperties.resources,
     webProperties.error,
     applicationContext
 ) {
     companion object {
         private const val INTERNAL_ERROR = 500
+
+        /** Ahead of Spring Boot's handler (-1) and of WebFlux's own (0). */
+        const val ORDER: Int = -2
     }
     init {
         setViewResolvers(viewResolvers.toList())
@@ -76,13 +82,9 @@ class F2ErrorWebExceptionHandler(
 
     override fun renderErrorResponse(request: ServerRequest): Mono<ServerResponse> {
         val error = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL))
-        // "code" is only present for F2Exception (set by F2ErrorAttributes). For any other
-        // exception type, fall back to "status", which DefaultErrorAttributes already
-        // resolves correctly from the throwable (e.g. ResponseStatusException,
-        // ErrorResponse) before defaulting to 500 itself if truly unclassified.
-        val status: Int = error[F2Error::code.name] as Int?
-            ?: error["status"] as Int?
-            ?: INTERNAL_ERROR
+        // F2ErrorAttributes resolves "status": an F2Exception's code, a body nobody could read, or what
+        // DefaultErrorAttributes derives from the throwable (ResponseStatusException, ErrorResponse).
+        val status: Int = error["status"] as Int? ?: INTERNAL_ERROR
         return ServerResponse.status(status).contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(error.filterValues { it != null }))
     }

@@ -1,6 +1,8 @@
 package f2.spring
 
 import f2.dsl.cqrs.error.F2Error
+import f2.dsl.cqrs.error.HttpRefusal
+import f2.dsl.cqrs.error.missingParameterError
 import f2.dsl.cqrs.exception.F2Exception
 import java.io.ByteArrayInputStream
 import java.io.IOException
@@ -8,6 +10,7 @@ import java.io.InputStream
 import java.io.Reader
 import java.lang.reflect.Type
 import java.nio.charset.StandardCharsets
+import java.time.Instant
 import java.util.UUID
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -47,18 +50,13 @@ class KSerializationMapper(
         try {
             return decode(json, type) as T
         } catch (e: MissingFieldException) {
-            throw F2Exception(error = F2Error(
-                id = UUID.randomUUID().toString(),
-                timestamp = System.currentTimeMillis().toString(),
-                message = "Missing parameter `${e.missingFields.joinToString(",")}`",
-                code = 400,
-            ), e)
+            throw F2Exception(error = missingParameterError(e.missingFields.joinToString(",")), e)
         } catch (e: SerializationException) {
             throw F2Exception(error = F2Error(
                 id = UUID.randomUUID().toString(),
-                timestamp = System.currentTimeMillis().toString(),
+                timestamp = Instant.now().toString(),
                 message = e.message ?: "Invalid JSON",
-                code = 400,
+                code = HttpRefusal.INVALID_PAYLOAD.status,
             ), e)
         } catch (e: Exception) {
             throw IllegalStateException(

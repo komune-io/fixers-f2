@@ -2,6 +2,7 @@ package f2.spring.exception.config
 
 import f2.dsl.cqrs.exception.F2Exception
 import f2.spring.exception.ConflictException
+import f2.spring.exception.F2HttpException
 import f2.spring.exception.ForbiddenAccessException
 import f2.spring.exception.NotFoundException
 import org.junit.jupiter.api.Test
@@ -17,11 +18,18 @@ import org.springframework.web.reactive.function.server.RouterFunction
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.router
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.server.WebFilter
 
 data class RequiredNameBody(val name: String)
 
 @SpringBootApplication
 class TestApp {
+
+	@Bean
+	fun refusingFilter() = WebFilter { exchange, chain ->
+		if (exchange.request.path.value() == "/filtered") exchange.writeRefusal(HttpStatus.UNAUTHORIZED)
+		else chain.filter(exchange)
+	}
 
 	@Bean
 	fun routes(): RouterFunction<ServerResponse> = router {
@@ -36,6 +44,12 @@ class TestApp {
 		}
 		GET("/f2-exception") {
 			throw F2Exception(message = "Something broke", code = 500)
+		}
+		GET("/refusal") {
+			throw F2HttpException(
+				status = HttpStatus.CONFLICT, message = "The item is cited: it stays", cause = null,
+				refusal = "item.CITED", parameters = mapOf("id" to "i-1"), citers = listOf("A"),
+			)
 		}
 		GET("/generic-error") {
 			throw IllegalStateException("unexpected")
@@ -65,43 +79,71 @@ class F2ErrorWebExceptionHandlerTest(
 	}
 
 	@Test
-	fun `should return 404 for NotFoundException`() {
+	fun `should return 404 for NotFoundException, without its message`() {
 		webTestClient.get().uri("/not-found")
 			.exchange()
 			.expectStatus().isNotFound
 			.expectBody()
-			.jsonPath("$.code").isEqualTo(404)
-			.jsonPath("$.message").isEqualTo("User [123] not found")
+			.jsonPath("$.status").isEqualTo(404)
+			.jsonPath("$.refusal").isEqualTo("http.NOT_FOUND")
+			.jsonPath("$.message").doesNotExist()
 	}
 
 	@Test
-	fun `should return 403 for ForbiddenAccessException`() {
+	fun `should return 403 for ForbiddenAccessException, without its message`() {
 		webTestClient.get().uri("/forbidden")
 			.exchange()
 			.expectStatus().isForbidden
 			.expectBody()
-			.jsonPath("$.code").isEqualTo(403)
-			.jsonPath("$.message").isEqualTo("Access denied to this resource")
+			.jsonPath("$.refusal").isEqualTo("http.FORBIDDEN")
+			.jsonPath("$.message").doesNotExist()
 	}
 
 	@Test
-	fun `should return 409 for ConflictException`() {
+	fun `should return 409 for ConflictException, without its message`() {
 		webTestClient.get().uri("/conflict")
 			.exchange()
-			.expectStatus().isEqualTo(409)
+			.expectStatus().isEqualTo(HttpStatus.CONFLICT)
 			.expectBody()
-			.jsonPath("$.code").isEqualTo(409)
-			.jsonPath("$.message").isEqualTo("User with email [test@example.com] already exists")
+			.jsonPath("$.refusal").isEqualTo("http.CONFLICT")
+			.jsonPath("$.message").doesNotExist()
 	}
 
 	@Test
-	fun `should return 500 for F2Exception`() {
+	fun `should return 500 for F2Exception, without its message`() {
 		webTestClient.get().uri("/f2-exception")
 			.exchange()
 			.expectStatus().is5xxServerError
 			.expectBody()
-			.jsonPath("$.code").isEqualTo(500)
-			.jsonPath("$.message").isEqualTo("Something broke")
+			.jsonPath("$.refusal").isEqualTo("http.UNEXPECTED")
+			.jsonPath("$.message").doesNotExist()
+	}
+
+	@Test
+	fun `should answer a refusal with its status, code, sentence, parameters and citers`() {
+		webTestClient.get().uri("/refusal")
+			.exchange()
+			.expectStatus().isEqualTo(HttpStatus.CONFLICT)
+			.expectBody()
+			.jsonPath("$.status").isEqualTo(409)
+			.jsonPath("$.refusal").isEqualTo("item.CITED")
+			.jsonPath("$.message").isEqualTo("The item is cited: it stays")
+			.jsonPath("$.parameters.id").isEqualTo("i-1")
+			.jsonPath("$.citers[0]").isEqualTo("A")
+			.jsonPath("$.id").doesNotExist()
+			.jsonPath("$.code").doesNotExist()
+	}
+
+	@Test
+	fun `should answer a refusal written by a web filter with the same body`() {
+		webTestClient.get().uri("/filtered")
+			.exchange()
+			.expectStatus().isUnauthorized
+			.expectBody()
+			.jsonPath("$.path").isEqualTo("/filtered")
+			.jsonPath("$.status").isEqualTo(401)
+			.jsonPath("$.refusal").isEqualTo("http.UNAUTHENTICATED")
+			.jsonPath("$.message").doesNotExist()
 	}
 
 	@Test
@@ -137,16 +179,18 @@ class F2ErrorWebExceptionHandlerTest(
 			.exchange()
 			.expectStatus().isBadRequest
 			.expectBody()
-			.jsonPath("$.code").isEqualTo(400)
+			.jsonPath("$.status").isEqualTo(400)
+			.jsonPath("$.refusal").isEqualTo("http.INVALID_PAYLOAD")
 			.jsonPath("$.message").isEqualTo("Missing parameter `name`")
+			.jsonPath("$.parameters.parameter").isEqualTo("name")
 	}
 
 	@Test
-	fun `should include id and timestamp in error response`() {
+	fun `should include path and timestamp in error response`() {
 		webTestClient.get().uri("/not-found")
 			.exchange()
 			.expectBody()
-			.jsonPath("$.id").isNotEmpty
+			.jsonPath("$.path").isEqualTo("/not-found")
 			.jsonPath("$.timestamp").isNotEmpty
 	}
 }

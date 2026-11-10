@@ -52,6 +52,9 @@ class F2ErrorExtensionTest {
     fun `f2Error toString contains error fields`() {
         val error = F2Error(message = "boom", code = 400, timestamp = "now", requestId = "req-1")
 
-        assertEquals("F2Error(timestamp='now', code=400, requestId='req-1', message='boom')", error.toString())
+        assertEquals(
+            "F2Error(timestamp='now', code=400, requestId='req-1', refusal=null, message='boom')",
+            error.toString(),
+        )
     }
 }
