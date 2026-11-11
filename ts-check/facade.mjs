@@ -23,14 +23,14 @@ for (const statement of valueImports) {
 }
 
 const { httpF2JsClient } = await import(`${dir}/fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http.mjs`);
-const { F2Refusal } = await import(`${dir}/fixers-f2-f2-dsl-f2-dsl-cqrs.mjs`);
+const { F2Refusal, OffsetPagination, PageQuery } = await import(`${dir}/fixers-f2-f2-dsl-f2-dsl-cqrs.mjs`);
 
 const received = [];
 const server = createServer((request, response) => {
   let body = "";
   request.on("data", (chunk) => { body += chunk; });
   request.on("end", () => {
-    received.push({ method: request.method, url: request.url, body });
+    received.push({ method: request.method, url: request.url, body, authorization: request.headers.authorization });
     if (request.url === "/itemSlow") return; // never answers: aborted or closed by the caller
     if (request.url === "/itemCut") { // a 200 whose body breaks off
       response.writeHead(200, { "content-type": "application/json", "content-length": "100" });
@@ -59,7 +59,7 @@ const rejection = (promise) => promise.then(() => assert.fail("resolved"), (e) =
 try {
   const counted = await client.function("itemCount").invoke([{ id: "a" }, { id: "b" }]);
   assert.deepEqual(counted, [{ id: "a", total: 2 }, { id: "b", total: 2 }]);
-  assert.deepEqual(received.at(-1), { method: "POST", url: "/itemCount", body: '[{"id":"a"},{"id":"b"}]' });
+  assert.deepEqual(received.at(-1), { method: "POST", url: "/itemCount", body: '[{"id":"a"},{"id":"b"}]', authorization: undefined });
   assert.deepEqual(await client.supplier("itemList").invoke(), [{ id: "a" }, { id: "b" }]);
   assert.equal(received.at(-1).method, "GET");
   assert.equal(await client.consumer("itemDelete").invoke([{ id: "a" }]), undefined);
@@ -89,12 +89,50 @@ try {
   const cyclic = { id: "a" };
   cyclic.self = cyclic;
   assert.match((await rejection(client.function("itemCount").invoke([cyclic]))).message, /cycle/);
+  // The two Kotlin objects use.mts refuses to type.
+  assert.ok((await rejection(client.function("itemCount").invoke([new PageQuery(null)]))) instanceof TypeError);
+  const nested = [{ pagination: new OffsetPagination(0, 10) }];
+  assert.ok((await rejection(client.function("itemCount").invoke(nested))) instanceof TypeError);
+  for (const messages of [[{ total: NaN }], [{ totals: [Infinity] }], [-Infinity]]) {
+    assert.match((await rejection(client.function("itemCount").invoke(messages))).message, /finite/);
+  }
   assert.equal(received.length, sentBefore);
+
+  // What was checked is what is sent: a getter is read once.
+  let reads = 0;
+  const changing = { get id() { reads += 1; return reads === 1 ? "a" : undefined; } };
+  await client.function("itemCount").invoke([changing]);
+  assert.deepEqual([received.at(-1).body, reads], ['[{"id":"a"}]', 1]);
+
+  // Headers: the provider is called before each request, what it answers is sent; its rejection is the call's.
+  let issued = 0;
+  const authorized = httpF2JsClient(`http://127.0.0.1:${server.address().port}`,
+    async () => ({ Authorization: `Bearer t${issued += 1}` }));
+  await authorized.function("itemCount").invoke([]);
+  await authorized.supplier("itemList").invoke();
+  assert.deepEqual(received.slice(-2).map((r) => r.authorization), ["Bearer t1", "Bearer t2"]);
+  const expired = httpF2JsClient(`http://127.0.0.1:${server.address().port}`, () => Promise.reject(new Error("expired")));
+  assert.equal((await rejection(expired.function("itemCount").invoke([]))).message, "expired");
+  const typo = httpF2JsClient(`http://127.0.0.1:${server.address().port}`, async () => ({ Authorization: 1 }));
+  assert.ok((await rejection(typo.function("itemCount").invoke([]))) instanceof TypeError);
+  const control = httpF2JsClient(`http://127.0.0.1:${server.address().port}`, async () => ({ Authorization: "Bearer secret\u0000" }));
+  const refusedControl = await rejection(control.function("itemCount").invoke([]));
+  assert.ok(refusedControl instanceof TypeError && !refusedControl.message.includes("secret"), refusedControl.message);
+  const cookie = httpF2JsClient(`http://127.0.0.1:${server.address().port}`, async () => ({ Cookie: "a=b" }));
+  assert.ok((await rejection(cookie.function("itemCount").invoke([]))) instanceof TypeError);
+  control.close(); cookie.close();
+  assert.equal(received.at(-1).authorization, "Bearer t2");
+  authorized.close(); expired.close(); typo.close();
 
   // Aborted: rejects with the signal's reason, as fetch does.
   const controller = new AbortController();
-  const slow = rejection(client.function("itemSlow").invoke([], controller.signal));
-  while (received.at(-1)?.url !== "/itemSlow") await new Promise((resolve) => setTimeout(resolve, 5));
+  let settledEarly = false;
+  const slow = rejection(client.function("itemSlow").invoke([], controller.signal)).finally(() => { settledEarly = true; });
+  const deadline = Date.now() + 2000;
+  while (received.at(-1)?.url !== "/itemSlow" && !settledEarly && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  assert.equal(received.at(-1)?.url, "/itemSlow", "the slow call never reached the server");
   controller.abort();
   assert.equal((await slow).name, "AbortError");
 } finally {
@@ -108,4 +146,7 @@ assert.deepEqual([gone.kind, gone.status], ["NETWORK", null]);
 // CLOSED: the client closed, its later calls refused.
 client.close();
 assert.equal((await rejection(client.supplier("itemList").invoke())).kind, "CLOSED");
-console.log("facade: every value use.mts imports exists; 15 calls as a front makes them, all as expected");
+const aborted = new AbortController();
+aborted.abort();
+assert.equal((await rejection(client.supplier("itemList").invoke(aborted.signal))).kind, "CLOSED");
+console.log("facade: every value use.mts imports exists; 28 calls as a front makes them, all as expected");

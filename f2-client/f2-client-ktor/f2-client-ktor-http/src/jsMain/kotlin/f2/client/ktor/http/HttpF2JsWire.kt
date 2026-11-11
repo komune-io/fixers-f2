@@ -23,49 +23,37 @@ private suspend fun <T> HttpF2Client.network(block: suspend () -> T): T = try {
 
 internal suspend fun HttpF2Client.request(block: suspend () -> HttpResponse): HttpResponse = network { send(block) }
 
-internal suspend fun HttpF2Client.postAll(route: String, messages: dynamic): HttpResponse {
+internal suspend fun HttpF2Client.postAll(
+    route: String,
+    messages: dynamic,
+    headers: suspend () -> List<Pair<String, String>>,
+): HttpResponse {
     if (!isArray(messages)) throw Rejection(typeError("The messages of $route are an array"))
-    jsonProblem(messages, js("new Set()"))?.let { problem ->
-        throw Rejection(typeError("A message of $route $problem"))
+    val checked = try {
+        jsonCopy(messages, js("new Set()"))
+    } catch (e: NotJson) {
+        throw Rejection(typeError("A message of $route ${e.problem}"), e)
     }
-    val body = JSON.stringify(messages)
-    return request { httpClient.post("$urlBase/$route") { setBody(TextContent(body, ContentType.Application.Json)) } }
-}
-
-// Why a value is no plain JSON, or null: a class instance at any depth, or a cycle through [ancestors].
-private fun jsonProblem(value: dynamic, ancestors: dynamic): String? = when (jsTypeOf(value)) {
-    "string", "number", "boolean", "undefined" -> null
-    "object" -> objectProblem(value, ancestors)
-    else -> "is plain JSON, not a ${jsTypeOf(value)}"
-}
-
-private fun objectProblem(value: dynamic, ancestors: dynamic): String? =
-    when {
-        value == null -> {
-            null
-        }
-        ancestors.has(value) as Boolean -> {
-            "holds a cycle, which JSON cannot write"
-        }
-        !isArray(value) && isClassInstance(value) -> {
-            "is plain JSON: no instance of a class, at any depth"
-        }
-        else -> {
-            ancestors.add(value)
-            val problem = js("Object").values(value).unsafeCast<Array<dynamic>>()
-                .firstNotNullOfOrNull { child -> jsonProblem(child, ancestors) }
-            ancestors.delete(value)
-            problem
+    val body = JSON.stringify(checked)
+    val sent = headers()
+    return request {
+        httpClient.post("$urlBase/$route") {
+            withHeaders(sent)
+            setBody(TextContent(body, ContentType.Application.Json))
         }
     }
+}
+
+
+internal val jsObject: dynamic = js("Object")
 
 // An object whose prototype is neither Object's nor none: an instance of a class, a Kotlin one included.
-private fun isClassInstance(value: dynamic): Boolean {
-    val prototype: dynamic = js("Object").getPrototypeOf(value)
+internal fun isClassInstance(value: dynamic): Boolean {
+    val prototype: dynamic = jsObject.getPrototypeOf(value)
     return prototype != js("Object.prototype") && prototype != null
 }
 
-private fun isArray(value: dynamic): Boolean = js("Array").isArray(value) as Boolean
+internal fun isArray(value: dynamic): Boolean = js("Array").isArray(value) as Boolean
 
 private suspend fun HttpResponse.text(client: HttpF2Client): String = client.network { bodyAsText() }
 

@@ -17,6 +17,7 @@ import io.ktor.utils.io.cancel
 import io.ktor.utils.io.writeStringUtf8
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.js.Promise
+import kotlin.js.json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -34,6 +35,7 @@ class HttpF2ClientJsTest {
     private fun client(
         status: HttpStatusCode = HttpStatusCode.OK,
         body: String,
+        headers: (() -> Promise<JsonOf<Map<String, String>>>)? = null,
         answer: suspend () -> Unit = {},
     ): JsClient = HttpF2JsClient(
         HttpF2Client(
@@ -43,8 +45,12 @@ class HttpF2ClientJsTest {
                 answer()
                 respond(body, status, headersOf(HttpHeaders.ContentType, "application/json"))
             }) { applyConfig() },
-        )
+        ),
+        headers,
     ).unsafeCast<JsClient>()
+
+    private fun provider(answer: () -> dynamic): () -> Promise<JsonOf<Map<String, String>>> =
+        { answer().unsafeCast<Promise<JsonOf<Map<String, String>>>>() }
 
     private fun sent(): String = (requests.single().body as TextContent).text
 
@@ -238,6 +244,164 @@ class HttpF2ClientJsTest {
         val failure = rejection(function, arrayOf(nested))
 
         assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean)
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun aNonFiniteNumberAtAnyDepthIsRefusedBeforeAnyRequest() = runTest {
+        val nonFinite = listOf(js("[{ total: NaN }]"), js("[{ page: { totals: [Infinity] } }]"), js("[-Infinity]"))
+        nonFinite.forEach { messages ->
+            val failure = rejection(client(body = "[]").function("itemCount"), messages)
+
+            assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean)
+            assertTrue((failure.message as String).contains("finite"))
+        }
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun whatIsCheckedIsWhatIsSentAGetterReadOnce() = runTest {
+        val reads = mutableListOf<String>()
+        val message: dynamic = js("({})")
+        val descriptor: dynamic = js("({ enumerable: true })")
+        descriptor.get = { reads.add("id"); if (reads.size == 1) "a" else undefined }
+        js("Object").defineProperty(message, "id", descriptor)
+
+        call(client(body = "[]").function("itemCount"), arrayOf(message))
+
+        assertEquals("""[{"id":"a"}]""", sent())
+        assertEquals(listOf("id"), reads)
+    }
+
+    @Test
+    fun aProtoKeyIsSentAsTheKeyItIs() = runTest {
+        call(client(body = "[]").function("itemCount"), JSON.parse<dynamic>("""[{"__proto__":{"id":"a"}}]"""))
+
+        assertEquals("""[{"__proto__":{"id":"a"}}]""", sent())
+    }
+
+    @Test
+    fun theHeadersProviderIsCalledBeforeEachRequestAndEveryHeaderItAnswersIsSent() = runTest {
+        var calls = 0
+        val client = client(body = "[]", headers = provider {
+            calls += 1
+            js("Promise").resolve(json("Authorization" to "Bearer t$calls", "X-Tenant" to "t"))
+        })
+
+        call(client.function("itemCount"), js("[]"))
+        client.supplier("itemList").invoke().unsafeCast<Promise<dynamic>>().await()
+        call(client.consumer("itemDelete"), js("[]"))
+
+        assertEquals(listOf("Bearer t1", "Bearer t2", "Bearer t3"), requests.map { it.headers["Authorization"] })
+        assertEquals(listOf("t", "t", "t"), requests.map { it.headers["X-Tenant"] })
+        assertEquals(3, calls)
+    }
+
+    @Test
+    fun aProviderThatRejectsRejectsTheCallWithItsReasonBeforeAnyRequest() = runTest {
+        val client = client(body = "[]", headers = provider { js("Promise.reject('expired')") })
+
+        assertEquals("expired", rejection(client.function("itemCount"), js("[]")) as String)
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun headersThatAreNoPlainObjectOfStringsAreRefusedBeforeAnyRequest() = runTest {
+        listOf(
+            js("({ Authorization: 1 })"),
+            js("['Authorization', 'Bearer t']"),
+            js("({ 'Bad Name': 'x' })"),
+            js("({ Authorization: 'a\\r\\nX-Injected: b' })"),
+        ).forEach { answered ->
+            val client = client(body = "[]", headers = provider { js("Promise").resolve(answered) })
+
+            val failure = rejection(client.function("itemCount"), js("[]"))
+
+            assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean, JSON.stringify(answered))
+        }
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun aHeaderTheClientWritesItselfIsRefusedRatherThanOverwritten() = runTest {
+        listOf("Content-Type", "content-length", "Transfer-Encoding", "Accept", "accept-charset").forEach { name ->
+            val client = client(body = "[]", headers = provider { js("Promise").resolve(json(name to "x")) })
+
+            val failure = rejection(client.function("itemCount"), js("[]"))
+
+            assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean, name)
+            assertTrue((failure.message as String).contains(name))
+        }
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun aHeaderValueKtorOrFetchWouldRefuseIsATypeErrorThatNeverCitesTheValue() = runTest {
+        // A control character, DEL, or a character beyond Latin-1: Ktor's own refusal quotes the value.
+        listOf("\u0000", "\u0001", "\u007F", "\u0100").map { char -> "Bearer secret${char}x" }.forEach { value ->
+            val answered = json("Authorization" to value)
+            val client = client(body = "[]", headers = provider { js("Promise").resolve(answered) })
+
+            val failure = rejection(client.function("itemCount"), js("[]"))
+
+            val seen = "kind=${failure.kind} message=${failure.message}"
+            assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean, seen)
+            assertTrue(!(failure.message as String).contains("secret"), seen)
+        }
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun aTabAndLatin1LettersAreValidInAHeaderValue() = runTest {
+        call(client(body = "[]", headers = provider { js("Promise").resolve(json("X-Name" to "a\tb é")) })
+            .function("itemCount"), js("[]"))
+
+        assertEquals("a\tb é", requests.single().headers["X-Name"])
+    }
+
+    @Test
+    fun aHeaderFetchWouldDropIsRefusedRatherThanLostAndTwoNamesEqualButForCaseToo() = runTest {
+        listOf(
+            json("Cookie" to "a=b"),
+            json("Origin" to "https://x"),
+            json("Sec-Fetch-Mode" to "cors"),
+            json("Proxy-Authorization" to "Basic x"),
+            json("Authorization" to "Bearer a", "authorization" to "Bearer b"),
+        ).forEach { answered ->
+            val client = client(body = "[]", headers = provider { js("Promise").resolve(answered) })
+
+            val failure = rejection(client.function("itemCount"), js("[]"))
+
+            assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean, JSON.stringify(answered))
+            assertTrue(!(failure.message as String).contains("Bearer"), failure.message as String)
+        }
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun aMessageArrayIsReadByIndexLikeJsonStringify() = runTest {
+        val messages: dynamic = js("[]")
+        val element: dynamic = js("({ id: 'a' })")
+        val descriptor: dynamic = js("({ enumerable: false, configurable: true })")
+        descriptor.value = element
+        jsObject.defineProperty(messages, "0", descriptor)
+
+        call(client(body = "[]").function("itemCount"), messages)
+
+        assertEquals("""[{"id":"a"}]""", sent())
+    }
+
+    @Test
+    fun aClosedClientRejectsAsClosedEvenWhenTheSignalIsAlreadyAborted() = runTest {
+        val client = client(body = "[]")
+        val controller: dynamic = js("new AbortController()")
+        controller.abort()
+        client.close()
+
+        val call = client.function("itemCount").invoke(js("[]"), controller.signal).unsafeCast<Promise<dynamic>>()
+        val failure = settled(call)
+
+        assertEquals("CLOSED", failure.await().kind as String)
         assertTrue(requests.isEmpty())
     }
 

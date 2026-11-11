@@ -7,6 +7,10 @@ import {
   httpF2JsClient,
 } from "../ts/fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http/kotlin/fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http.mjs";
 import type { HttpF2JsFailure, Json, PageQuery, PageQueryResult } from "../ts/fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http/kotlin/fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http.mjs";
+import {
+  OffsetPagination,
+  PageQuery as KotlinPageQuery,
+} from "../ts/fixers-f2-f2-dsl-f2-dsl-cqrs/kotlin/fixers-f2-f2-dsl-f2-dsl-cqrs.mjs";
 
 const client = httpF2JsClient("http://f2.test");
 const page = client.function<PageQuery, PageQueryResult<string>>("itemPage");
@@ -48,6 +52,21 @@ const citers = ({} as Json<HttpF2JsFailure>).error?.refusal?.citers.asJsReadonly
 // @ts-expect-error without its type arguments a function takes any message, and its results are unknown
 const untyped = (await client.function("itemPage").invoke([1, "a"]))[0].id;
 
+// @ts-expect-error a message is JSON, not a Kotlin object
+const kotlinMessage = await page.invoke([new KotlinPageQuery(null)]);
+// @ts-expect-error nor holds one at any depth
+const kotlinNested = await page.invoke([{ pagination: new OffsetPagination(0, 10) }]);
+
+// Headers: an async provider of a plain object of strings, called before each request
+const authorized = httpF2JsClient("http://f2.test", async () => ({ Authorization: "Bearer t", "X-Tenant": "t" }));
+const anonymous = httpF2JsClient("http://f2.test", null);
+// @ts-expect-error a header value is a string
+const numericHeader = httpF2JsClient("http://f2.test", async () => ({ Authorization: 1 }));
+// @ts-expect-error the provider answers a promise
+const syncHeaders = httpF2JsClient("http://f2.test", () => ({ Authorization: "Bearer t" }));
+// @ts-expect-error the headers are an object, not a list of pairs
+const pairHeaders = httpF2JsClient("http://f2.test", async () => [["Authorization", "Bearer t"]]);
+
 // @ts-expect-error a function is an object: called through invoke
 const direct = await page([]);
 // @ts-expect-error a signal is an AbortSignal
@@ -55,4 +74,4 @@ const badSignal = await page.invoke([], "abort");
 // @ts-expect-error a supplier's one argument is its signal
 const twoArgs = await list.invoke([], signal);
 
-export { direct, badSignal, twoArgs, aborted, listedAborted, removedAborted, untyped, count, absent, listed, done, reason, badMessage, notArray, view, kotlin, answered, supplied, unknownKind, citers };
+export { authorized, anonymous, numericHeader, syncHeaders, pairHeaders, kotlinMessage, kotlinNested, direct, badSignal, twoArgs, aborted, listedAborted, removedAborted, untyped, count, absent, listed, done, reason, badMessage, notArray, view, kotlin, answered, supplied, unknownKind, citers };
