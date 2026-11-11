@@ -34,6 +34,8 @@ internal suspend fun HttpF2Client.postAll(route: String, messages: dynamic): Htt
     return request { httpClient.post("$urlBase/$route") { setBody(TextContent(body, ContentType.Application.Json)) } }
 }
 
+private val jsObject: dynamic = js("Object")
+
 private class NotJson(val problem: String) : Exception(problem)
 
 // The plain JSON copy of [value], each property read once: what is checked is what is sent, a getter
@@ -52,8 +54,9 @@ private fun objectCopy(value: dynamic, ancestors: dynamic): dynamic {
     val isList = isArray(value)
     if (!isList && isClassInstance(value)) throw NotJson("is plain JSON: no instance of a class, at any depth")
     ancestors.add(value)
-    val copy: dynamic = if (isList) js("Array")(value.length) else js("({})")
-    js("Object").entries(value).unsafeCast<Array<Array<dynamic>>>().forEach { (key, child) ->
+    // No prototype: a `__proto__` key is copied as the key it is, not set as the copy's prototype.
+    val copy: dynamic = if (isList) js("Array")(value.length) else jsObject.create(null)
+    jsObject.entries(value).unsafeCast<Array<Array<dynamic>>>().forEach { (key, child) ->
         copy[key] = jsonCopy(child, ancestors)
     }
     ancestors.delete(value)
@@ -62,7 +65,7 @@ private fun objectCopy(value: dynamic, ancestors: dynamic): dynamic {
 
 // An object whose prototype is neither Object's nor none: an instance of a class, a Kotlin one included.
 private fun isClassInstance(value: dynamic): Boolean {
-    val prototype: dynamic = js("Object").getPrototypeOf(value)
+    val prototype: dynamic = jsObject.getPrototypeOf(value)
     return prototype != js("Object.prototype") && prototype != null
 }
 

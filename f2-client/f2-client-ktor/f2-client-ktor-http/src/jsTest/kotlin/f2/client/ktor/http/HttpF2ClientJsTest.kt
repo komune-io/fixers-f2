@@ -243,7 +243,8 @@ class HttpF2ClientJsTest {
 
     @Test
     fun aNonFiniteNumberAtAnyDepthIsRefusedBeforeAnyRequest() = runTest {
-        listOf(js("[{ total: NaN }]"), js("[{ page: { totals: [Infinity] } }]"), js("[-Infinity]")).forEach { messages ->
+        val nonFinite = listOf(js("[{ total: NaN }]"), js("[{ page: { totals: [Infinity] } }]"), js("[-Infinity]"))
+        nonFinite.forEach { messages ->
             val failure = rejection(client(body = "[]").function("itemCount"), messages)
 
             assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean)
@@ -267,13 +268,21 @@ class HttpF2ClientJsTest {
     }
 
     @Test
+    fun aProtoKeyIsSentAsTheKeyItIs() = runTest {
+        call(client(body = "[]").function("itemCount"), JSON.parse<dynamic>("""[{"__proto__":{"id":"a"}}]"""))
+
+        assertEquals("""[{"__proto__":{"id":"a"}}]""", sent())
+    }
+
+    @Test
     fun aClosedClientRejectsAsClosedEvenWhenTheSignalIsAlreadyAborted() = runTest {
         val client = client(body = "[]")
         val controller: dynamic = js("new AbortController()")
         controller.abort()
         client.close()
 
-        val failure = settled(client.function("itemCount").invoke(js("[]"), controller.signal).unsafeCast<Promise<dynamic>>())
+        val call = client.function("itemCount").invoke(js("[]"), controller.signal).unsafeCast<Promise<dynamic>>()
+        val failure = settled(call)
 
         assertEquals("CLOSED", failure.await().kind as String)
         assertTrue(requests.isEmpty())
