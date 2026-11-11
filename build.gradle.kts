@@ -56,7 +56,9 @@ fixers {
         organization = "komune-io"
         projectKey = "komune-io_fixers-f2"
         properties {
-            property("sonar.coverage.exclusions", "f2-bdd/**/*")
+            // JaCoCo measures the JVM only: jsMain code, run by the browser tests and ts-check/facade.mjs, would count
+            // as uncovered.
+            property("sonar.coverage.exclusions", "f2-bdd/**/*,**/src/jsMain/**")
             property("sonar.issue.ignore.multicriteria", "vendored")
             property("sonar.issue.ignore.multicriteria.vendored.ruleKey", "*")
             property("sonar.issue.ignore.multicriteria.vendored.resourceKey", "**/org/springframework/**")

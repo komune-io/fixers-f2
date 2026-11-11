@@ -40,6 +40,8 @@ dependencies {
 val node = the<NodeJsEnvSpec>().executable
 val tsCheck = rootProject.layout.projectDirectory.dir("ts-check")
 val checkTsContract = tasks.register<Exec>("checkTsContract") {
+    group = "verification"
+    description = "Type-checks ts-check/use.mts against the committed TypeScript contract under tsc --strict."
     val tsc = rootProject.layout.buildDirectory.file("js/node_modules/typescript/bin/tsc")
     dependsOn(":kotlinNpmInstall")
     mustRunAfter(":tsGen", ":checkTsGen")
@@ -53,6 +55,8 @@ val checkTsContract = tasks.register<Exec>("checkTsContract") {
     doLast { stamp.get().asFile.apply { parentFile.mkdirs() }.writeText("tsc --strict passed\n") }
 }
 val checkJsFacade = tasks.register<Exec>("checkJsFacade") {
+    group = "verification"
+    description = "Calls a local F2 server through the compiled JS client with ts-check/facade.mjs."
     val emitted = layout.buildDirectory.dir("dist/js/productionLibrary")
     dependsOn("jsBrowserProductionLibraryDistribution")
     inputs.dir(emitted)
