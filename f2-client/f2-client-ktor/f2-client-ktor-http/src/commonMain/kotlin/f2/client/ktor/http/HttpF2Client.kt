@@ -30,7 +30,6 @@ import io.ktor.http.isSuccess
 import io.ktor.util.reflect.TypeInfo
 import io.ktor.utils.io.ByteReadChannel
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.js.JsExport
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.asFlow
@@ -51,12 +50,9 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.serializer
 
-@JsExport
-class HttpF2Client @JsExport.Ignore constructor(
-    @property:JsExport.Ignore
+class HttpF2Client(
     val httpClient: HttpClient,
     val urlBase: String,
-    @property:JsExport.Ignore
     val json: Json = F2DefaultJson
 ) : F2Client {
 
@@ -71,7 +67,6 @@ class HttpF2Client @JsExport.Ignore constructor(
         }
     }
 
-    @JsExport.Ignore
     override fun <RESPONSE> supplier(
         route: String, responseTypeInfo: TypeInfo
     ): F2Supplier<RESPONSE> = F2Supplier<RESPONSE> {
@@ -81,7 +76,6 @@ class HttpF2Client @JsExport.Ignore constructor(
         )
     }
 
-    @JsExport.Ignore
     override fun <QUERY, RESPONSE> function(
         route: String, queryTypeInfo: TypeInfo, responseTypeInfo: TypeInfo
     ) = F2Function<QUERY, RESPONSE> { messageFlow ->
@@ -93,7 +87,6 @@ class HttpF2Client @JsExport.Ignore constructor(
         }
     }
 
-    @JsExport.Ignore
     override fun <QUERY> consumer(
         route: String, queryTypeInfo: TypeInfo
     ): F2Consumer<QUERY> = F2Consumer { messages ->

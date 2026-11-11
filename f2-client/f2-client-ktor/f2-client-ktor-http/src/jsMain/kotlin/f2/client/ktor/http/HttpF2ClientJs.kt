@@ -1,8 +1,5 @@
 package f2.client.ktor.http
 
-import f2.dsl.fnc.F2Consumer
-import f2.dsl.fnc.F2Function
-import f2.dsl.fnc.F2Supplier
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -11,46 +8,59 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.content.TextContent
 import io.ktor.http.isSuccess
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.toList
+import kotlin.js.Promise
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.promise
 
-// The client's functions as JS calls them, with the JS values it holds: a message is written with
-// JSON.stringify, a result read with JSON.parse — no Kotlin serializer stands between. A message is therefore a
-// plain JS object or array (the shape of a command's TypeScript interface), never an instance of an exported
-// Kotlin class: JSON.stringify writes its mangled fields, so such a message is refused; an upload command has no
-// JSON form and is refused alike. They are top-level functions: a member would shadow the reified Kotlin
-// extensions of the same name on every platform. Call their result with invokeF2Supplier, invokeF2Function and
-// invokeF2Consumer.
+/**
+ * The JSON of a [T]: what a function sends and answers on the wire. Declared by the `Json<T>` type at the head
+ * of every TypeScript contract, never by Kotlin, which only names it.
+ */
+external interface Json<T>
 
-/** The supplier at [route] of the F2 server [client] calls: one GET, its results as JS values. */
+/**
+ * The F2 server at a URL, as JS calls it: each function is a JS function of an array of JSON messages to a
+ * promise of the JSON results, no Kotlin value in between. A message is written with JSON.stringify and a result
+ * read with JSON.parse, so a message is a plain object or array; an instance of an exported Kotlin class is
+ * refused, its fields being mangled. A refused call rejects with the `F2Exception` the server answered.
+ */
 @JsExport
-fun <RESPONSE> httpF2Supplier(client: HttpF2Client, route: String): F2Supplier<RESPONSE> = F2Supplier {
-    flow { emitResults(client.checked(send { client.httpClient.get(client.routeUrl(route)) })) }
+class HttpF2JsClient internal constructor(private val client: HttpF2Client) {
+    private val scope = CoroutineScope(SupervisorJob())
+
+    /** The function at [route]: one POST of every message, its results. */
+    fun <QUERY, RESPONSE> function(route: String): (msgs: Array<Json<QUERY>>) -> Promise<Array<Json<RESPONSE>>> =
+        { msgs -> scope.promise { client.checked(client.postAll(route, msgs)).results() } }
+
+    /** The supplier at [route]: one GET, its results. */
+    fun <RESPONSE> supplier(route: String): () -> Promise<Array<Json<RESPONSE>>> =
+        { scope.promise { client.checked(send { client.httpClient.get(client.routeUrl(route)) }).results() } }
+
+    /** The consumer at [route]: one POST of every message. */
+    fun <QUERY> consumer(route: String): (msgs: Array<Json<QUERY>>) -> Promise<Unit> =
+        { msgs ->
+            // A promise of Unit would resolve to Kotlin's Unit object, where a `Promise<void>` holds undefined.
+            scope.promise<dynamic> {
+                val _ = client.checked(client.postAll(route, msgs))
+                undefined
+            }.unsafeCast<Promise<Unit>>()
+        }
 }
 
-/** The function at [route] of the F2 server [client] calls: one POST of every message, its results as JS values. */
+/** The F2 server at [urlBase], called on the platform's fetch. */
 @JsExport
-fun <QUERY, RESPONSE> httpF2Function(client: HttpF2Client, route: String): F2Function<QUERY, RESPONSE> =
-    F2Function { messages -> flow { emitResults(client.checked(client.postAll(route, messages))) } }
-
-/** The consumer at [route] of the F2 server [client] calls: one POST of every message. */
-@JsExport
-fun <QUERY> httpF2Consumer(client: HttpF2Client, route: String): F2Consumer<QUERY> = F2Consumer { messages ->
-    val _ = client.checked(client.postAll(route, messages))
-}
+fun httpF2JsClient(urlBase: String): HttpF2JsClient = HttpF2JsClient(httpClientBuilderDefault().build(urlBase))
 
 private fun HttpF2Client.routeUrl(route: String) = "$urlBase/$route"
 
-private suspend fun <MSG> HttpF2Client.postAll(route: String, messages: Flow<MSG>): HttpResponse {
-    val all = messages.toList()
-    all.forEach { message ->
+private suspend fun HttpF2Client.postAll(route: String, messages: Array<*>): HttpResponse {
+    messages.forEach { message ->
         require(isPlainJsValue(message)) {
             "A JS message is a plain object or array, not an instance of an exported Kotlin class: $route"
         }
     }
-    val body = JSON.stringify(all.toTypedArray())
+    val body = JSON.stringify(messages)
     return send {
         httpClient.post(routeUrl(route)) { setBody(TextContent(body, ContentType.Application.Json)) }
     }
@@ -67,13 +77,10 @@ private suspend fun HttpF2Client.checked(response: HttpResponse): HttpResponse {
     return response
 }
 
-private suspend fun <RESPONSE> FlowCollector<RESPONSE>.emitResults(response: HttpResponse) {
-    val text = response.bodyAsText()
-    if (text.isBlank()) return
+// A body is the array of the results, or a single result.
+private suspend fun <RESPONSE> HttpResponse.results(): Array<Json<RESPONSE>> {
+    val text = bodyAsText()
+    if (text.isBlank()) return emptyArray()
     val parsed: dynamic = JSON.parse(text)
-    if (js("Array").isArray(parsed) as Boolean) {
-        parsed.unsafeCast<Array<RESPONSE>>().forEach { emit(it) }
-    } else {
-        emit(parsed.unsafeCast<RESPONSE>())
-    }
+    return if (js("Array").isArray(parsed) as Boolean) parsed.unsafeCast<Array<Json<RESPONSE>>>() else arrayOf(parsed)
 }

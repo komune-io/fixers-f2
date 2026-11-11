@@ -1,8 +1,6 @@
 package f2.client.ktor.http.model
 
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.toByteArray
-import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -81,18 +79,5 @@ class F2UploadCommandTest {
 
         assertThat(command.files).isEqualTo(files)
         assertThat(command.fileMap["file"]).containsExactlyElementsOf(files)
-    }
-
-    @Test
-    fun `F2FilePart built from bytes reads them back from its channel`() = runTest {
-        val filePart = F2FilePart(
-            name = "bytes.bin",
-            bytes = byteArrayOf(1, 2, 3),
-            contentType = "application/octet-stream",
-        )
-
-        assertThat(filePart.name).isEqualTo("bytes.bin")
-        assertThat(filePart.contentType).isEqualTo("application/octet-stream")
-        assertThat(filePart.content.toByteArray()).containsExactly(1, 2, 3)
     }
 }

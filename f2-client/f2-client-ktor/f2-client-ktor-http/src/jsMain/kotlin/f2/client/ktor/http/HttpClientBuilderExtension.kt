@@ -8,7 +8,6 @@ import io.ktor.client.engine.js.JsClientEngineConfig
  *
  * @return A default instance of [HttpClientBuilder].
  */
-@JsExport
 actual fun httpClientBuilderDefault(): HttpClientBuilder = JsHttpClientBuilder {}
 
 /**

@@ -1,16 +1,62 @@
-declare function KtSingleton<T>(): T & (abstract new() => unknown);
+/** A Kotlin value the export cannot express, such as an `Instant`: opaque to TypeScript. */
+export declare interface KtOpaque<N extends string> {
+    readonly __kotlinOpaque: N;
+    readonly __doNotUseOrImplementIt: {
+        readonly "kotlin.Opaque": unique symbol;
+    };
+}
+/**
+ * The JSON a Kotlin value of type `T` is sent as: a list or a set is an array, a map an object, a
+ * `Long` a number, an enum its name, an opaque value a string, and a nullable property may be
+ * absent. The exported types describe the Kotlin objects; a body read from or written to the wire
+ * is a `Json<T>`, and the compiled code accepts none.
+ */
+export type Json<T> =
+    T extends { asJsReadonlyArrayView(): ReadonlyArray<infer E> } ? Json<E>[]
+    : T extends { asJsReadonlySetView(): ReadonlySet<infer E> } ? Json<E>[]
+    : T extends { asJsReadonlyMapView(): ReadonlyMap<infer K, infer V> } ? Record<JsonKey<K>, Json<V>>
+    : T extends { readonly __kotlinOpaque: string } ? string
+    : T extends bigint ? number
+    : T extends string | number | boolean | null | undefined ? T
+    : T extends { readonly name: infer N extends string; readonly ordinal: infer O extends number }
+        ? string extends N ? JsonObject<T> : number extends O ? JsonObject<T> : N
+    : T extends ReadonlyArray<infer E> ? Json<E>[]
+    : T extends (...args: never[]) => unknown ? never
+    : T extends object ? JsonObject<T>
+    : T;
+type JsonKey<K> = Json<K> extends string | number ? Json<K> : string;
+type JsonField<T, P extends keyof T> =
+    P extends "__doNotUseOrImplementIt" ? never : T[P] extends (...args: never[]) => unknown ? never : P;
+type JsonFields<T> = { [P in keyof T]-?: JsonField<T, P> }[keyof T];
+type JsonOptional<T> = {
+    [P in JsonFields<T>]-?: null extends T[P] ? P : undefined extends T[P] ? P : never
+}[JsonFields<T>];
+type JsonObject<T> =
+    { [P in Exclude<JsonFields<T>, JsonOptional<T>>]: Json<T[P]> } & { [P in JsonOptional<T>]?: Json<T[P]> };
+type Nullable<T> = T | null | undefined
+declare function KtSingleton<T>(): T & (abstract new() => object);
+export declare interface KtList<out E> /* extends Collection<E> */ {
+    asJsReadonlyArrayView(): ReadonlyArray<E>;
+    readonly __doNotUseOrImplementIt: {
+        readonly "kotlin.collections.KtList": unique symbol;
+    };
+}
+export declare namespace KtList {
+    function fromJsArray<E>(array: ReadonlyArray<E>): KtList<E>;
+}
+export declare interface KtMap<K, out V> {
+    asJsReadonlyMapView(): ReadonlyMap<K, V>;
+    readonly __doNotUseOrImplementIt: {
+        readonly "kotlin.collections.KtMap": unique symbol;
+    };
+}
+export declare namespace KtMap {
+    function fromJsMap<K, V>(map: ReadonlyMap<K, V>): KtMap<K, V>;
+}
 /** @deprecated  */
 export declare const initHook: {
     get(): unknown;
 };
-export declare interface F2Consumer<T> {
-}
-export declare interface F2Function<in T, out R> {
-}
-export declare interface F2Supplier<R> {
-}
-export declare interface F2SupplierSingle<R> {
-}
 export declare class Batch {
     constructor(size?: number, concurrency?: number);
     get size(): number;
@@ -18,7 +64,7 @@ export declare class Batch {
     copy(size?: number, concurrency?: number): Batch;
     toString(): string;
     hashCode(): number;
-    equals(other?: unknown): boolean;
+    equals(other: Nullable<unknown>): boolean;
 }
 export declare namespace Batch {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -26,26 +72,12 @@ export declare namespace Batch {
         const constructor: abstract new () => Batch;
     }
 }
-export declare function invokeF2Function<T, R>(fnc: F2Function<T, R>, msgs: Array<T>): Promise<Array<R>>;
-export declare function invokeF2Consumer<T>(fnc: F2Consumer<T>, msgs: Array<T>): Promise<void>;
-export declare function invokeF2Supplier<R>(fnc: F2Supplier<R>): Promise<Array<R>>;
-export declare function invokeF2SupplierSingle<R>(fnc: F2SupplierSingle<R>): Promise<R>;
-export type F2ClientType = "HTTP";
-export declare namespace F2ClientType {
-    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
-    namespace $metadata$ {
-        const constructor: abstract new () => F2ClientType;
-    }
-}
-export declare interface F2Client {
-    readonly type: F2ClientType;
-}
 export declare abstract class AuthRealm {
     private constructor();
     get serverUrl(): string;
     get realmId(): string;
     get clientId(): string;
-    get redirectUrl(): string | null;
+    get redirectUrl(): Nullable<string>;
 }
 export declare namespace AuthRealm {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -70,11 +102,11 @@ export declare namespace AuthRealmPassword {
     }
 }
 export declare class AuthRealmClientSecret extends AuthRealm.$metadata$.constructor {
-    constructor(serverUrl: string, realmId: string, clientId: string, redirectUrl: string | null | undefined, clientSecret: string, isPublic?: boolean);
+    constructor(serverUrl: string, realmId: string, clientId: string, redirectUrl: Nullable<string> | undefined, clientSecret: string, isPublic?: boolean);
     get serverUrl(): string;
     get realmId(): string;
     get clientId(): string;
-    get redirectUrl(): string | null;
+    get redirectUrl(): Nullable<string>;
     get clientSecret(): string;
     get isPublic(): boolean;
     toString(): string;
@@ -86,37 +118,56 @@ export declare namespace AuthRealmClientSecret {
     }
 }
 export declare interface Command extends Message {
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.Command": unique symbol;
+    } & Message["__doNotUseOrImplementIt"];
 }
 export declare interface Event extends Message {
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.Event": unique symbol;
+    } & Message["__doNotUseOrImplementIt"];
 }
 export declare interface Message {
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.Message": unique symbol;
+    };
 }
 export declare interface Problem extends Message {
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.Problem": unique symbol;
+    } & Message["__doNotUseOrImplementIt"];
 }
 export declare interface Query extends Message {
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.Query": unique symbol;
+    } & Message["__doNotUseOrImplementIt"];
 }
 export declare interface EnvelopeDTO<T> extends WithEnvelopeId, WithEnvelopeData<T>, Message {
     readonly id: string;
     readonly data: T;
     readonly type: string;
-    readonly datacontenttype?: string | null;
-    readonly specversion?: string | null;
-    readonly source?: string | null;
-    readonly time?: string | null;
+    readonly datacontenttype: Nullable<string>;
+    readonly specversion: Nullable<string>;
+    readonly source: Nullable<string>;
+    readonly time: Nullable<string>;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.envelope.EnvelopeDTO": unique symbol;
+    } & Message["__doNotUseOrImplementIt"] & WithEnvelopeData<unknown>["__doNotUseOrImplementIt"] & WithEnvelopeId["__doNotUseOrImplementIt"];
 }
 export declare class Envelope<T> implements EnvelopeDTO<T> {
-    constructor(id: string, data: T, type: string, datacontenttype?: string | null, source?: string | null, time?: string | null);
+    constructor(id: string, data: T, type: string, datacontenttype?: Nullable<string>, source?: Nullable<string>, time?: Nullable<string>);
     get id(): string;
     get data(): T;
     get type(): string;
-    get datacontenttype(): string | null;
-    get source(): string | null;
-    get time(): string | null;
+    get datacontenttype(): Nullable<string>;
+    get source(): Nullable<string>;
+    get time(): Nullable<string>;
     get specversion(): string;
-    copy(id?: string, data?: T, type?: string, datacontenttype?: string | null, source?: string | null, time?: string | null): Envelope<T>;
+    copy(id?: string, data?: T, type?: string, datacontenttype?: Nullable<string>, source?: Nullable<string>, time?: Nullable<string>): Envelope<T>;
     toString(): string;
     hashCode(): number;
-    equals(other?: unknown): boolean;
+    equals(other: Nullable<unknown>): boolean;
+    readonly __doNotUseOrImplementIt: EnvelopeDTO<unknown>["__doNotUseOrImplementIt"];
 }
 export declare namespace Envelope {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -126,28 +177,45 @@ export declare namespace Envelope {
 }
 export declare interface WithEnvelopeData<T> {
     readonly data: T;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.envelope.WithEnvelopeData": unique symbol;
+    };
 }
 export declare interface WithEnvelopeId {
     readonly id: string;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.envelope.WithEnvelopeId": unique symbol;
+    };
 }
 export declare interface F2ErrorDTO extends Problem {
-    readonly id?: string | null;
+    readonly id: Nullable<string>;
     readonly timestamp: string;
     readonly code: number;
-    readonly requestId?: string | null;
+    readonly requestId: Nullable<string>;
     readonly message: string;
-    readonly refusal?: F2RefusalDTO | null;
+    readonly refusal: Nullable<F2RefusalDTO>;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.error.F2ErrorDTO": unique symbol;
+    } & Problem["__doNotUseOrImplementIt"];
 }
 export declare interface F2RefusalDTO {
     readonly code: string;
+    readonly parameters: KtMap<string, string>;
+    readonly citers: KtList<string>;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.error.F2RefusalDTO": unique symbol;
+    };
 }
 export declare class F2Refusal implements F2RefusalDTO {
-    constructor(code: string, parameters?: Record<string, string>, citers?: string[]);
+    constructor(code: string, parameters?: KtMap<string, string>, citers?: KtList<string>);
     get code(): string;
-    copy(code?: string, parameters?: Record<string, string>, citers?: string[]): F2Refusal;
+    get parameters(): KtMap<string, string>;
+    get citers(): KtList<string>;
+    copy(code?: string, parameters?: KtMap<string, string>, citers?: KtList<string>): F2Refusal;
     toString(): string;
     hashCode(): number;
-    equals(other?: unknown): boolean;
+    equals(other: Nullable<unknown>): boolean;
+    readonly __doNotUseOrImplementIt: F2RefusalDTO["__doNotUseOrImplementIt"];
 }
 export declare namespace F2Refusal {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -156,14 +224,15 @@ export declare namespace F2Refusal {
     }
 }
 export declare class F2Error implements F2ErrorDTO {
-    constructor(message: string, id?: string | null, timestamp?: string, code?: number, requestId?: string | null, refusal?: F2Refusal | null);
+    constructor(message: string, id?: Nullable<string>, timestamp?: string, code?: number, requestId?: Nullable<string>, refusal?: Nullable<F2Refusal>);
     get message(): string;
-    get id(): string | null;
+    get id(): Nullable<string>;
     get timestamp(): string;
     get code(): number;
-    get requestId(): string | null;
-    get refusal(): F2Refusal | null;
+    get requestId(): Nullable<string>;
+    get refusal(): Nullable<F2Refusal>;
     toString(): string;
+    readonly __doNotUseOrImplementIt: F2ErrorDTO["__doNotUseOrImplementIt"];
 }
 export declare namespace F2Error {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -322,7 +391,7 @@ export declare namespace HttpRefusal {
     }
 }
 export declare class F2Exception extends /* RuntimeException */ Error {
-    constructor(error: F2ErrorDTO, cause?: Error | null);
+    constructor(error: F2ErrorDTO, cause?: Nullable<Error>);
     get error(): F2ErrorDTO;
 }
 export declare namespace F2Exception {
@@ -337,24 +406,34 @@ export declare interface Match<T> {
     not(): Match<T>;
     and(match: Match<T>): Match<T>;
     or(match: Match<T>): Match<T>;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.filter.Match": unique symbol;
+    };
 }
 export declare interface SortDTO {
     readonly property: string;
     readonly ascending: boolean;
-    readonly nullsFirst?: boolean | null;
+    readonly nullsFirst: Nullable<boolean>;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.filter.SortDTO": unique symbol;
+    };
 }
 export declare interface PageDTO<out OBJECT> {
     readonly total: number;
-    readonly items: OBJECT[];
+    readonly items: KtList<OBJECT>;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.page.PageDTO": unique symbol;
+    };
 }
 export declare class Page<out OBJECT> implements PageDTO<OBJECT> {
-    constructor(total: number, items: OBJECT[]);
+    constructor(total: number, items: KtList<OBJECT>);
     get total(): number;
-    get items(): OBJECT[];
-    copy(total?: number, items?: OBJECT[]): Page<OBJECT>;
+    get items(): KtList<OBJECT>;
+    copy(total?: number, items?: KtList<OBJECT>): Page<OBJECT>;
     toString(): string;
     hashCode(): number;
-    equals(other?: unknown): boolean;
+    equals(other: Nullable<unknown>): boolean;
+    readonly __doNotUseOrImplementIt: PageDTO<unknown>["__doNotUseOrImplementIt"];
 }
 export declare namespace Page {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -363,20 +442,27 @@ export declare namespace Page {
     }
 }
 export declare interface PageQueryDTO extends Query {
-    readonly pagination?: OffsetPaginationDTO | null;
+    readonly pagination: Nullable<OffsetPaginationDTO>;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.page.PageQueryDTO": unique symbol;
+    } & Query["__doNotUseOrImplementIt"];
 }
 export declare interface PageQueryResultDTO<out OBJECT> extends Event, PageDTO<OBJECT> {
     readonly total: number;
-    readonly items: OBJECT[];
-    readonly pagination?: OffsetPaginationDTO | null;
+    readonly items: KtList<OBJECT>;
+    readonly pagination: Nullable<OffsetPaginationDTO>;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.page.PageQueryResultDTO": unique symbol;
+    } & PageDTO<unknown>["__doNotUseOrImplementIt"] & Event["__doNotUseOrImplementIt"];
 }
 export declare class PageQuery implements PageQueryDTO {
-    constructor(pagination?: OffsetPaginationDTO | null);
-    get pagination(): OffsetPaginationDTO | null;
-    copy(pagination?: OffsetPaginationDTO | null): PageQuery;
+    constructor(pagination: Nullable<OffsetPaginationDTO>);
+    get pagination(): Nullable<OffsetPaginationDTO>;
+    copy(pagination?: Nullable<OffsetPaginationDTO>): PageQuery;
     toString(): string;
     hashCode(): number;
-    equals(other?: unknown): boolean;
+    equals(other: Nullable<unknown>): boolean;
+    readonly __doNotUseOrImplementIt: PageQueryDTO["__doNotUseOrImplementIt"];
 }
 export declare namespace PageQuery {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -385,14 +471,15 @@ export declare namespace PageQuery {
     }
 }
 export declare class PageQueryResult<out OBJECT> implements PageQueryResultDTO<OBJECT> {
-    constructor(pagination: OffsetPagination | null, total: number, items: OBJECT[]);
-    get pagination(): OffsetPagination | null;
+    constructor(pagination: Nullable<OffsetPagination>, total: number, items: KtList<OBJECT>);
+    get pagination(): Nullable<OffsetPagination>;
     get total(): number;
-    get items(): OBJECT[];
-    copy(pagination?: OffsetPagination | null, total?: number, items?: OBJECT[]): PageQueryResult<OBJECT>;
+    get items(): KtList<OBJECT>;
+    copy(pagination?: Nullable<OffsetPagination>, total?: number, items?: KtList<OBJECT>): PageQueryResult<OBJECT>;
     toString(): string;
     hashCode(): number;
-    equals(other?: unknown): boolean;
+    equals(other: Nullable<unknown>): boolean;
+    readonly __doNotUseOrImplementIt: PageQueryResultDTO<unknown>["__doNotUseOrImplementIt"];
 }
 export declare namespace PageQueryResult {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -401,14 +488,23 @@ export declare namespace PageQueryResult {
     }
 }
 export declare interface Pagination {
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.page.Pagination": unique symbol;
+    };
 }
 export declare interface OffsetPaginationDTO extends Pagination {
     readonly offset: number;
     readonly limit: number;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.page.OffsetPaginationDTO": unique symbol;
+    } & Pagination["__doNotUseOrImplementIt"];
 }
 export declare interface PagePaginationDTO extends Pagination {
-    readonly page?: number | null;
-    readonly size?: number | null;
+    readonly page: Nullable<number>;
+    readonly size: Nullable<number>;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.dsl.cqrs.page.PagePaginationDTO": unique symbol;
+    } & Pagination["__doNotUseOrImplementIt"];
 }
 export declare class OffsetPagination implements OffsetPaginationDTO {
     constructor(offset: number, limit: number);
@@ -417,7 +513,8 @@ export declare class OffsetPagination implements OffsetPaginationDTO {
     copy(offset?: number, limit?: number): OffsetPagination;
     toString(): string;
     hashCode(): number;
-    equals(other?: unknown): boolean;
+    equals(other: Nullable<unknown>): boolean;
+    readonly __doNotUseOrImplementIt: OffsetPaginationDTO["__doNotUseOrImplementIt"];
 }
 export declare namespace OffsetPagination {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -426,13 +523,14 @@ export declare namespace OffsetPagination {
     }
 }
 export declare class PagePagination implements PagePaginationDTO {
-    constructor(page?: number | null, size?: number | null);
-    get page(): number | null;
-    get size(): number | null;
-    copy(page?: number | null, size?: number | null): PagePagination;
+    constructor(page: Nullable<number>, size: Nullable<number>);
+    get page(): Nullable<number>;
+    get size(): Nullable<number>;
+    copy(page?: Nullable<number>, size?: Nullable<number>): PagePagination;
     toString(): string;
     hashCode(): number;
-    equals(other?: unknown): boolean;
+    equals(other: Nullable<unknown>): boolean;
+    readonly __doNotUseOrImplementIt: PagePaginationDTO["__doNotUseOrImplementIt"];
 }
 export declare namespace PagePagination {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -440,71 +538,16 @@ export declare namespace PagePagination {
         const constructor: abstract new () => PagePagination;
     }
 }
-export declare function refusalParameters(refusal: F2RefusalDTO): ReadonlyMap<string, string>;
-export declare function refusalCiters(refusal: F2RefusalDTO): ReadonlyArray<string>;
-export declare interface HttpClientBuilder {
-    build(urlBase: string): HttpF2Client;
-}
-export declare class HttpF2Client implements F2Client {
+export declare class HttpF2JsClient {
     private constructor();
-    get urlBase(): string;
-    get type(): F2ClientType;
+    function<QUERY, RESPONSE>(route: string): (msgs: Array<Json<QUERY>>) => Promise<Array<Json<RESPONSE>>>;
+    supplier<RESPONSE>(route: string): () => Promise<Array<Json<RESPONSE>>>;
+    consumer<QUERY>(route: string): (msgs: Array<Json<QUERY>>) => Promise<void>;
 }
-export declare namespace HttpF2Client {
+export declare namespace HttpF2JsClient {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
     namespace $metadata$ {
-        const constructor: abstract new () => HttpF2Client;
+        const constructor: abstract new () => HttpF2JsClient;
     }
 }
-export declare interface F2UploadCommand<COMMAND> {
-    readonly command: COMMAND;
-    readonly fileMap: Record<string, F2FilePart[]>;
-}
-export declare class F2UploadSingleCommand<COMMAND> implements F2UploadCommand<COMMAND> {
-    constructor(command: COMMAND, file: F2FilePart);
-    get command(): COMMAND;
-    get file(): F2FilePart;
-    get fileMap(): Record<string, F2FilePart[]>;
-    copy(command?: COMMAND, file?: F2FilePart): F2UploadSingleCommand<COMMAND>;
-    toString(): string;
-    hashCode(): number;
-    equals(other?: unknown): boolean;
-}
-export declare namespace F2UploadSingleCommand {
-    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
-    namespace $metadata$ {
-        const constructor: abstract new <COMMAND>() => F2UploadSingleCommand<COMMAND>;
-    }
-}
-export declare class F2UploadMultipleCommand<COMMAND> implements F2UploadCommand<COMMAND> {
-    constructor(command: COMMAND, files: F2FilePart[]);
-    get command(): COMMAND;
-    get files(): F2FilePart[];
-    get fileMap(): Record<string, F2FilePart[]>;
-    copy(command?: COMMAND, files?: F2FilePart[]): F2UploadMultipleCommand<COMMAND>;
-    toString(): string;
-    hashCode(): number;
-    equals(other?: unknown): boolean;
-}
-export declare namespace F2UploadMultipleCommand {
-    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
-    namespace $metadata$ {
-        const constructor: abstract new <COMMAND>() => F2UploadMultipleCommand<COMMAND>;
-    }
-}
-export declare class F2FilePart {
-    private constructor();
-    get name(): string;
-    get contentType(): string | null;
-    static fromBytes(name: string, bytes: Int8Array, contentType?: string | null): F2FilePart;
-}
-export declare namespace F2FilePart {
-    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
-    namespace $metadata$ {
-        const constructor: abstract new () => F2FilePart;
-    }
-}
-export declare function httpClientBuilderDefault(): HttpClientBuilder;
-export declare function httpF2Supplier<RESPONSE>(client: HttpF2Client, route: string): F2Supplier<RESPONSE>;
-export declare function httpF2Function<QUERY, RESPONSE>(client: HttpF2Client, route: string): F2Function<QUERY, RESPONSE>;
-export declare function httpF2Consumer<QUERY>(client: HttpF2Client, route: string): F2Consumer<QUERY>;
+export declare function httpF2JsClient(urlBase: string): HttpF2JsClient;

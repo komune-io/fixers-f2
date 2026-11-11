@@ -1,13 +1,7 @@
 package f2.client.ktor.http
 
 import f2.client.ktor.common.applyConfig
-import f2.client.ktor.http.model.exported.httpClientBuilderDefault
-import f2.client.ktor.http.model.exported.httpF2Consumer
-import f2.client.ktor.http.model.exported.httpF2Function
-import f2.client.ktor.http.model.exported.httpF2Supplier
-import f2.client.ktor.http.model.exported.invokeF2Consumer
-import f2.client.ktor.http.model.exported.invokeF2Function
-import f2.client.ktor.http.model.exported.invokeF2Supplier
+import f2.client.ktor.http.model.exported.httpF2JsClient
 import f2.dsl.cqrs.error.F2Refusal
 import f2.dsl.cqrs.exception.F2Exception
 import io.ktor.client.HttpClient
@@ -19,40 +13,46 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
+import kotlin.js.Promise
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlinx.coroutines.await
 import kotlinx.coroutines.test.runTest
+import f2.client.ktor.http.model.exported.HttpF2JsClient as JsClient
 
-/** The client as a JS caller uses it: every function called through its exported name, with JS values. */
+/** The client as a JS caller uses it: every function called through its exported names, with JS values. */
 class HttpF2ClientJsTest {
 
     private val requests = mutableListOf<HttpRequestData>()
 
-    private fun client(status: HttpStatusCode = HttpStatusCode.OK, body: String) = HttpF2Client(
-        urlBase = "http://f2.test",
-        httpClient = HttpClient(MockEngine { request ->
-            requests.add(request)
-            respond(body, status, headersOf(HttpHeaders.ContentType, "application/json"))
-        }) { applyConfig() },
-    )
+    private fun client(status: HttpStatusCode = HttpStatusCode.OK, body: String): JsClient = HttpF2JsClient(
+        HttpF2Client(
+            urlBase = "http://f2.test",
+            httpClient = HttpClient(MockEngine { request ->
+                requests.add(request)
+                respond(body, status, headersOf(HttpHeaders.ContentType, "application/json"))
+            }) { applyConfig() },
+        )
+    ).unsafeCast<JsClient>()
 
     private fun sent(): String = (requests.single().body as TextContent).text
 
+    private suspend fun call(function: dynamic, messages: dynamic): dynamic =
+        function(messages).unsafeCast<Promise<dynamic>>().await()
+
     @Test
-    fun theExportedFactoryBuildsAClientOfTheUrl() {
-        val client = httpClientBuilderDefault().build("http://f2.test")
-        assertEquals("http://f2.test", client.urlBase as String)
-        assertEquals("HTTP", client.type.toString())
+    fun theExportedFactoryBuildsAClientWhoseFunctionsAreJsFunctions() {
+        val client = httpF2JsClient("http://f2.test")
+        assertEquals("function", jsTypeOf(client.function("itemCount")))
+        assertEquals("function", jsTypeOf(client.supplier("itemList")))
+        assertEquals("function", jsTypeOf(client.consumer("itemDelete")))
     }
 
     @Test
     fun aFunctionPostsJsMessagesAndResolvesToJsResults() = runTest {
-        val function = httpF2Function(client(body = """[{"id":"a","total":2}]"""), "itemCount")
-
-        val results = invokeF2Function(function, js("[{ id: 'a' }]")).await()
+        val results = call(client(body = """[{"id":"a","total":2}]""").function("itemCount"), js("[{ id: 'a' }]"))
 
         assertEquals(HttpMethod.Post, requests.single().method)
         assertEquals("http://f2.test/itemCount", requests.single().url.toString())
@@ -62,28 +62,37 @@ class HttpF2ClientJsTest {
     }
 
     @Test
-    fun aSupplierGetsAndResolvesToJsResults() = runTest {
-        val supplier = httpF2Supplier(client(body = """[{"id":"a"},{"id":"b"}]"""), "itemList")
+    fun aSingleResultResolvesToAnArrayOfIt() = runTest {
+        val results = call(client(body = """{"id":"a"}""").function("itemGet"), js("[{ id: 'a' }]"))
 
-        val results = invokeF2Supplier(supplier).await()
-
-        assertEquals(HttpMethod.Get, requests.single().method)
-        assertEquals("a,b", results.map { item: dynamic -> item.id }.join(",") as String)
+        assertEquals(1, results.length as Int)
+        assertEquals("a", results[0].id as String)
     }
 
     @Test
-    fun aConsumerPostsJsMessages() = runTest {
-        invokeF2Consumer(httpF2Consumer(client(body = ""), "itemDelete"), js("[{ id: 'a' }, { id: 'b' }]")).await()
+    fun aSupplierGetsAndResolvesToJsResults() = runTest {
+        val supplier = client(body = """[{"id":"a"},{"id":"b"}]""").supplier("itemList")
+
+        val results = supplier().unsafeCast<Promise<Array<dynamic>>>().await()
+
+        assertEquals(HttpMethod.Get, requests.single().method)
+        assertEquals("a,b", results.map { item: dynamic -> item.id }.joinToString(","))
+    }
+
+    @Test
+    fun aConsumerPostsJsMessagesAndResolvesToUndefined() = runTest {
+        val result = call(client(body = "").consumer("itemDelete"), js("[{ id: 'a' }, { id: 'b' }]"))
 
         assertEquals("""[{"id":"a"},{"id":"b"}]""", sent())
+        assertEquals("undefined", jsTypeOf(result))
     }
 
     @Test
     fun aRefusalRejectsThePromiseWithTheF2Error() = runTest {
         val body = """{"status":409,"refusal":"item.CITED","message":"Cited","citers":["A"]}"""
-        val function = httpF2Function(client(HttpStatusCode.Conflict, body), "itemDelete")
+        val function = client(HttpStatusCode.Conflict, body).function("itemDelete")
 
-        val failure = runCatching { invokeF2Function(function, js("[{ id: 'a' }]")).await() }.exceptionOrNull()
+        val failure = runCatching { call(function, js("[{ id: 'a' }]")) }.exceptionOrNull()
 
         val error = assertIs<F2Exception>(failure).error
         assertEquals(409, error.code)
@@ -93,10 +102,9 @@ class HttpF2ClientJsTest {
 
     @Test
     fun aMessageThatIsAKotlinObjectIsRefusedBeforeAnyRequest() = runTest {
-        val function = httpF2Function(client(body = "[]"), "itemCount")
+        val function = client(body = "[]").function("itemCount")
 
-        val failure = runCatching { invokeF2Function(function, arrayOf(F2Refusal(code = "x"))).await() }
-            .exceptionOrNull()
+        val failure = runCatching { call(function, arrayOf(F2Refusal(code = "x"))) }.exceptionOrNull()
 
         assertIs<IllegalArgumentException>(failure)
         assertTrue(requests.isEmpty())

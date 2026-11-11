@@ -42,13 +42,11 @@ interface F2RefusalDTO {
 
     /**
      * The values the refusal names — an alias, a file name, the field a body could not be read at — for a caller
-     * to word it itself. They are the caller's own values. From JS: `refusalParameters(refusal)`.
+     * to word it itself. They are the caller's own values.
      */
-    @JsExport.Ignore
     val parameters: Map<String, String>
 
-    /** The objects whose citing keeps the refused one alive, by name. From JS: `refusalCiters(refusal)`. */
-    @JsExport.Ignore
+    /** The objects whose citing keeps the refused one alive, by name. */
     val citers: List<String>
 }
 
@@ -56,9 +54,7 @@ interface F2RefusalDTO {
 @JsName("F2Refusal")
 data class F2Refusal(
     override val code: String,
-    @property:JsExport.Ignore
     override val parameters: Map<String, String> = emptyMap(),
-    @property:JsExport.Ignore
     override val citers: List<String> = emptyList(),
 ) : F2RefusalDTO
 
