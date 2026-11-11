@@ -214,17 +214,41 @@ reaches an F2 server through the JS client of `f2-client-ktor-http`, whose funct
 messages to a promise of JSON results (`Json<T>` is the JSON of `T`, declared at the head of the contract):
 
 ```ts
-import { httpF2JsClient, Json, PageQuery, PageQueryResult } from "fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http"; // the package under ts/
+import { httpF2JsClient } from "fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http"; // the package under ts/
+import type { HttpF2JsFailure, Json, PageQuery, PageQueryResult } from "fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http";
 
 const client = httpF2JsClient("https://f2.example");
 const itemPage = client.function<PageQuery, PageQueryResult<Item>>("itemPage"); // (msgs: Json<PageQuery>[]) => Promise<Json<PageQueryResult<Item>>[]>
-const [page] = await itemPage([{ pagination: { offset: 0, limit: 10 } }]);
-const items: Json<Item>[] = page.items;
+try {
+  const [page] = await itemPage([{ pagination: { offset: 0, limit: 10 } }]);
+  const items: Json<Item>[] = page.items;
+} catch (e) {
+  const failure = e as Json<HttpF2JsFailure>; // an Error carrying kind, message, status, error
+  if (failure.kind === "F2") console.log(failure.error?.refusal?.parameters["id"]);
+}
+client.close();
 ```
 
 `client.supplier<R>(route)` is a `() => Promise<Json<R>[]>`, `client.consumer<Q>(route)` a
-`(msgs: Json<Q>[]) => Promise<void>`. A refused call rejects with the `F2Exception` the server answered. A
-message is a plain object or array: an instance of an exported Kotlin class is refused.
+`(msgs: Json<Q>[]) => Promise<void>`. Import values (`httpF2JsClient`) from the package that declares them, and the
+rest with `import type`: a package's `.d.mts` declares its whole program, its `.mjs` exports only its own.
+
+- **Type arguments**: always give them. TypeScript cannot require them on what Kotlin emits; without them a function
+  takes any message and its results are `unknown`.
+- **Messages** are plain JSON, an array of them: an array is required, and an instance of a class at any depth (an
+  exported Kotlin object, a `Date`) rejects with a `TypeError` before any request.
+- **Failures** reject with an `Error` carrying `Json<HttpF2JsFailure>`, no Kotlin object:
+
+  | `kind` | When | `status` | `error` |
+  |---|---|---|---|
+  | `F2` | the server answered an error status: a refusal, a `500` with a text body (its text is `error.message`), a `404` with an empty body (`error.message` is `""`) | the status | the F2 error as JSON: `refusal.parameters` an object, `refusal.citers` an array |
+  | `NETWORK` | no response: the server is unreachable or closed the connection | `null` | `null` |
+  | `UNREADABLE` | a success status whose body is no JSON | the status | `null` |
+  | `CLOSED` | the client was closed before or during the call | `null` | `null` |
+
+- **Cancellation**: `client.function(route, signal)` (and `supplier`, `consumer`) take an optional `AbortSignal`;
+  an aborted call rejects with the signal's reason, as `fetch` does. `client.close()` ends every pending call
+  (`CLOSED`) and releases the connections. `AbortSignal` is the platform's: the DOM library or Node's types.
 
 ## CQRS
 

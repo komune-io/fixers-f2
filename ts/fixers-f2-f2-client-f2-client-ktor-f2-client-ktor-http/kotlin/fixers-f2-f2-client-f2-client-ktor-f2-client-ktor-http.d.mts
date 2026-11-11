@@ -66,66 +66,6 @@ export declare namespace KtMap {
 export declare const initHook: {
     get(): unknown;
 };
-export declare class Batch {
-    constructor(size?: number, concurrency?: number);
-    get size(): number;
-    get concurrency(): number;
-    copy(size?: number, concurrency?: number): Batch;
-    toString(): string;
-    hashCode(): number;
-    equals(other: Nullable<unknown>): boolean;
-}
-export declare namespace Batch {
-    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
-    namespace $metadata$ {
-        const constructor: abstract new () => Batch;
-    }
-}
-export declare abstract class AuthRealm {
-    private constructor();
-    get serverUrl(): string;
-    get realmId(): string;
-    get clientId(): string;
-    get redirectUrl(): Nullable<string>;
-}
-export declare namespace AuthRealm {
-    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
-    namespace $metadata$ {
-        const constructor: abstract new () => AuthRealm;
-    }
-}
-export declare class AuthRealmPassword extends AuthRealm.$metadata$.constructor {
-    constructor(serverUrl: string, realmId: string, redirectUrl: string, clientId: string, username: string, password: string);
-    get serverUrl(): string;
-    get realmId(): string;
-    get redirectUrl(): string;
-    get clientId(): string;
-    get username(): string;
-    get password(): string;
-    toString(): string;
-}
-export declare namespace AuthRealmPassword {
-    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
-    namespace $metadata$ {
-        const constructor: abstract new () => AuthRealmPassword;
-    }
-}
-export declare class AuthRealmClientSecret extends AuthRealm.$metadata$.constructor {
-    constructor(serverUrl: string, realmId: string, clientId: string, redirectUrl: Nullable<string> | undefined, clientSecret: string, isPublic?: boolean);
-    get serverUrl(): string;
-    get realmId(): string;
-    get clientId(): string;
-    get redirectUrl(): Nullable<string>;
-    get clientSecret(): string;
-    get isPublic(): boolean;
-    toString(): string;
-}
-export declare namespace AuthRealmClientSecret {
-    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
-    namespace $metadata$ {
-        const constructor: abstract new () => AuthRealmClientSecret;
-    }
-}
 export declare interface Command extends Message {
     readonly __doNotUseOrImplementIt: {
         readonly "f2.dsl.cqrs.Command": unique symbol;
@@ -247,166 +187,6 @@ export declare namespace F2Error {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
     namespace $metadata$ {
         const constructor: abstract new () => F2Error;
-    }
-}
-export declare function isRefusal(error: F2ErrorDTO): boolean;
-export declare function refusalCode(error: F2ErrorDTO): string;
-export declare abstract class HttpRefusal {
-    private constructor();
-    static get INVALID_PAYLOAD(): HttpRefusal & {
-        get name(): "INVALID_PAYLOAD";
-        get ordinal(): 0;
-    };
-    static get UNAUTHENTICATED(): HttpRefusal & {
-        get name(): "UNAUTHENTICATED";
-        get ordinal(): 1;
-    };
-    static get PAYMENT_REQUIRED(): HttpRefusal & {
-        get name(): "PAYMENT_REQUIRED";
-        get ordinal(): 2;
-    };
-    static get FORBIDDEN(): HttpRefusal & {
-        get name(): "FORBIDDEN";
-        get ordinal(): 3;
-    };
-    static get NOT_FOUND(): HttpRefusal & {
-        get name(): "NOT_FOUND";
-        get ordinal(): 4;
-    };
-    static get METHOD_NOT_ALLOWED(): HttpRefusal & {
-        get name(): "METHOD_NOT_ALLOWED";
-        get ordinal(): 5;
-    };
-    static get NOT_ACCEPTABLE(): HttpRefusal & {
-        get name(): "NOT_ACCEPTABLE";
-        get ordinal(): 6;
-    };
-    static get PROXY_UNAUTHENTICATED(): HttpRefusal & {
-        get name(): "PROXY_UNAUTHENTICATED";
-        get ordinal(): 7;
-    };
-    static get REQUEST_TIMEOUT(): HttpRefusal & {
-        get name(): "REQUEST_TIMEOUT";
-        get ordinal(): 8;
-    };
-    static get CONFLICT(): HttpRefusal & {
-        get name(): "CONFLICT";
-        get ordinal(): 9;
-    };
-    static get GONE(): HttpRefusal & {
-        get name(): "GONE";
-        get ordinal(): 10;
-    };
-    static get LENGTH_REQUIRED(): HttpRefusal & {
-        get name(): "LENGTH_REQUIRED";
-        get ordinal(): 11;
-    };
-    static get PRECONDITION_FAILED(): HttpRefusal & {
-        get name(): "PRECONDITION_FAILED";
-        get ordinal(): 12;
-    };
-    static get PAYLOAD_TOO_LARGE(): HttpRefusal & {
-        get name(): "PAYLOAD_TOO_LARGE";
-        get ordinal(): 13;
-    };
-    static get URI_TOO_LONG(): HttpRefusal & {
-        get name(): "URI_TOO_LONG";
-        get ordinal(): 14;
-    };
-    static get UNSUPPORTED_MEDIA_TYPE(): HttpRefusal & {
-        get name(): "UNSUPPORTED_MEDIA_TYPE";
-        get ordinal(): 15;
-    };
-    static get RANGE_NOT_SATISFIABLE(): HttpRefusal & {
-        get name(): "RANGE_NOT_SATISFIABLE";
-        get ordinal(): 16;
-    };
-    static get EXPECTATION_FAILED(): HttpRefusal & {
-        get name(): "EXPECTATION_FAILED";
-        get ordinal(): 17;
-    };
-    static get MISDIRECTED_REQUEST(): HttpRefusal & {
-        get name(): "MISDIRECTED_REQUEST";
-        get ordinal(): 18;
-    };
-    static get UNPROCESSABLE(): HttpRefusal & {
-        get name(): "UNPROCESSABLE";
-        get ordinal(): 19;
-    };
-    static get LOCKED(): HttpRefusal & {
-        get name(): "LOCKED";
-        get ordinal(): 20;
-    };
-    static get FAILED_DEPENDENCY(): HttpRefusal & {
-        get name(): "FAILED_DEPENDENCY";
-        get ordinal(): 21;
-    };
-    static get TOO_EARLY(): HttpRefusal & {
-        get name(): "TOO_EARLY";
-        get ordinal(): 22;
-    };
-    static get UPGRADE_REQUIRED(): HttpRefusal & {
-        get name(): "UPGRADE_REQUIRED";
-        get ordinal(): 23;
-    };
-    static get PRECONDITION_REQUIRED(): HttpRefusal & {
-        get name(): "PRECONDITION_REQUIRED";
-        get ordinal(): 24;
-    };
-    static get TOO_MANY_REQUESTS(): HttpRefusal & {
-        get name(): "TOO_MANY_REQUESTS";
-        get ordinal(): 25;
-    };
-    static get HEADERS_TOO_LARGE(): HttpRefusal & {
-        get name(): "HEADERS_TOO_LARGE";
-        get ordinal(): 26;
-    };
-    static get UNAVAILABLE_FOR_LEGAL_REASONS(): HttpRefusal & {
-        get name(): "UNAVAILABLE_FOR_LEGAL_REASONS";
-        get ordinal(): 27;
-    };
-    static get UNEXPECTED(): HttpRefusal & {
-        get name(): "UNEXPECTED";
-        get ordinal(): 28;
-    };
-    static get UNAVAILABLE(): HttpRefusal & {
-        get name(): "UNAVAILABLE";
-        get ordinal(): 29;
-    };
-    static values(): [typeof HttpRefusal.INVALID_PAYLOAD, typeof HttpRefusal.UNAUTHENTICATED, typeof HttpRefusal.PAYMENT_REQUIRED, typeof HttpRefusal.FORBIDDEN, typeof HttpRefusal.NOT_FOUND, typeof HttpRefusal.METHOD_NOT_ALLOWED, typeof HttpRefusal.NOT_ACCEPTABLE, typeof HttpRefusal.PROXY_UNAUTHENTICATED, typeof HttpRefusal.REQUEST_TIMEOUT, typeof HttpRefusal.CONFLICT, typeof HttpRefusal.GONE, typeof HttpRefusal.LENGTH_REQUIRED, typeof HttpRefusal.PRECONDITION_FAILED, typeof HttpRefusal.PAYLOAD_TOO_LARGE, typeof HttpRefusal.URI_TOO_LONG, typeof HttpRefusal.UNSUPPORTED_MEDIA_TYPE, typeof HttpRefusal.RANGE_NOT_SATISFIABLE, typeof HttpRefusal.EXPECTATION_FAILED, typeof HttpRefusal.MISDIRECTED_REQUEST, typeof HttpRefusal.UNPROCESSABLE, typeof HttpRefusal.LOCKED, typeof HttpRefusal.FAILED_DEPENDENCY, typeof HttpRefusal.TOO_EARLY, typeof HttpRefusal.UPGRADE_REQUIRED, typeof HttpRefusal.PRECONDITION_REQUIRED, typeof HttpRefusal.TOO_MANY_REQUESTS, typeof HttpRefusal.HEADERS_TOO_LARGE, typeof HttpRefusal.UNAVAILABLE_FOR_LEGAL_REASONS, typeof HttpRefusal.UNEXPECTED, typeof HttpRefusal.UNAVAILABLE];
-    static valueOf(value: string): HttpRefusal;
-    get name(): "INVALID_PAYLOAD" | "UNAUTHENTICATED" | "PAYMENT_REQUIRED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "NOT_ACCEPTABLE" | "PROXY_UNAUTHENTICATED" | "REQUEST_TIMEOUT" | "CONFLICT" | "GONE" | "LENGTH_REQUIRED" | "PRECONDITION_FAILED" | "PAYLOAD_TOO_LARGE" | "URI_TOO_LONG" | "UNSUPPORTED_MEDIA_TYPE" | "RANGE_NOT_SATISFIABLE" | "EXPECTATION_FAILED" | "MISDIRECTED_REQUEST" | "UNPROCESSABLE" | "LOCKED" | "FAILED_DEPENDENCY" | "TOO_EARLY" | "UPGRADE_REQUIRED" | "PRECONDITION_REQUIRED" | "TOO_MANY_REQUESTS" | "HEADERS_TOO_LARGE" | "UNAVAILABLE_FOR_LEGAL_REASONS" | "UNEXPECTED" | "UNAVAILABLE";
-    get ordinal(): 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29;
-    get status(): number;
-    get refusal(): string;
-}
-export declare namespace HttpRefusal {
-    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
-    namespace $metadata$ {
-        const constructor: abstract new () => HttpRefusal;
-    }
-    abstract class Companion extends KtSingleton<Companion.$metadata$.constructor>() {
-        private constructor();
-    }
-    namespace Companion {
-        /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
-        namespace $metadata$ {
-            abstract class constructor {
-                get DOMAIN(): string;
-                ofStatus(status: number): HttpRefusal;
-                private constructor();
-            }
-        }
-    }
-}
-export declare class F2Exception extends /* RuntimeException */ Error {
-    constructor(error: F2ErrorDTO, cause?: Nullable<Error>);
-    get error(): F2ErrorDTO;
-}
-export declare namespace F2Exception {
-    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
-    namespace $metadata$ {
-        const constructor: abstract new () => F2Exception;
     }
 }
 export declare interface Match<T> {
@@ -547,11 +327,50 @@ export declare namespace PagePagination {
         const constructor: abstract new () => PagePagination;
     }
 }
+export declare interface HttpF2JsFailure {
+    readonly kind: HttpF2JsFailureKind;
+    readonly message: string;
+    readonly status: Nullable<number>;
+    readonly error: Nullable<F2ErrorDTO>;
+    readonly __doNotUseOrImplementIt: {
+        readonly "f2.client.ktor.http.HttpF2JsFailure": unique symbol;
+    };
+}
+export declare abstract class HttpF2JsFailureKind {
+    private constructor();
+    static get F2(): HttpF2JsFailureKind & {
+        get name(): "F2";
+        get ordinal(): 0;
+    };
+    static get NETWORK(): HttpF2JsFailureKind & {
+        get name(): "NETWORK";
+        get ordinal(): 1;
+    };
+    static get UNREADABLE(): HttpF2JsFailureKind & {
+        get name(): "UNREADABLE";
+        get ordinal(): 2;
+    };
+    static get CLOSED(): HttpF2JsFailureKind & {
+        get name(): "CLOSED";
+        get ordinal(): 3;
+    };
+    static values(): [typeof HttpF2JsFailureKind.F2, typeof HttpF2JsFailureKind.NETWORK, typeof HttpF2JsFailureKind.UNREADABLE, typeof HttpF2JsFailureKind.CLOSED];
+    static valueOf(value: string): HttpF2JsFailureKind;
+    get name(): "F2" | "NETWORK" | "UNREADABLE" | "CLOSED";
+    get ordinal(): 0 | 1 | 2 | 3;
+}
+export declare namespace HttpF2JsFailureKind {
+    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
+    namespace $metadata$ {
+        const constructor: abstract new () => HttpF2JsFailureKind;
+    }
+}
 export declare class HttpF2JsClient {
     private constructor();
-    function<QUERY, RESPONSE>(route: string): (msgs: Array<Json<QUERY>>) => Promise<Array<Json<RESPONSE>>>;
-    supplier<RESPONSE>(route: string): () => Promise<Array<Json<RESPONSE>>>;
-    consumer<QUERY>(route: string): (msgs: Array<Json<QUERY>>) => Promise<void>;
+    function<QUERY, RESPONSE>(route: string, signal?: Nullable<AbortSignal>): (msgs: Array<Json<QUERY>>) => Promise<Array<Json<RESPONSE>>>;
+    supplier<RESPONSE>(route: string, signal?: Nullable<AbortSignal>): () => Promise<Array<Json<RESPONSE>>>;
+    consumer<QUERY>(route: string, signal?: Nullable<AbortSignal>): (msgs: Array<Json<QUERY>>) => Promise<void>;
+    close(): void;
 }
 export declare namespace HttpF2JsClient {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */

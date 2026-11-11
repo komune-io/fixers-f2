@@ -34,7 +34,9 @@ dependencies {
 }
 
 // The JS client as a front uses it, on what the compiler emitted: ts-check/use.mts type-checks the committed
-// contract under tsc --strict, and ts-check/facade.mjs calls a local F2 server through the compiled module.
+// contract under tsc --strict, and ts-check/facade.mjs checks that each value use.mts imports exists in the module
+// it names, then calls a local F2 server through the compiled module. tsc is TypeScript as Kotlin/JS pins it: the
+// devDependency the Kotlin plugin gives every package, installed by kotlinNpmInstall from kotlin-js-store/yarn.lock.
 val node = the<NodeJsEnvSpec>().executable
 val tsCheck = rootProject.layout.projectDirectory.dir("ts-check")
 val checkTsContract = tasks.register<Exec>("checkTsContract") {
@@ -43,15 +45,22 @@ val checkTsContract = tasks.register<Exec>("checkTsContract") {
     mustRunAfter(":tsGen", ":checkTsGen")
     inputs.dir(rootProject.layout.projectDirectory.dir("ts"))
     inputs.dir(tsCheck)
+    // tsc --noEmit writes nothing; the stamp lets an unchanged contract and check be up to date.
+    val stamp = layout.buildDirectory.file("ts-check/contract")
+    outputs.file(stamp)
     executable = node.get()
     args(tsc.get().asFile.absolutePath, "--project", tsCheck.asFile.absolutePath)
+    doLast { stamp.get().asFile.apply { parentFile.mkdirs() }.writeText("tsc --strict passed\n") }
 }
 val checkJsFacade = tasks.register<Exec>("checkJsFacade") {
     val emitted = layout.buildDirectory.dir("dist/js/productionLibrary")
     dependsOn("jsBrowserProductionLibraryDistribution")
     inputs.dir(emitted)
-    inputs.file(tsCheck.file("facade.mjs"))
+    inputs.dir(tsCheck)
+    val stamp = layout.buildDirectory.file("ts-check/facade")
+    outputs.file(stamp)
     executable = node.get()
     args(tsCheck.file("facade.mjs").asFile.absolutePath, emitted.get().asFile.absolutePath)
+    doLast { stamp.get().asFile.apply { parentFile.mkdirs() }.writeText("facade.mjs passed\n") }
 }
 tasks.named("check") { dependsOn(checkTsContract, checkJsFacade) }

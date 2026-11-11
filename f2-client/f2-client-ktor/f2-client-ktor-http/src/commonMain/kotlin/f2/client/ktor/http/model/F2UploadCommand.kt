@@ -31,4 +31,8 @@ class F2FilePart(
     val name: String,
     val content: ByteReadChannel,
     val contentType: String? = null
-)
+) {
+    /** Builds a part from its bytes. */
+    constructor(name: String, bytes: ByteArray, contentType: String? = null) :
+        this(name, ByteReadChannel(bytes), contentType)
+}
