@@ -210,18 +210,19 @@ fun interface F2Consumer<T>: suspend (Flow<T>) -> Unit {
 ### From JS
 
 The three interfaces are Kotlin API, not exported: a `Flow` and a `suspend` call have no JS form. A JS caller
-reaches an F2 server through the JS client of `f2-client-ktor-http`, whose functions are JS functions of JSON
-messages to a promise of JSON results (`Json<T>` is the JSON of `T`, declared at the head of the contract):
+reaches an F2 server through the JS client of `f2-client-ktor-http`: each function is an object whose `invoke`
+takes JSON messages and an optional `AbortSignal` and returns a promise of JSON results (`Json<T>` is the JSON of
+`T`, declared at the head of the contract):
 
 ```ts
 import { httpF2JsClient } from "fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http"; // the package under ts/
 import type { HttpF2JsFailure, Json, PageQuery, PageQueryResult } from "fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http";
 
 const client = httpF2JsClient("https://f2.example");
-const itemPage = client.function<PageQuery, PageQueryResult<Item>>("itemPage");
-// (msgs: Json<PageQuery>[], signal?: AbortSignal | null) => Promise<Json<PageQueryResult<Item>>[]>
+const itemPage = client.function<PageQuery, PageQueryResult<Item>>("itemPage"); // an F2JsFunction
+// itemPage.invoke(msgs: Json<PageQuery>[], signal?: AbortSignal | null): Promise<Json<PageQueryResult<Item>>[]>
 try {
-  const [page] = await itemPage([{ pagination: { offset: 0, limit: 10 } }], controller.signal);
+  const [page] = await itemPage.invoke([{ pagination: { offset: 0, limit: 10 } }], controller.signal);
   const items: Json<Item>[] = page.items;
 } catch (e) {
   const failure = e as Json<HttpF2JsFailure>; // an Error carrying kind, message, status, error, body
@@ -230,8 +231,9 @@ try {
 client.close();
 ```
 
-`client.supplier<R>(route)` is a `(signal?) => Promise<Json<R>[]>`, `client.consumer<Q>(route)` a
-`(msgs: Json<Q>[], signal?) => Promise<void>`. Import values (`httpF2JsClient`) from the package that declares
+`client.supplier<R>(route)` is an `F2JsSupplier` whose `invoke(signal?)` returns a `Promise<Json<R>[]>`,
+`client.consumer<Q>(route)` an `F2JsConsumer` whose `invoke(msgs, signal?)` returns a `Promise<void>`. Where a plain
+JS function is wanted, an arrow adapts it: `(msgs) => itemPage.invoke(msgs)`. Import values (`httpF2JsClient`) from the package that declares
 them, and the rest with `import type`: a package's `.d.mts` declares its whole program, its `.mjs` exports only its
 own.
 
@@ -250,11 +252,12 @@ own.
   | `UNREADABLE` | a success status whose body is no JSON | the status | `null` | the text |
   | `CLOSED` | the client was closed before or during the call | `null` | `null` | `null` |
 
-- **Cancellation**, as with `fetch`: each call takes an optional `AbortSignal` as its last argument; an aborted call
-  rejects with the signal's reason, and its listener is removed when the call ends. `client.close()` ends every
-  pending call (`CLOSED`) and releases the connections. `AbortSignal` is the platform's: the DOM library or Node's
-  types. The `?` on `signal` is a cleaning rule of this build (`additionalCleaning`): a Kotlin function type has no
-  optional parameter, and JS passes `undefined`, which Kotlin takes for `null`.
+  A defect of the client itself rejects with a plain `Error` that has no `kind`, rather than leaving the promise
+  pending.
+
+- **Cancellation**, as with `fetch`: each `invoke` takes an optional `AbortSignal` last; an aborted call rejects
+  with the signal's reason, and its listener is removed when the call ends. `client.close()` ends every pending
+  call (`CLOSED`) and releases the connections. `AbortSignal` is the platform's: the DOM library or Node's types.
 
 ## CQRS
 

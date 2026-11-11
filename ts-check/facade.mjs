@@ -57,43 +57,43 @@ const client = httpF2JsClient(`http://127.0.0.1:${server.address().port}`);
 const rejection = (promise) => promise.then(() => assert.fail("resolved"), (e) => e);
 
 try {
-  const counted = await client.function("itemCount")([{ id: "a" }, { id: "b" }]);
+  const counted = await client.function("itemCount").invoke([{ id: "a" }, { id: "b" }]);
   assert.deepEqual(counted, [{ id: "a", total: 2 }, { id: "b", total: 2 }]);
   assert.deepEqual(received.at(-1), { method: "POST", url: "/itemCount", body: '[{"id":"a"},{"id":"b"}]' });
-  assert.deepEqual(await client.supplier("itemList")(), [{ id: "a" }, { id: "b" }]);
+  assert.deepEqual(await client.supplier("itemList").invoke(), [{ id: "a" }, { id: "b" }]);
   assert.equal(received.at(-1).method, "GET");
-  assert.equal(await client.consumer("itemDelete")([{ id: "a" }]), undefined);
+  assert.equal(await client.consumer("itemDelete").invoke([{ id: "a" }]), undefined);
 
   // F2: an error status, its body as the F2 error, in JSON.
-  const refused = await rejection(client.function("itemCited")([{ id: "a" }]));
+  const refused = await rejection(client.function("itemCited").invoke([{ id: "a" }]));
   assert.ok(refused instanceof Error);
   assert.deepEqual([refused.kind, refused.status, refused.message], ["F2", 409, "Cited"]);
   assert.deepEqual(refused.error.refusal, { code: "item.CITED", parameters: { id: "i-1" }, citers: ["A"] });
-  const spring = await rejection(client.function("itemSpring")([]));
+  const spring = await rejection(client.function("itemSpring").invoke([]));
   assert.deepEqual([spring.kind, spring.status, spring.error.message], ["F2", 500, "Internal Server Error"]);
   // HTTP: an error status whose body is text or empty.
-  const broken = await rejection(client.function("itemBroken")([]));
+  const broken = await rejection(client.function("itemBroken").invoke([]));
   assert.deepEqual([broken.kind, broken.status, broken.body, broken.error], ["HTTP", 500, "boom", null]);
-  const missing = await rejection(client.function("itemMissing")([]));
+  const missing = await rejection(client.function("itemMissing").invoke([]));
   assert.deepEqual([missing.kind, missing.status, missing.body], ["HTTP", 404, ""]);
   // NETWORK: a body cut while read.
-  assert.equal((await rejection(client.function("itemCut")([]))).kind, "NETWORK");
+  assert.equal((await rejection(client.function("itemCut").invoke([]))).kind, "NETWORK");
   // UNREADABLE: a success whose body is no JSON.
-  const html = await rejection(client.function("itemHtml")([]));
+  const html = await rejection(client.function("itemHtml").invoke([]));
   assert.deepEqual([html.kind, html.status], ["UNREADABLE", 200]);
 
   // Refused before any request: messages that are no array, a Kotlin object at any depth.
   const sentBefore = received.length;
-  assert.ok((await rejection(client.function("itemCount")({ id: "a" }))) instanceof TypeError);
-  assert.ok((await rejection(client.function("itemCount")([{ page: { items: [new F2Refusal("x")] } }]))) instanceof TypeError);
+  assert.ok((await rejection(client.function("itemCount").invoke({ id: "a" }))) instanceof TypeError);
+  assert.ok((await rejection(client.function("itemCount").invoke([{ page: { items: [new F2Refusal("x")] } }]))) instanceof TypeError);
   const cyclic = { id: "a" };
   cyclic.self = cyclic;
-  assert.match((await rejection(client.function("itemCount")([cyclic]))).message, /cycle/);
+  assert.match((await rejection(client.function("itemCount").invoke([cyclic]))).message, /cycle/);
   assert.equal(received.length, sentBefore);
 
   // Aborted: rejects with the signal's reason, as fetch does.
   const controller = new AbortController();
-  const slow = rejection(client.function("itemSlow")([], controller.signal));
+  const slow = rejection(client.function("itemSlow").invoke([], controller.signal));
   while (received.at(-1)?.url !== "/itemSlow") await new Promise((resolve) => setTimeout(resolve, 5));
   controller.abort();
   assert.equal((await slow).name, "AbortError");
@@ -103,9 +103,9 @@ try {
 }
 
 // NETWORK: no server at the URL any more.
-const gone = await rejection(client.function("itemCount")([]));
+const gone = await rejection(client.function("itemCount").invoke([]));
 assert.deepEqual([gone.kind, gone.status], ["NETWORK", null]);
 // CLOSED: the client closed, its later calls refused.
 client.close();
-assert.equal((await rejection(client.supplier("itemList")())).kind, "CLOSED");
+assert.equal((await rejection(client.supplier("itemList").invoke())).kind, "CLOSED");
 console.log("facade: every value use.mts imports exists; 15 calls as a front makes them, all as expected");

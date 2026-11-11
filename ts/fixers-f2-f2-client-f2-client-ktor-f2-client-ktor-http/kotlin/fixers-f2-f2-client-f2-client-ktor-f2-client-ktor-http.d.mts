@@ -372,15 +372,45 @@ export declare namespace HttpF2JsFailureKind {
 }
 export declare class HttpF2JsClient {
     private constructor();
-    function<QUERY, RESPONSE>(route: string): (msgs: Array<Json<QUERY>>, signal?: Nullable<AbortSignal>) => Promise<Array<Json<RESPONSE>>>;
-    supplier<RESPONSE>(route: string): (signal?: Nullable<AbortSignal>) => Promise<Array<Json<RESPONSE>>>;
-    consumer<QUERY>(route: string): (msgs: Array<Json<QUERY>>, signal?: Nullable<AbortSignal>) => Promise<void>;
+    function<QUERY, RESPONSE>(route: string): F2JsFunction<QUERY, RESPONSE>;
+    supplier<RESPONSE>(route: string): F2JsSupplier<RESPONSE>;
+    consumer<QUERY>(route: string): F2JsConsumer<QUERY>;
     close(): void;
 }
 export declare namespace HttpF2JsClient {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
     namespace $metadata$ {
         const constructor: abstract new () => HttpF2JsClient;
+    }
+}
+export declare class F2JsFunction<QUERY, RESPONSE> {
+    private constructor();
+    invoke(msgs: Array<Json<QUERY>>, signal?: Nullable<AbortSignal>): Promise<Array<Json<RESPONSE>>>;
+}
+export declare namespace F2JsFunction {
+    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
+    namespace $metadata$ {
+        const constructor: abstract new <QUERY, RESPONSE>() => F2JsFunction<QUERY, RESPONSE>;
+    }
+}
+export declare class F2JsSupplier<RESPONSE> {
+    private constructor();
+    invoke(signal?: Nullable<AbortSignal>): Promise<Array<Json<RESPONSE>>>;
+}
+export declare namespace F2JsSupplier {
+    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
+    namespace $metadata$ {
+        const constructor: abstract new <RESPONSE>() => F2JsSupplier<RESPONSE>;
+    }
+}
+export declare class F2JsConsumer<QUERY> {
+    private constructor();
+    invoke(msgs: Array<Json<QUERY>>, signal?: Nullable<AbortSignal>): Promise<void>;
+}
+export declare namespace F2JsConsumer {
+    /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
+    namespace $metadata$ {
+        const constructor: abstract new <QUERY>() => F2JsConsumer<QUERY>;
     }
 }
 export declare function httpF2JsClient(urlBase: string): HttpF2JsClient;

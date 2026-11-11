@@ -63,41 +63,26 @@ enum class HttpF2JsFailureKind {
 }
 
 /**
- * The F2 server at a URL, as JS calls it: each function is a JS function of an array of JSON messages to a
- * promise of the JSON results, no Kotlin value in between. A message is written with JSON.stringify and a result
- * read with JSON.parse, so the messages are an array of plain JSON: an array, without cycle, of plain objects,
- * arrays and primitives; anything else rejects with a `TypeError` before any request. A failed call rejects with
- * an `HttpF2JsFailure`; a call aborted by its signal with the signal's reason, as `fetch` does. Every call settles
- * once.
+ * The F2 server at a URL, as JS calls it: each function is an object whose `invoke` takes an array of JSON
+ * messages and an optional `AbortSignal`, and returns a promise of the JSON results, no Kotlin value in between. A
+ * message is written with JSON.stringify and a result read with JSON.parse, so the messages are an array of plain
+ * JSON: an array, without cycle, of plain objects, arrays and primitives; anything else rejects with a `TypeError`
+ * before any request. A failed call rejects with an `HttpF2JsFailure`; a call aborted by its signal with the
+ * signal's reason, as `fetch` does. Every call settles once.
  */
 @JsExport
-class HttpF2JsClient internal constructor(private val client: HttpF2Client) {
+class HttpF2JsClient internal constructor(internal val client: HttpF2Client) {
     private val scope = CoroutineScope(SupervisorJob())
     private var isClosed = false
 
-    /** The function at [route]: one POST of every message, its results; [signal] aborts the call. */
-    fun <QUERY, RESPONSE> function(
-        route: String,
-    ): (msgs: Array<JsonOf<QUERY>>, signal: AbortSignal?) -> Promise<Array<JsonOf<RESPONSE>>> =
-        { msgs, signal -> call(signal) { client.results(client.checked(client.postAll(route, msgs))) } }
+    /** The function at [route]: one POST of every message, its results. */
+    fun <QUERY, RESPONSE> function(route: String): F2JsFunction<QUERY, RESPONSE> = F2JsFunction(this, route)
 
-    /** The supplier at [route]: one GET, its results; [signal] aborts the call. */
-    fun <RESPONSE> supplier(route: String): (signal: AbortSignal?) -> Promise<Array<JsonOf<RESPONSE>>> =
-        { signal ->
-            call(signal) {
-                client.results(client.checked(client.request { client.httpClient.get("${client.urlBase}/$route") }))
-            }
-        }
+    /** The supplier at [route]: one GET, its results. */
+    fun <RESPONSE> supplier(route: String): F2JsSupplier<RESPONSE> = F2JsSupplier(this, route)
 
-    /** The consumer at [route]: one POST of every message; [signal] aborts the call. */
-    fun <QUERY> consumer(route: String): (msgs: Array<JsonOf<QUERY>>, signal: AbortSignal?) -> Promise<Unit> =
-        { msgs, signal ->
-            // A promise of Unit would resolve to Kotlin's Unit object, where a `Promise<void>` holds undefined.
-            call<dynamic>(signal) {
-                val _ = client.checked(client.postAll(route, msgs))
-                undefined
-            }.unsafeCast<Promise<Unit>>()
-        }
+    /** The consumer at [route]: one POST of every message. */
+    fun <QUERY> consumer(route: String): F2JsConsumer<QUERY> = F2JsConsumer(this, route)
 
     /** Ends every pending call, which rejects as `CLOSED`, and releases the connections; later calls reject alike. */
     fun close() {
@@ -107,7 +92,7 @@ class HttpF2JsClient internal constructor(private val client: HttpF2Client) {
     }
 
     // Settles once, whatever ends the job: its result, a prepared rejection, any other failure, a cancellation.
-    private fun <T> call(signal: AbortSignal?, block: suspend () -> T): Promise<T> = Promise { resolve, reject ->
+    internal fun <T> call(signal: AbortSignal?, block: suspend () -> T): Promise<T> = Promise { resolve, reject ->
         val settle = Settle(resolve, reject)
         when {
             signal?.aborted == true -> {
@@ -135,6 +120,36 @@ class HttpF2JsClient internal constructor(private val client: HttpF2Client) {
     }
 
     private fun closed(): Throwable = failure(HttpF2JsFailureKind.CLOSED, "The client is closed")
+}
+
+/** An F2 function of the server: `invoke(msgs, signal?)`. */
+@JsExport
+class F2JsFunction<QUERY, RESPONSE> internal constructor(private val owner: HttpF2JsClient, private val route: String) {
+    /** One POST of every message, its results; [signal] aborts the call. */
+    fun invoke(msgs: Array<JsonOf<QUERY>>, signal: AbortSignal? = null): Promise<Array<JsonOf<RESPONSE>>> =
+        owner.call(signal) { owner.client.results(owner.client.checked(owner.client.postAll(route, msgs))) }
+}
+
+/** An F2 supplier of the server: `invoke(signal?)`. */
+@JsExport
+class F2JsSupplier<RESPONSE> internal constructor(private val owner: HttpF2JsClient, private val route: String) {
+    /** One GET, its results; [signal] aborts the call. */
+    fun invoke(signal: AbortSignal? = null): Promise<Array<JsonOf<RESPONSE>>> = owner.call(signal) {
+        val client = owner.client
+        client.results(client.checked(client.request { client.httpClient.get("${client.urlBase}/$route") }))
+    }
+}
+
+/** An F2 consumer of the server: `invoke(msgs, signal?)`. */
+@JsExport
+class F2JsConsumer<QUERY> internal constructor(private val owner: HttpF2JsClient, private val route: String) {
+    /** One POST of every message; [signal] aborts the call. */
+    fun invoke(msgs: Array<JsonOf<QUERY>>, signal: AbortSignal? = null): Promise<Unit> =
+        // A promise of Unit would resolve to Kotlin's Unit object, where a `Promise<void>` holds undefined.
+        owner.call<dynamic>(signal) {
+            val _ = owner.client.checked(owner.client.postAll(route, msgs))
+            undefined
+        }.unsafeCast<Promise<Unit>>()
 }
 
 /** The F2 server at [urlBase], called on the platform's fetch. */

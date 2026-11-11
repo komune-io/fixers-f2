@@ -49,22 +49,22 @@ class HttpF2ClientJsTest {
     private fun sent(): String = (requests.single().body as TextContent).text
 
     private suspend fun call(function: dynamic, messages: dynamic): dynamic =
-        function(messages).unsafeCast<Promise<dynamic>>().await()
+        function.invoke(messages).unsafeCast<Promise<dynamic>>().await()
 
     // What the promise rejects with: a JS value, never a Kotlin exception.
     private suspend fun rejection(function: dynamic, messages: dynamic): dynamic =
-        settled(function(messages).unsafeCast<Promise<dynamic>>()).await()
+        settled(function.invoke(messages).unsafeCast<Promise<dynamic>>()).await()
 
     // The reason a promise rejects with, or null when it resolves.
     private fun settled(promise: Promise<dynamic>): Promise<dynamic> =
         promise.then<dynamic>({ _ -> null }, { reason -> reason })
 
     @Test
-    fun theExportedFactoryBuildsAClientWhoseFunctionsAreJsFunctions() {
+    fun theExportedFactoryBuildsAClientWhoseFunctionsHaveAnInvokeMethod() {
         val client = httpF2JsClient("http://f2.test")
-        assertEquals("function", jsTypeOf(client.function("itemCount")))
-        assertEquals("function", jsTypeOf(client.supplier("itemList")))
-        assertEquals("function", jsTypeOf(client.consumer("itemDelete")))
+        assertEquals("function", jsTypeOf(client.function("itemCount").invoke))
+        assertEquals("function", jsTypeOf(client.supplier("itemList").invoke))
+        assertEquals("function", jsTypeOf(client.consumer("itemDelete").invoke))
         client.close()
     }
 
@@ -91,7 +91,7 @@ class HttpF2ClientJsTest {
     fun aSupplierGetsAndResolvesToJsResults() = runTest {
         val supplier = client(body = """[{"id":"a"},{"id":"b"}]""").supplier("itemList")
 
-        val results = supplier().unsafeCast<Promise<Array<dynamic>>>().await()
+        val results = supplier.invoke().unsafeCast<Promise<Array<dynamic>>>().await()
 
         assertEquals(HttpMethod.Get, requests.single().method)
         assertEquals("a,b", results.map { item: dynamic -> item.id }.joinToString(","))
@@ -256,7 +256,7 @@ class HttpF2ClientJsTest {
         val function = client(body = "[]") { started.complete(Unit); CompletableDeferred<Unit>().await() }
             .function("itemCount")
 
-        val pending = settled(function(js("[]"), controller.signal).unsafeCast<Promise<dynamic>>())
+        val pending = settled(function.invoke(js("[]"), controller.signal).unsafeCast<Promise<dynamic>>())
         started.await()
         controller.abort()
 
@@ -284,7 +284,7 @@ class HttpF2ClientJsTest {
     fun closingTheClientRejectsItsPendingAndLaterCallsAsClosed() = runTest {
         val started = CompletableDeferred<Unit>()
         val client = client(body = "[]") { started.complete(Unit); CompletableDeferred<Unit>().await() }
-        val pending = settled(client.function("itemCount")(js("[]")).unsafeCast<Promise<dynamic>>())
+        val pending = settled(client.function("itemCount").invoke(js("[]")).unsafeCast<Promise<dynamic>>())
         started.await()
 
         client.close()
@@ -314,5 +314,5 @@ class HttpF2ClientJsTest {
     private fun keys(value: dynamic): List<String> = js("Object").keys(value).unsafeCast<Array<String>>().sorted()
 
     private suspend fun call2(function: dynamic, messages: dynamic, signal: dynamic): dynamic =
-        function(messages, signal).unsafeCast<Promise<dynamic>>().await()
+        function.invoke(messages, signal).unsafeCast<Promise<dynamic>>().await()
 }
