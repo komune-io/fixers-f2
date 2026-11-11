@@ -2,90 +2,28 @@ package f2.client.ktor
 
 import f2.client.F2Client
 import f2.client.ktor.common.F2ClientConfigLambda
-import f2.client.ktor.http.httpClientBuilderDefault
 import f2.client.ktor.http.httpClientBuilderGenerics
-import kotlin.js.JsExport
 
 /**
- * Builder object for creating instances of [F2Client] based on different protocols.
+ * Builds the [F2Client] of an F2 server from its URL. From JS, `httpClientBuilderDefault().build(url)`.
  */
-@JsExport
 object F2ClientBuilder {
 
     private const val HTTP_PREFIX = "http:"
     private const val HTTPS_PREFIX = "https:"
 
-    internal fun isHttpUrl(url: String): Boolean {
-        return url.startsWith(HTTP_PREFIX) || url.startsWith(HTTPS_PREFIX)
-    }
-
-    private fun requireHttpUrl(url: String) {
-        require(isHttpUrl(url)) { "Invalid Url[${url}] must start with one of http:, https:" }
-    }
-
     /**
-     * Creates an [F2Client] for HTTP or HTTPS communication.
+     * The HTTP client of the F2 server at [urlBase], its Ktor client configured by [config].
      *
-     * @param url The URL to connect to. Must start with "http:" or "https:".
-     * @return An instance of [F2Client].
-     * @throws IllegalArgumentException if the URL does not start with "http:" or "https:".
+     * @throws InvalidUrlException when [urlBase] starts with neither `http:` nor `https:`.
      */
-    fun getHttp(
-        url: String,
-    ): F2Client {
-        requireHttpUrl(url)
-        return httpClientBuilderDefault().build(url)
-    }
-
-    /**
-     * Creates an [F2Client] for HTTP or HTTPS communication, with optional configuration.
-     *
-     * @param urlBase The base URL to connect to. Must start with "http:" or "https:".
-     * @param config Additional configuration for the client. Defaults to null.
-     * @return An instance of [F2Client].
-     * @throws InvalidUrlException if the URL does not start with a valid protocol.
-     */
-    @JsExport.Ignore
     fun get(
         urlBase: String,
         config: F2ClientConfigLambda<*>? = null
     ): F2Client {
-        if (!isHttpUrl(urlBase)) {
+        if (!urlBase.startsWith(HTTP_PREFIX) && !urlBase.startsWith(HTTPS_PREFIX)) {
             throw InvalidUrlException(urlBase)
         }
         return httpClientBuilderGenerics(config).build(urlBase)
     }
-
-    /**
-     * Creates an [F2Client] for HTTP or HTTPS communication.
-     *
-     * @param url The URL to connect to. Must start with "http:" or "https:".
-     * @return An instance of [F2Client].
-     * @throws IllegalArgumentException if the URL does not start with "http:" or "https:".
-     */
-    @JsExport.Ignore
-    fun get(
-        url: String,
-    ): F2Client {
-        requireHttpUrl(url)
-        return httpClientBuilderDefault().build(url)
-    }
-
-    // The type parameter keeps the klib signature apart from the non-suspend get; the JVM erases it.
-    @Deprecated(SUSPEND_GET_REMOVED, level = DeprecationLevel.HIDDEN)
-    @JsExport.Ignore
-    @Suppress("RedundantSuspendModifier") // the suspend signature is what compiled callers link to
-    suspend fun <T> get(
-        urlBase: String,
-        config: F2ClientConfigLambda<*>? = null
-    ): F2Client = get(urlBase, config)
-
-    @Deprecated(SUSPEND_GET_REMOVED, level = DeprecationLevel.HIDDEN)
-    @JsExport.Ignore
-    @Suppress("RedundantSuspendModifier") // the suspend signature is what compiled callers link to
-    suspend fun <T> get(
-        url: String,
-    ): F2Client = get(url)
 }
-
-internal const val SUSPEND_GET_REMOVED = "get is no longer suspend; kept for already compiled callers until 0.48"

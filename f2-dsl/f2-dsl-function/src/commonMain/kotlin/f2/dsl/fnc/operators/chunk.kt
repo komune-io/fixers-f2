@@ -12,7 +12,9 @@ const val CHUNK_DEFAULT_SIZE: Int = 128
  * Extension function to chunk elements of a Flow into lists
  * of a specified size and apply a transformation function to each chunk.
  *
- * @param props An instance of [Chunking] containing the size of each chunk.
+ * @param T The type of the elements.
+ * @param R The type of the transformed elements.
+ * @param size The size of each chunk.
  * @param fnc A suspend function to apply to each chunk of elements.
  * @return A Flow emitting lists of transformed elements.
  */
@@ -37,7 +39,10 @@ fun <T, R> Flow<T>.chunk(
  * Extension function to chunk elements of a Flow into lists of a specified size
  * and apply a transformation function to each chunk.
  *
- * @param props An instance of [Chunking] containing the size of each chunk.
+ * @param T The type of the elements.
+ * @param R The type of the transformed elements.
+ * @param size The size of each chunk.
+ * @param fnc A suspend function to apply to each chunk of elements.
  * @return A Flow emitting lists of transformed elements.
  */
 fun <T, R> Flow<T>.chunkFlow(
@@ -48,19 +53,20 @@ fun <T, R> Flow<T>.chunkFlow(
     collect { value ->
         buffer.add(value)
         if (buffer.size == size) {
-            fnc(buffer).let { emit(it) }
+            emit(fnc(buffer))
             buffer.clear()
         }
     }
     if (buffer.isNotEmpty()) {
-        fnc(buffer).let { emit(it) }
+        emit(fnc(buffer))
     }
 }
 
 /**
  * Extension function to chunk elements of a Flow into lists of a specified size.
  *
- * @param props An instance of [Chunking] containing the size of each chunk.
+ * @param T The type of the elements.
+ * @param size The size of each chunk.
  * @return A Flow emitting lists of elements.
  */
-fun <T> Flow<T>.chunk(size: Int = CHUNK_DEFAULT_SIZE): Flow<List<T>> = chunk(size, {it})
+fun <T> Flow<T>.chunk(size: Int = CHUNK_DEFAULT_SIZE): Flow<List<T>> = chunk(size) { it }

@@ -7,7 +7,6 @@ data class F2TrustedIssuersConfig (
     private val issuers: List<TrustedIssuerProperties> = emptyList(),
 ) {
 
-    fun getTrustedIssuers(): List<String> {
-        return issuers.map { it.issuer }
-    }
+    val trustedIssuers: List<String>
+        get() = issuers.map { it.issuer }
 }

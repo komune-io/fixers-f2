@@ -1,7 +1,7 @@
 plugins {
-    alias(catalogue.plugins.fixers.gradle.kotlin.jvm)
-    alias(catalogue.plugins.fixers.gradle.publish)
-    alias(catalogue.plugins.kotlin.serialization)
+    alias(libs.plugins.fixers.gradle.kotlin.jvm)
+    alias(libs.plugins.fixers.gradle.publish)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
@@ -10,4 +10,8 @@ dependencies {
     implementation(libs.spring.cloud.function.web)
 
     testImplementation(libs.bundles.test.junit)
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
 }

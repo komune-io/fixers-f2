@@ -12,7 +12,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  * @see OtelPropertiesListener
  */
 @ConfigurationProperties(prefix = OtelPropertiesListener.F2_OTEL_PREFIX)
-class F2OpenTelemetryProperties(
+data class F2OpenTelemetryProperties(
     /**
      * Base endpoint for OpenTelemetry. When set, [OtelPropertiesListener] derives
      * metrics, traces, and logs endpoints by appending `/v1/metrics`, `/v1/traces`,

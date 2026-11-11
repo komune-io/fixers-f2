@@ -480,3 +480,35 @@ Three serializer can be used via the spring parameter `spring.cloud.function.pre
  * jackson
  * gson
  * kSerialization
+
+## Errors
+
+`f2-spring-boot-exception-http-webflux` and `-mvc` answer every error with one body:
+
+```json
+{"timestamp":"…","path":"/itemDelete","status":409,"error":"Conflict","requestId":"…",
+ "refusal":"item.CITED","message":"Cited by A: it stays","parameters":{"id":"i-1"},"citers":["A"]}
+```
+
+* `refusal` is always there: the rule a refusal names (`F2Refusal.code`), or the meaning of the status
+  (`HttpRefusal`, `http.NOT_FOUND`…).
+* `message`, `parameters` and `citers` travel only with a refusal — an `F2Exception` whose `F2Error` carries an
+  `F2Refusal`. Any other error says nothing it was raised with, whatever `server.error.include-*` asks for.
+* The status is the one the `F2Error` names, wherever the `F2Exception` sits in the cause chain.
+* An unreadable request body is the refusal `http.INVALID_PAYLOAD`; a 401 or 403 of f2's security starters gets
+  the same body, with `WWW-Authenticate: Bearer` alone.
+* The body is written with the application's `JsonMapper` bean.
+
+`spring.webflux.problemdetails.enabled` and `spring.mvc.problemdetails.enabled` must stay `false` (their
+default): enabled, Spring's `ProblemDetail` handler answers the exceptions it knows (`ResponseStatusException`,
+`ServerWebInputException`, `HttpMessageNotReadableException`…) raised in a controller before F2's error body is
+written, with its own body and their `detail` message.
+
+## BlockHound
+
+`f2-bdd-blockhound` installs BlockHound for a JUnit session. The test JVM needs
+`-XX:+AllowRedefinitionToAddDeleteMethods` (JDK 13 and later), or BlockHound cannot instrument the JDK:
+
+```kotlin
+tasks.withType<Test>().configureEach { jvmArgs("-XX:+AllowRedefinitionToAddDeleteMethods") }
+```

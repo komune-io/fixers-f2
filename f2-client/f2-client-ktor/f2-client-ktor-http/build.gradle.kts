@@ -1,7 +1,7 @@
 plugins {
-    alias(catalogue.plugins.fixers.gradle.kotlin.mpp)
-    alias(catalogue.plugins.fixers.gradle.publish)
-    alias(catalogue.plugins.kotlin.serialization)
+    alias(libs.plugins.fixers.gradle.kotlin.mpp)
+    alias(libs.plugins.fixers.gradle.publish)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
@@ -24,6 +24,8 @@ dependencies {
 
     jvmTestImplementation(libs.bundles.test.junit)
     jvmTestImplementation(libs.ktor.client.mock)
+    jsTestImplementation(libs.ktor.client.mock)
+    jsTestImplementation(libs.kotlinx.coroutines.test)
 
     jvmTestImplementation(project(":f2-spring:function:f2-spring-boot-starter-function-http-webflux"))
 

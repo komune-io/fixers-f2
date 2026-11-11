@@ -1,7 +1,7 @@
 plugins {
-    alias(catalogue.plugins.fixers.gradle.kotlin.jvm)
-    alias(catalogue.plugins.fixers.gradle.publish)
-    alias(catalogue.plugins.kotlin.spring)
+    alias(libs.plugins.fixers.gradle.kotlin.jvm)
+    alias(libs.plugins.fixers.gradle.publish)
+    alias(libs.plugins.kotlin.spring)
     `java-test-fixtures`
 }
 
@@ -11,6 +11,7 @@ dependencies {
 
     api(libs.spring.boot.starter.security)
     api(libs.bundles.spring.oauth2)
+    api(project(":f2-spring:exception:f2-spring-boot-exception-http-webflux"))
 
     testImplementation(libs.bundles.spring.test)
     testImplementation(libs.spring.boot.starter.webflux)

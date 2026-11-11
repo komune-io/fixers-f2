@@ -8,20 +8,20 @@ import kotlin.test.assertSame
 
 class F2UploadCommandJsTest {
 
-	@Test
-	fun aFilePartBuiltFromBytesInJsReadsBack() {
-		val part = JsF2FilePart.fromBytes("a.txt", "hello".encodeToByteArray(), "text/plain")
-		assertEquals("a.txt", part.name)
-		assertEquals("text/plain", part.contentType)
-	}
+    @Test
+    fun aFilePartBuiltFromBytesInJsReadsBack() {
+        val part = JsF2FilePart.fromBytes("a.txt", "hello".encodeToByteArray(), "text/plain")
+        assertEquals("a.txt", part.name)
+        assertEquals("text/plain", part.contentType)
+    }
 
-	@Test
-	fun aSingleUploadBuiltInJsKeepsItsCommandAndFile() {
-		val part = JsF2FilePart.fromBytes("b.bin", byteArrayOf(1, 2), null)
-		val command = JsF2UploadSingleCommand(js("({ id: 'c1' })"), part)
-		assertEquals("c1", command.command.id as String)
-		assertSame(part, command.file)
-		assertEquals("b.bin", command.file.name)
-		assertEquals(null, command.file.contentType)
-	}
+    @Test
+    fun aSingleUploadBuiltInJsKeepsItsCommandAndFile() {
+        val part = JsF2FilePart.fromBytes("b.bin", byteArrayOf(1, 2), null)
+        val command = JsF2UploadSingleCommand(js("({ id: 'c1' })"), part)
+        assertEquals("c1", command.command.id as String)
+        assertSame(part, command.file)
+        assertEquals("b.bin", command.file.name)
+        assertEquals(null, command.file.contentType)
+    }
 }

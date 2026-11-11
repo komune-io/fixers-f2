@@ -5,7 +5,7 @@ import io.cucumber.java8.En
 
 class BeanLambdaF2VehicleSteps : LambdaF2VehicleSteps(), En {
 
-	init {
-		prepareFunctionCatalogSteps()
-	}
+    init {
+        prepareFunctionCatalogSteps()
+    }
 }

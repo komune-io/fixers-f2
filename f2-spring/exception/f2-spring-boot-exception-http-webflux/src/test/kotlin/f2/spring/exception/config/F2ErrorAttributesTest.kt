@@ -1,5 +1,7 @@
 package f2.spring.exception.config
 
+import f2.dsl.cqrs.error.F2Error
+import f2.dsl.cqrs.error.F2Refusal
 import f2.dsl.cqrs.exception.F2Exception
 import f2.spring.exception.ConflictException
 import f2.spring.exception.F2HttpException
@@ -41,8 +43,8 @@ class F2ErrorAttributesTest {
     fun `a refusal tells the caller its rule, its sentence and the values it names`() {
         val body = bodyFor(
             F2HttpException(
-                status = HttpStatus.BAD_REQUEST, message = "The link name \"me\" is reserved", cause = null,
-                refusal = "item.ALIAS_RESERVED", parameters = mapOf("alias" to "me"),
+                status = HttpStatus.BAD_REQUEST, message = "The link name \"me\" is reserved",
+                refusal = F2Refusal("item.ALIAS_RESERVED", parameters = mapOf("alias" to "me")),
             )
         )
 
@@ -57,8 +59,8 @@ class F2ErrorAttributesTest {
     fun `an object kept because others cite it names them beside its rule`() {
         val body = bodyFor(
             F2HttpException(
-                status = HttpStatus.CONFLICT, message = "Cited by A, B: it stays", cause = null,
-                refusal = "item.CITED", citers = listOf("A", "B"),
+                status = HttpStatus.CONFLICT, message = "Cited by A, B: it stays",
+                refusal = F2Refusal("item.CITED", citers = listOf("A", "B")),
             )
         )
 
@@ -70,7 +72,7 @@ class F2ErrorAttributesTest {
     @Test
     fun `a refusal is read through the wrapper Spring puts around a handler failure`() {
         val refusal = F2Exception(
-            error = f2.dsl.cqrs.error.F2Error(message = "Too wide", code = 422, refusal = "read.TOO_WIDE")
+            error = F2Error(message = "Too wide", code = 422, refusal = F2Refusal("read.TOO_WIDE"))
         )
 
         val body = bodyFor(IllegalStateException("wrapper", refusal))
@@ -85,18 +87,16 @@ class F2ErrorAttributesTest {
     fun `an error no rule names carries the code of its status, and nothing it was raised with`() {
         val bodies = mapOf(
             ResponseStatusException(HttpStatus.UNAUTHORIZED, internal) to "http.UNAUTHENTICATED",
-            ForbiddenAccessException(internal) to "http.FORBIDDEN",
-            NotFoundException("Item", internal) to "http.NOT_FOUND",
-            ConflictException("Item", "name", internal) to "http.CONFLICT",
             ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE, internal) to "http.PAYLOAD_TOO_LARGE",
             ServerWebInputException(internal) to "http.INVALID_PAYLOAD",
-            F2Exception(message = internal, code = 400) to "http.INVALID_PAYLOAD",
+            F2Exception(F2Error(message = internal, code = 400)) to "http.INVALID_PAYLOAD",
             ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED, internal) to "http.METHOD_NOT_ALLOWED",
             ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, internal) to "http.UNSUPPORTED_MEDIA_TYPE",
             ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT, internal) to "http.UNPROCESSABLE",
             ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, internal) to "http.TOO_MANY_REQUESTS",
             ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, internal) to "http.UNAVAILABLE",
-            ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, internal) to "http.UNEXPECTED",
+            ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, internal) to "http.NOT_ACCEPTABLE",
+            ResponseStatusException(HttpStatus.GONE, internal) to "http.GONE",
             IllegalArgumentException(internal) to "http.UNEXPECTED",
         ).mapKeys { (error, _) -> bodyFor(error) }
 
@@ -109,7 +109,7 @@ class F2ErrorAttributesTest {
 
     @Test
     fun `an f2 exception answers with the status its error names`() {
-        val body = bodyFor(F2Exception(message = internal, code = 404))
+        val body = bodyFor(F2Exception(F2Error(message = internal, code = 404)))
 
         assertThat(body["status"]).isEqualTo(404)
         assertThat(body["error"]).isEqualTo("Not Found")
@@ -136,16 +136,27 @@ class F2ErrorAttributesTest {
         assertThat(body["status"]).isEqualTo(400)
         assertThat(body["error"]).isEqualTo("Bad Request")
         assertThat(body["refusal"]).isEqualTo("http.INVALID_PAYLOAD")
-        assertThat(body).doesNotContainKey("message")
+        assertThat(body["message"]).isEqualTo("Unreadable request body")
+        assertThat(body.values.map(Any?::toString)).noneMatch { it.contains("db-internal") }
     }
 
     @Test
-    fun `an input that converts to nothing is the caller's`() {
+    fun `an input that converts to nothing is the caller's refusal`() {
         val body = bodyFor(IllegalArgumentException("Failed to convert input: {} to class Item"))
 
         assertThat(body["status"]).isEqualTo(400)
         assertThat(body["refusal"]).isEqualTo("http.INVALID_PAYLOAD")
-        assertThat(body).doesNotContainKey("message")
+        assertThat(body["message"]).isEqualTo("Unreadable request body")
+        assertThat(body).doesNotContainKey("parameters")
+    }
+
+    @Test
+    fun `typed refusals tell the values the caller gave`() {
+        assertThat(bodyFor(NotFoundException(name = "Item", id = "i-1"))["parameters"])
+            .isEqualTo(mapOf("entity" to "Item", "id" to "i-1"))
+        assertThat(bodyFor(ConflictException(entity = "Item", property = "name", value = "n"))["refusal"])
+            .isEqualTo("http.CONFLICT")
+        assertThat(bodyFor(ForbiddenAccessException("Read only"))["message"]).isEqualTo("Read only")
     }
 
     @Test

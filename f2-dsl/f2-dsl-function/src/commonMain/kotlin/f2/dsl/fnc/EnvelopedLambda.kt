@@ -2,7 +2,6 @@ package f2.dsl.fnc
 
 import f2.dsl.cqrs.envelope.Envelope
 
-
 /**
  * Type alias for a function that takes an Envelope of type T and returns an Envelope of type R.
  */

@@ -26,8 +26,8 @@ class KeycloakConfigResolverTest {
     private val resolver = KeycloakConfigResolver(f2KeycloakConfig)
 
     @Test
-    fun `getConfig should map issuers by name`() {
-        val config = f2KeycloakConfig.getConfig()
+    fun `config should map issuers by name`() {
+        val config = f2KeycloakConfig.config
 
         assertThat(config).containsOnlyKeys("first", "second")
         assertThat(config["first"]).isEqualTo(
@@ -59,7 +59,7 @@ class KeycloakConfigResolverTest {
     @Test
     fun `resolve should fail for unknown name`() {
         assertThatThrownBy {
-            resolver.resolve("unknown")
+            val _ = resolver.resolve("unknown")
         }.isInstanceOf(NullPointerException::class.java)
             .hasMessageContaining("unknown")
     }

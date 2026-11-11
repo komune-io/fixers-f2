@@ -71,18 +71,18 @@ class PageRequestExtensionTest {
 
     @Test
     fun `a limit below one is rejected`() {
-        assertThatThrownBy { OffsetPagination(offset = 0, limit = 0).toPageRequest() }
+        assertThatThrownBy { val _ = OffsetPagination(offset = 0, limit = 0).toPageRequest() }
             .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessageContaining("Page size must not be less than one")
 
-        assertThatThrownBy { OffsetPagination(offset = 10, limit = -5).toPageRequest() }
+        assertThatThrownBy { val _ = OffsetPagination(offset = 10, limit = -5).toPageRequest() }
             .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessageContaining("Page size must not be less than one")
     }
 
     @Test
     fun `a negative offset is rejected`() {
-        assertThatThrownBy { OffsetPagination(offset = -1, limit = 10).toPageRequest() }
+        assertThatThrownBy { val _ = OffsetPagination(offset = -1, limit = 10).toPageRequest() }
             .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessageContaining("Offset must not be less than zero")
     }

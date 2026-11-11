@@ -1,7 +1,6 @@
 {
   "name": "fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-common",
   "version": "0.0.0",
-  "main": "kotlin/fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-common.mjs",
   "types": "kotlin/fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-common.d.mts",
   "devDependencies": {},
   "dependencies": {

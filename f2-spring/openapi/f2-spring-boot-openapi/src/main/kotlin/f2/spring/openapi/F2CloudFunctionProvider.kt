@@ -17,7 +17,6 @@ import org.springdoc.core.properties.SpringDocConfigProperties
 import org.springdoc.core.providers.CloudFunctionProvider
 import org.springdoc.core.utils.SpringDocAnnotationsUtils
 import org.springframework.context.ApplicationContext
-import org.springframework.context.ApplicationContextAware
 import org.springframework.core.ResolvableType
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.RequestMethod
@@ -25,13 +24,8 @@ import org.springframework.web.bind.annotation.RequestMethod
 class F2CloudFunctionProvider(
     private val springDocConfigProperties: SpringDocConfigProperties,
     private val prefix: String,
-) : CloudFunctionProvider, ApplicationContextAware {
-
-    private lateinit var applicationContext: ApplicationContext
-
-    override fun setApplicationContext(applicationContext: ApplicationContext) {
-        this.applicationContext = applicationContext
-    }
+    private val applicationContext: ApplicationContext,
+) : CloudFunctionProvider {
 
     override fun getRouterOperations(openAPI: OpenAPI): List<RouterOperation> {
         return collectOperations(openAPI, F2Function::class.java, Kind.FUNCTION) +
@@ -49,13 +43,18 @@ class F2CloudFunctionProvider(
             val resolvable = ResolvableType.forClass(rawType, getBeanClass(name, bean))
             val inputType = kind.inputIndex?.let { resolvable.getGeneric(it).type }
             val outputType = kind.outputIndex?.let { resolvable.getGeneric(it).type }
-            buildRouterOperation(openAPI, name, kind, inputType, outputType)
+            buildRouterOperation(
+                openAPI = openAPI,
+                name = name,
+                kind = kind,
+                inputType = inputType,
+                outputType = outputType,
+            )
         }
     }
 
-    private fun getBeanClass(beanName: String, bean: Any): Class<*> {
-        return applicationContext.getType(beanName) ?: bean.javaClass
-    }
+    private fun getBeanClass(beanName: String, bean: Any): Class<*> =
+        applicationContext.getType(beanName) ?: bean.javaClass
 
     private fun buildRouterOperation(
         openAPI: OpenAPI,
@@ -120,7 +119,11 @@ class F2CloudFunctionProvider(
 
     private fun routePath(name: String): String {
         val normalizedPrefix = prefix.trimEnd('/')
-        return if (normalizedPrefix.isEmpty()) "/$name" else "/$normalizedPrefix/$name".replace("//", "/")
+        return if (normalizedPrefix.isEmpty()) {
+            "/$name"
+        } else {
+            "/$normalizedPrefix/$name".replace(oldValue = "//", newValue = "/")
+        }
     }
 
     private enum class Kind(val label: String, val method: RequestMethod, val inputIndex: Int?, val outputIndex: Int?) {

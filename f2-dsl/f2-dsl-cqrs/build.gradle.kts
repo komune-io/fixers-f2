@@ -1,7 +1,7 @@
 plugins {
-    alias(catalogue.plugins.fixers.gradle.kotlin.mpp)
-    alias(catalogue.plugins.fixers.gradle.publish)
-    alias(catalogue.plugins.kotlin.serialization)
+    alias(libs.plugins.fixers.gradle.kotlin.mpp)
+    alias(libs.plugins.fixers.gradle.publish)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
@@ -12,6 +12,8 @@ dependencies {
 
     commonTestImplementation(kotlin("test"))
     commonTestImplementation(libs.kotlinx.coroutines.test)
+    commonTestImplementation(libs.kotlinx.serialization.json)
 
     jvmTestImplementation(libs.bundles.test.junit)
+    jvmTestImplementation(libs.jackson.module.kotlin)
 }

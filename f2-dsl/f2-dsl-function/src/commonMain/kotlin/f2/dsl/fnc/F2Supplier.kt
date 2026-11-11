@@ -21,6 +21,8 @@ fun interface F2Supplier<R> : F2LambdaSupplier<R> {
      * @return The Flow of type R.
      */
     @JsExport.Ignore
+    // The F2 wire shape: suspend to open the call (an HTTP request, a bean lookup), then a Flow of its results.
+    @Suppress("SuspendFunWithFlowReturnType")
     override suspend operator fun invoke(): Flow<R>
 }
 

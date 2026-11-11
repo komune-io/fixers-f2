@@ -24,24 +24,6 @@ class TenantIssuerPrefixMatchingTest(
     @LocalServerPort private val port: Int,
 ) {
 
-    companion object {
-        const val TENANT = "tenant-1"
-        const val SIBLING_TENANT = "tenant-1-other"
-
-        private val oidc = OidcProviderStub(listOf(TENANT, SIBLING_TENANT))
-
-        @JvmStatic
-        @DynamicPropertySource
-        fun issuerBaseUri(registry: DynamicPropertyRegistry) {
-            // no trailing separator on purpose: the resolver must still enforce a segment boundary
-            registry.add("f2.tenant.issuer-base-uri") { "${oidc.authUrl}/realms/$TENANT" }
-        }
-
-        @JvmStatic
-        @AfterAll
-        fun stopOidcProviderStub() = oidc.stop()
-    }
-
     private val webTestClient: WebTestClient by lazy {
         WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()
     }
@@ -71,5 +53,25 @@ class TenantIssuerPrefixMatchingTest(
             issuer = "https://evil.example.com/realms/tenant-1"
         )
         getAdmin(token).expectStatus().isUnauthorized
+    }
+
+    companion object {
+        const val TENANT = "tenant-1"
+        const val SIBLING_TENANT = "tenant-1-other"
+
+        private val oidc = OidcProviderStub(listOf(TENANT, SIBLING_TENANT))
+
+        @JvmStatic
+        @DynamicPropertySource
+        fun issuerBaseUri(registry: DynamicPropertyRegistry) {
+            // no trailing separator on purpose: the resolver must still enforce a segment boundary
+            registry.add("f2.tenant.issuer-base-uri") { "${oidc.authUrl}/realms/$TENANT" }
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun stopOidcProviderStub() {
+            oidc.stop()
+        }
     }
 }

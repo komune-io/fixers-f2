@@ -9,6 +9,8 @@ import kotlinx.coroutines.launch
 /**
  * Extension function to group elements of a Flow by a specified key.
  *
+ * @param T The type of the elements.
+ * @param K The type of the keys.
  * @param keySelector A function to extract the key for each element.
  * @return A Flow emitting pairs of keys and corresponding flows of elements.
  */

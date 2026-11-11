@@ -12,6 +12,7 @@ interface F2UploadCommand<COMMAND> {
     val fileMap: Map<F2FileKey, List<F2FilePart>>
 }
 
+/** One command and its file. */
 @JsExport
 data class F2UploadSingleCommand<COMMAND>(
     override val command: COMMAND,
@@ -20,6 +21,7 @@ data class F2UploadSingleCommand<COMMAND>(
     override val fileMap: Map<F2FileKey, List<F2FilePart>> = mapOf("file" to listOf(file))
 }
 
+/** One command and its files. */
 @JsExport
 data class F2UploadMultipleCommand<COMMAND>(
     override val command: COMMAND,
@@ -33,6 +35,7 @@ data class F2UploadMultipleCommand<COMMAND>(
  * the ByteReadChannel to JS, and two channels never compare equal anyway.
  */
 @JsExport
+@Suppress("UseDataClass") // copy() would expose the ByteReadChannel to JS, and two channels never compare equal
 class F2FilePart @JsExport.Ignore constructor(
     val name: String,
     @property:JsExport.Ignore

@@ -13,6 +13,6 @@ class KeycloakIssuers(
     realm = realm
 )
 
-class I2KeycloakProperties(
+data class I2KeycloakProperties(
     val clientId: String
 )

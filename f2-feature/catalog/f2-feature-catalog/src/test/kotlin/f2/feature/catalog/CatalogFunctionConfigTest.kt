@@ -14,9 +14,7 @@ class CatalogFunctionConfigTest {
             type: Class<*>?,
             functionDefinition: String?,
             vararg expectedOutputMimeTypes: String?
-        ): T? {
-            return null
-        }
+        ): T? = null
 
         override fun getNames(type: Class<*>?): Set<String> = when (type) {
             Function::class.java -> setOf("myFunction", "&internalFunction")
@@ -26,9 +24,7 @@ class CatalogFunctionConfigTest {
         }
     }
 
-    private val config = CatalogFunctionConfig().apply {
-        catalog = functionCatalog
-    }
+    private val config = CatalogFunctionConfig(catalog = functionCatalog)
 
     @Test
     fun `catalogFunction should list function names without internal ones`() {

@@ -14,18 +14,18 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class LambdaF2 {
 
-	@Bean
-	fun functionBasic(functionSimple: (String) -> String): F2Function<String, String> = f2Function { value ->
-		functionSimple(value)
-	}
+    @Bean
+    fun functionBasic(functionSimple: (String) -> String): F2Function<String, String> = f2Function { value ->
+        functionSimple(value)
+    }
 
-	@Bean
-	fun supplierBasic(supplierSimple: () -> String): F2Supplier<String> = f2Supplier {
-		flowOf(supplierSimple())
-	}
+    @Bean
+    fun supplierBasic(supplierSimple: () -> String): F2Supplier<String> = f2Supplier {
+        flowOf(supplierSimple())
+    }
 
-	@Bean
-	fun consumerBasic(receiver: ConsumerReceiver<String>): F2Consumer<String> = f2Consumer { value ->
-		receiver.items.add(value)
-	}
+    @Bean
+    fun consumerBasic(receiver: ConsumerReceiver<String>): F2Consumer<String> = f2Consumer { value ->
+        receiver.items.add(value)
+    }
 }

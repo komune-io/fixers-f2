@@ -24,17 +24,21 @@ class MapToEnvelopeRequiredIdTest {
 
     @Test
     fun `Flow mapToEnvelope preserves caller-supplied id`() = runTest {
-        val cmds = flowOf(Cmd("m-1", "a"), Cmd("m-2", "b"), Cmd("m-3", "c"))
+        val cmds = flowOf(
+            Cmd(msgId = "m-1", payload = "a"),
+            Cmd(msgId = "m-2", payload = "b"),
+            Cmd(msgId = "m-3", payload = "c"),
+        )
         val envelopes = cmds.mapToEnvelope { it.msgId }.toList()
-        assertEquals(listOf("m-1", "m-2", "m-3"), (envelopes.map { it.id }).toList())
-        assertEquals(listOf("a", "b", "c"), (envelopes.map { it.data.payload }).toList())
+        assertEquals(expected = listOf("m-1", "m-2", "m-3"), actual = envelopes.map { it.id }.toList())
+        assertEquals(expected = listOf("a", "b", "c"), actual = envelopes.map { it.data.payload }.toList())
     }
 
     @Test
     fun `Flow mapToEnvelope with type preserves caller-supplied id`() = runTest {
-        val cmds = flowOf(Cmd("m-1", "a"), Cmd("m-2", "b"))
+        val cmds = flowOf(Cmd(msgId = "m-1", payload = "a"), Cmd(msgId = "m-2", payload = "b"))
         val envelopes = cmds.mapToEnvelope(type = "Cmd") { it.msgId }.toList()
-        assertEquals(listOf("m-1", "m-2"), (envelopes.map { it.id }).toList())
+        assertEquals(expected = listOf("m-1", "m-2"), actual = envelopes.map { it.id }.toList())
         assertTrue(envelopes.all { it.type == "Cmd" })
     }
 
@@ -42,23 +46,23 @@ class MapToEnvelopeRequiredIdTest {
     fun `F2Function mapToEnvelope preserves caller-supplied id`() = runTest {
         val fn = F2Function<Cmd, String> { flow -> flow.map { it.payload.uppercase() } }
         val envelopes = fn.mapToEnvelope { it.msgId }.invoke(
-            flowOf(Cmd("m-1", "a"), Cmd("m-2", "b"))
+            flowOf(Cmd(msgId = "m-1", payload = "a"), Cmd(msgId = "m-2", payload = "b"))
         ).toList()
-        assertEquals(listOf("m-1", "m-2"), (envelopes.map { it.id }).toList())
-        assertEquals(listOf("A", "B"), (envelopes.map { it.data }).toList())
+        assertEquals(expected = listOf("m-1", "m-2"), actual = envelopes.map { it.id }.toList())
+        assertEquals(expected = listOf("A", "B"), actual = envelopes.map { it.data }.toList())
     }
 
     @Test
     fun `Flow mapToEnvelopeWithRandomId generates distinct UUIDs`() = runTest {
         val envelopes = flowOf(1, 2, 3).mapToEnvelopeWithRandomId().toList()
-        assertEquals(3, (envelopes.map { it.id }.distinct()).count())
-        assertEquals(listOf(1, 2, 3), (envelopes.map { it.data }).toList())
+        assertEquals(expected = 3, actual = envelopes.map { it.id }.distinct().count())
+        assertEquals(expected = listOf(1, 2, 3), actual = envelopes.map { it.data }.toList())
     }
 
     @Test
     fun `Flow mapToEnvelopeWithRandomId with type generates UUIDs and sets type`() = runTest {
         val envelopes = flowOf("x", "y").mapToEnvelopeWithRandomId(type = "Anon").toList()
-        assertEquals(2, (envelopes.map { it.id }.distinct()).count())
+        assertEquals(expected = 2, actual = envelopes.map { it.id }.distinct().count())
         assertTrue(envelopes.all { it.type == "Anon" })
     }
 
@@ -66,7 +70,7 @@ class MapToEnvelopeRequiredIdTest {
     fun `F2Function mapToEnvelopeWithRandomId generates distinct UUIDs`() = runTest {
         val fn = F2Function<Int, String> { flow -> flow.map { it.toString() } }
         val envelopes = fn.mapToEnvelopeWithRandomId().invoke(flowOf(1, 2, 3)).toList()
-        assertEquals(3, (envelopes.map { it.id }.distinct()).count())
-        assertEquals(listOf("1", "2", "3"), (envelopes.map { it.data }).toList())
+        assertEquals(expected = 3, actual = envelopes.map { it.id }.distinct().count())
+        assertEquals(expected = listOf("1", "2", "3"), actual = envelopes.map { it.data }.toList())
     }
 }

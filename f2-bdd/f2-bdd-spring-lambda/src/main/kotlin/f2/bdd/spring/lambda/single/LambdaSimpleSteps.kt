@@ -8,24 +8,19 @@ import org.assertj.core.api.Assertions
 
 abstract class LambdaSimpleSteps: LambdaSingleStepsBase<String, String>() {
 
-	fun En.prepareLambdaSteps() {
-		prepareLambdaSteps(
-			functionName = LambdaSimple::functionSingle.name,
-			supplierName = LambdaSimple::supplierSingle.name,
-			consumerName = LambdaSimple::consumerSingle.name,
-		)
+    fun En.prepareLambdaSteps() {
+        prepareLambdaSteps(
+            functionName = LambdaSimple::functionSingle.name,
+            supplierName = LambdaSimple::supplierSingle.name,
+            consumerName = LambdaSimple::consumerSingle.name,
+        )
 
-		@Suppress("UNCHECKED_CAST")
-		Then("Single: The result for {string} is") { value: String, dataTable: DataTable ->
-			Assertions.assertThat(listOf(bag.result[value] as String)).isEqualTo(dataTable.asList())
-		}
-	}
+        Then("Single: The result for {string} is") { value: String, dataTable: DataTable ->
+            Assertions.assertThat(listOf(bag.result[value])).isEqualTo(dataTable.asList())
+        }
+    }
 
-	override fun transform(dataTable: DataTable): String {
-		return requireNotNull(dataTable.asList().first())
-	}
+    override fun transform(dataTable: DataTable): String = requireNotNull(dataTable.asList().first())
 
-	override fun receiver(): ConsumerReceiver<String> {
-		return LambdaSimple::lambdaSingleReceiver.consumerReceiverBean()
-	}
+    override fun receiver(): ConsumerReceiver<String> = LambdaSimple::lambdaSingleReceiver.consumerReceiverBean()
 }

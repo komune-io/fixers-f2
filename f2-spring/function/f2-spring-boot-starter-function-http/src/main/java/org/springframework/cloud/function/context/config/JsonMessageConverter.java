@@ -27,22 +27,25 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
+import f2.spring.exception.UnreadableBodyException;
 import org.springframework.cloud.function.cloudevent.CloudEventMessageUtils;
 import org.springframework.cloud.function.json.JsonMapper;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.databind.DatabindException;
@@ -158,7 +161,7 @@ public class JsonMessageConverter extends AbstractMessageConverter {
                 }
                 else if (isJsonContentType(message.getHeaders())
                         && (e.getCause() instanceof StreamReadException || e.getCause() instanceof DatabindException)) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error parsing json", e.getCause());
+                    throw new UnreadableBodyException((JacksonException) e.getCause());
                 }
                 // KOMUNE End Of Modification
                 else if (logger.isDebugEnabled()) {
@@ -192,8 +195,18 @@ public class JsonMessageConverter extends AbstractMessageConverter {
         if (contentType == null) {
             contentType = headers.get("content-type");
         }
-        return contentType != null
-                && String.valueOf(contentType).toLowerCase(Locale.ROOT).contains("application/json");
+        if (contentType == null) {
+            return false;
+        }
+        try {
+            MimeType mimeType = MimeType.valueOf(String.valueOf(contentType));
+            String subtype = mimeType.getSubtype().toLowerCase(Locale.ROOT);
+            return "application".equalsIgnoreCase(mimeType.getType())
+                    && ("json".equals(subtype) || subtype.endsWith("+json"));
+        }
+        catch (InvalidMimeTypeException e) {
+            return false;
+        }
     }
     // KOMUNE End Of Modification
 

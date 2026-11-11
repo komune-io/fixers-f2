@@ -8,10 +8,10 @@ class KeycloakConfigResolver(
 ) {
     fun resolve(name: String?): KeycloakConfig {
         if (name.isNullOrBlank()) {
-            return f2KeycloakConfig.getConfig().values.first()
+            return f2KeycloakConfig.config.values.first()
         }
 
-        return f2KeycloakConfig.getConfig()[name]
+        return f2KeycloakConfig.config[name]
             ?: throw NullPointerException("No config found for this name $name")
     }
 }

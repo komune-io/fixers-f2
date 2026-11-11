@@ -12,11 +12,11 @@ import io.ktor.client.engine.js.JsClientEngineConfig
  * @param config Additional configuration for the HTTP client.
  */
 internal class JsHttpClientBuilder(
-	private val config: F2ClientConfigLambda<JsClientEngineConfig>?
+    private val config: F2ClientConfigLambda<JsClientEngineConfig>?
 ) : HttpClientBuilder {
 
-	override fun build(urlBase: String): HttpF2Client = HttpF2Client(
-		urlBase = urlBase,
-		httpClient = HttpClient(Js) { applyConfig(config) }
-	)
+    override fun build(urlBase: String): HttpF2Client = HttpF2Client(
+        urlBase = urlBase,
+        httpClient = HttpClient(Js) { applyConfig(config) }
+    )
 }

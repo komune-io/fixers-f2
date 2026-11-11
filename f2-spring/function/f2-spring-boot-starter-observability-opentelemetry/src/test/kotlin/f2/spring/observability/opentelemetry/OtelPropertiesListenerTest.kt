@@ -13,13 +13,6 @@ import org.springframework.context.ConfigurableApplicationContext
 
 class OtelPropertiesListenerTest {
 
-    companion object {
-        const val SPRING_APPLICATION_NAME = "spring.application.name"
-        const val SPRING_APPLICATION_NAME_VALUE = "myTestApp"
-        const val SPRING_APPLICATION_NAME_PROPERTIES = "$SPRING_APPLICATION_NAME=$SPRING_APPLICATION_NAME_VALUE"
-        const val TEST_ENDPOINT = "http://test-tracing-endpoint:4318"
-    }
-
     @SpringBootApplication
     open class App
 
@@ -31,11 +24,12 @@ class OtelPropertiesListenerTest {
                 "f2.observability.opentelemetry.traces.endpoint=$TEST_ENDPOINT/v1/traces",
                 "f2.observability.opentelemetry.logs.endpoint=$TEST_ENDPOINT/v1/logs",
                 SPRING_APPLICATION_NAME_PROPERTIES
-            ).run()
+            )
+            .run()
 
-        context.use {
-            it.assertThatPropertiesAreSet()
-            it.assertThatTracingBeansAreCreated()
+        context.use { started ->
+            started.assertThatPropertiesAreSet()
+            started.assertThatTracingBeansAreCreated()
         }
     }
 
@@ -48,9 +42,9 @@ class OtelPropertiesListenerTest {
             )
             .run()
 
-        context.use {
-            it.assertThatPropertiesAreSet()
-            it.assertThatTracingBeansAreCreated()
+        context.use { started ->
+            started.assertThatPropertiesAreSet()
+            started.assertThatTracingBeansAreCreated()
         }
     }
 
@@ -59,10 +53,11 @@ class OtelPropertiesListenerTest {
         val context = SpringApplicationBuilder(App::class.java)
             .properties(
                 SPRING_APPLICATION_NAME_PROPERTIES
-            ).run()
+            )
+            .run()
 
-        context.use {
-            val environment = it.environment
+        context.use { started ->
+            val environment = started.environment
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE))
                 .isNull()
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_ENDPOINT_METRICS_ENABLED))
@@ -89,7 +84,7 @@ class OtelPropertiesListenerTest {
                 .isEqualTo("none")
 
             assertThatThrownBy {
-                it.getBean<SpanProcessor>()
+                started.getBean<SpanProcessor>()
             }.isInstanceOf(NoSuchBeanDefinitionException::class.java)
         }
     }
@@ -100,10 +95,11 @@ class OtelPropertiesListenerTest {
             .properties(
                 "f2.observability.opentelemetry.traces.endpoint=$TEST_ENDPOINT/v1/traces",
                 SPRING_APPLICATION_NAME_PROPERTIES
-            ).run()
+            )
+            .run()
 
-        context.use {
-            val environment = it.environment
+        context.use { started ->
+            val environment = started.environment
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_TRACING_ENABLED))
                 .isEqualTo("true")
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT))
@@ -134,10 +130,11 @@ class OtelPropertiesListenerTest {
             .properties(
                 "f2.observability.opentelemetry.metrics.endpoint=$TEST_ENDPOINT/v1/metrics",
                 SPRING_APPLICATION_NAME_PROPERTIES
-            ).run()
+            )
+            .run()
 
-        context.use {
-            val environment = it.environment
+        context.use { started ->
+            val environment = started.environment
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_TRACING_ENABLED))
                 .isEqualTo("false")
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT))
@@ -168,10 +165,11 @@ class OtelPropertiesListenerTest {
             .properties(
                 "f2.observability.opentelemetry.logs.endpoint=$TEST_ENDPOINT/v1/logs",
                 SPRING_APPLICATION_NAME_PROPERTIES
-            ).run()
+            )
+            .run()
 
-        context.use {
-            val environment = it.environment
+        context.use { started ->
+            val environment = started.environment
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_TRACING_ENABLED))
                 .isEqualTo("false")
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT))
@@ -205,10 +203,11 @@ class OtelPropertiesListenerTest {
                 "f2.observability.opentelemetry.metrics.endpoint=  ",
                 "f2.observability.opentelemetry.logs.endpoint=",
                 SPRING_APPLICATION_NAME_PROPERTIES
-            ).run()
+            )
+            .run()
 
-        context.use {
-            val environment = it.environment
+        context.use { started ->
+            val environment = started.environment
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_TRACING_ENABLED))
                 .isEqualTo("false")
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED))
@@ -240,10 +239,11 @@ class OtelPropertiesListenerTest {
                 "f2.observability.opentelemetry.metrics.endpoint=http://custom-metrics:4318/v1/metrics",
                 "f2.observability.opentelemetry.logs.endpoint=http://custom-logs:4318/v1/logs",
                 SPRING_APPLICATION_NAME_PROPERTIES
-            ).run()
+            )
+            .run()
 
-        context.use {
-            val environment = it.environment
+        context.use { started ->
+            val environment = started.environment
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT))
                 .isEqualTo("http://custom-traces:4318/v1/traces")
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OTLP_METRICS_EXPORT_URL))
@@ -259,10 +259,11 @@ class OtelPropertiesListenerTest {
             .properties(
                 "f2.observability.opentelemetry.endpoint=$TEST_ENDPOINT"
                 // No spring.application.name
-            ).run()
+            )
+            .run()
 
-        context.use {
-            val environment = it.environment
+        context.use { started ->
+            val environment = started.environment
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_METRICS_TAGS_APPLICATION))
                 .isNull()
             // Other properties should still be set
@@ -281,10 +282,11 @@ class OtelPropertiesListenerTest {
             .properties(
                 "f2.observability.opentelemetry.endpoint=$TEST_ENDPOINT/",
                 SPRING_APPLICATION_NAME_PROPERTIES
-            ).run()
+            )
+            .run()
 
-        context.use {
-            val environment = it.environment
+        context.use { started ->
+            val environment = started.environment
             // Documents current behavior: trailing slash is NOT stripped,
             // resulting in double slash (e.g., http://host:4318//v1/traces)
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT))
@@ -302,10 +304,11 @@ class OtelPropertiesListenerTest {
             .properties(
                 SPRING_APPLICATION_NAME_PROPERTIES
                 // No endpoints configured
-            ).run()
+            )
+            .run()
 
-        context.use {
-            val environment = it.environment
+        context.use { started ->
+            val environment = started.environment
             assertThat(environment.getProperty(OtelPropertiesListener.SPRING_AUTOCONFIGURE_EXCLUDE))
                 .isEqualTo(OtelPropertiesListener.OPENTELEMETRY_TRACING_AUTOCONFIG)
         }
@@ -318,10 +321,11 @@ class OtelPropertiesListenerTest {
             .properties(
                 "f2.observability.opentelemetry.endpoint=$endpointWithPath",
                 SPRING_APPLICATION_NAME_PROPERTIES
-            ).run()
+            )
+            .run()
 
-        context.use {
-            val environment = it.environment
+        context.use { started ->
+            val environment = started.environment
             // Documents current behavior: path is simply appended
             assertThat(environment.getProperty(OtelPropertiesListener.MANAGEMENT_OPENTELEMETRY_TRACING_ENDPOINT))
                 .isEqualTo("$endpointWithPath/v1/traces")
@@ -358,5 +362,12 @@ class OtelPropertiesListenerTest {
     private fun ConfigurableApplicationContext.assertThatTracingBeansAreCreated() {
         assertThat(getBean(OpenTelemetry::class.java)).isNotNull
         assertThat(getBean(SpanProcessor::class.java)).isNotNull
+    }
+
+    companion object {
+        const val SPRING_APPLICATION_NAME = "spring.application.name"
+        const val SPRING_APPLICATION_NAME_VALUE = "myTestApp"
+        const val SPRING_APPLICATION_NAME_PROPERTIES = "$SPRING_APPLICATION_NAME=$SPRING_APPLICATION_NAME_VALUE"
+        const val TEST_ENDPOINT = "http://test-tracing-endpoint:4318"
     }
 }

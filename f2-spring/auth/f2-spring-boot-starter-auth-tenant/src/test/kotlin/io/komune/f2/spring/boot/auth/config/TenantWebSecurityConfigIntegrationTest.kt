@@ -4,7 +4,9 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -22,30 +24,13 @@ class TenantWebSecurityConfigIntegrationTest(
     @LocalServerPort private val port: Int,
 ) {
 
-    companion object {
-        const val TENANT_1 = "tenant-1"
-        const val TENANT_2 = "tenant-2"
-
-        private val oidc = OidcProviderStub(listOf(TENANT_1, TENANT_2))
-
-        @JvmStatic
-        @DynamicPropertySource
-        fun issuerBaseUri(registry: DynamicPropertyRegistry) {
-            registry.add("f2.tenant.issuer-base-uri") { "${oidc.authUrl}/realms/" }
-        }
-
-        @JvmStatic
-        @AfterAll
-        fun stopOidcProviderStub() = oidc.stop()
-    }
-
     private val webTestClient: WebTestClient by lazy {
         WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()
     }
 
     private fun get(path: String, token: String? = null) = webTestClient.get()
         .uri(path)
-        .apply { token?.let { headers { headers -> headers.setBearerAuth(it) } } }
+        .headers { headers -> if (token != null) headers.setBearerAuth(token) }
         .exchange()
 
     @Test
@@ -56,14 +41,20 @@ class TenantWebSecurityConfigIntegrationTest(
     @Test
     fun `PermitAll path should be reachable without any token`() {
         get("/openFunction")
-            .expectStatus().isOk
-            .expectBody(String::class.java).isEqualTo("open")
+            .expectStatus()
+            .isOk
+            .expectBody(String::class.java)
+            .isEqualTo("open")
     }
 
     @Test
     fun `PermitAll path should still require a token on PUT and DELETE`() {
         listOf(HttpMethod.PUT, HttpMethod.DELETE).forEach { method ->
-            webTestClient.method(method).uri("/openFunction").exchange().expectStatus().isUnauthorized
+            webTestClient.method(method)
+                .uri("/openFunction")
+                .exchange()
+                .expectStatus()
+                .isUnauthorized
         }
     }
 
@@ -73,7 +64,8 @@ class TenantWebSecurityConfigIntegrationTest(
             .header("Origin", "http://example.com")
             .header("Access-Control-Request-Method", "POST")
             .exchange()
-            .expectStatus().isOk
+            .expectStatus()
+            .isOk
     }
 
     @Test
@@ -86,16 +78,20 @@ class TenantWebSecurityConfigIntegrationTest(
     fun `token of the first tenant should be accepted`() {
         val token = oidc.mintToken(TENANT_1, roles = listOf("admin"))
         get("/adminFunction", token)
-            .expectStatus().isOk
-            .expectBody(String::class.java).isEqualTo("admin")
+            .expectStatus()
+            .isOk
+            .expectBody(String::class.java)
+            .isEqualTo("admin")
     }
 
     @Test
     fun `token of the second tenant should be accepted`() {
         val token = oidc.mintToken(TENANT_2, roles = listOf("admin"))
         get("/adminFunction", token)
-            .expectStatus().isOk
-            .expectBody(String::class.java).isEqualTo("admin")
+            .expectStatus()
+            .isOk
+            .expectBody(String::class.java)
+            .isEqualTo("admin")
     }
 
     @Test
@@ -122,6 +118,64 @@ class TenantWebSecurityConfigIntegrationTest(
 
     @Test
     fun `malformed bearer token should be rejected with 401`() {
-        get("/securedFunction", "not-a-jwt").expectStatus().isUnauthorized
+        get(path = "/securedFunction", token = "not-a-jwt").expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `a 401 of the security chain answers the F2 body and no decoding message`() {
+        listOf(null, "not-a-jwt").forEach { token ->
+            get("/securedFunction", token)
+                .expectStatus()
+                .isUnauthorized
+                .expectHeader()
+                .valueEquals(HttpHeaders.WWW_AUTHENTICATE, "Bearer")
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.status")
+                .isEqualTo(401)
+                .jsonPath("$.path")
+                .isEqualTo("/securedFunction")
+                .jsonPath("$.refusal")
+                .isEqualTo("http.UNAUTHENTICATED")
+                .jsonPath("$.message")
+                .doesNotExist()
+        }
+    }
+
+    @Test
+    fun `a 403 of the security chain answers the F2 body`() {
+        val token = oidc.mintToken(TENANT_1, roles = listOf("user"))
+        get("/adminFunction", token)
+            .expectStatus()
+            .isForbidden
+            .expectHeader()
+            .doesNotExist(HttpHeaders.WWW_AUTHENTICATE)
+            .expectBody()
+            .jsonPath("$.status")
+            .isEqualTo(403)
+            .jsonPath("$.refusal")
+            .isEqualTo("http.FORBIDDEN")
+            .jsonPath("$.message")
+            .doesNotExist()
+    }
+
+    companion object {
+        const val TENANT_1 = "tenant-1"
+        const val TENANT_2 = "tenant-2"
+
+        private val oidc = OidcProviderStub(listOf(TENANT_1, TENANT_2))
+
+        @JvmStatic
+        @DynamicPropertySource
+        fun issuerBaseUri(registry: DynamicPropertyRegistry) {
+            registry.add("f2.tenant.issuer-base-uri") { "${oidc.authUrl}/realms/" }
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun stopOidcProviderStub() {
+            oidc.stop()
+        }
     }
 }

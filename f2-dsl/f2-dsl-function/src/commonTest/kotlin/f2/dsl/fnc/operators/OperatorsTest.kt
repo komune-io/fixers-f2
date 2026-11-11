@@ -62,8 +62,11 @@ class OperatorsTest {
 
 
         // Assertions
-        assertEquals(9, (result).count())
-        assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9), result.map { it.second.first }.sorted())
-        assertEquals(listOf("1", "2", "3", "4", "5", "6", "7", "8", "9"), result.map { it.second.second }.sorted())
+        assertEquals(expected = 9, actual = result.count())
+        assertEquals(expected = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9), actual = result.map { it.second.first }.sorted())
+        assertEquals(
+            expected = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9"),
+            actual = result.map { it.second.second }.sorted(),
+        )
     }
 }

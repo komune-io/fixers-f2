@@ -7,15 +7,15 @@ import org.springframework.stereotype.Component
 @Component
 class MethodCall {
 
-	private val f2Object = MethodCallLambda()
+    private val f2Object = MethodCallLambda()
 
-	@Bean
-	fun functionMethodCall(functionSimple: (String) -> String) = f2Object.functionF2(functionSimple)
+    @Bean
+    fun functionMethodCall(functionSimple: (String) -> String) = f2Object.functionF2(functionSimple)
 
-	@Bean
-	fun supplierMethodCall(supplierSimple: () -> String) = f2Object.supplierF2(supplierSimple)
+    @Bean
+    fun supplierMethodCall(supplierSimple: () -> String) = f2Object.supplierF2(supplierSimple)
 
-	@Bean
-	fun consumerMethodCall(receiver: ConsumerReceiver<String>) = f2Object.consumerF2(receiver)
+    @Bean
+    fun consumerMethodCall(receiver: ConsumerReceiver<String>) = f2Object.consumerF2(receiver)
 
 }

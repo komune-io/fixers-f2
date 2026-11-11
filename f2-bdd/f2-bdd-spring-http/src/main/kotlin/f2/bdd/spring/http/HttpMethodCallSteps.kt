@@ -4,7 +4,7 @@ import io.cucumber.java8.En
 
 class HttpMethodCallSteps : StringHttpF2Steps("MethodCall: "), En {
 
-	init {
-		prepareFunctionCatalogSteps()
-	}
+    init {
+        prepareFunctionCatalogSteps()
+    }
 }

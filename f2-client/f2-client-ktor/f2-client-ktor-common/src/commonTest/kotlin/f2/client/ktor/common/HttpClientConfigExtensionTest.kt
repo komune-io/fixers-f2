@@ -21,11 +21,11 @@ class HttpClientConfigExtensionTest {
     @Test
     fun `applyConfig installs content negotiation and applies custom config`() {
         val config = HttpClientConfig<HttpClientEngineConfig>()
-        var applied = false
+        var isApplied = false
 
-        config.applyConfig { applied = true }
+        config.applyConfig { isApplied = true }
 
-        assertTrue(applied)
+        assertTrue(isApplied)
     }
 
     @Test
@@ -44,7 +44,7 @@ class HttpClientConfigExtensionTest {
             """{"name": "value", "unknown": "field"}"""
         )
 
-        assertEquals("value", decoded.name)
+        assertEquals(expected = "value", actual = decoded.name)
         assertNull(decoded.nullable)
     }
 
@@ -52,7 +52,7 @@ class HttpClientConfigExtensionTest {
     fun `F2DefaultJson encodes defaults and omits nulls`() {
         val encoded = F2DefaultJson.encodeToString(JsonSample(name = "value"))
 
-        assertTrue(encoded.contains("\"optional\":\"default\""))
+        assertTrue(encoded.contains(""""optional":"default""""))
         assertFalse(encoded.contains("nullable"))
     }
 }

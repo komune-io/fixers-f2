@@ -14,12 +14,6 @@ import reactor.util.context.Context
 
 class AuthenticationProviderTest {
 
-    companion object {
-        const val ISSUER = "http://localhost:8080/auth/realms/tenant-1"
-        const val ORGANIZATION_ID = "organization-1"
-        const val CLIENT_ID = "client-1"
-    }
-
     private fun jwt(issuer: String = ISSUER): Jwt = Jwt.withTokenValue("token")
         .header("alg", "none")
         .issuer(issuer)
@@ -151,5 +145,11 @@ class AuthenticationProviderTest {
     @Test
     suspend fun `hasRole should return false without authentication`() {
         assertThat(AuthenticationProvider.hasRole("admin")).isFalse()
+    }
+
+    companion object {
+        const val ISSUER = "http://localhost:8080/auth/realms/tenant-1"
+        const val ORGANIZATION_ID = "organization-1"
+        const val CLIENT_ID = "client-1"
     }
 }

@@ -10,6 +10,7 @@ import java.io.InputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import org.springframework.context.annotation.Bean
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
@@ -26,13 +27,15 @@ import reactor.core.scheduler.Schedulers
 @Configuration
 open class ServerEndpoint {
 
+    private val logger = LoggerFactory.getLogger(ServerEndpoint::class.java)
+
     @PostMapping("/uploadFile")
     //, consumes = [MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun uploadFile(
         @RequestPart("command") command: ServerUploadCommandBody,
         @RequestPart("file") file: FilePart
     ): ServerUploadedEvent {
-        println("uploadFile: $command")
+        logger.info("uploadFile: {}", command)
         return ServerUploadedEvent(
             base64 = file.content().asInputStream().readAllBytes().toBase64()
         )
@@ -40,13 +43,13 @@ open class ServerEndpoint {
 
     @Bean
     open fun consume(): ServerConsumeFunction = f2Function { command ->
-        println("consume: $command")
+        logger.info("consume: {}", command)
         command
     }
-    
+
     private fun Flux<DataBuffer>.asInputStream(): InputStream {
         val osPipe = PipedOutputStream()
-        val isPipe = PipedInputStream(osPipe)
+        val inputPipe = PipedInputStream(osPipe)
 
         DataBufferUtils.write(this, osPipe)
             .subscribeOn(Schedulers.boundedElastic())
@@ -57,6 +60,6 @@ open class ServerEndpoint {
                 }
             }
             .subscribe(DataBufferUtils.releaseConsumer())
-        return isPipe
+        return inputPipe
     }
 }

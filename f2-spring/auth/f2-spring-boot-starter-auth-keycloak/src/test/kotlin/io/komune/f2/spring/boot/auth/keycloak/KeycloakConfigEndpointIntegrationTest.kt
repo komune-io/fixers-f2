@@ -38,11 +38,6 @@ class KeycloakConfigEndpointIntegrationTest @Autowired constructor(
     private val keycloakEndpoint: KeycloakConfigEndpoint,
 ) {
 
-    private companion object {
-        const val SECOND_CONFIG_JSON =
-            """{"realm":"tenant","authServerUrl":"http://localhost:8081/auth","resource":null}"""
-    }
-
     private val webTestClient: WebTestClient by lazy {
         WebTestClient.bindToServer().baseUrl("http://localhost:$port").build()
     }
@@ -50,18 +45,18 @@ class KeycloakConfigEndpointIntegrationTest @Autowired constructor(
     @Test
     fun `f2 issuers should bind to KeycloakIssuers including the optional web client id`() {
         assertThat(keycloakConfig.issuers).hasSize(2)
-        assertThat(keycloakConfig.getConfig()).containsOnlyKeys("first", "second")
-        assertThat(keycloakConfig.getConfig()["first"]).isEqualTo(
+        assertThat(keycloakConfig.config).containsOnlyKeys("first", "second")
+        assertThat(keycloakConfig.config["first"]).isEqualTo(
             KeycloakConfig(realm = "master", authServerUrl = "http://localhost:8080/auth", resource = "web-client")
         )
-        assertThat(keycloakConfig.getConfig()["second"]).isEqualTo(
+        assertThat(keycloakConfig.config["second"]).isEqualTo(
             KeycloakConfig(realm = "tenant", authServerUrl = "http://localhost:8081/auth", resource = null)
         )
     }
 
     @Test
     fun `the same f2 issuers should bind to the trusted issuers of the security config`() {
-        assertThat(trustedIssuersConfig.getTrustedIssuers()).containsExactly(
+        assertThat(trustedIssuersConfig.trustedIssuers).containsExactly(
             "http://localhost:8080/auth/realms/master",
             "http://localhost:8081/auth/realms/tenant"
         )
@@ -80,9 +75,12 @@ class KeycloakConfigEndpointIntegrationTest @Autowired constructor(
             .contentType(MediaType.TEXT_PLAIN)
             .bodyValue("second")
             .exchange()
-            .expectStatus().isOk
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody().json(SECOND_CONFIG_JSON, JsonCompareMode.STRICT)
+            .expectStatus()
+            .isOk
+            .expectHeader()
+            .contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .json(SECOND_CONFIG_JSON, JsonCompareMode.STRICT)
     }
 
     @Test
@@ -91,9 +89,12 @@ class KeycloakConfigEndpointIntegrationTest @Autowired constructor(
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("""["second"]""")
             .exchange()
-            .expectStatus().isOk
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody().json("[$SECOND_CONFIG_JSON]", JsonCompareMode.STRICT)
+            .expectStatus()
+            .isOk
+            .expectHeader()
+            .contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .json("[$SECOND_CONFIG_JSON]", JsonCompareMode.STRICT)
     }
 
     @Test
@@ -102,24 +103,33 @@ class KeycloakConfigEndpointIntegrationTest @Autowired constructor(
             .contentType(MediaType.TEXT_PLAIN)
             .bodyValue("unknown")
             .exchange()
-            .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+            .expectStatus()
+            .isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @Test
     fun `keycloak route should fail with 500 without a body`() {
         webTestClient.post().uri("/keycloak").exchange()
-            .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+            .expectStatus()
+            .isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @Test
     fun `keycloak route should not be anonymous under a path variable`() {
         webTestClient.get().uri("/keycloak/second").exchange()
-            .expectStatus().isUnauthorized
+            .expectStatus()
+            .isUnauthorized
     }
 
     @Test
     fun `other endpoints should still require authentication`() {
         webTestClient.get().uri("/securedFunction").exchange()
-            .expectStatus().isUnauthorized
+            .expectStatus()
+            .isUnauthorized
+    }
+
+    private companion object {
+        const val SECOND_CONFIG_JSON =
+            """{"realm":"tenant","authServerUrl":"http://localhost:8081/auth","resource":null}"""
     }
 }

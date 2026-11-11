@@ -8,19 +8,15 @@ import io.cucumber.java8.En
 
 abstract class LambdaFluxSteps: LambdaListStepsBase<String, String>() {
 
-	fun En.prepareLambdaSteps() {
-		prepareLambdaSteps(
-			functionName = LambdaFlux::functionFlux.name,
-			supplierName = LambdaFlux::supplierFlux.name,
-			consumerName = LambdaFlux::consumerFlux.name
-		)
-	}
+    fun En.prepareLambdaSteps() {
+        prepareLambdaSteps(
+            functionName = LambdaFlux::functionFlux.name,
+            supplierName = LambdaFlux::supplierFlux.name,
+            consumerName = LambdaFlux::consumerFlux.name
+        )
+    }
 
-	override fun transform(dataTable: DataTable): List<String> {
-		return dataTable.asList().map { requireNotNull(it) }
-	}
+    override fun transform(dataTable: DataTable): List<String> = dataTable.asList().map { requireNotNull(it) }
 
-	override fun receiver(): ConsumerReceiver<String> {
-		return LambdaSimple::lambdaSingleReceiver.consumerReceiverBean()
-	}
+    override fun receiver(): ConsumerReceiver<String> = LambdaSimple::lambdaSingleReceiver.consumerReceiverBean()
 }

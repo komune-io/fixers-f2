@@ -17,23 +17,23 @@ class HttpClientBuilderTest {
     fun `httpClientBuilderDefault should build a client on the given base url`() {
         val client = httpClientBuilderDefault().build(urlBase)
 
-        assertEquals(urlBase, client.urlBase)
+        assertEquals(expected = urlBase, actual = client.urlBase)
     }
 
     @Test
     fun `httpClientBuilderGenerics should build a client without configuration`() {
         val client = httpClientBuilderGenerics().build(urlBase)
 
-        assertEquals(urlBase, client.urlBase)
+        assertEquals(expected = urlBase, actual = client.urlBase)
     }
 
     @Test
     fun `httpClientBuilderGenerics should apply the given configuration`() {
-        var configured = false
+        var isConfigured = false
 
-        val client = httpClientBuilderGenerics { configured = true }.build(urlBase)
+        val client = httpClientBuilderGenerics { isConfigured = true }.build(urlBase)
 
-        assertTrue(configured)
-        assertEquals(urlBase, client.urlBase)
+        assertTrue(isConfigured)
+        assertEquals(expected = urlBase, actual = client.urlBase)
     }
 }

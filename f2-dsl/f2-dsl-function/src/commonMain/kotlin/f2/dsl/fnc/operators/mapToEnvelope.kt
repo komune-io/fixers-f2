@@ -55,30 +55,19 @@ fun <T> Flow<T>.mapToEnvelopeWithRandomId(
     type: String,
 ): Flow<Envelope<T>> = mapToEnvelope(type) { Uuid.random().toString() }
 
-@Suppress("LongParameterList") // one parameter per envelope attribute it can override
+/** The envelope of [transform]ed data, typed by the simple name of [R], under this envelope's [id]. */
 suspend inline fun <T, reified R> Envelope<T>.mapEnvelope(
     crossinline transform: suspend (value: T) -> R,
-    source: String? = null,
     id: String = this.id,
     type: String = R::class.simpleName ?: "Unknown",
-    time: String? = null,
-    datacontenttype: String? = null
-): Envelope<R> {
-    return transform(data).asEnvelope(this, source, id, type, time, datacontenttype)
-}
+): Envelope<R> = transform(data).asEnvelopeWithType(type, id = id)
 
-
-@Suppress("LongParameterList") // one parameter per envelope attribute it can override
+/** The envelope of [transform]ed data, of the given [type], under this envelope's [id]. */
 suspend fun <T, R> Envelope<T>.mapEnvelopeWithType(
     transform: suspend (value: T) -> R,
     type: String,
-    source: String? = null,
     id: String = this.id,
-    time: String? = null,
-    datacontenttype: String? = null
-): Envelope<R> {
-    return transform(data).asEnvelopeWithType(type, this, source, id, time, datacontenttype)
-}
+): Envelope<R> = transform(data).asEnvelopeWithType(type, id = id)
 
 
 inline fun <T, reified R> Flow<Envelope<T>>.mapEnvelopesReified(

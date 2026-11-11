@@ -10,29 +10,29 @@ Feature:
 
   Scenario: Execute vehicle function from the catalog
     When Vehicle: Execute function "fixVehicle" with
-      | name   | broken |
-      | alpine | false  |
-      | tesla  | true   |
+      | name   | isBroken |
+      | alpine | false    |
+      | tesla  | true     |
     Then Vehicle: The result for "fixVehicle" is
-      | name   | broken |
-      | alpine | false  |
-      | tesla  | false  |
+      | name   | isBroken |
+      | alpine | false    |
+      | tesla  | false    |
 
   Scenario: Execute vehicle supplier from the catalog
     When Vehicle: Execute supplier "supplierVehicle"
     Then Vehicle: The result for "supplierVehicle" is
-      | name | broken |
-      | Car  | false  |
-      | Moto | true   |
-      | Bike | true   |
+      | name | isBroken |
+      | Car  | false    |
+      | Moto | true     |
+      | Bike | true     |
 
   Scenario: Execute vehicle consumer from the catalog
     When Vehicle: Execute consumer "consumerVehicle" with
-      | name   | broken |
-      | alpine | false  |
-      | tesla  | true   |
+      | name   | isBroken |
+      | alpine | false    |
+      | tesla  | true     |
 
     Then Vehicle: The result for "consumerVehicle" is
-      | name   | broken |
-      | alpine | false  |
-      | tesla  | true   |
+      | name   | isBroken |
+      | alpine | false    |
+      | tesla  | true     |

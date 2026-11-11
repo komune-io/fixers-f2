@@ -8,19 +8,15 @@ import io.cucumber.java8.En
 
 abstract class MethodCallSteps : LambdaListStepsBase<String, String>() {
 
-	fun En.prepareLambdaSteps() {
-		prepareLambdaSteps(
-			functionName = MethodCall::functionMethodCall.name,
-			supplierName = MethodCall::supplierMethodCall.name,
-			consumerName = MethodCall::consumerMethodCall.name
-		)
-	}
+    fun En.prepareLambdaSteps() {
+        prepareLambdaSteps(
+            functionName = MethodCall::functionMethodCall.name,
+            supplierName = MethodCall::supplierMethodCall.name,
+            consumerName = MethodCall::consumerMethodCall.name
+        )
+    }
 
-	override fun transform(dataTable: DataTable): List<String> {
-		return dataTable.asList().map { requireNotNull(it) }
-	}
+    override fun transform(dataTable: DataTable): List<String> = dataTable.asList().map { requireNotNull(it) }
 
-	override fun receiver(): ConsumerReceiver<String> {
-		return LambdaSimple::lambdaSingleReceiver.consumerReceiverBean()
-	}
+    override fun receiver(): ConsumerReceiver<String> = LambdaSimple::lambdaSingleReceiver.consumerReceiverBean()
 }

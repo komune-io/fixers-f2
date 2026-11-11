@@ -36,24 +36,25 @@ class HttpF2ClientExtensionTest {
 
     @Test
     fun `HttpF2Client is created with correct properties`() {
-        val httpClient = HttpClient(Java)
-        val json = Json { ignoreUnknownKeys = true }
+        HttpClient(Java).use { httpClient ->
+            val json = Json { ignoreUnknownKeys = true }
 
-        val client = HttpF2Client(httpClient, "http://example.com", json)
+            val client = HttpF2Client(httpClient, "http://example.com", json)
 
-        assertThat(client.urlBase).isEqualTo("http://example.com")
-        assertThat(client.httpClient).isEqualTo(httpClient)
-        assertThat(client.json).isEqualTo(json)
-        assertThat(client.type).isEqualTo(F2ClientType.HTTP)
+            assertThat(client.urlBase).isEqualTo("http://example.com")
+            assertThat(client.httpClient).isEqualTo(httpClient)
+            assertThat(client.json).isEqualTo(json)
+            assertThat(client.type).isEqualTo(F2ClientType.HTTP)
+        }
     }
 
     @Test
     fun `HttpF2Client uses default json when not specified`() {
-        val httpClient = HttpClient(Java)
+        HttpClient(Java).use { httpClient ->
+            val client = HttpF2Client(httpClient, "http://test.com")
 
-        val client = HttpF2Client(httpClient, "http://test.com")
-
-        assertThat(client.json).isNotNull()
+            assertThat(client.json).isNotNull()
+        }
     }
 
     @Test
@@ -71,87 +72,87 @@ class HttpF2ClientExtensionTest {
     suspend fun `function extension with regular type makes single batched request`() {
         var requestCount = 0
 
-        val mockClient = HttpClient(MockEngine { _ ->
+        HttpClient(MockEngine { _ ->
             requestCount++
             respond(
                 content = """[{"result": "ok"}]""",
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }) {
             install(ContentNegotiation) {
                 json(json)
             }
+        }.use { mockClient ->
+            val client = HttpF2Client(mockClient, "http://localhost", json)
+            val function = client.function<ExtTestRequest, ExtTestResponse>("test")
+
+            val results = function.invoke(flowOf(ExtTestRequest("1", 42))).toList()
+
+            // Extension uses List<MSG> typeInfo, resulting in single batched request
+            assertThat(requestCount).isEqualTo(1)
+            assertThat(results).hasSize(1)
+            assertThat(results[0].result).isEqualTo("ok")
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
-        val function = client.function<ExtTestRequest, ExtTestResponse>("test")
-
-        val results = function.invoke(flowOf(ExtTestRequest("1", 42))).toList()
-
-        // Extension uses List<MSG> typeInfo, resulting in single batched request
-        assertThat(requestCount).isEqualTo(1)
-        assertThat(results).hasSize(1)
-        assertThat(results[0].result).isEqualTo("ok")
     }
 
     @Test
     suspend fun `function extension with regular type returns unwrapped list items`() {
-        val mockClient = HttpClient(MockEngine { _ ->
+        HttpClient(MockEngine { _ ->
             respond(
                 content = """[{"result": "first"}, {"result": "second"}]""",
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }) {
             install(ContentNegotiation) {
                 json(json)
             }
+        }.use { mockClient ->
+            val client = HttpF2Client(mockClient, "http://localhost", json)
+            val function = client.function<ExtTestRequest, ExtTestResponse>("test")
+
+            val results = function.invoke(flowOf(ExtTestRequest("1", 1))).toList()
+
+            // List response items are emitted individually to the flow
+            assertThat(results).hasSize(2)
+            assertThat(results[0].result).isEqualTo("first")
+            assertThat(results[1].result).isEqualTo("second")
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
-        val function = client.function<ExtTestRequest, ExtTestResponse>("test")
-
-        val results = function.invoke(flowOf(ExtTestRequest("1", 1))).toList()
-
-        // List response items are emitted individually to the flow
-        assertThat(results).hasSize(2)
-        assertThat(results[0].result).isEqualTo("first")
-        assertThat(results[1].result).isEqualTo("second")
     }
 
     @Test
     suspend fun `function extension batches multiple flow items into single list request`() {
         var requestCount = 0
 
-        val mockClient = HttpClient(MockEngine { _ ->
+        HttpClient(MockEngine { _ ->
             requestCount++
             // Return a list with 3 responses for the 3 input items
             respond(
                 content = """[{"result": "r1"}, {"result": "r2"}, {"result": "r3"}]""",
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers = headersOf(name = HttpHeaders.ContentType, value = ContentType.Application.Json.toString())
             )
         }) {
             install(ContentNegotiation) {
                 json(json)
             }
+        }.use { mockClient ->
+            val client = HttpF2Client(mockClient, "http://localhost", json)
+            val function = client.function<ExtTestRequest, ExtTestResponse>("test")
+
+            val input = flowOf(
+                ExtTestRequest("1", 1),
+                ExtTestRequest("2", 2),
+                ExtTestRequest("3", 3)
+            )
+            val results = function.invoke(input).toList()
+
+            // Extension function uses List<MSG> typeInfo, so all items are batched into single request
+            assertThat(requestCount).isEqualTo(1)
+            // Response list items are emitted individually
+            assertThat(results).hasSize(3)
+            assertThat(results.map { it.result }).containsExactly("r1", "r2", "r3")
         }
-
-        val client = HttpF2Client(mockClient, "http://localhost", json)
-        val function = client.function<ExtTestRequest, ExtTestResponse>("test")
-
-        val input = flowOf(
-            ExtTestRequest("1", 1),
-            ExtTestRequest("2", 2),
-            ExtTestRequest("3", 3)
-        )
-        val results = function.invoke(input).toList()
-
-        // Extension function uses List<MSG> typeInfo, so all items are batched into single request
-        assertThat(requestCount).isEqualTo(1)
-        // Response list items are emitted individually
-        assertThat(results).hasSize(3)
-        assertThat(results.map { it.result }).containsExactly("r1", "r2", "r3")
     }
 }

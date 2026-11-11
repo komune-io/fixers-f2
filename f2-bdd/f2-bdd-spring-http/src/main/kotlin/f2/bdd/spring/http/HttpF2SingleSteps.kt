@@ -10,22 +10,22 @@ import kotlinx.coroutines.runBlocking
 
 class HttpF2SingleSteps : StringHttpF2Steps("Single: "), En {
 
-	init {
-		prepareFunctionCatalogSteps()
-	}
+    init {
+        prepareFunctionCatalogSteps()
+    }
 
-	override fun consumer(consumerName: String, msgs: Flow<String>): Unit = runBlocking {
-		F2ClientBuilder
-			.get(urlBase())
-			.consumerSingle<String>(consumerName)
-			.invoke(msgs)
-	}
+    override fun consumer(consumerName: String, msgs: Flow<String>): Unit = runBlocking {
+        F2ClientBuilder
+            .get(urlBase())
+            .consumerSingle<String>(consumerName)
+            .invoke(msgs)
+    }
 
-	override fun supplier(supplierName: String) = runBlocking {
-		F2ClientBuilder
-			.get(urlBase())
-			.supplierSingle<String>(supplierName)
-			.invoke()
-			.toList()
-	}
+    override fun supplier(supplierName: String) = runBlocking {
+        F2ClientBuilder
+            .get(urlBase())
+            .supplierSingle<String>(supplierName)
+            .invoke()
+            .toList()
+    }
 }

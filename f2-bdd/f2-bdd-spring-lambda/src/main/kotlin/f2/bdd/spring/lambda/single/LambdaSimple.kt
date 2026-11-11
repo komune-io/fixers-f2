@@ -7,25 +7,25 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class LambdaSimple {
 
-	@Bean
-	fun lambdaSingleReceiver(): StringConsumerReceiver = StringConsumerReceiver()
+    @Bean
+    fun lambdaSingleReceiver(): StringConsumerReceiver = StringConsumerReceiver()
 
-	@Bean
-	fun functionSingle(): (String) -> String = { value ->
-		value.reversed()
-	}
+    @Bean
+    fun functionSingle(): (String) -> String = { value ->
+        value.reversed()
+    }
 
-	@Bean
-	fun supplierSingle(): () -> String = {
-		"supplierValuePureKotlinValue"
-	}
+    @Bean
+    fun supplierSingle(): () -> String = {
+        "supplierValuePureKotlinValue"
+    }
 
-	@Bean
-	fun consumerSingle(receiver: ConsumerReceiver<String>): (String) -> Unit = { value ->
-		receiver.items.add(value)
-	}
+    @Bean
+    fun consumerSingle(receiver: ConsumerReceiver<String>): (String) -> Unit = { value ->
+        receiver.items.add(value)
+    }
 }
 
 class StringConsumerReceiver(
-	override val items: MutableList<String> = mutableListOf()
-	) : ConsumerReceiver<String>
+    override val items: MutableList<String> = mutableListOf()
+    ) : ConsumerReceiver<String>

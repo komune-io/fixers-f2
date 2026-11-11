@@ -4,7 +4,7 @@ import kotlin.js.JsExport
 
 @JsExport
 sealed interface Match<T> {
-    val negative: Boolean
+    val isNegative: Boolean
 
     fun <R> map(transform: (value: T) -> R): Match<R>
     operator fun not(): Match<T>
@@ -13,6 +13,7 @@ sealed interface Match<T> {
         matches = listOf(this, match)
     )
 
+    @Suppress("FunctionNameMinLength") // the boolean operator's own name, paired with `and`
     infix fun or(match: Match<T>): Match<T> = OrMatch(
         matches = listOf(this, match)
     )
@@ -20,15 +21,15 @@ sealed interface Match<T> {
 
 data class AndMatch<T>(
     val matches: List<Match<T>>,
-    override val negative: Boolean = false
+    override val isNegative: Boolean = false
 ): Match<T> {
     override fun <R> map(transform: (value: T) -> R) = AndMatch(
         matches = matches.map { it.map(transform) },
-        negative = negative
+        isNegative = isNegative
     )
 
     override fun not(): Match<T> = copy(
-        negative = !negative
+        isNegative = !isNegative
     )
 
     override fun and(match: Match<T>) = copy(
@@ -38,15 +39,15 @@ data class AndMatch<T>(
 
 data class OrMatch<T>(
     val matches: List<Match<T>>,
-    override val negative: Boolean = false
+    override val isNegative: Boolean = false
 ): Match<T> {
     override fun <R> map(transform: (value: T) -> R) = OrMatch(
         matches = matches.map { it.map(transform) },
-        negative = negative
+        isNegative = isNegative
     )
 
     override fun not(): Match<T> = copy(
-        negative = !negative
+        isNegative = !isNegative
     )
 
     override fun or(match: Match<T>) = copy(
@@ -56,33 +57,33 @@ data class OrMatch<T>(
 
 data class ExactMatch<T>(
     val value: T,
-    override val negative: Boolean = false
+    override val isNegative: Boolean = false
 ): Match<T> {
     override fun <R> map(transform: (value: T) -> R): Match<R> = ExactMatch(
         value = transform(value),
-        negative = negative
+        isNegative = isNegative
     )
 
-    override fun not() = copy(negative = !negative)
+    override fun not() = copy(isNegative = !isNegative)
 }
 
 data class CollectionMatch<T>(
     val values: Collection<T>,
-    override val negative: Boolean = false
+    override val isNegative: Boolean = false
 ): Match<T> {
     override fun <R> map(transform: (value: T) -> R): Match<R> = CollectionMatch(
         values = values.map(transform),
-        negative = negative
+        isNegative = isNegative
     )
 
-    override fun not() = copy(negative = !negative)
+    override fun not() = copy(isNegative = !isNegative)
 }
 
 data class StringMatch(
     val value: String,
     val condition: StringMatchCondition,
-    val caseSensitive: Boolean = false,
-    override val negative: Boolean = false
+    val isCaseSensitive: Boolean = false,
+    override val isNegative: Boolean = false
 ): Match<String> {
     override fun toString() = when (condition) {
         StringMatchCondition.EXACT -> pattern()
@@ -91,24 +92,24 @@ data class StringMatch(
         StringMatchCondition.CONTAINS -> pattern(prefix = "%", suffix = "%")
     }
 
-    private fun pattern(prefix: String = "", suffix: String = "") = "$prefix${value.trim()}$suffix"
-
     override fun <R> map(transform: (value: String) -> R): Match<R> {
         val newValue = transform(value)
 
         return if (newValue is String) {
-            @Suppress("UNCHECKED_CAST")
+            @Suppress("UNCHECKED_CAST") // newValue is a String: R is String, erased
             copy(value = newValue) as Match<R>
         } else {
             ExactMatch(
                 value = newValue,
-                negative = negative
+                isNegative = isNegative
             )
         }
     }
 
-    override fun not() = copy(negative = !negative)
+    override fun not() = copy(isNegative = !isNegative)
 }
+
+private fun StringMatch.pattern(prefix: String = "", suffix: String = "") = "$prefix${value.trim()}$suffix"
 
 enum class StringMatchCondition {
     EXACT, STARTS_WITH, ENDS_WITH, CONTAINS
@@ -117,15 +118,15 @@ enum class StringMatchCondition {
 data class ComparableMatch<T>(
     val value: T,
     val condition: ComparableMatchCondition,
-    override val negative: Boolean = false
+    override val isNegative: Boolean = false
 ): Match<T> {
     override fun <R> map(transform: (value: T) -> R): Match<R> = ComparableMatch(
         value = transform(value),
         condition = condition,
-        negative = negative
+        isNegative = isNegative
     )
 
-    override fun not(): Match<T> = copy(negative = !negative)
+    override fun not(): Match<T> = copy(isNegative = !isNegative)
 }
 
 enum class ComparableMatchCondition {

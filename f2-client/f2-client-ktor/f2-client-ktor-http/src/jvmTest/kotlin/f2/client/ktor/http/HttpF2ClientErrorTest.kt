@@ -25,6 +25,11 @@ import org.junit.jupiter.api.assertThrows
 
 class HttpF2ClientErrorTest {
 
+    private val expectingSuccess: HttpClientConfig<*>.() -> Unit = {
+        mockContentNegotiation()
+        expectSuccess = true
+    }
+
     private fun f2Client(
         status: HttpStatusCode,
         body: String,
@@ -40,7 +45,7 @@ class HttpF2ClientErrorTest {
         respond(
             content = body,
             status = status,
-            headers = headersOf(HttpHeaders.ContentType, contentType)
+            headers = headersOf(name = HttpHeaders.ContentType, value = contentType)
         )
     }
 
@@ -64,20 +69,15 @@ class HttpF2ClientErrorTest {
         mockContentNegotiation()
         install(
             createClientPlugin("FailFirstErrorRead") {
-                var failed = false
+                var hasFailed = false
                 client.responsePipeline.intercept(HttpResponsePipeline.Receive) {
-                    if (!this.context.response.status.isSuccess() && !failed) {
-                        failed = true
+                    if (!this.context.response.status.isSuccess() && !hasFailed) {
+                        hasFailed = true
                         throw failure()
                     }
                 }
             }
         )
-    }
-
-    private val expectingSuccess: HttpClientConfig<*>.() -> Unit = {
-        mockContentNegotiation()
-        expectSuccess = true
     }
 
     @Test
@@ -88,10 +88,11 @@ class HttpF2ClientErrorTest {
             failingOnFirstErrorRead { CancellationException("caller went away") }
         )
 
-        val failure = runCatching { client.testConsumer().invoke(flowOf(TestRequest("id", 1))) }.exceptionOrNull()
+        val failure = assertThrows<CancellationException> {
+            client.testConsumer().invoke(flowOf(TestRequest("id", 1)))
+        }
 
-        assertThat(failure).isInstanceOf(CancellationException::class.java)
-            .isNotInstanceOf(F2Exception::class.java)
+        assertThat(failure).isNotInstanceOf(F2Exception::class.java)
     }
 
     @Test
@@ -102,9 +103,9 @@ class HttpF2ClientErrorTest {
             failingOnFirstErrorRead { CancellationException("caller went away") }
         )
 
-        val failure = runCatching { client.testSupplier().invoke().toList() }.exceptionOrNull()
-
-        assertThat(failure).isInstanceOf(CancellationException::class.java)
+        assertThrows<CancellationException> {
+            client.testSupplier().invoke().toList()
+        }
     }
 
     @Test
@@ -177,7 +178,7 @@ class HttpF2ClientErrorTest {
     }
 
     @Test
-    suspend fun `error body with a code that is not a number keeps it in the message`() {
+    suspend fun `error body with a code that is not a number carries the HTTP status`() {
         val client = f2Client(HttpStatusCode.Forbidden, """{"message":"Forbidden","code":"ACCESS_DENIED"}""")
 
         val exception = assertThrows<F2Exception> {
@@ -185,7 +186,7 @@ class HttpF2ClientErrorTest {
         }
 
         assertThat(exception.error.code).isEqualTo(403)
-        assertThat(exception.error.message).isEqualTo("Forbidden (code ACCESS_DENIED)")
+        assertThat(exception.error.message).isEqualTo("Forbidden")
     }
 
     @Test
@@ -210,6 +211,7 @@ class HttpF2ClientErrorTest {
 
         assertThat(exception.error.code).isEqualTo(409)
         assertThat(exception.error.message).isEqualTo(body)
+        assertThat(exception.error.id).isNull()
     }
 
     @Test
@@ -223,11 +225,11 @@ class HttpF2ClientErrorTest {
         }
 
         assertThat(exception.error.code).isEqualTo(409)
-        assertThat(exception.error.isRefusal).isTrue()
-        assertThat(exception.error.refusal).isEqualTo("item.CITED")
+        assertThat(isRefusal(exception.error)).isTrue()
+        assertThat(exception.error.refusal?.code).isEqualTo("item.CITED")
         assertThat(exception.error.message).isEqualTo("Cited by A: it stays")
-        assertThat(exception.error.parameters).containsExactlyEntriesOf(mapOf("id" to "i-1"))
-        assertThat(exception.error.citers).containsExactly("A")
+        assertThat(exception.error.refusal?.parameters).containsExactlyEntriesOf(mapOf("id" to "i-1"))
+        assertThat(exception.error.refusal?.citers).containsExactly("A")
     }
 
     @Test
@@ -240,9 +242,10 @@ class HttpF2ClientErrorTest {
         }
 
         assertThat(exception.error.code).isEqualTo(404)
-        assertThat(exception.error.isRefusal).isFalse()
+        assertThat(isRefusal(exception.error)).isFalse()
         assertThat(exception.error.refusal).isNull()
-        assertThat(exception.error.refusalCode).isEqualTo("http.NOT_FOUND")
+        assertThat(refusalCode(exception.error)).isEqualTo("http.NOT_FOUND")
+        assertThat(exception.error.id).isNull()
         assertThat(exception.error.message).isEqualTo("Not Found")
     }
 

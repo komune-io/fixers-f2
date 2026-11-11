@@ -12,8 +12,9 @@ private val PERMIT_ALL_METHODS = listOf(HttpMethod.GET, HttpMethod.POST)
 /**
  * Opens the path of every `@PermitAll` bean to requests without a token, on GET and POST only.
  *
- * @return the opened paths
+ * @return the opened paths, for a caller that logs them
  */
+@IgnorableReturnValue
 fun ServerHttpSecurity.permitAllFunctionBeans(
     applicationContext: ApplicationContext,
     contextPath: String,

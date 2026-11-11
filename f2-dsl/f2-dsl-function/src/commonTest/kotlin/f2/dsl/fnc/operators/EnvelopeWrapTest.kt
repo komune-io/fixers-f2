@@ -29,14 +29,14 @@ class EnvelopeWrapTest {
         val collectedResults = results.toList()
 
         // Assert the results using AssertJ
-        assertEquals(2, (collectedResults).count())
+        assertEquals(expected = 2, actual = collectedResults.count())
 
-        assertEquals("Hello", collectedResults[0].data)
-        assertEquals("String", collectedResults[0].type)
+        assertEquals(expected = "Hello", actual = collectedResults[0].data)
+        assertEquals(expected = "String", actual = collectedResults[0].type)
 
-        assertEquals("World", collectedResults[1].data)
-        assertEquals("String", collectedResults[1].type)
+        assertEquals(expected = "World", actual = collectedResults[1].data)
+        assertEquals(expected = "String", actual = collectedResults[1].type)
     }
 }
 
-class Letter(val content: String)
+data class Letter(val content: String)

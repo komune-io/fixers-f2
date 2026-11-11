@@ -7,7 +7,6 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -37,8 +36,7 @@ class KSerializationMapperTest {
     @Test
     fun `doFromJson deserializes from Reader`() {
         val json = """{"name":"reader","value":200}"""
-        val reader = StringReader(json)
-        val result: TestData = mapper.fromJson(reader, TestData::class.java)
+        val result: TestData = StringReader(json).use { mapper.fromJson(it, TestData::class.java) }
 
         assertEquals("reader", result.name)
         assertEquals(200, result.value)
@@ -67,8 +65,8 @@ class KSerializationMapperTest {
         assertNotNull(exception.error)
         assertEquals(400, exception.error.code)
         assertTrue(exception.error.message.contains("required") || exception.error.message.contains("Missing"))
-        assertEquals("http.INVALID_PAYLOAD", exception.error.refusal)
-        assertEquals(mapOf("parameter" to "required"), exception.error.parameters)
+        assertEquals("http.INVALID_PAYLOAD", exception.error.refusal?.code)
+        assertEquals(mapOf("parameter" to "required"), exception.error.refusal?.parameters)
     }
 
     @Test
@@ -81,12 +79,13 @@ class KSerializationMapperTest {
 
         assertNotNull(exception.error)
         assertEquals(400, exception.error.code)
-        assertNull(exception.error.refusal, "a parser's own sentence is not written for the caller")
+        assertEquals("http.INVALID_PAYLOAD", exception.error.refusal?.code)
+        assertEquals("Unreadable request body", exception.error.message, "a parser's own sentence stays here")
     }
 
     @Test
     fun `doFromJson throws exception for unsupported type`() {
-        val unsupportedInput = 12345
+        val unsupportedInput = 12_345
 
         // The mapper tries to convert the input but fails - it may throw F2Exception or IllegalStateException
         // depending on how the input is processed
@@ -182,9 +181,7 @@ class KSerializationMapperTest {
     @Test
     fun `Reader toInputStream converts correctly`() {
         val json = """{"name":"inputstream","value":700}"""
-        val reader = StringReader(json)
-
-        val result: TestData = mapper.fromJson(reader, TestData::class.java)
+        val result: TestData = StringReader(json).use { mapper.fromJson(it, TestData::class.java) }
 
         assertEquals("inputstream", result.name)
         assertEquals(700, result.value)
@@ -192,11 +189,9 @@ class KSerializationMapperTest {
 
     @Test
     fun `Reader toInputStream handles large content`() {
-        val largeContent = "x".repeat(10000)
+        val largeContent = "x".repeat(10_000)
         val json = """{"name":"$largeContent","value":800}"""
-        val reader = StringReader(json)
-
-        val result: TestData = mapper.fromJson(reader, TestData::class.java)
+        val result: TestData = StringReader(json).use { mapper.fromJson(it, TestData::class.java) }
 
         assertEquals(largeContent, result.name)
         assertEquals(800, result.value)

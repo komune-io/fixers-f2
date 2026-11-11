@@ -12,12 +12,6 @@ import org.junit.jupiter.api.extension.RegisterExtension
  */
 class OtelMetricIntegrationTest {
 
-    companion object {
-        @RegisterExtension
-        @JvmStatic
-        val otelTesting: OpenTelemetryExtension = OpenTelemetryExtension.create()
-    }
-
     @Test
     fun `should capture counter metrics`() {
         val meter = otelTesting.openTelemetry.getMeter("test-meter")
@@ -82,5 +76,11 @@ class OtelMetricIntegrationTest {
         val metrics = otelTesting.metrics
         val gaugeMetric = metrics.find { it.name == "system.memory.usage" }
         assertThat(gaugeMetric).isNotNull
+    }
+
+    companion object {
+        @RegisterExtension
+        @JvmStatic
+        val otelTesting: OpenTelemetryExtension = OpenTelemetryExtension.create()
     }
 }

@@ -18,37 +18,35 @@ import kotlinx.coroutines.runBlocking
  */
 open class StringHttpF2Steps(prefix: String) : HttpF2GenericsSteps<String, String>(prefix) {
 
-	protected fun urlBase() = F2SpringHttpCucumberConfig.urlBase(bag)
+    protected fun urlBase() = F2SpringHttpCucumberConfig.urlBase(bag)
 
-	override fun transform(dataTable: DataTable): List<String> {
-		return dataTable.asList().map { requireNotNull(it) }
-	}
+    override fun transform(dataTable: DataTable): List<String> = dataTable.asList().map { requireNotNull(it) }
 
-	override fun consumerReceiver(): List<String> {
-		val bean = bag.requireApplicationContext().getBean(StringConsumerReceiver::class.java)
-		return bean.items
-	}
+    override fun consumerReceiver(): List<String> {
+        val bean = bag.requireApplicationContext().getBean(StringConsumerReceiver::class.java)
+        return bean.items
+    }
 
-	override fun function(functionName: String, msgs: Flow<String>) = runBlocking {
-		F2ClientBuilder
-			.get(urlBase())
-			.function<String, String>(functionName)
-			.invoke(msgs)
-			.toList()
-	}
+    override fun function(functionName: String, msgs: Flow<String>) = runBlocking {
+        F2ClientBuilder
+            .get(urlBase())
+            .function<String, String>(functionName)
+            .invoke(msgs)
+            .toList()
+    }
 
-	override fun consumer(consumerName: String, msgs: Flow<String>): Unit = runBlocking {
-		F2ClientBuilder
-			.get(urlBase())
-			.consumer<String>(consumerName)
-			.invoke(msgs)
-	}
+    override fun consumer(consumerName: String, msgs: Flow<String>): Unit = runBlocking {
+        F2ClientBuilder
+            .get(urlBase())
+            .consumer<String>(consumerName)
+            .invoke(msgs)
+    }
 
-	override fun supplier(supplierName: String) = runBlocking {
-		F2ClientBuilder
-			.get(urlBase())
-			.supplier<String>(supplierName)
-			.invoke()
-			.toList()
-	}
+    override fun supplier(supplierName: String) = runBlocking {
+        F2ClientBuilder
+            .get(urlBase())
+            .supplier<String>(supplierName)
+            .invoke()
+            .toList()
+    }
 }

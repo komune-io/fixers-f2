@@ -11,10 +11,10 @@ class EnvelopeExtensionTest {
     fun `asEnvelopeWithType wraps data with the given type`() {
         val envelope = "payload".asEnvelopeWithType(type = "CustomType", id = "id-1")
 
-        assertEquals("payload", envelope.data)
-        assertEquals("CustomType", envelope.type)
-        assertEquals("id-1", envelope.id)
-        assertEquals("1.0", envelope.specversion)
+        assertEquals(expected = "payload", actual = envelope.data)
+        assertEquals(expected = "CustomType", actual = envelope.type)
+        assertEquals(expected = "id-1", actual = envelope.id)
+        assertEquals(expected = "1.0", actual = envelope.specversion)
         assertNull(envelope.source)
         assertNull(envelope.time)
         assertNull(envelope.datacontenttype)
@@ -33,19 +33,19 @@ class EnvelopeExtensionTest {
 
         val envelope = "payload".asEnvelopeWithType(type = "CustomType", from = from)
 
-        assertEquals("origin-id", envelope.id)
-        assertEquals("test-source", envelope.source)
-        assertEquals("2024-01-01T00:00:00Z", envelope.time)
-        assertEquals("application/json", envelope.datacontenttype)
+        assertEquals(expected = "origin-id", actual = envelope.id)
+        assertEquals(expected = "test-source", actual = envelope.source)
+        assertEquals(expected = "2024-01-01T00:00:00Z", actual = envelope.time)
+        assertEquals(expected = "application/json", actual = envelope.datacontenttype)
     }
 
     @Test
     fun `asEnvelope wraps data with the class simple name as type`() {
         val envelope = "payload".asEnvelope(id = "id-2")
 
-        assertEquals("String", envelope.type)
-        assertEquals("payload", envelope.data)
-        assertEquals("id-2", envelope.id)
+        assertEquals(expected = "String", actual = envelope.type)
+        assertEquals(expected = "payload", actual = envelope.data)
+        assertEquals(expected = "id-2", actual = envelope.id)
     }
 
     @Test
@@ -53,6 +53,6 @@ class EnvelopeExtensionTest {
         val envelope = 42.asEnvelope()
 
         assertTrue(envelope.id.isNotBlank())
-        assertEquals("Int", envelope.type)
+        assertEquals(expected = "Int", actual = envelope.type)
     }
 }

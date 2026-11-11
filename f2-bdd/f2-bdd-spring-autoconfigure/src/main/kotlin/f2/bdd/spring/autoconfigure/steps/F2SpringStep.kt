@@ -10,11 +10,13 @@ import kotlin.reflect.KFunction
 
 open class F2SpringStep {
 
-    companion object {
-        const val GLUE = "f2.bdd.spring"
-    }
+    private var scenarioBag: F2SpringContextBag? = null
 
-    lateinit var bag: F2SpringContextBag
+    var bag: F2SpringContextBag
+        get() = checkNotNull(scenarioBag) { "No scenario started: the Before hook sets the bag" }
+        set(value) {
+            scenarioBag = value
+        }
 
     fun En.prepareSteps() {
         Before { scenario: Scenario ->
@@ -27,47 +29,27 @@ open class F2SpringStep {
         }
     }
 
-    fun <P, R> KFunction<*>.blockingFunctionBean(): (P) -> R {
-        return bag.getBlockingFunctionBean(this.name)
-    }
+    fun <P, R> KFunction<*>.blockingFunctionBean(): (P) -> R = bag.getBlockingFunctionBean(this.name)
 
-    fun <R> KFunction<*>.blockingSupplierBean(): () -> R {
-        return bag.getBlockingSupplierBean(this.name)
-    }
+    fun <R> KFunction<*>.blockingSupplierBean(): () -> R = bag.getBlockingSupplierBean(this.name)
 
-    fun <P> KFunction<*>.blockingConsumerBean(): (P) -> Unit {
-        return bag.getBlockingConsumerBean(this.name)
-    }
+    fun <P> KFunction<*>.blockingConsumerBean(): (P) -> Unit = bag.getBlockingConsumerBean(this.name)
 
-    fun <P, R> KFunction<*>.functionBean(): suspend (P) -> R {
-        return bag.getFunctionBean(this.name)
-    }
+    fun <P, R> KFunction<*>.functionBean(): suspend (P) -> R = bag.getFunctionBean(this.name)
 
-    fun <R> KFunction<*>.supplierBean(): suspend () -> R {
-        return bag.getSupplierBean(this.name)
-    }
+    fun <R> KFunction<*>.supplierBean(): suspend () -> R = bag.getSupplierBean(this.name)
 
-    fun <P> KFunction<*>.consumerBean(): suspend (P) -> Unit {
-        return bag.getConsumerBean(this.name)
-    }
+    fun <P> KFunction<*>.consumerBean(): suspend (P) -> Unit = bag.getConsumerBean(this.name)
 
-    @Suppress("UNCHECKED_CAST")
-    fun <P, R> KFunction<*>.functionF2Bean(): F2Function<P, R> {
-        return bag.requireApplicationContext().getBean(name) as F2Function<P, R>
-    }
+    fun <P, R> KFunction<*>.functionF2Bean(): F2Function<P, R> = bag.typedBean(name)
 
-    @Suppress("UNCHECKED_CAST")
-    fun <R> KFunction<*>.supplierF2Bean(): F2Supplier<R> {
-        return bag.requireApplicationContext().getBean(name) as F2Supplier<R>
-    }
+    fun <R> KFunction<*>.supplierF2Bean(): F2Supplier<R> = bag.typedBean(name)
 
-    @Suppress("UNCHECKED_CAST")
-    fun <P> KFunction<*>.consumerF2Bean(): F2Consumer<P> {
-        return bag.requireApplicationContext().getBean(name) as F2Consumer<P>
-    }
+    fun <P> KFunction<*>.consumerF2Bean(): F2Consumer<P> = bag.typedBean(name)
 
-    @Suppress("UNCHECKED_CAST")
-    protected fun <T> KFunction<*>.consumerReceiverBean(): ConsumerReceiver<T> {
-        return bag.requireApplicationContext().getBean(name) as ConsumerReceiver<T>
+    protected fun <T> KFunction<*>.consumerReceiverBean(): ConsumerReceiver<T> = bag.typedBean(name)
+
+    companion object {
+        const val GLUE = "f2.bdd.spring"
     }
 }

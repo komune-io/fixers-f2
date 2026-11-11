@@ -10,6 +10,8 @@ import kotlinx.serialization.Serializable
  * Extension function to batch elements of a Flow into lists of a specified size and
  * apply a transformation function to each batch.
  *
+ * @param T The type of the elements.
+ * @param R The type of the transformed elements.
  * @param batch An instance of [Batch] containing the size of each batch and the concurrency level.
  * @param fnc A suspend function to apply to each batch of elements.
  * @return A Flow emitting transformed elements.
@@ -23,6 +25,8 @@ fun <T, R> Flow<T>.batch(
  * Extension function to batch elements of a Flow into lists of a specified size and
  * apply a transformation function to each batch.
  *
+ * @param T The type of the elements.
+ * @param R The type of the transformed elements.
  * @param batch An instance of [Batch] containing the size of each batch and the concurrency level.
  * @param fnc A suspend function to apply to each batch of elements.
  * @return A Flow emitting transformed elements.
@@ -44,7 +48,7 @@ val BATCH_DEFAULT_CONCURRENCY: Int = DEFAULT_CONCURRENCY
 const val BATCH_DEFAULT_SIZE: Int = CHUNK_DEFAULT_SIZE
 
 /**
- * Data class representing the configuration for batching elements in a Flow.
+ * The configuration for batching elements in a Flow.
  *
  * @property size The size of each batch.
  * @property concurrency The number of concurrently collected batches.

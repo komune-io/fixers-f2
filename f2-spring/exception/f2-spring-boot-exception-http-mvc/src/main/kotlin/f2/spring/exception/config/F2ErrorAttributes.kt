@@ -11,7 +11,7 @@ import org.springframework.web.context.request.WebRequest
  * `server.error.include-*` asks for.
  *
  * The status stays the servlet's, the one the response carries: an [f2.dsl.cqrs.exception.F2Exception] answers its
- * own through [F2ExceptionHandler], before the error page is ever rendered.
+ * own through [F2ExceptionResolver], before the error page is ever rendered.
  */
 class F2ErrorAttributes : DefaultErrorAttributes() {
     override fun getErrorAttributes(webRequest: WebRequest, options: ErrorAttributeOptions): MutableMap<String, Any?> =

@@ -1,7 +1,6 @@
 {
   "name": "fixers-f2-f2-dsl-f2-dsl-function",
   "version": "0.0.0",
-  "main": "kotlin/fixers-f2-f2-dsl-f2-dsl-function.mjs",
   "types": "kotlin/fixers-f2-f2-dsl-f2-dsl-function.d.mts",
   "devDependencies": {},
   "dependencies": {},
