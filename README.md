@@ -275,6 +275,18 @@ the module that declares them, and the rest with `import type`: a module's `.d.m
   A defect of the client itself rejects with a plain `Error` that has no `kind`, rather than leaving the promise
   pending.
 
+- **Headers**: `httpF2JsClient(url, headers)` takes an optional async provider, called before each request; every
+  header it answers is sent, so a token is refreshed where it lives. With keycloak-js:
+
+  ```ts
+  const token = async () => { await keycloak.updateToken(30); return keycloak.token; };
+  const client = httpF2JsClient("https://f2.example", async () => ({ Authorization: "Bearer " + (await token()) }));
+  ```
+
+  The provider answers a plain object of strings; anything else (a number, a list of pairs, a name that is no HTTP
+  token, a line break in a value) rejects the call with a `TypeError` before any request. `Content-Type`,
+  `Content-Length`, `Transfer-Encoding` and `Upgrade`, which the client writes itself, are refused the same way
+  rather than overwritten. A provider that rejects rejects the call with its reason, as a signal does.
 - **Cancellation**, as with `fetch`: each `invoke` takes an optional `AbortSignal` last; an aborted call rejects
   with the signal's reason, and its listener is removed when the call ends. `client.close()` ends every pending
   call (`CLOSED`) and releases the connections; a closed client rejects every later call as `CLOSED`, an aborted

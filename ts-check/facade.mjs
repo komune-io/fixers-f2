@@ -30,7 +30,7 @@ const server = createServer((request, response) => {
   let body = "";
   request.on("data", (chunk) => { body += chunk; });
   request.on("end", () => {
-    received.push({ method: request.method, url: request.url, body });
+    received.push({ method: request.method, url: request.url, body, authorization: request.headers.authorization });
     if (request.url === "/itemSlow") return; // never answers: aborted or closed by the caller
     if (request.url === "/itemCut") { // a 200 whose body breaks off
       response.writeHead(200, { "content-type": "application/json", "content-length": "100" });
@@ -59,7 +59,7 @@ const rejection = (promise) => promise.then(() => assert.fail("resolved"), (e) =
 try {
   const counted = await client.function("itemCount").invoke([{ id: "a" }, { id: "b" }]);
   assert.deepEqual(counted, [{ id: "a", total: 2 }, { id: "b", total: 2 }]);
-  assert.deepEqual(received.at(-1), { method: "POST", url: "/itemCount", body: '[{"id":"a"},{"id":"b"}]' });
+  assert.deepEqual(received.at(-1), { method: "POST", url: "/itemCount", body: '[{"id":"a"},{"id":"b"}]', authorization: undefined });
   assert.deepEqual(await client.supplier("itemList").invoke(), [{ id: "a" }, { id: "b" }]);
   assert.equal(received.at(-1).method, "GET");
   assert.equal(await client.consumer("itemDelete").invoke([{ id: "a" }]), undefined);
@@ -104,6 +104,20 @@ try {
   await client.function("itemCount").invoke([changing]);
   assert.deepEqual([received.at(-1).body, reads], ['[{"id":"a"}]', 1]);
 
+  // Headers: the provider is called before each request, what it answers is sent; its rejection is the call's.
+  let issued = 0;
+  const authorized = httpF2JsClient(`http://127.0.0.1:${server.address().port}`,
+    async () => ({ Authorization: `Bearer t${issued += 1}` }));
+  await authorized.function("itemCount").invoke([]);
+  await authorized.supplier("itemList").invoke();
+  assert.deepEqual(received.slice(-2).map((r) => r.authorization), ["Bearer t1", "Bearer t2"]);
+  const expired = httpF2JsClient(`http://127.0.0.1:${server.address().port}`, () => Promise.reject(new Error("expired")));
+  assert.equal((await rejection(expired.function("itemCount").invoke([]))).message, "expired");
+  const typo = httpF2JsClient(`http://127.0.0.1:${server.address().port}`, async () => ({ Authorization: 1 }));
+  assert.ok((await rejection(typo.function("itemCount").invoke([]))) instanceof TypeError);
+  assert.equal(received.at(-1).authorization, "Bearer t2");
+  authorized.close(); expired.close(); typo.close();
+
   // Aborted: rejects with the signal's reason, as fetch does.
   const controller = new AbortController();
   let settledEarly = false;
@@ -129,4 +143,4 @@ assert.equal((await rejection(client.supplier("itemList").invoke())).kind, "CLOS
 const aborted = new AbortController();
 aborted.abort();
 assert.equal((await rejection(client.supplier("itemList").invoke(aborted.signal))).kind, "CLOSED");
-console.log("facade: every value use.mts imports exists; 22 calls as a front makes them, all as expected");
+console.log("facade: every value use.mts imports exists; 26 calls as a front makes them, all as expected");

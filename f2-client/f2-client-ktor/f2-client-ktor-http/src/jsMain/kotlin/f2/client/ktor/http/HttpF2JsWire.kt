@@ -23,7 +23,11 @@ private suspend fun <T> HttpF2Client.network(block: suspend () -> T): T = try {
 
 internal suspend fun HttpF2Client.request(block: suspend () -> HttpResponse): HttpResponse = network { send(block) }
 
-internal suspend fun HttpF2Client.postAll(route: String, messages: dynamic): HttpResponse {
+internal suspend fun HttpF2Client.postAll(
+    route: String,
+    messages: dynamic,
+    headers: suspend () -> List<Pair<String, String>>,
+): HttpResponse {
     if (!isArray(messages)) throw Rejection(typeError("The messages of $route are an array"))
     val checked = try {
         jsonCopy(messages, js("new Set()"))
@@ -31,10 +35,17 @@ internal suspend fun HttpF2Client.postAll(route: String, messages: dynamic): Htt
         throw Rejection(typeError("A message of $route ${e.problem}"), e)
     }
     val body = JSON.stringify(checked)
-    return request { httpClient.post("$urlBase/$route") { setBody(TextContent(body, ContentType.Application.Json)) } }
+    val sent = headers()
+    return request {
+        httpClient.post("$urlBase/$route") {
+            withHeaders(sent)
+            setBody(TextContent(body, ContentType.Application.Json))
+        }
+    }
 }
 
-private val jsObject: dynamic = js("Object")
+
+internal val jsObject: dynamic = js("Object")
 
 private class NotJson(val problem: String) : Exception(problem)
 
@@ -64,12 +75,12 @@ private fun objectCopy(value: dynamic, ancestors: dynamic): dynamic {
 }
 
 // An object whose prototype is neither Object's nor none: an instance of a class, a Kotlin one included.
-private fun isClassInstance(value: dynamic): Boolean {
+internal fun isClassInstance(value: dynamic): Boolean {
     val prototype: dynamic = jsObject.getPrototypeOf(value)
     return prototype != js("Object.prototype") && prototype != null
 }
 
-private fun isArray(value: dynamic): Boolean = js("Array").isArray(value) as Boolean
+internal fun isArray(value: dynamic): Boolean = js("Array").isArray(value) as Boolean
 
 private suspend fun HttpResponse.text(client: HttpF2Client): String = client.network { bodyAsText() }
 

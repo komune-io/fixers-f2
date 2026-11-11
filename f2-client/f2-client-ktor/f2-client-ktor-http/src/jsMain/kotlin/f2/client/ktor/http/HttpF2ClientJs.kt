@@ -8,6 +8,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * The JSON of a [T]: what a function sends and answers on the wire. Declared by the `Json<T>` type at the head
@@ -72,7 +75,10 @@ enum class HttpF2JsFailureKind {
  * call settles once.
  */
 @JsExport
-class HttpF2JsClient internal constructor(internal val client: HttpF2Client) {
+class HttpF2JsClient internal constructor(
+    internal val client: HttpF2Client,
+    private val headers: (() -> Promise<JsonOf<Map<String, String>>>)? = null,
+) {
     private val scope = CoroutineScope(SupervisorJob())
     private var isClosed = false
 
@@ -121,6 +127,19 @@ class HttpF2JsClient internal constructor(internal val client: HttpF2Client) {
     }
 
     private fun closed(): Throwable = failure(HttpF2JsFailureKind.CLOSED, "The client is closed")
+
+    // What the provider answers for this request, checked: a rejection of it rejects the call with its reason.
+    internal suspend fun headersFor(route: String): List<Pair<String, String>> {
+        val provider = headers ?: return emptyList()
+        val provided: dynamic = suspendCancellableCoroutine { continuation ->
+            // Through a resolved promise: a provider that throws, or answers no promise, settles the same way.
+            val _ = Promise.resolve(Unit).then { provider() }.then(
+                { value -> continuation.resume(value) },
+                { reason -> continuation.resumeWithException(Rejection(reason)) },
+            )
+        }
+        return checkedHeaders(route, provided)
+    }
 }
 
 /** An F2 function of the server: `invoke(msgs, signal?)`. */
@@ -128,7 +147,10 @@ class HttpF2JsClient internal constructor(internal val client: HttpF2Client) {
 class F2JsFunction<QUERY, RESPONSE> internal constructor(private val owner: HttpF2JsClient, private val route: String) {
     /** One POST of every message, its results; [signal] aborts the call. */
     fun invoke(msgs: Array<JsonOf<QUERY>>, signal: AbortSignal? = null): Promise<Array<JsonOf<RESPONSE>>> =
-        owner.call(signal) { owner.client.results(owner.client.checked(owner.client.postAll(route, msgs))) }
+        owner.call(signal) {
+            val client = owner.client
+            client.results(client.checked(client.postAll(route, msgs) { owner.headersFor(route) }))
+        }
 }
 
 /** An F2 supplier of the server: `invoke(signal?)`. */
@@ -137,7 +159,9 @@ class F2JsSupplier<RESPONSE> internal constructor(private val owner: HttpF2JsCli
     /** One GET, its results; [signal] aborts the call. */
     fun invoke(signal: AbortSignal? = null): Promise<Array<JsonOf<RESPONSE>>> = owner.call(signal) {
         val client = owner.client
-        client.results(client.checked(client.request { client.httpClient.get("${client.urlBase}/$route") }))
+        val headers = owner.headersFor(route)
+        val response = client.request { client.httpClient.get("${client.urlBase}/$route") { withHeaders(headers) } }
+        client.results(client.checked(response))
     }
 }
 
@@ -148,11 +172,19 @@ class F2JsConsumer<QUERY> internal constructor(private val owner: HttpF2JsClient
     fun invoke(msgs: Array<JsonOf<QUERY>>, signal: AbortSignal? = null): Promise<Unit> =
         // A promise of Unit would resolve to Kotlin's Unit object, where a `Promise<void>` holds undefined.
         owner.call<dynamic>(signal) {
-            val _ = owner.client.checked(owner.client.postAll(route, msgs))
+            val _ = owner.client.checked(owner.client.postAll(route, msgs) { owner.headersFor(route) })
             undefined
         }.unsafeCast<Promise<Unit>>()
 }
 
-/** The F2 server at [urlBase], called on the platform's fetch. */
+/**
+ * The F2 server at [urlBase], called on the platform's fetch. [headers], when given, is called before each request,
+ * and every header it answers is sent with it: a plain object of strings (`Authorization: "Bearer …"`), anything else
+ * rejecting the call with a `TypeError` before the request, `Content-Type`, `Content-Length`, `Transfer-Encoding` and
+ * `Upgrade` included, which the client writes itself. A provider that rejects rejects the call with its reason.
+ */
 @JsExport
-fun httpF2JsClient(urlBase: String): HttpF2JsClient = HttpF2JsClient(httpClientBuilderDefault().build(urlBase))
+fun httpF2JsClient(
+    urlBase: String,
+    headers: (() -> Promise<JsonOf<Map<String, String>>>)? = null,
+): HttpF2JsClient = HttpF2JsClient(httpClientBuilderDefault().build(urlBase), headers)

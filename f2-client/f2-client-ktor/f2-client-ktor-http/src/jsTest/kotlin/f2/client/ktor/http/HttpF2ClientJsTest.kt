@@ -17,6 +17,7 @@ import io.ktor.utils.io.cancel
 import io.ktor.utils.io.writeStringUtf8
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.js.Promise
+import kotlin.js.json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -34,6 +35,7 @@ class HttpF2ClientJsTest {
     private fun client(
         status: HttpStatusCode = HttpStatusCode.OK,
         body: String,
+        headers: (() -> Promise<JsonOf<Map<String, String>>>)? = null,
         answer: suspend () -> Unit = {},
     ): JsClient = HttpF2JsClient(
         HttpF2Client(
@@ -43,8 +45,12 @@ class HttpF2ClientJsTest {
                 answer()
                 respond(body, status, headersOf(HttpHeaders.ContentType, "application/json"))
             }) { applyConfig() },
-        )
+        ),
+        headers,
     ).unsafeCast<JsClient>()
+
+    private fun provider(answer: () -> dynamic): () -> Promise<JsonOf<Map<String, String>>> =
+        { answer().unsafeCast<Promise<JsonOf<Map<String, String>>>>() }
 
     private fun sent(): String = (requests.single().body as TextContent).text
 
@@ -272,6 +278,61 @@ class HttpF2ClientJsTest {
         call(client(body = "[]").function("itemCount"), JSON.parse<dynamic>("""[{"__proto__":{"id":"a"}}]"""))
 
         assertEquals("""[{"__proto__":{"id":"a"}}]""", sent())
+    }
+
+    @Test
+    fun theHeadersProviderIsCalledBeforeEachRequestAndEveryHeaderItAnswersIsSent() = runTest {
+        var calls = 0
+        val client = client(body = "[]", headers = provider {
+            calls += 1
+            js("Promise").resolve(json("Authorization" to "Bearer t$calls", "X-Tenant" to "t"))
+        })
+
+        call(client.function("itemCount"), js("[]"))
+        client.supplier("itemList").invoke().unsafeCast<Promise<dynamic>>().await()
+        call(client.consumer("itemDelete"), js("[]"))
+
+        assertEquals(listOf("Bearer t1", "Bearer t2", "Bearer t3"), requests.map { it.headers["Authorization"] })
+        assertEquals(listOf("t", "t", "t"), requests.map { it.headers["X-Tenant"] })
+        assertEquals(3, calls)
+    }
+
+    @Test
+    fun aProviderThatRejectsRejectsTheCallWithItsReasonBeforeAnyRequest() = runTest {
+        val client = client(body = "[]", headers = provider { js("Promise.reject('expired')") })
+
+        assertEquals("expired", rejection(client.function("itemCount"), js("[]")) as String)
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun headersThatAreNoPlainObjectOfStringsAreRefusedBeforeAnyRequest() = runTest {
+        listOf(
+            js("({ Authorization: 1 })"),
+            js("['Authorization', 'Bearer t']"),
+            js("({ 'Bad Name': 'x' })"),
+            js("({ Authorization: 'a\\r\\nX-Injected: b' })"),
+        ).forEach { answered ->
+            val client = client(body = "[]", headers = provider { js("Promise").resolve(answered) })
+
+            val failure = rejection(client.function("itemCount"), js("[]"))
+
+            assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean, JSON.stringify(answered))
+        }
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun aHeaderTheClientWritesItselfIsRefusedRatherThanOverwritten() = runTest {
+        listOf("Content-Type", "content-length", "Transfer-Encoding").forEach { name ->
+            val client = client(body = "[]", headers = provider { js("Promise").resolve(json(name to "x")) })
+
+            val failure = rejection(client.function("itemCount"), js("[]"))
+
+            assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean, name)
+            assertTrue((failure.message as String).contains(name))
+        }
+        assertTrue(requests.isEmpty())
     }
 
     @Test
