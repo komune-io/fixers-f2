@@ -178,16 +178,9 @@ A `F2Supplier` does not take any input and produces a result.
 For example, you might write a Supplier that returns a random number. 
 The get method of a Supplier returns the result.
 
- * JVM
 ```kotlin
-actual fun interface F2Supplier<R> : suspend () -> Flow<R> {
+fun interface F2Supplier<R> : suspend () -> Flow<R> {
 	override suspend operator fun invoke(): Flow<R>
-}
-```
- * Js
-```kotlin
-actual interface F2Supplier<R> {
-	fun invoke(): Promise<Array<R>>
 }
 ```
 
@@ -196,16 +189,9 @@ A `F2Function` takes one or more inputs and produces a result.
 For example, you might write a Function that takes an Integer and returns a String. 
 The apply method of a Function takes the input and returns the result.
 
-* JVM
 ```kotlin
-actual fun interface F2Function<T, R>: suspend (Flow<T>) -> Flow<R> {
+fun interface F2Function<T, R>: suspend (Flow<T>) -> Flow<R> {
   override suspend operator fun invoke(msgs: Flow<T>): Flow<R>
-}
-```
-* Js
-```kotlin
-actual interface F2Function<T, R> {
-  fun invoke(cmd: T): Promise<R>
 }
 ```
 ### F2Consumer
@@ -215,18 +201,63 @@ For example, you might write a Consumer that prints a message to the console.
 The accept method of a Consumer takes the input and performs an action, 
 but does not return a value.
 
-* JVM
 ```kotlin
-actual fun interface F2Consumer<T>: suspend (Flow<T>) -> Unit {
+fun interface F2Consumer<T>: suspend (Flow<T>) -> Unit {
   override suspend operator fun invoke(msg: Flow<T>)
 }
 ```
-* Js
-```kotlin
-actual interface F2Consumer<T> {
-  fun invoke(cmd: T): Promise<Unit>
+
+### From JS
+
+The three interfaces are Kotlin API, not exported: a `Flow` and a `suspend` call have no JS form. A JS caller
+reaches an F2 server through the JS client of `f2-client-ktor-http`: each function is an object whose `invoke`
+takes JSON messages and an optional `AbortSignal` and returns a promise of JSON results (`Json<T>` is the JSON of
+`T`, declared at the head of the contract):
+
+```ts
+import { httpF2JsClient } from "fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http"; // the package under ts/
+import type { HttpF2JsFailure, Json, PageQuery, PageQueryResult } from "fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http";
+
+const client = httpF2JsClient("https://f2.example");
+const itemPage = client.function<PageQuery, PageQueryResult<Item>>("itemPage"); // an F2JsFunction
+// itemPage.invoke(msgs: Json<PageQuery>[], signal?: AbortSignal | null): Promise<Json<PageQueryResult<Item>>[]>
+try {
+  const [page] = await itemPage.invoke([{ pagination: { offset: 0, limit: 10 } }], controller.signal);
+  const items: Json<Item>[] = page.items;
+} catch (e) {
+  const failure = e as Json<HttpF2JsFailure>; // an Error carrying kind, message, status, error, body
+  if (failure.kind === "F2") console.log(failure.error?.refusal?.parameters["id"]);
 }
+client.close();
 ```
+
+`client.supplier<R>(route)` is an `F2JsSupplier` whose `invoke(signal?)` returns a `Promise<Json<R>[]>`,
+`client.consumer<Q>(route)` an `F2JsConsumer` whose `invoke(msgs, signal?)` returns a `Promise<void>`. Where a plain
+JS function is wanted, an arrow adapts it: `(msgs) => itemPage.invoke(msgs)`. Import values (`httpF2JsClient`) from the package that declares
+them, and the rest with `import type`: a package's `.d.mts` declares its whole program, its `.mjs` exports only its
+own.
+
+- **Type arguments**: always give them. TypeScript cannot require them on what Kotlin emits; without them a function
+  takes any message and its results are `unknown`.
+- **Messages** are an array of plain JSON: anything else rejects with a `TypeError` before any request — no array,
+  an instance of a class at any depth (an exported Kotlin object, a `Date`), or a cycle. A value shared by two
+  messages is fine.
+- **Every call settles once.** A failure rejects with an `Error` carrying `Json<HttpF2JsFailure>`, no Kotlin object:
+
+  | `kind` | When | `status` | `error` | `body` |
+  |---|---|---|---|---|
+  | `F2` | an error status whose body is a JSON error object (an F2 error, a Spring error body) | the status | that error as JSON: `refusal.parameters` an object, `refusal.citers` an array | `null` |
+  | `HTTP` | an error status whose body is text or empty (`message` is the text, or `HTTP <status>`) | the status | `null` | the text, `""` when empty |
+  | `NETWORK` | no response, or one not read whole: the server is unreachable, the connection broke, the call was cancelled by anything but its signal or `close()` | `null` | `null` | `null` |
+  | `UNREADABLE` | a success status whose body is no JSON | the status | `null` | the text |
+  | `CLOSED` | the client was closed before or during the call | `null` | `null` | `null` |
+
+  A defect of the client itself rejects with a plain `Error` that has no `kind`, rather than leaving the promise
+  pending.
+
+- **Cancellation**, as with `fetch`: each `invoke` takes an optional `AbortSignal` last; an aborted call rejects
+  with the signal's reason, and its listener is removed when the call ends. `client.close()` ends every pending
+  call (`CLOSED`) and releases the connections. `AbortSignal` is the platform's: the DOM library or Node's types.
 
 ## CQRS
 
@@ -443,8 +474,6 @@ fun main(args: Array<String>) {
 ```kotlin
 expect fun didClient(url: String): F2Supplier<DIDFunctionClient>
 
-@JsName("DIDFunctionClient")
-@JsExport
 open class DIDFunctionClient constructor(private val client: F2Client) : DidAggregate {
 	override fun sha256(): F2Function<String, String> = client.function("sha256")
 	override fun uuid(): F2Supplier<String> = client.function("uuid")

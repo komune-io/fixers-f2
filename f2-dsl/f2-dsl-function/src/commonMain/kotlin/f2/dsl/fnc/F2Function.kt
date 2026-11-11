@@ -1,6 +1,5 @@
 package f2.dsl.fnc
 
-import kotlin.js.JsExport
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -11,9 +10,6 @@ typealias F2LambdaFunction<T, R> = suspend (Flow<T>) -> Flow<R>
 /**
  * Fun interface representing a function that transforms a Flow of type T to a Flow of type R.
  */
-@JsExport
-// The suspend function supertype has no JS export, by design: https://youtrack.jetbrains.com/issue/KT-83009
-@Suppress("EXPOSED_NOT_EXPORTED_SUPER_INTERFACE_WARNING")
 fun interface F2Function<in T, out R> : F2LambdaFunction<T, R> {
     /**
      * Invokes the function with the given Flow of type T and returns a Flow of type R.
@@ -21,7 +17,6 @@ fun interface F2Function<in T, out R> : F2LambdaFunction<T, R> {
      * @param msgs The Flow of type T to be transformed.
      * @return The transformed Flow of type R.
      */
-    @JsExport.Ignore
     // The F2 wire shape: suspend to open the call (an HTTP request, a bean lookup), then a Flow of its results.
     @Suppress("SuspendFunWithFlowReturnType")
     override suspend operator fun invoke(msgs: Flow<T>): Flow<R>

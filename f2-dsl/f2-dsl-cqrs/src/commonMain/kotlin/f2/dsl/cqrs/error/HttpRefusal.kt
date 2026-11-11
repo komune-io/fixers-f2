@@ -1,7 +1,5 @@
 package f2.dsl.cqrs.error
 
-import kotlin.js.JsExport
-import kotlin.js.JsName
 
 /**
  * The meaning of an HTTP status, as the refusal code an error carries when no rule of the application names one:
@@ -9,8 +7,6 @@ import kotlin.js.JsName
  *
  * Never reused for another meaning: a caller words the meaning from the code.
  */
-@JsExport
-@JsName("HttpRefusal")
 enum class HttpRefusal(val status: Int) {
     INVALID_PAYLOAD(status = 400),
     UNAUTHENTICATED(status = 401),

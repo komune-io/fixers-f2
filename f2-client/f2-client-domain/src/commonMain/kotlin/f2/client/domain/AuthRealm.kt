@@ -1,10 +1,8 @@
 package f2.client.domain
 
-import kotlin.js.JsExport
 
 typealias RealmId = String
 
-@JsExport
 sealed class AuthRealm(
     open val serverUrl: String,
     open val realmId: RealmId,
@@ -13,7 +11,6 @@ sealed class AuthRealm(
 )
 
 /** A realm a user signs in to with a password. Not a data class: its generated `toString` would print it. */
-@JsExport
 class AuthRealmPassword(
     override val serverUrl: String,
     override val realmId: RealmId,
@@ -27,7 +24,6 @@ class AuthRealmPassword(
 }
 
 /** A realm a client signs in to with its secret. Not a data class: its generated `toString` would print it. */
-@JsExport
 class AuthRealmClientSecret(
     override val serverUrl: String,
     override val realmId: RealmId,

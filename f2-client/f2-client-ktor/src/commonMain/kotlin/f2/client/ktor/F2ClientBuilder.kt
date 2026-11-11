@@ -5,7 +5,7 @@ import f2.client.ktor.common.F2ClientConfigLambda
 import f2.client.ktor.http.httpClientBuilderGenerics
 
 /**
- * Builds the [F2Client] of an F2 server from its URL. From JS, `httpClientBuilderDefault().build(url)`.
+ * Builds the [F2Client] of an F2 server from its URL. From JS, `httpF2JsClient(url)`.
  */
 object F2ClientBuilder {
 
