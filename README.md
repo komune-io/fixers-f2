@@ -276,17 +276,30 @@ the module that declares them, and the rest with `import type`: a module's `.d.m
   pending.
 
 - **Headers**: `httpF2JsClient(url, headers)` takes an optional async provider, called before each request; every
-  header it answers is sent, so a token is refreshed where it lives. With keycloak-js:
+  header it answers is sent, so a token is refreshed where it lives. With keycloak-js, where `keycloak.token` is
+  `undefined` until a login:
 
   ```ts
-  const token = async () => { await keycloak.updateToken(30); return keycloak.token; };
-  const client = httpF2JsClient("https://f2.example", async () => ({ Authorization: "Bearer " + (await token()) }));
+  const client = httpF2JsClient("https://f2.example", async () => {
+    await keycloak.updateToken(30);
+    return keycloak.token === undefined ? {} : { Authorization: `Bearer ${keycloak.token}` };
+  });
   ```
 
-  The provider answers a plain object of strings; anything else (a number, a list of pairs, a name that is no HTTP
-  token, a line break in a value) rejects the call with a `TypeError` before any request. `Content-Type`,
-  `Content-Length`, `Transfer-Encoding` and `Upgrade`, which the client writes itself, are refused the same way
-  rather than overwritten. A provider that rejects rejects the call with its reason, as a signal does.
+  - The provider answers a plain object of strings, each name once whatever its case. Anything else rejects the call
+    with a `TypeError` before any request, which names the header and never quotes its value: a number, a list of
+    pairs, a name that is no HTTP token, a value holding a control character (a tab aside) or a character beyond
+    Latin-1.
+  - Refused the same way rather than overwritten or lost: `Content-Type`, `Content-Length`, `Transfer-Encoding`,
+    `Upgrade` and `Accept`, which the client writes itself, and the headers a browser's fetch drops without a word
+    (`Cookie`, `Host`, `Origin`, `Referer`, `Accept-Charset`, any `Proxy-` or `Sec-` header, the rest of the Fetch
+    standard's forbidden request headers).
+  - A provider that rejects rejects the call with its reason, as a signal does. One that never settles leaves the
+    call pending until its signal aborts or the client is closed: give `invoke` a signal with a timeout
+    (`AbortSignal.timeout(ms)`) where that matters.
+  - fetch follows redirects with the headers given: a redirect to another origin drops `Authorization` but carries
+    every other header the provider answered. Point the client at the API's own URL, and keep secrets in
+    `Authorization`.
 - **Cancellation**, as with `fetch`: each `invoke` takes an optional `AbortSignal` last; an aborted call rejects
   with the signal's reason, and its listener is removed when the call ends. `client.close()` ends every pending
   call (`CLOSED`) and releases the connections; a closed client rejects every later call as `CLOSED`, an aborted

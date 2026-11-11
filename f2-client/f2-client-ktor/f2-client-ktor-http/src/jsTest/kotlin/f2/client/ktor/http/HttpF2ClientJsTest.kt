@@ -324,7 +324,7 @@ class HttpF2ClientJsTest {
 
     @Test
     fun aHeaderTheClientWritesItselfIsRefusedRatherThanOverwritten() = runTest {
-        listOf("Content-Type", "content-length", "Transfer-Encoding").forEach { name ->
+        listOf("Content-Type", "content-length", "Transfer-Encoding", "Accept", "accept-charset").forEach { name ->
             val client = client(body = "[]", headers = provider { js("Promise").resolve(json(name to "x")) })
 
             val failure = rejection(client.function("itemCount"), js("[]"))
@@ -333,6 +333,62 @@ class HttpF2ClientJsTest {
             assertTrue((failure.message as String).contains(name))
         }
         assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun aHeaderValueKtorOrFetchWouldRefuseIsATypeErrorThatNeverCitesTheValue() = runTest {
+        // A control character, DEL, or a character beyond Latin-1: Ktor's own refusal quotes the value.
+        listOf("\u0000", "\u0001", "\u007F", "\u0100").map { char -> "Bearer secret${char}x" }.forEach { value ->
+            val answered = json("Authorization" to value)
+            val client = client(body = "[]", headers = provider { js("Promise").resolve(answered) })
+
+            val failure = rejection(client.function("itemCount"), js("[]"))
+
+            val seen = "kind=${failure.kind} message=${failure.message}"
+            assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean, seen)
+            assertTrue(!(failure.message as String).contains("secret"), seen)
+        }
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun aTabAndLatin1LettersAreValidInAHeaderValue() = runTest {
+        call(client(body = "[]", headers = provider { js("Promise").resolve(json("X-Name" to "a\tb é")) })
+            .function("itemCount"), js("[]"))
+
+        assertEquals("a\tb é", requests.single().headers["X-Name"])
+    }
+
+    @Test
+    fun aHeaderFetchWouldDropIsRefusedRatherThanLostAndTwoNamesEqualButForCaseToo() = runTest {
+        listOf(
+            json("Cookie" to "a=b"),
+            json("Origin" to "https://x"),
+            json("Sec-Fetch-Mode" to "cors"),
+            json("Proxy-Authorization" to "Basic x"),
+            json("Authorization" to "Bearer a", "authorization" to "Bearer b"),
+        ).forEach { answered ->
+            val client = client(body = "[]", headers = provider { js("Promise").resolve(answered) })
+
+            val failure = rejection(client.function("itemCount"), js("[]"))
+
+            assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean, JSON.stringify(answered))
+            assertTrue(!(failure.message as String).contains("Bearer"), failure.message as String)
+        }
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun aMessageArrayIsReadByIndexLikeJsonStringify() = runTest {
+        val messages: dynamic = js("[]")
+        val element: dynamic = js("({ id: 'a' })")
+        val descriptor: dynamic = js("({ enumerable: false, configurable: true })")
+        descriptor.value = element
+        jsObject.defineProperty(messages, "0", descriptor)
+
+        call(client(body = "[]").function("itemCount"), messages)
+
+        assertEquals("""[{"id":"a"}]""", sent())
     }
 
     @Test

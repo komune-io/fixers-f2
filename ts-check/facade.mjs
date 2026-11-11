@@ -115,6 +115,12 @@ try {
   assert.equal((await rejection(expired.function("itemCount").invoke([]))).message, "expired");
   const typo = httpF2JsClient(`http://127.0.0.1:${server.address().port}`, async () => ({ Authorization: 1 }));
   assert.ok((await rejection(typo.function("itemCount").invoke([]))) instanceof TypeError);
+  const control = httpF2JsClient(`http://127.0.0.1:${server.address().port}`, async () => ({ Authorization: "Bearer secret\u0000" }));
+  const refusedControl = await rejection(control.function("itemCount").invoke([]));
+  assert.ok(refusedControl instanceof TypeError && !refusedControl.message.includes("secret"), refusedControl.message);
+  const cookie = httpF2JsClient(`http://127.0.0.1:${server.address().port}`, async () => ({ Cookie: "a=b" }));
+  assert.ok((await rejection(cookie.function("itemCount").invoke([]))) instanceof TypeError);
+  control.close(); cookie.close();
   assert.equal(received.at(-1).authorization, "Bearer t2");
   authorized.close(); expired.close(); typo.close();
 
@@ -143,4 +149,4 @@ assert.equal((await rejection(client.supplier("itemList").invoke())).kind, "CLOS
 const aborted = new AbortController();
 aborted.abort();
 assert.equal((await rejection(client.supplier("itemList").invoke(aborted.signal))).kind, "CLOSED");
-console.log("facade: every value use.mts imports exists; 26 calls as a front makes them, all as expected");
+console.log("facade: every value use.mts imports exists; 28 calls as a front makes them, all as expected");
