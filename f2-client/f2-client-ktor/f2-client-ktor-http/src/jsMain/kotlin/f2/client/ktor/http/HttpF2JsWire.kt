@@ -25,39 +25,40 @@ internal suspend fun HttpF2Client.request(block: suspend () -> HttpResponse): Ht
 
 internal suspend fun HttpF2Client.postAll(route: String, messages: dynamic): HttpResponse {
     if (!isArray(messages)) throw Rejection(typeError("The messages of $route are an array"))
-    jsonProblem(messages, js("new Set()"))?.let { problem ->
-        throw Rejection(typeError("A message of $route $problem"))
+    val checked = try {
+        jsonCopy(messages, js("new Set()"))
+    } catch (e: NotJson) {
+        throw Rejection(typeError("A message of $route ${e.problem}"), e)
     }
-    val body = JSON.stringify(messages)
+    val body = JSON.stringify(checked)
     return request { httpClient.post("$urlBase/$route") { setBody(TextContent(body, ContentType.Application.Json)) } }
 }
 
-// Why a value is no plain JSON, or null: a class instance at any depth, or a cycle through [ancestors].
-private fun jsonProblem(value: dynamic, ancestors: dynamic): String? = when (jsTypeOf(value)) {
-    "string", "number", "boolean", "undefined" -> null
-    "object" -> objectProblem(value, ancestors)
-    else -> "is plain JSON, not a ${jsTypeOf(value)}"
+private class NotJson(val problem: String) : Exception(problem)
+
+// The plain JSON copy of [value], each property read once: what is checked is what is sent, a getter
+// answering twice included. Throws NotJson on a class instance at any depth, a cycle through [ancestors],
+// or a number JSON.stringify would write as null.
+private fun jsonCopy(value: dynamic, ancestors: dynamic): dynamic = when (jsTypeOf(value)) {
+    "string", "boolean", "undefined" -> value
+    "number" -> if (js("Number").isFinite(value) as Boolean) value else throw NotJson("holds $value, no finite number")
+    "object" -> objectCopy(value, ancestors)
+    else -> throw NotJson("is plain JSON, not a ${jsTypeOf(value)}")
 }
 
-private fun objectProblem(value: dynamic, ancestors: dynamic): String? =
-    when {
-        value == null -> {
-            null
-        }
-        ancestors.has(value) as Boolean -> {
-            "holds a cycle, which JSON cannot write"
-        }
-        !isArray(value) && isClassInstance(value) -> {
-            "is plain JSON: no instance of a class, at any depth"
-        }
-        else -> {
-            ancestors.add(value)
-            val problem = js("Object").values(value).unsafeCast<Array<dynamic>>()
-                .firstNotNullOfOrNull { child -> jsonProblem(child, ancestors) }
-            ancestors.delete(value)
-            problem
-        }
+private fun objectCopy(value: dynamic, ancestors: dynamic): dynamic {
+    if (value == null) return null
+    if (ancestors.has(value) as Boolean) throw NotJson("holds a cycle, which JSON cannot write")
+    val isList = isArray(value)
+    if (!isList && isClassInstance(value)) throw NotJson("is plain JSON: no instance of a class, at any depth")
+    ancestors.add(value)
+    val copy: dynamic = if (isList) js("Array")(value.length) else js("({})")
+    js("Object").entries(value).unsafeCast<Array<Array<dynamic>>>().forEach { (key, child) ->
+        copy[key] = jsonCopy(child, ancestors)
     }
+    ancestors.delete(value)
+    return copy
+}
 
 // An object whose prototype is neither Object's nor none: an instance of a class, a Kotlin one included.
 private fun isClassInstance(value: dynamic): Boolean {

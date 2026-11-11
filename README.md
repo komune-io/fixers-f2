@@ -214,34 +214,54 @@ reaches an F2 server through the JS client of `f2-client-ktor-http`: each functi
 takes JSON messages and an optional `AbortSignal` and returns a promise of JSON results (`Json<T>` is the JSON of
 `T`, declared at the head of the contract):
 
+The client runs from the `.mjs` modules Kotlin/JS emits; f2 publishes no npm package, and `ts/` holds the
+declarations only, for review. A front gets the modules from the Kotlin/JS build of a project that depends on
+`io.komune.f2:f2-client-ktor-http` (its `jsBrowserProductionLibraryDistribution` writes them to
+`build/dist/js/productionLibrary/`, one `.mjs` per module), or from the npm package that build publishes. Import
+from that module; TypeScript reads the `.d.mts` beside it:
+
 ```ts
-import { httpF2JsClient } from "fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http"; // the package under ts/
-import type { HttpF2JsFailure, Json, PageQuery, PageQueryResult } from "fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http";
+// The emitted modules, here copied to src/f2/.
+import { httpF2JsClient } from "./f2/fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http.mjs";
+import type { HttpF2JsFailure, Json, PageQuery, PageQueryResult } from "./f2/fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http.mjs";
+
+// Your function's result type: an exported Kotlin class, or any TypeScript type of its JSON.
+type Item = { id: string; name: string };
 
 const client = httpF2JsClient("https://f2.example");
 const itemPage = client.function<PageQuery, PageQueryResult<Item>>("itemPage"); // an F2JsFunction
 // itemPage.invoke(msgs: Json<PageQuery>[], signal?: AbortSignal | null): Promise<Json<PageQueryResult<Item>>[]>
+const controller = new AbortController();
 try {
   const [page] = await itemPage.invoke([{ pagination: { offset: 0, limit: 10 } }], controller.signal);
   const items: Json<Item>[] = page.items;
 } catch (e) {
-  const failure = e as Json<HttpF2JsFailure>; // an Error carrying kind, message, status, error, body
-  if (failure.kind === "F2") console.log(failure.error?.refusal?.parameters["id"]);
+  if (e instanceof Error && "kind" in e) {
+    const failure = e as Json<HttpF2JsFailure>; // kind, message, status, error, body
+    if (failure.kind === "F2") console.log(failure.error?.refusal?.parameters["id"]);
+  } else if (e instanceof TypeError) {
+    // the messages are no plain JSON: refused before any request
+  } else {
+    // the signal's reason (an AbortError by default, or whatever was passed to abort()), or a defect of the client
+  }
 }
 client.close();
 ```
 
 `client.supplier<R>(route)` is an `F2JsSupplier` whose `invoke(signal?)` returns a `Promise<Json<R>[]>`,
-`client.consumer<Q>(route)` an `F2JsConsumer` whose `invoke(msgs, signal?)` returns a `Promise<void>`. Where a plain
-JS function is wanted, an arrow adapts it: `(msgs) => itemPage.invoke(msgs)`. Import values (`httpF2JsClient`) from the package that declares
-them, and the rest with `import type`: a package's `.d.mts` declares its whole program, its `.mjs` exports only its
-own.
+`client.consumer<Q>(route)` an `F2JsConsumer` whose `invoke(msgs, signal?)` returns a `Promise<void>`. `invoke` is a
+method: call it on its function, never detached (`const run = itemPage.invoke` loses its object); where a plain JS
+function is wanted, an arrow adapts it: `(msgs) => itemPage.invoke(msgs)`. Import values (`httpF2JsClient`) from
+the module that declares them, and the rest with `import type`: a module's `.d.mts` declares its whole program, its
+`.mjs` exports only its own.
 
 - **Type arguments**: always give them. TypeScript cannot require them on what Kotlin emits; without them a function
   takes any message and its results are `unknown`.
 - **Messages** are an array of plain JSON: anything else rejects with a `TypeError` before any request — no array,
-  an instance of a class at any depth (an exported Kotlin object, a `Date`), or a cycle. A value shared by two
-  messages is fine.
+  an instance of a class at any depth (an exported Kotlin object, a `Date`), a cycle, or a number that is not
+  finite (`NaN`, `Infinity`, which JSON would write as `null`). `Json<T>` refuses a Kotlin object at type level too,
+  where it implements an exported interface or is a data class. Each property is read once, and what was checked is
+  what is sent. A value shared by two messages is fine.
 - **Every call settles once.** A failure rejects with an `Error` carrying `Json<HttpF2JsFailure>`, no Kotlin object:
 
   | `kind` | When | `status` | `error` | `body` |
@@ -257,7 +277,8 @@ own.
 
 - **Cancellation**, as with `fetch`: each `invoke` takes an optional `AbortSignal` last; an aborted call rejects
   with the signal's reason, and its listener is removed when the call ends. `client.close()` ends every pending
-  call (`CLOSED`) and releases the connections. `AbortSignal` is the platform's: the DOM library or Node's types.
+  call (`CLOSED`) and releases the connections; a closed client rejects every later call as `CLOSED`, an aborted
+  signal included. `AbortSignal` is the platform's: the DOM library or Node's types.
 
 ## CQRS
 

@@ -67,8 +67,9 @@ enum class HttpF2JsFailureKind {
  * messages and an optional `AbortSignal`, and returns a promise of the JSON results, no Kotlin value in between. A
  * message is written with JSON.stringify and a result read with JSON.parse, so the messages are an array of plain
  * JSON: an array, without cycle, of plain objects, arrays and primitives; anything else rejects with a `TypeError`
- * before any request. A failed call rejects with an `HttpF2JsFailure`; a call aborted by its signal with the
- * signal's reason, as `fetch` does. Every call settles once.
+ * before any request, as does a number that is not finite. A failed call rejects with an `HttpF2JsFailure`; a call
+ * aborted by its signal with the signal's reason, as `fetch` does, unless the client is closed: `CLOSED` wins. Every
+ * call settles once.
  */
 @JsExport
 class HttpF2JsClient internal constructor(internal val client: HttpF2Client) {
@@ -95,11 +96,11 @@ class HttpF2JsClient internal constructor(internal val client: HttpF2Client) {
     internal fun <T> call(signal: AbortSignal?, block: suspend () -> T): Promise<T> = Promise { resolve, reject ->
         val settle = Settle(resolve, reject)
         when {
-            signal?.aborted == true -> {
-                settle.reject(signal.reason)
-            }
             isClosed -> {
                 settle.reject(closed())
+            }
+            signal?.aborted == true -> {
+                settle.reject(signal.reason)
             }
             else -> {
                 val job = scope.launch { settle.resolveWith(block) }
@@ -110,8 +111,8 @@ class HttpF2JsClient internal constructor(internal val client: HttpF2Client) {
                     when {
                         cause == null -> Unit
                         cause !is CancellationException -> settle.reject(unexpected(cause))
-                        signal?.aborted == true -> settle.reject(signal.reason)
                         isClosed -> settle.reject(closed())
+                        signal?.aborted == true -> settle.reject(signal.reason)
                         else -> settle.reject(failure(HttpF2JsFailureKind.NETWORK, "The call was cancelled"))
                     }
                 }

@@ -23,7 +23,7 @@ for (const statement of valueImports) {
 }
 
 const { httpF2JsClient } = await import(`${dir}/fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http.mjs`);
-const { F2Refusal } = await import(`${dir}/fixers-f2-f2-dsl-f2-dsl-cqrs.mjs`);
+const { F2Refusal, OffsetPagination, PageQuery } = await import(`${dir}/fixers-f2-f2-dsl-f2-dsl-cqrs.mjs`);
 
 const received = [];
 const server = createServer((request, response) => {
@@ -89,12 +89,30 @@ try {
   const cyclic = { id: "a" };
   cyclic.self = cyclic;
   assert.match((await rejection(client.function("itemCount").invoke([cyclic]))).message, /cycle/);
+  // The two Kotlin objects use.mts refuses to type.
+  assert.ok((await rejection(client.function("itemCount").invoke([new PageQuery(null)]))) instanceof TypeError);
+  const nested = [{ pagination: new OffsetPagination(0, 10) }];
+  assert.ok((await rejection(client.function("itemCount").invoke(nested))) instanceof TypeError);
+  for (const messages of [[{ total: NaN }], [{ totals: [Infinity] }], [-Infinity]]) {
+    assert.match((await rejection(client.function("itemCount").invoke(messages))).message, /finite/);
+  }
   assert.equal(received.length, sentBefore);
+
+  // What was checked is what is sent: a getter is read once.
+  let reads = 0;
+  const changing = { get id() { reads += 1; return reads === 1 ? "a" : undefined; } };
+  await client.function("itemCount").invoke([changing]);
+  assert.deepEqual([received.at(-1).body, reads], ['[{"id":"a"}]', 1]);
 
   // Aborted: rejects with the signal's reason, as fetch does.
   const controller = new AbortController();
-  const slow = rejection(client.function("itemSlow").invoke([], controller.signal));
-  while (received.at(-1)?.url !== "/itemSlow") await new Promise((resolve) => setTimeout(resolve, 5));
+  let settledEarly = false;
+  const slow = rejection(client.function("itemSlow").invoke([], controller.signal)).finally(() => { settledEarly = true; });
+  const deadline = Date.now() + 2000;
+  while (received.at(-1)?.url !== "/itemSlow" && !settledEarly && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  assert.equal(received.at(-1)?.url, "/itemSlow", "the slow call never reached the server");
   controller.abort();
   assert.equal((await slow).name, "AbortError");
 } finally {
@@ -108,4 +126,7 @@ assert.deepEqual([gone.kind, gone.status], ["NETWORK", null]);
 // CLOSED: the client closed, its later calls refused.
 client.close();
 assert.equal((await rejection(client.supplier("itemList").invoke())).kind, "CLOSED");
-console.log("facade: every value use.mts imports exists; 15 calls as a front makes them, all as expected");
+const aborted = new AbortController();
+aborted.abort();
+assert.equal((await rejection(client.supplier("itemList").invoke(aborted.signal))).kind, "CLOSED");
+console.log("facade: every value use.mts imports exists; 22 calls as a front makes them, all as expected");

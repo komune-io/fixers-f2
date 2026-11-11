@@ -242,6 +242,44 @@ class HttpF2ClientJsTest {
     }
 
     @Test
+    fun aNonFiniteNumberAtAnyDepthIsRefusedBeforeAnyRequest() = runTest {
+        listOf(js("[{ total: NaN }]"), js("[{ page: { totals: [Infinity] } }]"), js("[-Infinity]")).forEach { messages ->
+            val failure = rejection(client(body = "[]").function("itemCount"), messages)
+
+            assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean)
+            assertTrue((failure.message as String).contains("finite"))
+        }
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun whatIsCheckedIsWhatIsSentAGetterReadOnce() = runTest {
+        val reads = mutableListOf<String>()
+        val message: dynamic = js("({})")
+        val descriptor: dynamic = js("({ enumerable: true })")
+        descriptor.get = { reads.add("id"); if (reads.size == 1) "a" else undefined }
+        js("Object").defineProperty(message, "id", descriptor)
+
+        call(client(body = "[]").function("itemCount"), arrayOf(message))
+
+        assertEquals("""[{"id":"a"}]""", sent())
+        assertEquals(listOf("id"), reads)
+    }
+
+    @Test
+    fun aClosedClientRejectsAsClosedEvenWhenTheSignalIsAlreadyAborted() = runTest {
+        val client = client(body = "[]")
+        val controller: dynamic = js("new AbortController()")
+        controller.abort()
+        client.close()
+
+        val failure = settled(client.function("itemCount").invoke(js("[]"), controller.signal).unsafeCast<Promise<dynamic>>())
+
+        assertEquals("CLOSED", failure.await().kind as String)
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
     fun messagesThatAreNoArrayAreRefusedBeforeAnyRequest() = runTest {
         val failure = rejection(client(body = "[]").function("itemCount"), js("({ id: 'a' })"))
 
