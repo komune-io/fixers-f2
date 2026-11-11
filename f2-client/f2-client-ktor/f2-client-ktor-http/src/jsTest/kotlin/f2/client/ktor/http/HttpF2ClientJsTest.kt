@@ -12,6 +12,10 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
+import io.ktor.utils.io.ByteChannel
+import io.ktor.utils.io.cancel
+import io.ktor.utils.io.writeStringUtf8
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.js.Promise
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,6 +23,7 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.await
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.IOException
 import f2.client.ktor.http.model.exported.HttpF2JsClient as JsClient
 
 /** The client as a JS caller uses it: every function called through its exported names, with JS values. */
@@ -119,22 +124,45 @@ class HttpF2ClientJsTest {
     }
 
     @Test
-    fun anErrorStatusWithATextBodyRejectsAsF2WithTheTextAsMessage() = runTest {
-        val failure = rejection(client(HttpStatusCode.InternalServerError, "boom").function("itemCount"), js("[]"))
+    fun anErrorStatusWithAJsonErrorObjectRejectsAsF2() = runTest {
+        val body = """{"status":500,"error":"Internal Server Error"}"""
+        val failure = rejection(client(HttpStatusCode.InternalServerError, body).function("itemCount"), js("[]"))
 
         assertEquals("F2", failure.kind as String)
         assertEquals(500, failure.status as Int)
-        assertEquals("boom", failure.error.message as String)
-        assertEquals(null, failure.error.refusal)
+        assertEquals("Internal Server Error", failure.error.message as String)
     }
 
     @Test
-    fun anErrorStatusWithAnEmptyBodyRejectsAsF2WithItsStatus() = runTest {
+    fun anErrorStatusWithATextBodyRejectsAsHttpWithTheText() = runTest {
+        val failure = rejection(client(HttpStatusCode.InternalServerError, "boom").function("itemCount"), js("[]"))
+
+        assertEquals("HTTP", failure.kind as String)
+        assertEquals(500, failure.status as Int)
+        assertEquals("boom", failure.body as String)
+        assertEquals(null, failure.error)
+    }
+
+    @Test
+    fun anErrorStatusWithAnEmptyBodyRejectsAsHttpWithItsStatus() = runTest {
         val failure = rejection(client(HttpStatusCode.NotFound, "").function("itemCount"), js("[]"))
 
-        assertEquals("F2", failure.kind as String)
-        assertEquals(404, failure.error.code as Int)
-        assertEquals("", failure.error.message as String)
+        assertEquals("HTTP", failure.kind as String)
+        assertEquals(404, failure.status as Int)
+        assertEquals("", failure.body as String)
+        assertEquals("HTTP 404", failure.message as String)
+    }
+
+    @Test
+    fun theF2ErrorJsonHoldsEveryFieldOfTheKotlinError() = runTest {
+        val body = """{"refusal":"item.CITED","message":"Cited","parameters":{"id":"i-1"},"citers":["A"],""" +
+            """"id":"e-1","requestId":"r-1","timestamp":"t","code":409}"""
+        val json = rejection(client(HttpStatusCode.Conflict, body).function("itemDelete"), js("[]")).error
+
+        // Every getter the Kotlin classes export is a key of the JSON: a field added to the DTO fails here.
+        val error = f2.dsl.cqrs.error.F2Error(message = "m", refusal = F2Refusal(code = "c"))
+        assertEquals(exportedGetters(error), keys(json))
+        assertEquals(exportedGetters(error.refusal), keys(json.refusal))
     }
 
     @Test
@@ -151,6 +179,54 @@ class HttpF2ClientJsTest {
 
         assertEquals("NETWORK", failure.kind as String)
         assertEquals(null, failure.status)
+    }
+
+    @Test
+    fun aBodyCutWhileReadRejectsAsNetwork() = runTest {
+        val client = HttpF2JsClient(
+            HttpF2Client(
+                urlBase = "http://f2.test",
+                httpClient = HttpClient(MockEngine {
+                    val body = ByteChannel(autoFlush = true)
+                    body.writeStringUtf8("[{\"id\"")
+                    body.cancel(IOException("cut"))
+                    respond(body, HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+                }) { applyConfig() },
+            )
+        ).unsafeCast<JsClient>()
+
+        assertEquals("NETWORK", rejection(client.function("itemCount"), js("[]")).kind as String)
+    }
+
+    @Test
+    fun aCancellationNeitherAbortNorCloseRejectsAsNetwork() = runTest {
+        val failure = rejection(
+            client(body = "[]") { throw CancellationException("timed out") }.function("itemCount"),
+            js("[]"),
+        )
+
+        assertEquals("NETWORK", failure.kind as String)
+    }
+
+    @Test
+    fun aCyclicMessageIsRefusedBeforeAnyRequest() = runTest {
+        val message: dynamic = js("({ id: 'a' })")
+        message.self = message
+
+        val failure = rejection(client(body = "[]").function("itemCount"), arrayOf(message))
+
+        assertTrue(js("TypeError").prototype.isPrototypeOf(failure) as Boolean)
+        assertTrue((failure.message as String).contains("cycle"))
+        assertTrue(requests.isEmpty())
+    }
+
+    @Test
+    fun aSharedButAcyclicValueIsSent() = runTest {
+        val shared: dynamic = js("({ id: 'a' })")
+
+        call(client(body = "[]").function("itemCount"), arrayOf(shared, shared))
+
+        assertEquals("""[{"id":"a"},{"id":"a"}]""", sent())
     }
 
     @Test
@@ -178,13 +254,30 @@ class HttpF2ClientJsTest {
         val started = CompletableDeferred<Unit>()
         val controller: dynamic = js("new AbortController()")
         val function = client(body = "[]") { started.complete(Unit); CompletableDeferred<Unit>().await() }
-            .function("itemCount", controller.signal)
+            .function("itemCount")
 
-        val pending = settled(function(js("[]")).unsafeCast<Promise<dynamic>>())
+        val pending = settled(function(js("[]"), controller.signal).unsafeCast<Promise<dynamic>>())
         started.await()
         controller.abort()
 
         assertEquals("AbortError", pending.await().name as String)
+    }
+
+    @Test
+    fun theAbortListenerIsAddedOnceAndRemovedWhenTheCallEnds() = runTest {
+        val listeners = mutableListOf<String>()
+        val signal: dynamic = js("({ aborted: false })")
+        signal.addEventListener = { type: String, listener: dynamic, options: dynamic ->
+            listeners.add("add $type once=${options.once}")
+            signal.listener = listener
+        }
+        signal.removeEventListener = { type: String, listener: dynamic ->
+            listeners.add("remove $type same=${listener === signal.listener}")
+        }
+
+        call2(client(body = "[]").function("itemCount"), js("[]"), signal)
+
+        assertEquals(listOf("add abort once=true", "remove abort same=true"), listeners)
     }
 
     @Test
@@ -199,4 +292,27 @@ class HttpF2ClientJsTest {
         assertEquals("CLOSED", pending.await().kind as String)
         assertEquals("CLOSED", rejection(client.function("itemCount"), js("[]")).kind as String)
     }
+
+    @Test
+    fun aPromiseSettlesOnceWhateverEndsTheCall() {
+        val outcomes = mutableListOf<String>()
+        val settle = Settle<Int>({ value -> outcomes.add("resolve $value") }, { _ -> outcomes.add("reject") })
+
+        settle.reject(js("new Error()"))
+        settle.reject(js("new Error()"))
+
+        assertEquals(listOf("reject"), outcomes)
+    }
+
+    private fun exportedGetters(value: dynamic): List<String> {
+        val descriptors: dynamic = js("Object").getOwnPropertyDescriptors(js("Object").getPrototypeOf(value))
+        return js("Object").keys(descriptors).unsafeCast<Array<String>>()
+            .filter { name -> descriptors[name].get != undefined }
+            .sorted()
+    }
+
+    private fun keys(value: dynamic): List<String> = js("Object").keys(value).unsafeCast<Array<String>>().sorted()
+
+    private suspend fun call2(function: dynamic, messages: dynamic, signal: dynamic): dynamic =
+        function(messages, signal).unsafeCast<Promise<dynamic>>().await()
 }

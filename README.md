@@ -218,37 +218,43 @@ import { httpF2JsClient } from "fixers-f2-f2-client-f2-client-ktor-f2-client-kto
 import type { HttpF2JsFailure, Json, PageQuery, PageQueryResult } from "fixers-f2-f2-client-f2-client-ktor-f2-client-ktor-http";
 
 const client = httpF2JsClient("https://f2.example");
-const itemPage = client.function<PageQuery, PageQueryResult<Item>>("itemPage"); // (msgs: Json<PageQuery>[]) => Promise<Json<PageQueryResult<Item>>[]>
+const itemPage = client.function<PageQuery, PageQueryResult<Item>>("itemPage");
+// (msgs: Json<PageQuery>[], signal?: AbortSignal | null) => Promise<Json<PageQueryResult<Item>>[]>
 try {
-  const [page] = await itemPage([{ pagination: { offset: 0, limit: 10 } }]);
+  const [page] = await itemPage([{ pagination: { offset: 0, limit: 10 } }], controller.signal);
   const items: Json<Item>[] = page.items;
 } catch (e) {
-  const failure = e as Json<HttpF2JsFailure>; // an Error carrying kind, message, status, error
+  const failure = e as Json<HttpF2JsFailure>; // an Error carrying kind, message, status, error, body
   if (failure.kind === "F2") console.log(failure.error?.refusal?.parameters["id"]);
 }
 client.close();
 ```
 
-`client.supplier<R>(route)` is a `() => Promise<Json<R>[]>`, `client.consumer<Q>(route)` a
-`(msgs: Json<Q>[]) => Promise<void>`. Import values (`httpF2JsClient`) from the package that declares them, and the
-rest with `import type`: a package's `.d.mts` declares its whole program, its `.mjs` exports only its own.
+`client.supplier<R>(route)` is a `(signal?) => Promise<Json<R>[]>`, `client.consumer<Q>(route)` a
+`(msgs: Json<Q>[], signal?) => Promise<void>`. Import values (`httpF2JsClient`) from the package that declares
+them, and the rest with `import type`: a package's `.d.mts` declares its whole program, its `.mjs` exports only its
+own.
 
 - **Type arguments**: always give them. TypeScript cannot require them on what Kotlin emits; without them a function
   takes any message and its results are `unknown`.
-- **Messages** are plain JSON, an array of them: an array is required, and an instance of a class at any depth (an
-  exported Kotlin object, a `Date`) rejects with a `TypeError` before any request.
-- **Failures** reject with an `Error` carrying `Json<HttpF2JsFailure>`, no Kotlin object:
+- **Messages** are an array of plain JSON: anything else rejects with a `TypeError` before any request — no array,
+  an instance of a class at any depth (an exported Kotlin object, a `Date`), or a cycle. A value shared by two
+  messages is fine.
+- **Every call settles once.** A failure rejects with an `Error` carrying `Json<HttpF2JsFailure>`, no Kotlin object:
 
-  | `kind` | When | `status` | `error` |
-  |---|---|---|---|
-  | `F2` | the server answered an error status: a refusal, a `500` with a text body (its text is `error.message`), a `404` with an empty body (`error.message` is `""`) | the status | the F2 error as JSON: `refusal.parameters` an object, `refusal.citers` an array |
-  | `NETWORK` | no response: the server is unreachable or closed the connection | `null` | `null` |
-  | `UNREADABLE` | a success status whose body is no JSON | the status | `null` |
-  | `CLOSED` | the client was closed before or during the call | `null` | `null` |
+  | `kind` | When | `status` | `error` | `body` |
+  |---|---|---|---|---|
+  | `F2` | an error status whose body is a JSON error object (an F2 error, a Spring error body) | the status | that error as JSON: `refusal.parameters` an object, `refusal.citers` an array | `null` |
+  | `HTTP` | an error status whose body is text or empty (`message` is the text, or `HTTP <status>`) | the status | `null` | the text, `""` when empty |
+  | `NETWORK` | no response, or one not read whole: the server is unreachable, the connection broke, the call was cancelled by anything but its signal or `close()` | `null` | `null` | `null` |
+  | `UNREADABLE` | a success status whose body is no JSON | the status | `null` | the text |
+  | `CLOSED` | the client was closed before or during the call | `null` | `null` | `null` |
 
-- **Cancellation**: `client.function(route, signal)` (and `supplier`, `consumer`) take an optional `AbortSignal`;
-  an aborted call rejects with the signal's reason, as `fetch` does. `client.close()` ends every pending call
-  (`CLOSED`) and releases the connections. `AbortSignal` is the platform's: the DOM library or Node's types.
+- **Cancellation**, as with `fetch`: each call takes an optional `AbortSignal` as its last argument; an aborted call
+  rejects with the signal's reason, and its listener is removed when the call ends. `client.close()` ends every
+  pending call (`CLOSED`) and releases the connections. `AbortSignal` is the platform's: the DOM library or Node's
+  types. The `?` on `signal` is a cleaning rule of this build (`additionalCleaning`): a Kotlin function type has no
+  optional parameter, and JS passes `undefined`, which Kotlin takes for `null`.
 
 ## CQRS
 

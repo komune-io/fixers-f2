@@ -43,6 +43,11 @@ fixers {
     kt2Ts {
         outputDirectory = "ts"
         committedFiles = io.komune.fixers.gradle.config.model.Kt2TsFiles.DECLARATIONS
+        // A Kotlin function type has no optional parameter: the JS client's trailing `signal` is optional in
+        // TypeScript, as JS passes undefined for it and Kotlin takes undefined for null.
+        additionalCleaning = mapOf(
+            ".d.mts" to listOf(Regex("""\bsignal: Nullable<AbortSignal>\) =>""") to "signal?: Nullable<AbortSignal>) =>"),
+        )
     }
     bundle {
         group = "io.komune.f2"

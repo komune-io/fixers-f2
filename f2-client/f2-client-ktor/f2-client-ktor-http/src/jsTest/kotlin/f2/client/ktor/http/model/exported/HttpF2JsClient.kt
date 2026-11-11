@@ -5,9 +5,9 @@ package f2.client.ktor.http.model.exported
 // The JS client as JS sees it: imported by its exported names from the module the library compiles to.
 
 external class HttpF2JsClient {
-    fun function(route: String, signal: dynamic = definedExternally): dynamic
-    fun supplier(route: String, signal: dynamic = definedExternally): dynamic
-    fun consumer(route: String, signal: dynamic = definedExternally): dynamic
+    fun function(route: String): dynamic
+    fun supplier(route: String): dynamic
+    fun consumer(route: String): dynamic
     fun close()
 }
 

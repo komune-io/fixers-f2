@@ -8,11 +8,16 @@ import { createServer } from "node:http";
 
 const dir = process.argv[2];
 const use = readFileSync(new URL("use.mts", import.meta.url), "utf8");
-const valueImports = [...use.matchAll(/^import \{([^}]*)\} from "[^"]*\/([^/"]+\.mjs)";/gm)];
+// Every import statement, on one line or several; `import type` names types only and is left out.
+const statements = [...use.matchAll(/^import\s[^;]*;/gm)].map(([statement]) => statement);
+const valueImports = statements.filter((statement) => !/^import\s+type\s/.test(statement));
 assert.ok(valueImports.length > 0, "use.mts imports no value");
-for (const [, names, file] of valueImports) {
+for (const statement of valueImports) {
+  const parsed = statement.match(/^import\s*\{([^}]*)\}\s*from\s*"[^"]*\/([^/"]+\.mjs)"\s*;$/);
+  assert.ok(parsed, `use.mts imports in a form this check does not read: ${statement}`);
+  const [, names, file] = parsed;
   const module = await import(`${dir}/${file}`);
-  for (const name of names.split(",").map((n) => n.trim()).filter(Boolean)) {
+  for (const name of names.split(",").map((n) => n.trim().split(/\s+as\s+/)[0]).filter(Boolean)) {
     assert.ok(name in module, `use.mts imports ${name} from ${file}, which does not export it`);
   }
 }
@@ -27,12 +32,19 @@ const server = createServer((request, response) => {
   request.on("end", () => {
     received.push({ method: request.method, url: request.url, body });
     if (request.url === "/itemSlow") return; // never answers: aborted or closed by the caller
+    if (request.url === "/itemCut") { // a 200 whose body breaks off
+      response.writeHead(200, { "content-type": "application/json", "content-length": "100" });
+      response.write('[{"id"');
+      setTimeout(() => response.socket.destroy(), 20);
+      return;
+    }
     const answers = {
       "/itemCount": [200, JSON.stringify(JSON.parse(body || "[]").map(({ id }) => ({ id, total: 2 })))],
       "/itemList": [200, '[{"id":"a"},{"id":"b"}]'],
       "/itemDelete": [200, ""],
       "/itemCited": [409, '{"status":409,"refusal":"item.CITED","message":"Cited","parameters":{"id":"i-1"},"citers":["A"]}'],
       "/itemBroken": [500, "boom"],
+      "/itemSpring": [500, '{"status":500,"error":"Internal Server Error"}'],
       "/itemHtml": [200, "<html>"],
     };
     const [status, text] = answers[request.url] ?? [404, ""];
@@ -57,10 +69,15 @@ try {
   assert.ok(refused instanceof Error);
   assert.deepEqual([refused.kind, refused.status, refused.message], ["F2", 409, "Cited"]);
   assert.deepEqual(refused.error.refusal, { code: "item.CITED", parameters: { id: "i-1" }, citers: ["A"] });
+  const spring = await rejection(client.function("itemSpring")([]));
+  assert.deepEqual([spring.kind, spring.status, spring.error.message], ["F2", 500, "Internal Server Error"]);
+  // HTTP: an error status whose body is text or empty.
   const broken = await rejection(client.function("itemBroken")([]));
-  assert.deepEqual([broken.kind, broken.status, broken.error.message, broken.error.refusal], ["F2", 500, "boom", null]);
+  assert.deepEqual([broken.kind, broken.status, broken.body, broken.error], ["HTTP", 500, "boom", null]);
   const missing = await rejection(client.function("itemMissing")([]));
-  assert.deepEqual([missing.kind, missing.error.code, missing.error.message], ["F2", 404, ""]);
+  assert.deepEqual([missing.kind, missing.status, missing.body], ["HTTP", 404, ""]);
+  // NETWORK: a body cut while read.
+  assert.equal((await rejection(client.function("itemCut")([]))).kind, "NETWORK");
   // UNREADABLE: a success whose body is no JSON.
   const html = await rejection(client.function("itemHtml")([]));
   assert.deepEqual([html.kind, html.status], ["UNREADABLE", 200]);
@@ -69,11 +86,14 @@ try {
   const sentBefore = received.length;
   assert.ok((await rejection(client.function("itemCount")({ id: "a" }))) instanceof TypeError);
   assert.ok((await rejection(client.function("itemCount")([{ page: { items: [new F2Refusal("x")] } }]))) instanceof TypeError);
+  const cyclic = { id: "a" };
+  cyclic.self = cyclic;
+  assert.match((await rejection(client.function("itemCount")([cyclic]))).message, /cycle/);
   assert.equal(received.length, sentBefore);
 
   // Aborted: rejects with the signal's reason, as fetch does.
   const controller = new AbortController();
-  const slow = rejection(client.function("itemSlow", controller.signal)([]));
+  const slow = rejection(client.function("itemSlow")([], controller.signal));
   while (received.at(-1)?.url !== "/itemSlow") await new Promise((resolve) => setTimeout(resolve, 5));
   controller.abort();
   assert.equal((await slow).name, "AbortError");
@@ -88,4 +108,4 @@ assert.deepEqual([gone.kind, gone.status], ["NETWORK", null]);
 // CLOSED: the client closed, its later calls refused.
 client.close();
 assert.equal((await rejection(client.supplier("itemList")())).kind, "CLOSED");
-console.log("facade: every value use.mts imports exists; 12 calls as a front makes them, all as expected");
+console.log("facade: every value use.mts imports exists; 15 calls as a front makes them, all as expected");

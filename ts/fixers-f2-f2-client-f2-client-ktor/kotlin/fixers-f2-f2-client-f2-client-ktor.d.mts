@@ -332,6 +332,7 @@ export declare interface HttpF2JsFailure {
     readonly message: string;
     readonly status: Nullable<number>;
     readonly error: Nullable<F2ErrorDTO>;
+    readonly body: Nullable<string>;
     readonly __doNotUseOrImplementIt: {
         readonly "f2.client.ktor.http.HttpF2JsFailure": unique symbol;
     };
@@ -342,22 +343,26 @@ export declare abstract class HttpF2JsFailureKind {
         get name(): "F2";
         get ordinal(): 0;
     };
+    static get HTTP(): HttpF2JsFailureKind & {
+        get name(): "HTTP";
+        get ordinal(): 1;
+    };
     static get NETWORK(): HttpF2JsFailureKind & {
         get name(): "NETWORK";
-        get ordinal(): 1;
+        get ordinal(): 2;
     };
     static get UNREADABLE(): HttpF2JsFailureKind & {
         get name(): "UNREADABLE";
-        get ordinal(): 2;
+        get ordinal(): 3;
     };
     static get CLOSED(): HttpF2JsFailureKind & {
         get name(): "CLOSED";
-        get ordinal(): 3;
+        get ordinal(): 4;
     };
-    static values(): [typeof HttpF2JsFailureKind.F2, typeof HttpF2JsFailureKind.NETWORK, typeof HttpF2JsFailureKind.UNREADABLE, typeof HttpF2JsFailureKind.CLOSED];
+    static values(): [typeof HttpF2JsFailureKind.F2, typeof HttpF2JsFailureKind.HTTP, typeof HttpF2JsFailureKind.NETWORK, typeof HttpF2JsFailureKind.UNREADABLE, typeof HttpF2JsFailureKind.CLOSED];
     static valueOf(value: string): HttpF2JsFailureKind;
-    get name(): "F2" | "NETWORK" | "UNREADABLE" | "CLOSED";
-    get ordinal(): 0 | 1 | 2 | 3;
+    get name(): "F2" | "HTTP" | "NETWORK" | "UNREADABLE" | "CLOSED";
+    get ordinal(): 0 | 1 | 2 | 3 | 4;
 }
 export declare namespace HttpF2JsFailureKind {
     /** @deprecated $metadata$ is used for internal purposes, please don't use it in your code, because it can be removed at any moment */
@@ -367,9 +372,9 @@ export declare namespace HttpF2JsFailureKind {
 }
 export declare class HttpF2JsClient {
     private constructor();
-    function<QUERY, RESPONSE>(route: string, signal?: Nullable<AbortSignal>): (msgs: Array<Json<QUERY>>) => Promise<Array<Json<RESPONSE>>>;
-    supplier<RESPONSE>(route: string, signal?: Nullable<AbortSignal>): () => Promise<Array<Json<RESPONSE>>>;
-    consumer<QUERY>(route: string, signal?: Nullable<AbortSignal>): (msgs: Array<Json<QUERY>>) => Promise<void>;
+    function<QUERY, RESPONSE>(route: string): (msgs: Array<Json<QUERY>>, signal?: Nullable<AbortSignal>) => Promise<Array<Json<RESPONSE>>>;
+    supplier<RESPONSE>(route: string): (signal?: Nullable<AbortSignal>) => Promise<Array<Json<RESPONSE>>>;
+    consumer<QUERY>(route: string): (msgs: Array<Json<QUERY>>, signal?: Nullable<AbortSignal>) => Promise<void>;
     close(): void;
 }
 export declare namespace HttpF2JsClient {

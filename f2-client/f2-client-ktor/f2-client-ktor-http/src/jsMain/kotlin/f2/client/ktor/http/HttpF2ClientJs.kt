@@ -2,19 +2,11 @@ package f2.client.ktor.http
 
 import f2.dsl.cqrs.error.F2ErrorDTO
 import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.content.TextContent
-import io.ktor.http.isSuccess
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.js.Promise
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
@@ -28,7 +20,8 @@ external interface JsonOf<T>
 external interface AbortSignal {
     val aborted: Boolean
     val reason: dynamic
-    fun addEventListener(type: String, listener: () -> Unit)
+    fun addEventListener(type: String, listener: () -> Unit, options: dynamic)
+    fun removeEventListener(type: String, listener: () -> Unit)
 }
 
 /**
@@ -45,15 +38,21 @@ interface HttpF2JsFailure {
 
     /** The error the server answered, for [HttpF2JsFailureKind.F2] only. */
     val error: F2ErrorDTO?
+
+    /** The body the server answered, for [HttpF2JsFailureKind.HTTP] and [HttpF2JsFailureKind.UNREADABLE]. */
+    val body: String?
 }
 
 /** What failed. */
 @JsExport
 enum class HttpF2JsFailureKind {
-    /** The server answered an error status; [HttpF2JsFailure.error] is its F2 error, a body that is none included. */
+    /** An error status whose body is a JSON error object: [HttpF2JsFailure.error] is that F2 error. */
     F2,
 
-    /** No response came back: the server is unreachable, or the connection broke. */
+    /** An error status whose body is text or empty: [HttpF2JsFailure.body] is that text. */
+    HTTP,
+
+    /** No response, or none read whole: the server is unreachable, or the connection broke. */
     NETWORK,
 
     /** A success status whose body is no JSON. */
@@ -66,32 +65,33 @@ enum class HttpF2JsFailureKind {
 /**
  * The F2 server at a URL, as JS calls it: each function is a JS function of an array of JSON messages to a
  * promise of the JSON results, no Kotlin value in between. A message is written with JSON.stringify and a result
- * read with JSON.parse, so a message is plain JSON: an array of plain objects, arrays and primitives; anything
- * else (an instance of an exported Kotlin class, at any depth) rejects with a `TypeError` before any request. A
- * failed call rejects with an `HttpF2JsFailure`; an aborted one with its signal's reason, as `fetch` does.
+ * read with JSON.parse, so the messages are an array of plain JSON: an array, without cycle, of plain objects,
+ * arrays and primitives; anything else rejects with a `TypeError` before any request. A failed call rejects with
+ * an `HttpF2JsFailure`; a call aborted by its signal with the signal's reason, as `fetch` does. Every call settles
+ * once.
  */
 @JsExport
 class HttpF2JsClient internal constructor(private val client: HttpF2Client) {
     private val scope = CoroutineScope(SupervisorJob())
+    private var isClosed = false
 
-    /** The function at [route]: one POST of every message, its results. [signal] aborts each call. */
+    /** The function at [route]: one POST of every message, its results; [signal] aborts the call. */
     fun <QUERY, RESPONSE> function(
         route: String,
-        signal: AbortSignal? = null,
-    ): (msgs: Array<JsonOf<QUERY>>) -> Promise<Array<JsonOf<RESPONSE>>> =
-        { msgs -> call(signal) { client.checked(client.postAll(route, msgs)).results() } }
+    ): (msgs: Array<JsonOf<QUERY>>, signal: AbortSignal?) -> Promise<Array<JsonOf<RESPONSE>>> =
+        { msgs, signal -> call(signal) { client.results(client.checked(client.postAll(route, msgs))) } }
 
-    /** The supplier at [route]: one GET, its results. [signal] aborts each call. */
-    fun <RESPONSE> supplier(route: String, signal: AbortSignal? = null): () -> Promise<Array<JsonOf<RESPONSE>>> =
-        {
+    /** The supplier at [route]: one GET, its results; [signal] aborts the call. */
+    fun <RESPONSE> supplier(route: String): (signal: AbortSignal?) -> Promise<Array<JsonOf<RESPONSE>>> =
+        { signal ->
             call(signal) {
-                client.checked(client.request { client.httpClient.get("${client.urlBase}/$route") }).results()
+                client.results(client.checked(client.request { client.httpClient.get("${client.urlBase}/$route") }))
             }
         }
 
-    /** The consumer at [route]: one POST of every message. [signal] aborts each call. */
-    fun <QUERY> consumer(route: String, signal: AbortSignal? = null): (msgs: Array<JsonOf<QUERY>>) -> Promise<Unit> =
-        { msgs ->
+    /** The consumer at [route]: one POST of every message; [signal] aborts the call. */
+    fun <QUERY> consumer(route: String): (msgs: Array<JsonOf<QUERY>>, signal: AbortSignal?) -> Promise<Unit> =
+        { msgs, signal ->
             // A promise of Unit would resolve to Kotlin's Unit object, where a `Promise<void>` holds undefined.
             call<dynamic>(signal) {
                 val _ = client.checked(client.postAll(route, msgs))
@@ -101,149 +101,42 @@ class HttpF2JsClient internal constructor(private val client: HttpF2Client) {
 
     /** Ends every pending call, which rejects as `CLOSED`, and releases the connections; later calls reject alike. */
     fun close() {
+        isClosed = true
         scope.cancel()
         client.httpClient.close()
     }
 
-    private fun closed(): Throwable = failure(HttpF2JsFailureKind.CLOSED, "The client is closed")
-
+    // Settles once, whatever ends the job: its result, a prepared rejection, any other failure, a cancellation.
     private fun <T> call(signal: AbortSignal?, block: suspend () -> T): Promise<T> = Promise { resolve, reject ->
-        if (signal?.aborted == true) {
-            reject(signal.reason.unsafeCast<Throwable>())
-        } else if (!scope.isActive) {
-            reject(closed())
-        } else {
-            val job = scope.launch {
-                try {
-                    resolve(block())
-                } catch (e: Rejection) {
-                    reject(e.value.unsafeCast<Throwable>())
+        val settle = Settle(resolve, reject)
+        when {
+            signal?.aborted == true -> {
+                settle.reject(signal.reason)
+            }
+            isClosed -> {
+                settle.reject(closed())
+            }
+            else -> {
+                val job = scope.launch { settle.resolveWith(block) }
+                val abort = { job.cancel() }
+                signal?.addEventListener("abort", abort, js("({ once: true })"))
+                job.invokeOnCompletion { cause ->
+                    signal?.removeEventListener("abort", abort)
+                    when {
+                        cause == null -> Unit
+                        cause !is CancellationException -> settle.reject(unexpected(cause))
+                        signal?.aborted == true -> settle.reject(signal.reason)
+                        isClosed -> settle.reject(closed())
+                        else -> settle.reject(failure(HttpF2JsFailureKind.NETWORK, "The call was cancelled"))
+                    }
                 }
             }
-            job.invokeOnCompletion { cause ->
-                if (cause is CancellationException) {
-                    reject(signal?.takeIf { it.aborted }?.reason?.unsafeCast<Throwable>() ?: closed())
-                }
-            }
-            signal?.addEventListener("abort") { job.cancel() }
         }
     }
+
+    private fun closed(): Throwable = failure(HttpF2JsFailureKind.CLOSED, "The client is closed")
 }
 
 /** The F2 server at [urlBase], called on the platform's fetch. */
 @JsExport
 fun httpF2JsClient(urlBase: String): HttpF2JsClient = HttpF2JsClient(httpClientBuilderDefault().build(urlBase))
-
-// A failure the promise rejects with, prepared as the JS value the caller receives.
-private class Rejection(val value: dynamic, cause: Throwable? = null) : Exception(cause)
-
-private fun failure(
-    kind: HttpF2JsFailureKind,
-    message: String,
-    status: Int? = null,
-    error: F2ErrorDTO? = null,
-): Throwable {
-    val value: dynamic = js("new Error()")
-    value.message = message
-    value.kind = kind.name
-    value.status = status
-    value.error = error?.toJson()
-    return value.unsafeCast<Throwable>()
-}
-
-private fun typeError(message: String): Throwable = js("TypeError")(message).unsafeCast<Throwable>()
-
-// The JSON of an F2 error, as its body reads: `refusal.parameters` an object, `refusal.citers` an array.
-private fun F2ErrorDTO.toJson(): dynamic {
-    val value: dynamic = js("({})")
-    value.message = message
-    value.id = id
-    value.timestamp = timestamp
-    value.code = code
-    value.requestId = requestId
-    value.refusal = refusal?.let { refusal ->
-        val parameters: dynamic = js("({})")
-        refusal.parameters.forEach { (key, parameter) -> parameters[key] = parameter }
-        val json: dynamic = js("({})")
-        json.code = refusal.code
-        json.parameters = parameters
-        json.citers = refusal.citers.toTypedArray()
-        json
-    }
-    return value
-}
-
-// Any failure to get a response is the network's: the request never got an answer to read.
-@Suppress("TooGenericExceptionCaught") // a JS engine fails a fetch with any JS error, a TypeError most often
-private suspend fun HttpF2Client.request(block: suspend () -> HttpResponse): HttpResponse = try {
-    send(block)
-} catch (e: CancellationException) {
-    throw e
-} catch (e: Throwable) {
-    throw Rejection(failure(HttpF2JsFailureKind.NETWORK, e.message ?: "No response from $urlBase"), e)
-}
-
-private suspend fun HttpF2Client.postAll(route: String, messages: dynamic): HttpResponse {
-    if (!isArray(messages)) {
-        throw Rejection(typeError("The messages of $route are an array"))
-    }
-    if (!isPlainJson(messages)) {
-        throw Rejection(typeError("A message of $route is plain JSON: no instance of a class, at any depth"))
-    }
-    val body = JSON.stringify(messages)
-    return request { httpClient.post("$urlBase/$route") { setBody(TextContent(body, ContentType.Application.Json)) } }
-}
-
-// Plain JSON at every depth: primitives, arrays, and objects whose prototype is Object's or none.
-private fun isPlainJson(value: dynamic): Boolean = when (jsTypeOf(value)) {
-    "string", "number", "boolean", "undefined" -> {
-        true
-    }
-    "object" -> {
-        isPlainJsonObject(value)
-    }
-    else -> {
-        false
-    }
-}
-
-private fun isPlainJsonObject(value: dynamic): Boolean = when {
-    value == null -> {
-        true
-    }
-    isArray(value) -> {
-        value.unsafeCast<Array<dynamic>>().all { isPlainJson(it) }
-    }
-    else -> {
-        val prototype: dynamic = js("Object").getPrototypeOf(value)
-        (prototype == js("Object.prototype") || prototype == null) &&
-            js("Object").values(value).unsafeCast<Array<dynamic>>().all { isPlainJson(it) }
-    }
-}
-
-private fun isArray(value: dynamic): Boolean = js("Array").isArray(value) as Boolean
-
-private suspend fun HttpF2Client.checked(response: HttpResponse): HttpResponse {
-    if (!response.status.isSuccess()) {
-        val error = json.responseError(response).error
-        throw Rejection(failure(HttpF2JsFailureKind.F2, error.message, response.status.value, error))
-    }
-    return response
-}
-
-// A body is the array of the results, or a single result.
-@Suppress("TooGenericExceptionCaught") // JSON.parse fails with a JS SyntaxError, which Kotlin sees as a Throwable
-private suspend fun <RESPONSE> HttpResponse.results(): Array<JsonOf<RESPONSE>> {
-    val text = bodyAsText()
-    if (text.isBlank()) return emptyArray()
-    val parsed: dynamic = try {
-        JSON.parse(text)
-    } catch (e: Throwable) {
-        throw Rejection(failure(HttpF2JsFailureKind.UNREADABLE, e.message ?: "No JSON", status.value), e)
-    }
-    return if (isArray(parsed)) {
-        parsed.unsafeCast<Array<JsonOf<RESPONSE>>>()
-    } else {
-        arrayOf(parsed)
-    }
-}
