@@ -53,8 +53,9 @@ dependencies {
         api("io.komune.f2:f2-spring-boot-starter-function-http-webflux:${project.version}")
         api("io.komune.f2:f2-spring-boot-starter-function-http-mvc:${project.version}")
 
-        // Never published, so no constraint: f2-bdd-*, f2-feature-*, f2-dsl-event, f2-spring-boot-openapi-mvc,
-        // f2-spring-boot-openapi-webflux, f2-spring-boot-starter-observability-opentelemetry (README, "Modules not published").
+        // Not published, so no constraint: f2-bdd-*, f2-feature-*, and since 0.47.0 f2-dsl-event,
+        // f2-spring-boot-openapi-mvc, f2-spring-boot-openapi-webflux, f2-spring-boot-starter-observability-opentelemetry
+        // (README, "Modules not published").
 
         // ═══════════════════════════════════════════
         // Third-party deps
