@@ -34,7 +34,7 @@ The CloudEvents-shaped wire wrapper for a single message (`f2-dsl-cqrs`, `f2.dsl
 
 ### CloudEvent / SnapEvent
 
-`f2-dsl-event` — the third DSL module — defines `CloudEvent<T>`, a multiplatform class following the CloudEvents attribute set (`eventType`, `cloudEventsVersion`, `source`, `eventID`, `eventTime`, `schemaURL`, `contentType`, `extensions`, `data`), and `SnapEvent<T>`, a `CloudEvent` subtype marking a state snapshot. Consumed by `f2-feature-cloud-event-storming`. Distinct from both the CQRS `Event` marker and `Envelope` (the per-message wire wrapper in `f2-dsl-cqrs`).
+`f2-dsl-event` — the third DSL module — defines `CloudEvent<T>`, a multiplatform class following the CloudEvents attribute set (`eventType`, `cloudEventsVersion`, `source`, `eventID`, `eventTime`, `schemaURL`, `contentType`, `extensions`, `data`), and `SnapEvent<T>`, a `CloudEvent` subtype marking a state snapshot. Consumed by `f2-feature-cloud-event-storming`; not published since 0.47.0. Distinct from both the CQRS `Event` marker and `Envelope` (the per-message wire wrapper in `f2-dsl-cqrs`).
 
 ### F2 Client
 
@@ -42,7 +42,7 @@ The Ktor-based HTTP client family (`f2-client-core`, `f2-client-domain`, `f2-cli
 
 ### F2 Spring
 
-Spring Boot modules (`f2-spring/`) that mount F2 functions into a host application, grouped in four families: `function` (`f2-spring-boot-starter-function`, `-function-http`, `-function-http-mvc`, `-function-http-webflux`, plus `f2-spring-boot-starter-observability-opentelemetry`), `auth` (`f2-spring-boot-starter-auth`, `-auth-commons`, `-auth-keycloak`, `-auth-tenant` — Keycloak + multi-tenant), `exception` (`f2-spring-boot-exception-http`, `-http-mvc`, `-http-webflux` — WebMVC/WebFlux error mapping), `openapi` (`f2-spring-boot-openapi`, `-mvc`, `-webflux` — Springdoc integration). Note the exception and openapi artifacts are not named `starter`.
+Spring Boot modules (`f2-spring/`) that mount F2 functions into a host application, grouped in four families: `function` (`f2-spring-boot-starter-function`, `-function-http`, `-function-http-mvc`, `-function-http-webflux`, plus `f2-spring-boot-starter-observability-opentelemetry`), `auth` (`f2-spring-boot-starter-auth`, `-auth-commons`, `-auth-keycloak`, `-auth-tenant` — Keycloak + multi-tenant), `exception` (`f2-spring-boot-exception-http`, `-http-mvc`, `-http-webflux` — WebMVC/WebFlux error mapping), `openapi` (`f2-spring-boot-openapi`, `-mvc`, `-webflux` — Springdoc integration). Note the exception and openapi artifacts are not named `starter`. `f2-spring-boot-openapi-mvc`, `-webflux` and `f2-spring-boot-starter-observability-opentelemetry` are not published since 0.47.0 (README, "Modules not published").
 
 ### F2 Feature
 

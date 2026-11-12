@@ -31,7 +31,6 @@ dependencies {
         // f2-dsl
         api("io.komune.f2:f2-dsl-function:${project.version}")
         api("io.komune.f2:f2-dsl-cqrs:${project.version}")
-        api("io.komune.f2:f2-dsl-event:${project.version}")
 
         // f2-client
         api("io.komune.f2:f2-client-core:${project.version}")
@@ -49,17 +48,13 @@ dependencies {
         api("io.komune.f2:f2-spring-boot-exception-http-webflux:${project.version}")
         api("io.komune.f2:f2-spring-boot-exception-http-mvc:${project.version}")
         api("io.komune.f2:f2-spring-boot-openapi:${project.version}")
-        api("io.komune.f2:f2-spring-boot-openapi-mvc:${project.version}")
-        api("io.komune.f2:f2-spring-boot-openapi-webflux:${project.version}")
         api("io.komune.f2:f2-spring-boot-starter-function:${project.version}")
         api("io.komune.f2:f2-spring-boot-starter-function-http:${project.version}")
         api("io.komune.f2:f2-spring-boot-starter-function-http-webflux:${project.version}")
         api("io.komune.f2:f2-spring-boot-starter-function-http-mvc:${project.version}")
-        api("io.komune.f2:f2-spring-boot-starter-observability-opentelemetry:${project.version}")
 
-        // f2-bdd
-        // f2-bdd-config, f2-bdd-spring-* and the f2-feature-* modules are never published: no constraint
-        api("io.komune.f2:f2-bdd-blockhound:${project.version}")
+        // Never published, so no constraint: f2-bdd-*, f2-feature-*, f2-dsl-event, f2-spring-boot-openapi-mvc,
+        // f2-spring-boot-openapi-webflux, f2-spring-boot-starter-observability-opentelemetry (README, "Modules not published").
 
         // ═══════════════════════════════════════════
         // Third-party deps
