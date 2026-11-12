@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.fixers.gradle.kotlin.jvm)
-    alias(libs.plugins.fixers.gradle.publish)
     alias(libs.plugins.kotlin.kapt)
 }
 

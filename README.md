@@ -90,6 +90,24 @@ dependencies {
 
 Third-party dependencies managed by the BOM (Spring Boot, Ktor, coroutines, etc.) also resolve their versions automatically.
 
+### Modules not published
+
+Since 0.47.0 these modules are no longer published, and the BOM and the `f2` catalog no longer name them. No
+Komune or Bois Local repository depended on them:
+
+| Coordinate | Since |
+|---|---|
+| `io.komune.f2:f2-dsl-event` (and `f2-dsl-event-jvm`, `f2-dsl-event-js`) | 0.47.0 |
+| `io.komune.f2:f2-spring-boot-openapi-mvc` | 0.47.0 |
+| `io.komune.f2:f2-spring-boot-openapi-webflux` | 0.47.0 |
+| `io.komune.f2:f2-spring-boot-starter-observability-opentelemetry` | 0.47.0 |
+| `io.komune.f2:f2-bdd-blockhound` | 0.47.0 |
+
+Releases up to 0.46 stay on Maven Central. To use one of these modules with 0.47.0 or later, open an issue, or build
+it from this repository (`./gradlew :f2-dsl:f2-dsl-event:publishToMavenLocal` with the publish plugin added back to its
+build file). `f2-spring-boot-openapi` is still published: add `org.springdoc:springdoc-openapi-starter-webmvc-ui` or
+`-webflux-ui` next to it for what the two dropped modules brought.
+
 ## Development
 
 ### Setup
@@ -581,7 +599,7 @@ written, with its own body and their `detail` message.
 
 ## BlockHound
 
-`f2-bdd-blockhound` installs BlockHound for a JUnit session. The test JVM needs
+Not published since 0.47.0 (see "Modules not published"). `f2-bdd-blockhound` installs BlockHound for a JUnit session. The test JVM needs
 `-XX:+AllowRedefinitionToAddDeleteMethods` (JDK 13 and later), or BlockHound cannot instrument the JDK:
 
 ```kotlin
