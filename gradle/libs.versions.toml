@@ -27,7 +27,7 @@ gradle-plugin-publish = "2.2.1"
 netty = "4.2.20.Final"
 jackson3 = "3.3.0"
 # Raises the Jackson 2 that ktor-serialization-jackson and keycloak-core still bring to consumers.
-jackson2 = "2.22.4"
+jackson2 = "2.23.0"
 # Raises the SCRAM client that r2dbc-postgresql, whose version Spring Boot sets, still declares below it.
 scram = "3.4"
 
