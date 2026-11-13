@@ -1,11 +1,16 @@
 
 pluginManagement {
-    // The version of the fixers plugins this build applies, the settings plugin included: gradle.properties.
-    val fixersVersion = providers.gradleProperty("fixers.version").get()
+    // One fixers version for the build: the catalogue's, which the settings plugin also checks.
+    val fixersVersion = settingsDir.resolve("gradle/libs.versions.toml").readLines()
+        .firstNotNullOf { Regex("^fixers\\s*=\\s*\"([^\"]+)\"").find(it)?.groupValues?.get(1) }
     plugins {
         id("io.komune.fixers.gradle.settings") version fixersVersion
     }
     repositories {
+        // A release builds each fixers repository against the previous one's artifacts in Maven Local.
+        if (providers.environmentVariable("FIXERS_REPOSITORIES_MAVEN_LOCAL").orNull == "true") {
+            mavenLocal { content { includeGroupByRegex("io\\.komune(\\..*)?") } }
+        }
         gradlePluginPortal()
         mavenCentral()
         maven("https://central.sonatype.com/repository/maven-snapshots") {
@@ -15,8 +20,17 @@ pluginManagement {
     }
 }
 
+// Before the settings plugin's repositories: a release resolves the io.komune artifacts it just built from Maven Local.
+dependencyResolutionManagement {
+    repositories {
+        if (providers.environmentVariable("FIXERS_REPOSITORIES_MAVEN_LOCAL").orNull == "true") {
+            mavenLocal { content { includeGroupByRegex("io\\.komune(\\..*)?") } }
+        }
+    }
+}
+
 // The repositories of the build: Maven Central and the io.komune snapshots, nothing a build script may add.
-// Its `catalogue` is the published f2 catalog; this build reads its own, gradle/libs.versions.toml, as `libs`.
+// It loads no `catalogue` (gradle.properties): this build produces it and reads its own, gradle/libs.versions.toml, as `libs`.
 plugins {
     id("io.komune.fixers.gradle.settings")
 }
