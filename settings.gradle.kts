@@ -30,7 +30,8 @@ dependencyResolutionManagement {
 }
 
 // The repositories of the build: Maven Central and the io.komune snapshots, nothing a build script may add.
-// It loads no `catalogue` (gradle.properties): this build produces it and reads its own, gradle/libs.versions.toml, as `libs`.
+// No `catalogue` (gradle.properties): this build produces it; it reads its own,
+// gradle/libs.versions.toml, as `libs`.
 plugins {
     id("io.komune.fixers.gradle.settings")
 }
