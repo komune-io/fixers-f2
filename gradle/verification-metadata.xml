@@ -237,6 +237,11 @@
             <pgp value="16FFFF8AD10219BC78B42B18243FBB4D5814C621"/>
          </artifact>
       </component>
+      <component group="net.jodah" name="typetools" version="0.7.0">
+         <artifact name="typetools-0.7.0.jar">
+            <pgp value="4E1CAA8ABA1D2259F02F57E682E1D008D5C49EA5"/>
+         </artifact>
+      </component>
       <component group="net.thauvin.erik.urlencoder" name="urlencoder-lib-jvm" version="1.6.0">
          <artifact name="urlencoder-lib-jvm-1.6.0.jar">
             <pgp value="217BFC8CA98788CB33198A8E7FAC222BF1FC0C12"/>
