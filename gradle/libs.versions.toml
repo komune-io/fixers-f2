@@ -24,7 +24,7 @@ testcontainers = "2.0.5"
 arrow = "2.3.0.1"
 ksp = "2.3.14"
 gradle-plugin-publish = "2.2.1"
-netty = "4.2.20.Final"
+netty = "4.2.21.Final"
 jackson3 = "3.3.0"
 # Raises the Jackson 2 that ktor-serialization-jackson and keycloak-core still bring to consumers.
 jackson2 = "2.23.0"
