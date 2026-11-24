@@ -6,7 +6,7 @@ kotlin = "2.4.21"
 # resolves the higher pin below). Rationale and the re-verification checklist for the next
 # Spring Cloud train live in .claude/skills/upgrading-spring-cloud-function/SKILL.md
 # ("Accepted version skew"). Do not realign one of these two without reading it.
-spring-boot = "4.1.2"
+spring-boot = "4.2.0"
 spring-cloud = "2026.0.0"
 ktor = "3.6.1"
 coroutines = "1.11.0"
